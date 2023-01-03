@@ -2,17 +2,54 @@
 
 (defvar *app*)
 
-(defmethod initialize-instance :after ((window essential-os-window-mixin)
-				       &rest initargs)
-  (apply #'initialize-os-window window initargs)
+(defun input-framebuffer-size (window width height)
+  (declare (ignorable window width height))
+  (values))
+
+(defun input-window-damage (window)
+  (declare (ignore window))
+  (values))
+
+(defun input-cursor-pos (window pos-x pos-y)
+  (declare (ignorable window pos-x pos-y))
+  (values))
+
+(defun input-mouse-clicked (window button action mods)
+  (declare (ignorable window button action mods))
+  (values))
+
+(defun input-cursor-enter (window entered?)
+  (declare (ignorable window entered?))
+  (values))
+
+(defun show-cursor (window)
+  (declare (ignorable window))
+  (values))
+
+(defun hide-cursor (window)
+  (declare (ignorable window))
+  (values))
+
+(defun input-window-damaged (window)
+  (declare (ignorable window))
+  (values))
+
+(defun input-window-close-request (window)
+  (declare (ignorable window))
   (values))
 
 (defun initialize-os-window (window &rest args
-			     &key width height (title "silica")
+			     &key (width 640) (height 480) (title "Abstract OS")
 			       (monitor nil)
-			       resizable? decorated? auto-iconify? floating?
-			       focus-on-show? mouse-passthrough?
-			     &allow-other-keys)
+			       (share nil)
+			       (resizable? t)
+			       (decorated? t)
+			       (auto-iconify? t)
+			       (floating? t)
+			       (focus-on-show? t)
+			       (mouse-passthrough? nil)
+			       &allow-other-keys)
+  (declare (ignorable share))
   (assert title)
 
   ;;require-init-or-return
@@ -22,8 +59,8 @@
 
   (setf (window-next window) (application-window-list-head *app*))
   (setf (application-window-list-head *app*) window)
-  (let ((video-mode (application-default-video-mode window)))
-    (setf (video-mode-width video-mode) width
+  (let (#+NIL(video-mode (application-default-video-mode window)))
+    #+NIL(setf (video-mode-width video-mode) width
 	  (video-mode-height video-mode) height
 	  (video-mode-refresh-rate video-mode) (hints-refresh-rate (hints *app*)))
 
@@ -42,7 +79,7 @@
 	  (window-numer window) :dont-care
 	  (window-denom window) :dont-care))
 
-  (apply #'create-win32-window *app* window args))
+  (apply #'create-os-window *app* window args))
 
 #+notyet
 (defun input-window-focus (window focused?)
@@ -110,6 +147,10 @@
 	  (declare (type essential-os-window-mixin window))
 	(setf (window-monitor window) monitor))))
 
+(defun input-monitor-window (monitor window)
+  (declare (ignorable monitor window))
+  (values))
+
 (defun input-monitor (monitor &key (action nil) (placement nil))
   (declare (type monitor-mixin monitor))
   (declare (type application-mixin *app*))
@@ -129,9 +170,10 @@
 	 (:insert-last (vector-push-extend monitor monitors))))
 
       (:disconnected
-       (do ((window (application-window-list-head *app*) (window-next window)))
-	   ()
-	   (if (eq (window-monitor window) monitor)
+       (do ((window (application-window-list-head *app*)))
+	   ((window-next window))
+	 
+	 (if (eq (window-monitor window) monitor)
 	       (multiple-value-bind (width height) (get-window-size window)
 		 (set-window-monitor *app* window nil 0 0 width height :blah))))))))
 

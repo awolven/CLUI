@@ -2,6 +2,7 @@
 
 (defpackage :abstract-os
   (:use :cl)
+  #-darwin
   (:import-from :noffi
 		#:copy-ptr
 		#:%cons-ptr

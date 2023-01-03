@@ -1,4 +1,4 @@
-(in-package :silica)
+(in-package :abstract-os)
 
 (defclass win32-application-mixin ()
   ((instance)

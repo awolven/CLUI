@@ -1,4 +1,4 @@
-(in-package :silica)
+(in-package :abstract-os)
 
 (defclass application-mixin (#+windows win32-application-mixin
 			     #+x11 x11-application-mixin
@@ -71,8 +71,8 @@
    (cursor-mode :initform :normal :accessor window-cursor-mode)
    (mouse-buttons)
    (keys)
-   (virtual-cursor-pos-x)
-   (virtual-cursor-pos-y)
+   (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
+   (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)
    (raw-mouse-motion? :type boolean :initform nil)
    (pos-callback :initform nil :type (or null function))
    (size-callback :initform nil :type (or null function))
@@ -90,5 +90,40 @@
    (char-callback :initform nil :type (or null function))
    (char-mods-callback :initform nil :type (or null function))
    (drop-callback :initform nil :type (or null function))))
+
+(defmethod initialize-instance :after ((window essential-os-window-mixin)
+				       &rest initargs
+				       &key xpos ypos
+					 width height
+					 title
+					 visible?
+					 focused?
+					 scale-to-monitor?
+					 maximized?
+					 resizable?
+					 decorated?
+					 floating?
+					 transparent?
+					 auto-iconify?
+					 focus-on-show?
+					 center-cursor?
+					 mouse-passthrough?
+					 monitor
+					 share
+					 frame-name
+					 key-menu
+					 clear-color
+					 retina?
+					 &allow-other-keys)
+  
+  (declare (ignorable xpos ypos width height title visible? focused?
+		      scale-to-monitor? maximized? resizable?
+		      decorated? floating? transparent? auto-iconify?
+		      focus-on-show? center-cursor? mouse-passthrough?
+		      monitor share frame-name key-menu clear-color
+		      retina?))
+  
+  (apply #'initialize-os-window window initargs)
+  (values))
 
 (defclass standard-os-window (essential-os-window-mixin) ())

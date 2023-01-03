@@ -10,7 +10,7 @@
 
 (defconstant +WM_COPYGLOBALDATA+ #x0049)
 
-(defvar *app*)
+
 
 
 (defmacro with-lpcwstr* ((var string) &body body)
