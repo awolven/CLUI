@@ -1,15 +1,30 @@
 (in-package :abstract-os)
 (named-readtables:in-readtable :objc-readtable)
 
-(defclass ns-application-mixin ()
-  ((event-source)
-   (delegate)
+(defclass ns-object-mixin ()
+  ((ptr :initarg :ptr :accessor ns-object-ptr)))
+
+(defclass ns-helper (ns-object-mixin)
+  ())
+
+(defclass ns-application-mixin (ns-object-mixin)
+  ((helper-class :accessor helper-class)
+   (application-delegate-class :accessor application-delegate-class)
+   (window-class :accessor window-class)
+   (window-delegate-class :accessor window-delegate-class)
+   (content-view-class :accessor content-view-class)
+   
+   (delegate->clos-window-table	:accessor delegate->clos-window-table)
+   (content-view->clos-content-view-table :accessor content-view->clos-content-view-table)
+   
+   (event-source :accessor application-event-source)
+   (delegate :accessor application-delegate)
    (cursor-hidden?)
-   (input-source)
+   (input-source :initform nil :accessor tis-input-source)
    (hid-manager)
-   (unicode-data)
-   (helper)
-   (key-up-monitor)
+   (unicode-data :initform nil :accessor application-unicode-data)
+   (helper :initform nil :accessor application-helper)
+   (key-up-monitor :accessor key-up-monitor)
    (nib-objects)
    (keynames)
    (keycodes)
@@ -19,26 +34,17 @@
    (restore-cursor-position-x)
    (restore-cursor-position-y)
    (disabled-cursor-window :accessor disabled-cursor-window)
-   (tis-bundle)
-   (tis-copy-current-keyboard-layout-input-source)
-   (tis-get-input-source-property)
-   (tis-get-keyboard-type)
-   (tis-k-property-unicode-key-layout-data)
-
-   (window-delegate-class :initform (make-window-delegate-class)
-			  :reader window-delegate-class)
+   (tis-bundle :initform nil :accessor tis-bundle)
+   (kTISPropertyUnicodeKeyLayoutData)
+   (TISCopyCurrentKeyboardLayoutInputSource)
+   (TISGetInputSourceProperty)
+   (LMGetKeyboardType)
    
-   (content-view-class :initform (make-content-view-class)
-		       :reader content-view-class)
-
-   (window-class :initform (make-window-class)
-		 :reader window-class)
-
-   (delegate->clos-window-table :initform (make-hash-table :test #'eq)
-				:reader delegate->clos-window-table)
-   (content-view->clos-content-view-table :initform (make-hash-table :test #'eq)
-					  :reader content-view->clos-content-view-table)
+   
    ))
+
+(defclass application-delegate (ns-object-mixin)
+  ())
 
 (defclass ns-monitor-mixin ()
   ((display-id :accessor monitor-display-id)
@@ -55,10 +61,10 @@
   ((ptr :initarg :ptr :accessor ns-object-ptr)))
 
 (defclass ns-window-mixin (essential-rect-mixin ns-object-mixin)
-  (;;;(object :initarg :object) ;; superseded by ptr, ns-object-ptr
-   (delegate :accessor window-delegate)
+  ((delegate :accessor window-delegate)
    (view :accessor window-content-view)
    (layer)
+   (content :accessor window-graphics-context)
    (maximized? :initform nil :accessor maximized?)
    (occluded? :initform nil :accessor occluded?)
    (retina? :initform nil :accessor window-retina?)
@@ -76,6 +82,7 @@
   ((owner :initarg :owner :accessor content-view-owner)
    (tracking-area :initform nil :accessor content-view-tracking-area)
    (marked-text :initarg :marked-text :reader content-view-marked-text)))
+
 
 (defmethod initialize-instance :after ((instance ns-window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-cocoa-window instance initargs))
@@ -97,4 +104,5 @@
 	instance)
   (values))
   
-
+(defclass ns-screen (ns-object-mixin)
+  ())

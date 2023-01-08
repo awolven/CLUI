@@ -4,10 +4,21 @@
 			     #+x11 x11-application-mixin
 			     #+wayland wayland-application-mixin
 			     #+darwin ns-application-mixin)
-  ((window-list-head :initform nil :accessor application-window-list-head)
+  ((name :accessor application-name)
+   (window-list-head :initform nil :accessor application-window-list-head)
    (monitors :initform (make-array 6 :adjustable t :fill-pointer 0)
 	     :reader application-monitors)))
-  
+
+(defmethod initialize-instance :before ((instance application-mixin)
+					&rest initargs
+					&key (name "Abstract OS Application")
+					  &allow-other-keys)
+					
+  (declare (ignore initargs))
+  (setq *app* instance)
+  (setf (application-name instance) (or name "Abstract OS Application"))
+  #+darwin(init-cocoa instance)
+  (values))  
 
 (defclass monitor-mixin (#+windows win32-monitor-mixin
 			 #+x11 x11-monitor
@@ -47,7 +58,7 @@
 				     #+x11 x11-window-mixin
 				     #+wayland wayland-window-mixin
 				     #+darwin ns-window-mixin)
-  ((next :type essential-os-window-mixin :accessor window-next)
+  ((next :type (or null essential-os-window-mixin) :accessor window-next)
    (resizable? :type boolean :initform nil :accessor resizable?)
    (decorated? :type boolean :initform nil :accessor decorated?)
    (auto-iconify? :type boolean :initform nil :accessor auto-iconify?)
@@ -90,6 +101,7 @@
    (char-callback :initform nil :type (or null function))
    (char-mods-callback :initform nil :type (or null function))
    (drop-callback :initform nil :type (or null function))))
+
 
 (defmethod initialize-instance :after ((window essential-os-window-mixin)
 				       &rest initargs
