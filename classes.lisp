@@ -54,10 +54,7 @@
   (blue-bits)
   (refresh-rate))
 
-(defclass essential-os-window-mixin (#+windows win32-window-mixin
-				     #+x11 x11-window-mixin
-				     #+wayland wayland-window-mixin
-				     #+darwin ns-window-mixin)
+(defclass essential-os-window-mixin ()
   ((next :type (or null essential-os-window-mixin) :accessor window-next)
    (resizable? :type boolean :initform nil :accessor resizable?)
    (decorated? :type boolean :initform nil :accessor decorated?)
@@ -103,7 +100,7 @@
    (drop-callback :initform nil :type (or null function))))
 
 
-(defmethod initialize-instance :after ((window essential-os-window-mixin)
+(defmethod initialize-instance :before ((window essential-os-window-mixin)
 				       &rest initargs
 				       &key xpos ypos
 					 width height
@@ -138,4 +135,13 @@
   (apply #'initialize-os-window window initargs)
   (values))
 
-(defclass standard-os-window (essential-os-window-mixin) ())
+
+(defclass os-window-mixin (essential-os-window-mixin
+			   #+windows win32-window-mixin
+			   #+x11 x11-window-mixin
+			   #+wayland wayland-window-mixin
+			   #+darwin ns-window-mixin)
+  ())
+
+
+

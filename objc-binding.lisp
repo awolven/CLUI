@@ -1,0 +1,598 @@
+(in-package :abstract-os)
+(named-readtables:in-readtable :objc-readtable)
+
+(defpackage :ns)
+
+
+(in-package :cffi)
+#+NIL
+(defun foreign-funcall-form/fsbv-with-libffi (function function-arguments symbols types
+                                              return-type argument-types
+                                              &optional pointerp (abi :default-abi))
+  "A body of foreign-funcall calling the libffi function #'call (ffi_call)."
+  (let ((argument-count (length argument-types)))
+    `(with-foreign-objects ((argument-values :pointer ,argument-count)
+                            ,@(unless (eql return-type :void)
+                                `((result ',return-type))))
+       ,(translate-objects-ret
+         symbols function-arguments types return-type
+         ;; NOTE: We must delay the cif creation until the first call
+         ;; because it's FOREIGN-ALLOC'd, i.e. it gets corrupted by an
+         ;; image save/restore cycle. This way a lib will remain usable
+         ;; through a save/restore cycle if the save happens before any
+         ;; FFI calls will have been made, i.e. nothing is malloc'd yet.
+         `(progn
+            (loop
+	       :for arg :in (list ,@symbols)
+	       :for count :from 0
+	       when (consp arg)
+	       do (break)
+	       :do (setf (mem-aref argument-values :pointer count) arg))
+            (let* ((libffi-cif-cache (load-time-value (cons 'libffi-cif-cache nil)))
+                   (libffi-cif (or ;;(cdr libffi-cif-cache)
+                                   ;; TODO use compare-and-swap to set it and call
+                                   ;; FREE-LIBFFI-CIF when someone else did already.
+                                   (setf (cdr libffi-cif-cache)
+                                         ;; FIXME we should install a finalizer on the cons cell
+                                         ;; that calls FREE-LIBFFI-CIF on the cif (when the function
+                                         ;; gets redefined, and the cif becomes unreachable). but a
+                                         ;; finite world is full of compromises... - attila
+                                         (make-libffi-cif ,function ',return-type
+                                                          ',argument-types ',abi)))))
+              (libffi/call libffi-cif
+                           ,(if pointerp
+                                function
+                                `(foreign-symbol-pointer ,function))
+                           ,(if (eql return-type :void) '(null-pointer) 'result)
+                           argument-values)
+              ,(if (eql return-type :void)
+                   '(values)
+                   '(progn
+		     (print (cffi::translate-from-foreign result (make-instance 'abstract-os::|CGPoint-TCLASS| :name 'ns::|CGPoint|)))
+		     (print result)))))
+	 ))))
+
+(in-package :abstract-os)
+
+(defpackage :ns)
+
+(defparameter *wrapped-selector-table* (make-hash-table))
+
+(cffi:defctype ns::|CGFloat| #+64-bit :double #+32-bit :float)
+(cffi:defctype ns::|NSUInteger| #+64-bit :unsigned-long-long #+32-bit :unsigned-int)
+
+(cffi:defcstruct ns::|CGPath|) ;;fixme
+(cffi:defcstruct ns::|CGContext|) ;;fixme
+(cffi:defcstruct ns::|CGAffineTransform|) ;;fixme
+(cffi:defcstruct ns::|CGSRegionObject|) ;;fixme
+(cffi:defcstruct ns::|CGImage|) ;;fixme
+(cffi:defcstruct ns::|CGColorSpace|) ;;fixme
+(cffi:defcstruct ns::|_NSModalSession|) ;;fixme
+(cffi:defcstruct ns::|OpaqueWindowPtr|) ;;fixme
+(cffi:defcstruct ns::|CGColor|) ;;fixme
+(cffi:defcstruct ns::|__CFDictionary|) ;;fixme
+(cffi:defcstruct ns::|NSEdgeInsets|) ;;fixme
+(cffi:defcstruct ns::|__CFString|) ;;fixme
+(cffi:defcstruct ns::|__CFURL|) ;;fixme
+(cffi:defcstruct ns::|__CAView|) ;;fixme
+(cffi:defcstruct NS::|__CFNotificationCenter|) ;; fixme
+(cffi:defcstruct NS::|__IOHIDEvent|) ;; fixme
+(cffi:defcstruct NS::|__CGEvent|)
+(cffi:defcstruct NS::|_NSZone|)
+(cffi:defcstruct NS::|pthread_override_s|)
+(cffi:defcstruct NS::|ProcessSerialNumber|)
+(cffi:defcstruct NS::__LSASN)
+(cffi:defcstruct NS::|__CFArray|)
+(cffi:defcstruct NS::|Object|)
+(cffi:defcstruct NS::|_CAView|)
+(cffi:defcstruct NS::|objc_method_description|)
+(cffi:defcstruct NS::|ValueInterpolator|)
+
+
+(cffi:defcstruct ns::|_NSRange|
+		 (location ns::|NSUInteger|)
+		 (length ns::|NSUInteger|))
+    
+
+(cffi:defcstruct ns::|CGPoint|
+		 (ns::x ns::|CGFloat|)
+		 (ns::y ns::|CGFloat|))
+
+(cffi:defcstruct ns::|CGSize|
+		 (ns::width ns::|CGFloat|)
+		 (ns::height ns::|CGFloat|))
+		 
+
+(cffi:defcstruct ns::|CGRect|
+		 (ns::x ns::|CGFloat|)
+		 (ns::y ns::|CGFloat|)
+		 (ns::width ns::|CGFloat|)
+		 (ns::height ns::|CGFloat|))
+     
+
+(cffi:defcfun (class_copyMethodList "class_copyMethodList") :pointer (cls :pointer) (out-count :pointer))
+(cffi:defcfun (class_copyIvarList "class_copyIvarList") :pointer (cls :pointer) (out-count :pointer))
+(cffi:defcfun (method_copyReturnType "method_copyReturnType") :pointer (m :pointer))
+(cffi:defcfun (method_getNumberOfArguments "method_getNumberOfArguments") :unsigned-int (m :pointer))
+(cffi:defcfun (method_getArgumentType "method_getArgumentType") :void (m :pointer) (index :unsigned-int) (dst :pointer) (dst_len :long-long))
+(cffi:defcfun (method_copyArgumentType "method_copyArgumentType") :pointer (m :pointer) (index :unsigned-int))
+(cffi:defcfun (class_getClassMethod "class_getClassMethod") :pointer (cls :pointer) (name :pointer))
+(cffi:defcfun (class_getInstanceMethod "class_getInstanceMethod") :pointer (cls :pointer) (name :pointer))
+(cffi:defcfun (method_getName "method_getName") :pointer (m :pointer))
+(cffi:defcfun (ivar_getName "ivar_getName") :pointer (m :pointer))
+
+(defmacro make-message-lambda (selector ((&rest arg-types) return-type))
+  (let ((arg-syms (mapcar (lambda (_) _ (gensym))
+                          arg-types)))
+    (if (and (listp return-type)
+	     (or (eq (car return-type) :struct)
+		 (eq (car return-type) :union)))
+	`(lambda ,(cons 'target arg-syms)
+	   (cffi:foreign-funcall "objc_msgSend_stret"
+				 :pointer target
+				 :pointer ,selector
+				 ,@(mapcan #'list arg-types arg-syms)
+				 ,return-type))
+	`(lambda ,(cons 'target arg-syms)
+	   (cffi:foreign-funcall "objc_msgSend"
+				 :pointer target
+				 :pointer ,selector
+				 ,@(mapcan #'list arg-types arg-syms)
+				 ,return-type)))))
+
+(defclass objc-method ()
+  ((name :initarg :name :reader objc-method-name)
+   (selector :initarg :selector :reader objc-method-selector)
+   (return-type :initarg :return-type :reader objc-method-return-type)
+   (number-of-args :initarg :number-of-args :reader objc-method-number-of-args)
+   (args :initform nil :initarg :args :reader objc-method-args)))
+
+(defmethod print-object ((obj objc-method) stream)
+  (print-unreadable-object (obj stream :type t)
+    (fresh-line stream)
+    (princ ":name " stream)
+    (princ (objc-method-selector obj) stream)
+    (fresh-line stream)
+    (princ ":return-type " stream)
+    (format stream "~S" (objc-method-return-type obj))
+    (fresh-line stream)
+    (princ ":args (" stream)
+    (loop for arg in (objc-method-args obj) for i from 0
+       do (format stream ":name ~A :type ~S"
+		  (objc-method-argument-name arg)
+		  (objc-method-argument-type arg))
+	 (fresh-line stream)
+       finally (princ ")" stream))))
+	   
+
+(defclass objc-method-argument ()
+  ((name :initarg :name :reader objc-method-argument-name)
+   (type :initarg :type :reader objc-method-argument-type)))
+
+(defun test3 ()
+  (class-copy-method-list #@NSWindow))
+   
+(defun create-objc-method (m)
+  (let* ((sel (method_getName m))
+	 (rt (method_copyReturnType m))
+	 (n (method_getNumberOfArguments m))
+	 (parsed-method-name (parse-method-name (objc-runtime::sel-get-name sel))))
+    (make-instance 'objc-method
+		   :name (first parsed-method-name)
+		   :selector (objc-runtime::sel-get-name sel)
+		   :return-type (decode-objc-type (cffi:foreign-string-to-lisp rt))
+		   :number-of-args n
+		   :args (let ((arg-names ()))
+			   (loop for j from 2 below n ;; -2 for self, selector
+			      collect (let ((type (method_copyArgumentType m j)))				      
+					(make-instance 'objc-method-argument
+						       :name (if (= 2 j)
+								 "_"
+								 (let ((arg-name (or (nth (- j 3) (cdr parsed-method-name))
+										     (format nil "arg~A" (- j 2)))))
+								   (when (member arg-name arg-names :test #'string=)
+								     (setq arg-name (concatenate 'string arg-name "x")))
+								   (prog1 arg-name
+								     (push arg-name arg-names))))
+						       :type (let* ((type-string (cffi:foreign-string-to-lisp type)))
+							       (decode-objc-type type-string)))))))))
+
+(defun class-copy-method-list (class)
+  (cffi:with-foreign-object (count :unsigned-int)
+    (let ((list (class_copyMethodList class count)))
+      (loop for i from 0 below (cffi:mem-aref count :unsigned-int)
+	 collect (let* ((m (cffi:mem-aref list :pointer i)))
+		   (create-objc-method m))))))
+  
+
+
+(defun class-copy-ivar-list (class)
+  (cffi:with-foreign-object (count :unsigned-int)
+    (let ((list (class_copyIvarList (ns-object-ptr class) count)))
+      (loop for i from 0 below (cffi:mem-aref count :unsigned-int)
+	 collect (ivar_getName (cffi:mem-aref list :pointer i))))))
+
+(defvar *target-arch-register-size* :64-bit)
+
+(defvar *indirection-level* 0)
+
+(defmacro register-size-value (&key 64-bit 32-bit)
+  `(ecase *target-arch-register-size*
+     (:64-bit ,64-bit)
+     (:32-bit ,32-bit)))
+
+(defun parse-array (string &key start)
+  (assert (> (length string) (+ 2 start)))
+  (unless (char= (char string start) #\[)
+    (error "~S is not an encoding of an array type." (subseq string start)))
+  (multiple-value-bind (int end)
+      (parse-integer string :start (1+ start) :junk-allowed t)
+    (multiple-value-bind (type end)
+	(decode-objc-type string :start end)
+      (values (list :array type int)
+	      (1+ end)))))
+
+(defun parse-struct-or-union (string &key start kind)
+  (multiple-value-bind (init term)
+      (if (eq kind :union)
+	  (values #\( #\))
+	  (if (eq kind :struct)
+	      (values #\{ #\})
+	      (error "expected struct or union: ~S" kind)))
+    (assert (> (length string) (+ 2 start)))
+    (unless (char= (char string start) init)
+      (error "~S is not an encoding of a struct/union type." string))
+    (if (< *indirection-level* 2)
+	(let ((break (position-next-thingamabob string :start (1+ start)))
+	      (=-pos (position #\= string :start (1+ start))))
+	  (if (and =-pos (< =-pos break))
+	      (multiple-value-bind (name end) (parse-name string :start (1+ start) :terminator #\=)
+		(declare (ignore end))
+		(values (list kind name)
+			(multiple-value-bind (types end)
+			    (decode-objc-types string :start (1+ =-pos) :terminator term)
+			  (declare (ignore types)) ;; discard types, all we need is the tag of the struct
+			  end)))
+	      (multiple-value-bind (types end)
+		  (decode-objc-types string :start (1+ start) :terminator term)
+		(values (if (eq kind :struct)
+			    (list :array :char (reduce #'+ (mapcar #'cffi:foreign-type-size types)))
+			    (list :array :char (reduce #'max (mapcar #'cffi:foreign-type-size types))))
+			(1+ end)))))
+	;; indirection level is 2 or above, expecting only name
+	(progn
+	  (let ((=-pos (position #\= string :start (1+ start))))
+	    (if =-pos
+		(progn (warn "unexpected equals sign ~S" (subseq string (1+ start)))
+		       (multiple-value-bind (name end) (parse-name (subseq string (1+ start) =-pos) :start 0 :terminator term) ;; definitely expecting a name
+			 (declare (ignore end))
+			 (values (list kind name)
+				 (multiple-value-bind (types end)
+				     (decode-objc-types string :start (1+ =-pos) :terminator term)
+				   (declare (ignore types)) ;; discard types, all we need is the tag of the struct
+				   end))))
+		(multiple-value-bind (name end) (parse-name string :start (1+ start) :terminator term)
+		  (when (not (char= (char string end) term))
+		    (error "junk found while parsing ~A: ~S" kind (char string end)))
+		  (values (list kind name)
+			  (1+ end)))))))))
+
+(defparameter *thingamabobs* (list #\* #\@ #\# #\: #\? #\] #\) #\} #\{ #\[ #\( #\^ #\- #\&))
+      
+
+(defun position-next-thingamabob (string &key (start 0))
+  (flet ((%pos-list (char)
+	   (let ((p (position char string :start start)))
+	     (when p (list p)))))
+    (let ((positions (apply #'append (mapcar #'%pos-list *thingamabobs*))))
+      (when positions
+	(apply #'min positions)))))
+
+(defun parse-name (string &key start terminator)
+  (let ((end (position terminator string :start start)))
+    (values (intern (subseq string start end) :ns)
+	    end)))
+
+(defun parse-bitfield (string &key start)
+  (assert (> (length string) (+ 1 start)))
+  (unless (char= (char string start) #\b)
+    (error "~S is not an encoding of a bitfield type." string))
+  (multiple-value-bind (int end)
+      (parse-integer string :start (1+ start) :junk-allowed t)
+    (let ((aligned-size (+ 8 (mod 8 int))))
+      (values (or (case aligned-size
+		    (8 :unsigned-char)
+		    (16 :unsigned-short)
+		    (24 :unsigned-int)
+		    (32 :unsigned-int)
+		    (otherwise nil))
+		  :unsigned-long-long)
+	      end))))
+
+(defun parse-pointer (string &key start)
+  (assert (> (length string) (+ 1 start)))
+  (unless (char= (char string start) #\^)
+    (error "~S is not an encoding of a pointer type." string))
+  (multiple-value-bind (type end)
+      (decode-objc-type string :start (+ start 1))
+    (values (list :pointer type)
+	    end)))
+
+(defun parse-unknown-type (string &key start)
+  (assert (> (length string) start))
+  (unless (char= (char string start) #\?)
+    (error "~S is not an encoding of an unknown pointer type." string))
+  (if (= (length string) (1+ start)) ;; case where string ends on ?
+      (values :pointer (1+ start))
+      (let ((char (char string (1+ start)))) ;; there might be equals
+	(if (char= char #\=)
+	    (decode-objc-type string :start (+ 2 start))
+	    (values :pointer (1+ start))))))
+
+(defun decode-objc-types (string &key start (terminator nil))
+  (values (loop until (or 
+		       (= start (length string))
+		       (and terminator (char= terminator (char string start))))
+	     collect (progn (multiple-value-bind (type p) (decode-objc-type string :start start)
+		      (setq start p)
+		      type)))
+	  start))
+
+(defun decode-objc-type (string &key (start 0))
+  (let ((char (char string start)))
+    (ecase char
+      (#\c (values :char (1+ start)))
+      (#\i (values :int (1+ start)))
+      (#\s (values :short (1+ start)))
+      (#\l (values (register-size-value :64-bit :long-long :32-bit :long) (1+ start)))
+      (#\q (values :long-long (1+ start)))
+      (#\C (values :unsigned-char (1+ start)))
+      (#\I (values :unsigned-int (1+ start)))
+      (#\S (values :unsigned-short (1+ start)))
+      (#\L (values (register-size-value :64-bit :unsigned-long-long :32-bit :unsigned-long) (1+ start)))
+      (#\Q (values :unsigned-long-long (1+ start)))
+      (#\f (values :float (1+ start)))
+      (#\d (values :double (1+ start)))
+      (#\B (values :bool (1+ start)))
+      (#\v (values :void (1+ start)))
+      (#\* (values :string (1+ start)))
+      (#\@ (values :pointer (1+ start)))     ;; objc object pointer
+      (#\# (values :pointer (1+ start)))     ;; objc class pointer
+      (#\: (values :pointer (1+ start)))     ;; objc selector
+      
+      (#\? (parse-unknown-type string :start start))
+
+      (#\[ (parse-array string :start start))
+      (#\{ (parse-struct-or-union string :start start :kind :struct))
+      (#\( (parse-struct-or-union string :start start :kind :union))
+      (#\b (parse-bitfield string :start start))
+      (#\^ (let ((*indirection-level* (1+ *indirection-level*)))
+	     (parse-pointer string :start start)))
+
+      ((#\r #\n #\N #\o #\O #\R #\V) (decode-objc-type string :start (1+ start)))))) ;; ignore these qualifiers
+	      
+(defun parse-method-name (string)
+  (let ((basic-name (if (find #\: string)
+			(subseq string 0 (1+ (position #\: string)))
+			string)))
+    (list* (lispize-name basic-name)
+	   (let* ((p1 (position #\: string))
+		  (p2))
+	     (loop while p1
+		do 
+		  (setq p2 (unless (>= p1 (1- (length string)))
+			     (position #\: string :start (1+ p1))))
+		when p2
+		collect
+		  (if (= (1+ p1) p2) ;; some colon sequences in method names do not have a name
+		      (symbol-name (gensym))
+		      (lispize-name (subseq string (1+ p1) (and p2 (1+ p2)))))
+		  do
+		    (setq p1 p2))))))
+
+(defun capital-char? (char)
+  (<= 65 (char-code char) #.(+ 65 (1- 26))))
+
+(defun lispize-name (name)
+  (let ((string (make-array 1000 :element-type 'character :adjustable t :fill-pointer 0))
+	(capital? nil))
+    (loop for char across name
+       when (capital-char? char)
+       do (vector-push-extend #\- string)
+	 (vector-push-extend char string)
+	 (setq capital? t)
+       when (char= char #\:)
+       do (return string)
+       unless capital?
+       do (vector-push-extend (char-upcase char) string)
+       when capital?
+       do (setq capital? nil))
+    string))
+
+
+
+(defun write-package-file (class path)
+  (let ((methods (class-copy-method-list class)))
+    (with-open-file (stream path :direction :output :if-does-not-exist :create :if-exists :append)
+      (loop for method in methods
+	 initially
+	   (terpri stream)
+	   (princ "(export (list " stream)
+	 unless (char= #\_ (char (objc-method-name method) 0))
+	 do (princ "#:" stream)
+	   (format stream "|~A|" (objc-method-selector method))
+	   (terpri stream)
+	 finally (princ ") :ns)" stream)))))
+
+#+old
+(defun process-arg (arg stream)
+  (terpri stream)
+  (princ "    " stream)
+  (with-slots (name type) arg
+    (format stream "'~S" type)
+    (princ " " stream)
+    (when (eq type :pointer)
+      (princ "(ns-object-ptr " stream))
+    (when (eq type :char) ;; assuming :char really means :bool (they would use :int otherwise)
+      (princ "(if " stream))
+    ;;(when (and (listp type) (or (eq :struct (car type)) (eq :union (car type))))
+      ;;(princ "'" stream))
+    (princ (string-downcase name) stream)
+    (when (eq type :char) ;; assuming :char really means :bool (they would use :int otherwise)
+      (princ " 1 0)" stream))
+    (when (eq type :pointer)
+      (princ ")" stream))))
+
+#+OLD
+(defun process-method (method stream)
+  (terpri stream)
+  (with-slots (name return-type args) method
+    ;; guessing that in objc same selector different class will have the same signature
+    (let ((sel-sym (intern (objc-method-selector method) :ns)))
+      (unless (gethash sel-sym *wrapped-selector-table*)
+	(princ "(defun " stream)
+	(format stream "~S" sel-sym)
+	(setf (gethash sel-sym *wrapped-selector-table*)
+	      sel-sym)
+	(princ " (thing" stream)
+	(loop for argz on args by #'cdr
+	   initially (when argz (princ " " stream))
+	   do (with-slots (name) (car argz)
+		(princ (string-downcase name) stream))
+	   when (cdr argz)
+	   do (princ " " stream))
+	
+	(princ ")" stream)
+	(terpri stream)
+	(when (eq return-type :char) ;; we'll assume returning a char actually means a bool
+	  (princ "  (if (= 0" stream))
+	(princ "  (send thing @(" stream)
+	(princ (objc-method-selector method) stream)
+	(princ ") " stream)
+	(format stream "'~S" return-type)
+
+	(loop for argz on args by #'cdr
+	   initially (when argz (princ " " stream))
+	   do (process-arg (car argz) stream)
+	   when (cdr argz)
+	   do (princ " " stream))
+
+	(princ ")" stream)
+	(when (eq return-type :char) ;; we'll assume returning a char actually means a bool
+	  (princ ") nil t)" stream))
+	(princ ")" stream)
+	(terpri stream)))))
+
+(defun process-arg-types-and-return-type (args ret-type stream)
+  (format stream "~S"
+   (list (loop for arg in args
+	    collect (objc-method-argument-type arg))
+	 ;; cffi:foreign-funcall cannot process struct ret-types!!
+	 ret-type)))
+
+
+(defun process-arg-names1 (args stream)
+  (loop for argz on args by #'cdr
+     initially (when argz (princ " " stream))
+     do (with-slots (name) (car argz)
+	  (princ (string-downcase name) stream))
+     when (cdr argz)
+     do (princ " " stream)))
+
+(defun process-arg-names2 (args stream)
+  (loop for argz on args by #'cdr
+     initially (when argz (princ " " stream))
+     do (with-slots (name type) (car argz)
+	  (when (or (eq type :pointer) (and (consp type) (eq (car type) :pointer)))
+	    (princ "(ns-object-ptr " stream))
+	  (when (eq type :char)
+	    (princ "(if " stream))
+	  (princ (string-downcase name) stream)
+	  (when (eq type :char)
+	    (princ " 1 0)" stream))
+	  (when (or (eq type :pointer) (and (consp type) (eq (car type) :pointer)))
+	    (princ ")" stream)))
+     when (cdr argz)
+     do (princ " " stream)))
+
+(defun process-method (method stream)
+  (terpri stream)
+  (with-slots (name return-type args) method
+    ;; guessing that in objc same selector different class will have the same signature
+    (let ((sel-sym (intern (objc-method-selector method) :ns)))
+      (unless (gethash sel-sym *wrapped-selector-table*)
+	(princ "(defun " stream)
+	(format stream "~S" sel-sym)
+	(setf (gethash sel-sym *wrapped-selector-table*)
+	      sel-sym)
+	(princ " (thing" stream) (process-arg-names1 args stream) (princ ")" stream)
+	(terpri stream)
+	(when (eq return-type :char) ;; we'll assume returning a char actually means a bool
+	  (princ "  (if (= 0" stream))
+	(princ "  (let ((message-lambda " stream)
+	(terpri stream)
+	(princ "         (make-message-lambda @(" stream)
+	(princ (objc-method-selector method) stream)
+	(princ ") " stream) (process-arg-types-and-return-type args return-type stream) (princ "))) " stream)
+	(terpri stream)
+	(princ "   (funcall message-lambda (ns-object-ptr thing) " stream) (process-arg-names2 args stream) (princ "))" stream)
+	(when (eq return-type :char) ;; we'll assume returning a char actually means a bool
+	  (princ ") nil t)" stream))
+	(princ ")" stream)
+	(terpri stream)))))
+
+(defun process-class (class stream)
+  (let ((methods (class-copy-method-list class)))
+    (loop for method in methods
+       do (process-method method stream))))
+
+(defun write-method-bindings (classes path &optional (extras nil))
+  ;; for some reason there still sometimes exist methods which don't show up in class-copy-method-list
+  ;; those method pointers go in extras       
+  (with-open-file (stream path :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (princ "(in-package :abstract-os)" stream)
+    (terpri stream)
+    (princ "(named-readtables:in-readtable :objc-readtable)" stream)
+    (terpri stream)
+    (terpri stream)
+    
+    (loop for class in classes
+       for i from 0
+	 do (print i)
+       do (process-class class stream))
+
+    (loop for m in extras
+	 do (process-method (create-objc-method m) stream))))
+	 
+
+(defun wrap-ns ()
+  (clrhash *wrapped-selector-table*)
+  (write-method-bindings (list #@NSObject
+			       #@NSApplication #@NSRunningApplication #@NSThread #@NSEvent #@NSUserDefaults
+			       #@NSNotificationCenter
+			       ;;#@NSWorkspace #@NSWorkspaceOpenConfiguration #@NSAppKitVersion
+			       ;;@NSUserActivity #@NSUserActivityRestoring
+			       ;;#@NSSharingService #@NSSharingServicePicker #@NSPreviewRepresentableActivityItem
+			       #@NSView #@NSControl #@NSCell #@NSActionCell #@NSSplitView #@NSStackView #@NSTabView
+			       #@NSScrollView #@NSScroller #@NSClipView #@NSRulerView #@NSRulerMarker
+			       #@NSTextView ;; #@NSTextViewDelegate
+			       #@NSWindow
+			       #@NSColor #@NSColorList
+			       #@NSScreen
+			       #@NSGraphicsContext #@NSBezierPath
+			       #@NSDate)
+			 "~/abstract-os/ns-bindings.lisp"
+			 (list (class_getClassMethod #@NSThread @(detachNewThreadSelector:toTarget:withObject:))
+			       (class_getClassMethod #@NSApplication @(sharedApplication))
+			       ;;(class_getClassMethod #@NSEvent @(addLocalMonitorForEventsMatchingMask:handler:)) ;; bogus
+			       (class_getClassMethod #@NSUserDefaults @(standardUserDefaults))
+			       (class_getClassMethod #@NSNotificationCenter @(defaultCenter))
+			       (class_getClassMethod #@NSRunningApplication @(currentApplication))
+			       (class_getClassMethod #@NSBezierPath @(strokeRect:))
+			       (class_getInstanceMethod #@NSGraphicsContext @(flushGraphics))
+			       (class_getClassMethod #@NSColor @(whiteColor))
+			       (class_getClassMethod #@NSDate @(distantPast))
+			       (class_getClassMethod
+				#@NSEvent @(otherEventWithType:location:modifierFlags:timestamp:windowNumber:context:subtype:data1:data2:))
+			       )))
+						     

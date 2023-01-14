@@ -1,8 +1,10 @@
 (in-package :abstract-os)
 (named-readtables:in-readtable :objc-readtable)
 
-(defvar *yes* t)
-(defvar *no* nil)
+(defvar *yes* 1)
+(defvar *no* 0)
+
+(defvar NSDefaultRunLoopMode (objc-runtime::make-nsstring "NSDefaultRunLoopMode"))
 
 (cffi:defcallback exception-handler :void ((exception :pointer))
   (objc-runtime::with-selectors (reason)
@@ -50,11 +52,11 @@
 
 (set-uncaught-exception-handler (cffi:callback exception-handler))
 
-(cffi:defcfun (class_copyIvarList "class_copyIvarList") :pointer (cls :pointer) (out-count :pointer))
+
 
 (cffi:defcfun (class_getSuperclass "class_getSuperclass") :pointer (cls :pointer))
 
-(cffi:defcfun (class_copyMethodList "class_copyMethodList") :pointer (cls :pointer) (out-count :pointer))
+
 
 (cffi:defcfun (ivar_getName "ivar_getName") :string (ivar :pointer))
 
@@ -66,18 +68,9 @@
 
 (cffi:defcfun (method_getName "method_getName") :pointer (method :pointer))
 
-(defun class-copy-ivar-list (class)
-  (cffi:with-foreign-object (count :unsigned-int)
-    (let ((list (class_copyIvarList (ns-object-ptr class) count)))
-      (loop for i from 0 below (cffi:mem-aref count :unsigned-int)
-	 collect (ivar_getName (cffi:mem-aref list :pointer i))))))
 
-(defun class-copy-method-list (class)
-  (cffi:with-foreign-object (count :unsigned-int)
-    (let ((list (class_copyMethodList class count)))
-      (loop for i from 0 below (cffi:mem-aref count :unsigned-int)
-	 collect (let ((sel (method_getName (cffi:mem-aref list :pointer i))))
-	      (objc-runtime::sel-get-name sel))))))
+
+
 
 
 (cffi:defcfun (objc_msgSendSuper "objc_msgSendSuper") :pointer (obj :pointer) (selector :pointer) &rest)
@@ -192,7 +185,7 @@
 	  [[app-menu @(addItemWithTitle:action:keyEquivalent:)
 	   :pointer (objc-runtime::make-nsstring "Hide Others")
 	   :pointer @(hideOtherApplications:) :pointer (objc-runtime::make-nsstring "h")]
-	   @(setKeyEquivalentModifierMask:) :int64 (logior NSEventModifierFlagOption NSEventModifierFlagCommand)]
+	   @(setKeyEquivalentModifierMask:) :long-long (logior NSEventModifierFlagOption NSEventModifierFlagCommand)]
 
 	   [app-menu @(addItemWithTitle:action:keyEquivalent:)
 	  :pointer (objc-runtime::make-nsstring "Show All")
@@ -290,34 +283,37 @@
 
     (pre-init-app)
 
-    [#@NSThread @(detachNewThreadSelector:toTarget:withObject:) :pointer @(doNothing:)
-     :pointer (ns-object-ptr (application-helper app)) :pointer (cffi:null-pointer)]
+    (send #@NSThread @(detachNewThreadSelector:toTarget:withObject:) :void :pointer @(doNothing:)
+     :pointer (ns-object-ptr (application-helper app)) :pointer (cffi:null-pointer))
      
-     [#@NSApplication @(sharedApplication)]
+     (send #@NSApplication @(sharedApplication) :pointer)
 
      (setf (ns-object-ptr app) objc-runtime::ns-app)
   
-     [(ns-object-ptr app) @(setDelegate:) :pointer (application-delegate app)]
+     (send app @(setDelegate:) :void :pointer (application-delegate app))
 
      (setf (key-up-monitor app)
-	   [#@NSEvent @(addLocalMonitorForEventsMatchingMask:handler:)
-	    :int64 NSEventMaskKeyUp :int 0 :pointer (cffi:callback closure-like-thingy-named-block-callback)])
+	   (send #@NSEvent @(addLocalMonitorForEventsMatchingMask:handler:) :pointer
+	    :long-long NSEventMaskKeyUp :int 0 :pointer (cffi:callback closure-like-thingy-named-block-callback)))
 
      (change-to-resources-directory)
 
      (let ((defaults (make-dictionary (cffi::null-pointer)
 				      (objc-runtime::make-nsstring "ApplePressAndHoldEnabled")))
-	   #+nil(NSTextInputContextKeyboardSelectionDidChangeNotification
+	   (NSTextInputContextKeyboardSelectionDidChangeNotification
 	    (objc-runtime::make-nsstring
-	     "misspellingNSTextInputContextKeyboardSelectionDidChangeNotification")))
+	     "NSTextInputContextKeyboardSelectionDidChangeNotification")))
     
-       [[#@NSUserDefaults @(standardUserDefaults)] @(registerDefaults:) :pointer defaults]
+       (send
+	(send #@NSUserDefaults @(standardUserDefaults) :pointer) @(registerDefaults:) :void :pointer defaults)
 
-;;       [[#@NSNotificationCenter @(defaultCenter)] @(addObserver:selector:name:object:)
-;;        :pointer (ns-object-ptr (application-helper app))
-       ;;        :pointer @(selectedKeyboardInputSourceChanged:)
-;;	:pointer NSTextInputContextKeyboardSelectionDidChangeNotification
-;;	:pointer (cffi:null-pointer)]
+       (send
+	(send #@NSNotificationCenter @(defaultCenter) :pointer) @(addObserver:selector:name:object:)
+	:void
+        :pointer (ns-object-ptr (application-helper app))
+	:pointer @(selectedKeyboardInputSourceChanged:)
+	:pointer NSTextInputContextKeyboardSelectionDidChangeNotification
+	:pointer (cffi:null-pointer))
 
 	;;(create-key-tables app)
 
@@ -334,10 +330,12 @@
 
 	;;(poll-monitors-cocoa app)
 
-	(when (cffi:null-pointer-p [[#@NSRunningApplication @(currentApplication)] @(isFinishedLaunching)])
-	  [(ns-object-ptr app) @(run)])
+	(when (cffi:null-pointer-p
+	       (send
+		(send #@NSRunningApplication @(currentApplication) :pointer) @(isFinishedLaunching) :pointer))
+	  (send app @(run) :void))
 
-	[(ns-object-ptr app) @(setActivationPolicy:) :int64 NSApplicationActivationPolicyRegular]
+	(send app @(setActivationPolicy:) :void :long-long NSApplicationActivationPolicyRegular)
 
 	t)))
 
@@ -585,7 +583,7 @@ backtra	      (disconnected))
   )
   
 
-(deftraceable-callback content-view-is-opaque-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback content-view-is-opaque-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
@@ -599,7 +597,7 @@ backtra	      (disconnected))
 	  *yes*
 	  *no*))))
 
-(deftraceable-callback content-view-can-become-key-view-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback content-view-can-become-key-view-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
@@ -610,7 +608,7 @@ backtra	      (disconnected))
   (declare (ignore content-view))
   *yes*)
 
-(deftraceable-callback content-view-accepts-first-responder-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback content-view-accepts-first-responder-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
@@ -621,12 +619,13 @@ backtra	      (disconnected))
   (declare (ignore content-view))
   *yes*)
 
-(deftraceable-callback content-view-wants-update-layer-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback content-view-wants-update-layer-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
     (when content-view
       (content-view-wants-update-layer content-view))
+    #+IGNORE
     *no*))
 
 (defun content-view-wants-update-layer (content-view)
@@ -663,7 +662,7 @@ backtra	      (disconnected))
   (declare (ignore window))
   (values))
 
-(deftraceable-callback content-view-accepts-first-mouse-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback content-view-accepts-first-mouse-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
@@ -949,21 +948,22 @@ backtra	      (disconnected))
       (super-msg-send content-view @(updateTrackingAreas))))
   (values))
 
+(defun wait-cocoa-events (app)
+  (declare (ignorable app)))
+
 (defun poll-cocoa-events (app)
-  (let ((NSDefaultRunLoopMode
-	 (objc-runtime::make-nsstring "NSDefaultRunLoopMode")))
-    (loop
-       do
+  (loop
+     do
        (let ((event [(ns-object-ptr app) @(nextEventMatchingMask:untilDate:inMode:dequeue:)
 		    :uint64 NSEventMaskAny
 		    :pointer [#@NSDate @(distantPast)]
 		    :pointer NSDefaultRunLoopMode
-		    :int 1]))
+		    :char *yes*]))
 	 
 	 (when (cffi:null-pointer-p event)
 	   (return (values)))
 
-	 [(ns-object-ptr app) @(sendEvent:) :pointer event]))))
+	 [(ns-object-ptr app) @(sendEvent:) :pointer event])))
     
 		    
 
@@ -1007,13 +1007,13 @@ backtra	      (disconnected))
 #+SBCL
 (defun init-with-content-rect (thing content-rect style-mask backing defer)
   (let ((selector (new-msg-send @(initWithContentRect:styleMask:backing:defer:)
-				(((:struct NSRect) :uint64 :uint64 :bool) :pointer))))
+				(((:struct NSRect) :uint64 :uint64 :char) :pointer))))
     (funcall selector thing
 	     (list 'height (print (cffi:mem-aref content-rect :double 3))
 		   'width (print (cffi:mem-aref content-rect :double 2))
 		   'y (print (cffi:mem-aref content-rect :double 1))
 		   'x (print (cffi:mem-aref content-rect :double 0)))
-	     style-mask backing defer)))
+	     style-mask backing (if defer 1 0))))
 
 (defmethod cffi:translate-to-foreign (value (type (eql :bool)))
   (if value 1 0))
@@ -1056,7 +1056,7 @@ backtra	      (disconnected))
 (defun cascade-top-left-from-point (thing point)
   ;; point is plist.
   (let ((selector (new-msg-send @(cascadeTopLeftFromPoint:) (((:struct NSPoint)) (:struct NSPoint)))))
-    (funcall selector thing point)))
+    (funcall selector (ns-object-ptr thing) point)))
 
 (defun is-visible? (thing)
   (let ((selector (new-msg-send @(isVisible) (() :bool))))
@@ -1216,13 +1216,13 @@ backtra	      (disconnected))
 
 (defun enter-full-screen-mode (thing screen &optional (options nil))
   (let ((selector (new-msg-send @(enterFullScreenMode:)
-				((:pointer :bool) :bool))))
-    (funcall selector (ns-object-ptr thing) (ns-object-ptr screen) options)))
+				((:pointer :int) :bool))))
+    (funcall selector (ns-object-ptr thing) (ns-object-ptr screen) (if options options 0))))
 
 (defun exit-full-screen-mode (thing &optional (options nil))
   (let ((selector (new-msg-send @(exitFullScreenMode:)
-				((:bool) :bool))))
-    (funcall selector (ns-object-ptr thing) options)))
+				((:int) :bool))))
+    (funcall selector (ns-object-ptr thing) (if options options 0))))
 
 (defun get-screen (thing)
   (let ((selector (new-msg-send @(screen) (() :pointer))))
@@ -1270,7 +1270,6 @@ backtra	      (disconnected))
 	    (getf bounds 'y))))
 
 
-
 (defun vidmode-from-cg-display-mode (mode &optional (fallback-refresh-rate 0.0d0))
   (let ((width (CGDisplayModeGetWidth mode))
 	(height (CGDisplayModeGetHeight mode))
@@ -1294,6 +1293,163 @@ backtra	      (disconnected))
   (declare (type real y))
   (coerce (1- (- (getf (CGDisplayBounds (CGMainDisplayID)) 'height) y)) 'double-float))
 
+(defun (setf cocoa-window-title) (string window)
+  [(ns-object-ptr window) @(setTitle:)
+  :pointer (objc-runtime::make-nsstring string)]
+  string)
+
+(defun get-cocoa-window-frame-size (window)
+  (declare (ignorable window))
+  )
+
+(defun get-cocoa-window-content-scale (window)
+  (declare (ignorable window))
+  (values 2.0d0 2.0d0)
+  )
+
+(defun get-cocoa-window-cursor-pos (window)
+  (declare (ignorable window))
+  (values 100 100)
+  )
+
+(defun get-cocoa-window-framebuffer-size (window)
+  (let* ((content-rect (get-frame (window-content-view window))))
+    (print content-rect)
+    (let ((fb-rect (convert-rect-to-backing (window-content-view window) content-rect)))
+      (print fb-rect)
+      (values (getf fb-rect 'width) (getf fb-rect 'height)))))
+
+(defun get-cocoa-window-pos (window)
+  (declare (ignorable window))
+  )
+
+(defun get-cocoa-window-size (window)
+  (let ((frame (get-frame (window-content-view window))))
+    (values (getf frame 'width) (getf frame 'height))))
+
+(defun iconify-cocoa-window (window)
+  (declare (ignorable window))
+  )
+
+(defun maximize-cocoa-window (window)
+  (declare (ignorable window))
+  )
+
+(defun restore-cocoa-window (window)
+  (declare (ignorable window))
+  )
+
+(defun set-cocoa-window-aspect-ratio (window numer denom)
+  (declare (ignorable window numer denom))
+  )
+
+(defun set-cocoa-window-pos (window x y)
+  (declare (ignorable window x y))
+  )
+
+(defun set-cocoa-window-size-limits (window width height)
+  (declare (ignorable window width height))
+  )
+
+(defun terminate-cocoa-application (app)
+  (declare (ignorable app))
+  )
+
+(defun backing-scale-factor (window)
+  (let ((selector (new-msg-send @(backingScaleFactor)
+				(() :double))))
+    (funcall selector (ns-object-ptr window))))
+
+
+
+#+vulkan
+(defun get-cocoa-required-instance-extensions ()
+  (list "VK_KHR_surface"
+	(if (symbol-value (intern (symbol-name '*use-metal-surface*) :vk))
+	    "VK_EXT_metal_surface"
+	    "VK_MVK_macos_surface")))
+
+
+(defun cocoa-window-title (window)
+  (let ((ptr [(ns-object-ptr window) @(title)]))
+    (unless (cffi:null-pointer-p ptr)
+      (objc-runtime::extract-nsstring ptr))))
+
+(defun set-delegate (window delegate)
+  (let ((selector (new-msg-send @(setDelegate:)
+				((:pointer) :void))))
+    (funcall selector (ns-object-ptr window) (ns-object-ptr delegate))))
+
+(defun set-content-view (window view)
+  (let ((selector (new-msg-send @(setContentView:)
+				((:pointer) :void))))
+    (funcall selector (ns-object-ptr window) (ns-object-ptr view))))
+
+(defun make-first-responder (window view)
+  (let ((selector (new-msg-send @(makeFirstResponder:)
+				((:pointer) :void))))
+    (funcall selector (ns-object-ptr window) (ns-object-ptr view))))
+
+(defun ff-call (name return-type &rest args)
+  (eval
+   (multiple-value-bind (types ctypes fargs rettype)
+       (cffi::parse-args-and-types (append args (list return-type)))
+     (let ((syms (cffi::make-gensym-list (length types))))
+       (cffi::foreign-funcall-form/fsbv-with-libffi name
+						    fargs
+						    syms
+						    types
+						    rettype
+						    ctypes
+						    nil)))))
+					       
+					       
+					       
+#+OLD
+(defun ff-call (name return-type &rest args)
+  (apply #'sb-alien::alien-funcall
+	 (sb-alien-internals:%alien-value
+	  (sb-alien::foreign-symbol-sap name nil)
+	  0
+	  (sb-alien::parse-alien-type (list* 'sb-alien::function
+					     (cffi-sys::convert-foreign-type return-type)
+					     (mapcar #'cffi-sys::convert-foreign-type
+						     (serapeum::plist-keys args)))
+					nil))
+	 (serapeum:plist-values args)))
+
+(defun send (object message return-type &rest args)
+  (if (listp return-type)
+      (apply #'ff-call "objc_msgSend_stret"
+	     return-type
+	     :pointer (ns-object-ptr object)
+	     :pointer message
+	     args)
+      (apply #'ff-call "objc_msgSend"
+	     return-type
+	     :pointer (ns-object-ptr object)
+	     :pointer message
+	     args)))
+
+(defun array-with-objects (&rest sequence)
+  (let ((args (append
+	       (loop for i from 0 below (length sequence)
+		  append (list :pointer (elt sequence i)))
+	       (list :pointer (cffi:null-pointer)))))
+  (apply #'send #@NSArray @(arrayWithObjects:) :pointer args)))
+
+(defun register-for-dragged-types (view &rest new-types)
+  (send view @(registerForDraggedTypes:) :void :pointer (apply #'array-with-objects new-types)))
+
+(defun alloc-init (objc-class)
+  (init (alloc objc-class)))
+
+(defun alloc (objc-class)
+  (send objc-class @(alloc) :pointer))
+
+(defun init (objc-object)
+  (send objc-object @(init) :pointer))
+
 (defun create-native-window (window &rest args
 			     &key (xpos nil) (ypos nil)
 			       (width 640) (height 480)
@@ -1303,10 +1459,12 @@ backtra	      (disconnected))
 			       (floating? nil)
 			       (transparent? nil)
 			       (frame-name "Abstract OS")
-			       (clear-color #xffffffff)
 			       (retina? t)
 			       &allow-other-keys)
   (declare (ignorable args))
+
+  #+sbcl
+  (sb-int:set-floating-point-modes :traps '())
   
   (with-nsrect (content-rect)
     (if (window-monitor window)
@@ -1354,75 +1512,73 @@ backtra	      (disconnected))
 	      (setq style-mask (logior style-mask NSWindowStyleMaskResizable)))))
 
       (setf (ns-object-ptr window)
-	    (init-with-content-rect [(window-class *app*) @(alloc)]
+	    (init-with-content-rect (alloc (window-class *app*))
 				    content-rect
 				    style-mask NSBackingStoreBuffered nil))
 	
       (when (cffi:null-pointer-p (ns-object-ptr window))
 	(error "Cocoa: Failed to create window."))
 
-      [(ns-object-ptr window) @(setTitle:)
-      :pointer
-      (or (and title (objc-runtime::make-nsstring title)) (objc-runtime::make-nsstring "Abstract OS"))]
+      (setf (cocoa-window-title window)
+	    (or (and title (objc-runtime::make-nsstring title)) (objc-runtime::make-nsstring "Abstract OS")))
       
       (setf (window-delegate window)
 	    (make-instance 'window-delegate
-			   :ptr [[(window-delegate-class *app*) @(alloc)] @(init)]
+			   :ptr (alloc-init (window-delegate-class *app*))
 			   :owner window))
 
-      [(ns-object-ptr window) @(setDelegate:) :pointer (ns-object-ptr (window-delegate window))]
+      (set-delegate window (window-delegate window))
 	  
       (setf (window-content-view window)
 	    (make-instance 'content-view
-			   :ptr [(content-view-class *app*) @(alloc)]
+			   :ptr (alloc-init (content-view-class *app*))
 			   :owner window
-			   :marked-text [[#@NSMutableAttributedString @(alloc)] @(init)]))
+			   :marked-text (alloc-init #@NSMutableAttributedString)))
 
-      (super-init-with-frame (window-content-view window) (get-frame window))
-      [(ns-object-ptr (window-content-view window)) @(updateTrackingAreas)]
+      ;;      (super-init-with-frame (window-content-view window) (get-frame window))
+      (send (window-content-view window) @(updateTrackingAreas) :void)
 
-      [(ns-object-ptr window) @(setContentView:) :pointer (ns-object-ptr (window-content-view window))]
-      [(ns-object-ptr window) @(makeFirstResponder:) :pointer (ns-object-ptr (window-content-view window))]
-	
+      (set-content-view window (window-content-view window))
+      (make-first-responder window (window-content-view window))
 
-      ;;[(ns-object-ptr (window-content-view window)) @(registerForDraggedTypes:) :pointer @(NSPasteboardTypeURL)]
+      (register-for-dragged-types (window-content-view window)
+				  (objc-runtime::make-nsstring "NSPasteboardTypedURL"))
 	
       (if (window-monitor window)
-	    
-	  [(ns-object-ptr window) @(setLevel:) :int (1+ NSMainMenuWindowLevel)]
+
+	  (send window @(setLevel:) :void :int (1+ NSMainMenuWindowLevel))
 	    
 	  (progn
 	      
 	    (when (or (null xpos) (null ypos))
-	      (setf (cascade-point *app*) (cascade-top-left-from-point (ns-object-ptr window) (cascade-point *app*))))
+	      (setf (cascade-point *app*)
+		    (cascade-top-left-from-point window (cascade-point *app*))))
 	      
-	    (if resizable?
+	    (let ((behavior (if resizable?
+				(logior NSWindowCollectionBehaviorFullScreenPrimary
+					NSWindowCollectionBehaviorManaged)
+				NSWindowCollectionBehaviorFullScreenNone)))
 		  
-		(let ((behavior (logior NSWindowCollectionBehaviorFullScreenPrimary
-					NSWindowCollectionBehaviorManaged)))
-		  [(ns-object-ptr window) @(setCollectionBehavior:) :int behavior])
-		  
-		(let ((behavior NSWindowCollectionBehaviorFullScreenNone))
-		  [(ns-object-ptr window) @(setCollectionBehavior:) :int behavior]))
+	      (send window @(setCollectionBehavior:) :void :int behavior))
 	      
 	    (when floating?
-	      [(ns-object-ptr window) @(setLevel:) :int NSFloatingWindowLevel])
+	      (send window @(setLevel:) :void :int NSFloatingWindowLevel))
 	      
 	    (when maximized?
-	      [(ns-object-ptr window) @(zoom:) :bool *yes*])))
+	      (send window @(zoom:) :void :char *yes*))))
 	  
       (when (and frame-name (not (string= frame-name "")))
-	[(ns-object-ptr window) @(setFrameAutosaveName:) :pointer (objc-runtime::make-nsstring frame-name)])
+	(send window @(setFrameAutosaveName:) :void :pointer (objc-runtime::make-nsstring frame-name)))
 	  
       (setf (window-retina? window) retina?)
 
       (when transparent?
-	[(ns-object-ptr window) @(setOpaque:) :bool *yes*]
-	[(ns-object-ptr window) @(setHasShadow:) :bool *yes*]
-	[(ns-object-ptr window) @(setBackgroundColor:) :pointer [#@NSColor clear-color]])
-	  
-      [(ns-object-ptr window) @(setAcceptsMouseMovedEvents:) :bool *yes*]
-      [(ns-object-ptr window) @(setRestorable:) :bool *no*]
+	(send window @(setOpaque:) :void :char *yes*)
+	(send window @(setHasShadow:) :void :char *yes*)
+	(send window @(setBackgroundColor:) :void (send #@NSColor @(clearColor) :pointer)))
+
+      (send window @(setAcceptsMouseMovedEvents:) :void :char *yes*)
+      (send window @(setRestorable:) :void :char *no*)
 
       (multiple-value-bind (width height)
 	  (get-cocoa-window-size window)
@@ -1430,15 +1586,14 @@ backtra	      (disconnected))
 	      (height window) height))
 
       (multiple-value-bind (fb-width fb-height)
-	  (get-cocoa-framebuffer-size window)
+	  (get-cocoa-window-framebuffer-size window)
 	(setf (window-fb-width window) fb-width
 	      (window-fb-height window) fb-height))
 
+      #+NOTYET
       (setf (window-graphics-context window)
-	    [#@NSGraphicsContext @(graphicsContextWithWindow:) :pointer (ns-object-ptr window)])
+	    (send #@NSGraphicsContext @(graphicsContextWithWindow:) :pointer :pointer (ns-object-ptr window)))
 
-      (set-background-color window [#@NSColor @(whiteColor)])
-      
       t)))
 
 (defun set-background-color (window color)
@@ -1450,14 +1605,9 @@ backtra	      (disconnected))
 (defun NSRectFill (rect)
   (cffi:foreign-funcall "NSRectFill" (:struct NSRect) rect :void))
 
-(defun get-cocoa-window-size (window)
-  (let ((frame (get-frame (window-content-view window))))
-    (values (getf frame 'width) (getf frame 'height))))
 
-(defun get-cocoa-framebuffer-size (window)
-  (let* ((content-rect (get-frame (window-content-view window)))
-	 (fb-rect (convert-rect-to-backing (window-content-view window) content-rect)))
-    (values (getf fb-rect 'width) (getf fb-rect 'height))))    
+
+    
 
 (defun create-cocoa-window (window &rest initargs
 			    &key (visible? t)
@@ -1495,7 +1645,7 @@ backtra	      (disconnected))
   (order-out window))
 
 (defun focus-cocoa-window (window)
-  [(ns-object-ptr *app*) @(activateIgnoringOtherApps:) :bool *yes*]
+  [(ns-object-ptr *app*) @(activateIgnoringOtherApps:) :char *yes*]
   (make-key-and-order-front window))
 	      
 (defun set-cocoa-video-mode (monitor video-mode)
@@ -1512,12 +1662,6 @@ backtra	      (disconnected))
       ;;[(ns-object-ptr window) @(setFrame:) (:struct NSRect) frame :pointer @(display:) :boolean t]
       (input-monitor-window (window-monitor window) window))))
 
-
-
-(defun make-os-window (&rest args)
-  #+sbcl
-  (sb-int:set-floating-point-modes :traps '())
-  (apply #'make-instance 'essential-os-window-mixin args))
 
 ;;
 
@@ -1762,16 +1906,16 @@ backtra	      (disconnected))
 				    "v@:")
     (objc-runtime::class-add-method content-view-class @(isOpaque)
 				    (cffi:callback content-view-is-opaque-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method content-view-class @(canBecomeKeyView)
 				    (cffi:callback content-view-can-become-key-view-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method content-view-class @(acceptsFirstResponder)
 				    (cffi:callback content-view-accepts-first-responder-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method content-view-class @(wantsUpdateLayer)
 				    (cffi:callback content-view-wants-update-layer-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method content-view-class @(updateLayer)
 				    (cffi:callback content-view-update-layer-callback)
 				    "v@:")
@@ -1780,7 +1924,7 @@ backtra	      (disconnected))
 				    "v@:@")
     (objc-runtime::class-add-method content-view-class @(acceptsFirstMouse)
 				    (cffi:callback content-view-accepts-first-mouse-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method content-view-class @(mouseDown)
 				    (cffi:callback content-view-mouse-down-callback)
 				    "v@:@")
@@ -1828,11 +1972,11 @@ backtra	      (disconnected))
 				    "v@:")
     content-view-class))
 
-(deftraceable-callback window-can-become-key-window-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback window-can-become-key-window-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignore self _cmd))
   *yes*)
 
-(deftraceable-callback window-can-become-main-window-callback :bool ((self :pointer) (_cmd :pointer))
+(deftraceable-callback window-can-become-main-window-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignore self _cmd))
   *yes*)
 
@@ -1842,10 +1986,10 @@ backtra	      (disconnected))
 	  #@NSWindow "AbstractOSWindow" 0)))
     (objc-runtime::class-add-method window-class @(canBecomeKeyWindow)
 				    (cffi:callback window-can-become-key-window-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method window-class @(canBecomeMainWindow)
 				    (cffi:callback window-can-become-main-window-callback)
-				    "B@:")
+				    "c@:")
     (objc-runtime::class-add-method window-class @(observeValueForKeyPath:ofObject:change:context:)
 				    (cffi:callback observe-value-for-key-path-callback)
 				    "v@:@@@@")
@@ -1912,8 +2056,10 @@ backtra	      (disconnected))
 (defvar w)
 
 (defun main-loop-body (window app)
+  (set-needs-display-in-rect (window-content-view window) (get-bounds (window-content-view window)))
   (poll-cocoa-events app)
-  (content-view-draw-rect (window-content-view window) (get-bounds (window-content-view window)))
+  
+  ;;(content-view-draw-rect (window-content-view window) (get-bounds (window-content-view window)))
   [(window-graphics-context w) @(flushGraphics)]
   )
 
@@ -1923,7 +2069,7 @@ backtra	      (disconnected))
     (funcall selector (ns-object-ptr self) rect)))
 
 (defun test-main-loop (app)
-  (let ((window (setq w (make-os-window))))
+  (let ((window w #+NIL(setq w (make-os-window))))
     (set-needs-display-in-rect (window-content-view window) (get-bounds (window-content-view window)))
     (tagbody
      start
@@ -1934,3 +2080,11 @@ backtra	      (disconnected))
   #+sbcl
   (sb-int:set-floating-point-modes :traps '())
   [(ns-object-ptr *app*) @(run)])
+
+(defun visible-rect (content-view)
+  (let ((selector (new-msg-send @(visibleRect)
+				(() (:struct NSRect)))))
+    (funcall selector (ns-object-ptr content-view))))
+
+      
+  

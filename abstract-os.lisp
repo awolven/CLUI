@@ -49,6 +49,7 @@
 			       (focus-on-show? t)
 			       (mouse-passthrough? nil)
 			       &allow-other-keys)
+  (declare (ignore args))
   (declare (ignorable share))
   (assert title)
 
@@ -64,6 +65,9 @@
 	  (video-mode-height video-mode) height
 	  (video-mode-refresh-rate video-mode) (hints-refresh-rate (hints *app*)))
 
+    (when decorated?
+      (print 'decorated))
+    
     (setf (window-monitor window) monitor
 	  (resizable? window) resizable?
 	  (decorated? window) decorated?
@@ -173,7 +177,7 @@
 	   ((window-next window))
 	 
 	 (if (eq (window-monitor window) monitor)
-	       (multiple-value-bind (width height) (get-window-size window)
+	       (multiple-value-bind (width height) (get-os-window-size window)
 		 (set-window-monitor *app* window nil 0 0 width height :blah))))))))
 
 (defmethod set-window-monitor ((app application-mixin) window monitor xpos ypos width height refresh-rate)

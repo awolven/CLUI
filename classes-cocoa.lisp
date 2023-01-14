@@ -7,7 +7,7 @@
 (defclass ns-helper (ns-object-mixin)
   ())
 
-(defclass ns-application-mixin (ns-object-mixin)
+(defclass ns-application-mixin ()
   ((helper-class :accessor helper-class)
    (application-delegate-class :accessor application-delegate-class)
    (window-class :accessor window-class)
@@ -30,7 +30,7 @@
    (keycodes)
    (scancodes)
    (clipboard-string)
-   (cascade-point :initform (list 'y 0.0d0 'x 0.0d0) :accessor cascade-point)
+   (cascade-point :initform (make-ns-point 0 0) :accessor cascade-point)
    (restore-cursor-position-x)
    (restore-cursor-position-y)
    (disabled-cursor-window :accessor disabled-cursor-window)
@@ -42,6 +42,9 @@
    
    
    ))
+
+(defmethod ns-object-ptr ((app ns-application-mixin))
+  objc-runtime::ns-app)
 
 (defclass application-delegate (ns-object-mixin)
   ())
@@ -57,14 +60,10 @@
 (defclass ns-cursor-mixin ()
   ((object)))
 
-(defclass ns-object-mixin ()
-  ((ptr :initarg :ptr :accessor ns-object-ptr)))
-
 (defclass ns-window-mixin (essential-rect-mixin ns-object-mixin)
   ((delegate :accessor window-delegate)
    (view :accessor window-content-view)
-   (layer)
-   (content :accessor window-graphics-context)
+   (context :accessor window-graphics-context)
    (maximized? :initform nil :accessor maximized?)
    (occluded? :initform nil :accessor occluded?)
    (retina? :initform nil :accessor window-retina?)
@@ -74,6 +73,9 @@
    (yscale :accessor window-y-scale)
    (cursor-warp-delta-x :accessor cursor-warp-delta-x)
    (cursor-warp-delta-y :accessor cursor-warp-delta-y)))
+
+(defclass ns-vulkan-window-mixin (ns-window-mixin)
+  ((layer :accessor window-layer)))
 
 (defclass window-delegate (ns-object-mixin)
   ((owner :initarg :owner :accessor window-delegate-owner)))

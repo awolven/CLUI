@@ -2,6 +2,30 @@
 
 (defpackage :abstract-os
   (:use :cl)
+  (:export #:*app*
+	   #:os-window-should-close?
+	   #:poll-application-events
+	   #:wait-application-events
+	   #:os-window-title
+	   #:get-os-window-pos
+	   #:set-os-window-pos
+	   #:set-os-window-cursor-pos
+	   #:get-os-window-size
+	   #:focus-os-window
+	   #:hide-os-window
+	   #:show-os-window
+	   #:maximize-os-window
+	   #:restore-os-window
+	   #:iconify-window
+	   #:get-os-window-frame-size
+	   #:get-os-window-framebuffer-size
+	   #:set-os-window-size
+	   #:set-os-window-aspect-ratio
+	   #:set-os-window-size-limits
+	   #:destroy-os-window
+	   #:shutdown-application)
+  #+vulkan
+  (:export #:get-required-instance-extensions)
   #-darwin
   (:import-from :noffi
 		#:copy-ptr
