@@ -1,6 +1,12 @@
 (in-package :abstract-os)
 
-(defvar *app*)
+(defvar *app* nil)
+
+(defmethod default-application-class-for-window ((window essential-os-window-mixin))
+  'abstract-os-application)
+
+(defmethod default-window-class-for-application ((app application-mixin))
+  'os-window)
 
 (defun input-framebuffer-size (window width height)
   (declare (ignorable window width height))
@@ -30,7 +36,7 @@
   (declare (ignorable window))
   (values))
 
-(defun input-window-damaged (window)
+(defmethod input-window-damaged (window)
   (declare (ignorable window))
   (values))
 
@@ -52,6 +58,9 @@
   (declare (ignore args))
   (declare (ignorable share))
   (assert title)
+
+  (unless *app*
+    (make-instance (default-application-class-for-window window)))
 
   ;;require-init-or-return
 

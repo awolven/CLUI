@@ -8,11 +8,11 @@
   ())
 
 (defclass ns-application-mixin ()
-  ((helper-class :accessor helper-class)
-   (application-delegate-class :accessor application-delegate-class)
-   (window-class :accessor window-class)
-   (window-delegate-class :accessor window-delegate-class)
-   (content-view-class :accessor content-view-class)
+  ((helper-class :accessor objc-helper-class)
+   (application-delegate-class :accessor objc-application-delegate-class)
+   (window-class :accessor objc-window-class)
+   (window-delegate-class :accessor objc-window-delegate-class)
+   (content-view-class :accessor objc-content-view-class)
    
    (delegate->clos-window-table	:accessor delegate->clos-window-table)
    (content-view->clos-content-view-table :accessor content-view->clos-content-view-table)

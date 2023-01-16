@@ -5,9 +5,13 @@
 			     #+wayland wayland-application-mixin
 			     #+darwin ns-application-mixin)
   ((name :accessor application-name)
+   (exit? :initform nil :accessor application-exit?)
    (window-list-head :initform nil :accessor application-window-list-head)
    (monitors :initform (make-array 6 :adjustable t :fill-pointer 0)
 	     :reader application-monitors)))
+
+(defclass abstract-os-application (application-mixin)
+  ())
 
 (defmethod initialize-instance :before ((instance application-mixin)
 					&rest initargs
@@ -136,11 +140,18 @@
   (values))
 
 
+
 (defclass os-window-mixin (essential-os-window-mixin
 			   #+windows win32-window-mixin
 			   #+x11 x11-window-mixin
 			   #+wayland wayland-window-mixin
 			   #+darwin ns-window-mixin)
+  ())
+
+(defclass os-window (os-window-mixin)
+  ())
+
+(defclass constant-refresh-os-window-mixin (essential-os-window-mixin)
   ())
 
 

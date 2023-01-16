@@ -87,6 +87,9 @@
 (cffi:defcstruct NS::|_CAView|)
 (cffi:defcstruct NS::|objc_method_description|)
 (cffi:defcstruct NS::|ValueInterpolator|)
+(cffi:defcstruct ns::|__CFBundle|) ;;fixme
+(cffi:defcstruct ns::|CATransform3D|) ;;fixme
+(cffi:defcstruct ns::|_CARenderRendererInfo|) ;;fixme
 
 
 (cffi:defcstruct ns::|_NSRange|
@@ -139,6 +142,11 @@
 				 :pointer ,selector
 				 ,@(mapcan #'list arg-types arg-syms)
 				 ,return-type)))))
+
+(defun NS::|alloc| (class)
+  (let ((message-lambda 
+         (make-message-lambda @(alloc) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr class))))
 
 (defclass objc-method ()
   ((name :initarg :name :reader objc-method-name)
@@ -229,8 +237,9 @@
       (parse-integer string :start (1+ start) :junk-allowed t)
     (multiple-value-bind (type end)
 	(decode-objc-type string :start end)
+      ;; assume the #\[ is there.
       (values (list :array type int)
-	      (1+ end)))))
+	      (+ 2 end)))))
 
 (defun parse-struct-or-union (string &key start kind)
   (multiple-value-bind (init term)
@@ -568,6 +577,7 @@
 (defun wrap-ns ()
   (clrhash *wrapped-selector-table*)
   (write-method-bindings (list #@NSObject
+			       #@NSBundle
 			       #@NSApplication #@NSRunningApplication #@NSThread #@NSEvent #@NSUserDefaults
 			       #@NSNotificationCenter
 			       ;;#@NSWorkspace #@NSWorkspaceOpenConfiguration #@NSAppKitVersion
@@ -580,7 +590,9 @@
 			       #@NSColor #@NSColorList
 			       #@NSScreen
 			       #@NSGraphicsContext #@NSBezierPath
-			       #@NSDate)
+			       #@NSDate
+			       #@CALayer
+			       #@CAMetalLayer)
 			 "~/abstract-os/ns-bindings.lisp"
 			 (list (class_getClassMethod #@NSThread @(detachNewThreadSelector:toTarget:withObject:))
 			       (class_getClassMethod #@NSApplication @(sharedApplication))
@@ -590,9 +602,16 @@
 			       (class_getClassMethod #@NSRunningApplication @(currentApplication))
 			       (class_getClassMethod #@NSBezierPath @(strokeRect:))
 			       (class_getInstanceMethod #@NSGraphicsContext @(flushGraphics))
+			       (class_getClassMethod #@NSGraphicsContext @(graphicsContextWithWindow:))
 			       (class_getClassMethod #@NSColor @(whiteColor))
+			       (class_getClassMethod #@NSColor @(clearColor))
 			       (class_getClassMethod #@NSDate @(distantPast))
+			       (class_getClassMethod #@NSDate @(distantFuture))
 			       (class_getClassMethod
 				#@NSEvent @(otherEventWithType:location:modifierFlags:timestamp:windowNumber:context:subtype:data1:data2:))
+			       (class_getClassMethod #@NSAutoreleasePool @(new))
+			       (class_getClassMethod #@NSAutoreleasePool @(release))
+			       (class_getInstanceMethod #@CALayer @(setContentsScale:))
+			       (class_getClassMethod #@NSBundle @(bundleWithPath:))
 			       )))
 						     

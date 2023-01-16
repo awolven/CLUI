@@ -3,6 +3,10 @@
 (defpackage :abstract-os
   (:use :cl)
   (:export #:*app*
+	   #:exit?
+	   #:application-exit?
+	   #:default-application-class-for-window
+	   #:default-window-class-for-application
 	   #:os-window-should-close?
 	   #:poll-application-events
 	   #:wait-application-events
