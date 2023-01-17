@@ -1,128 +1,7 @@
 (in-package :abstract-os)
 (named-readtables:in-readtable :objc-readtable)
 
-(defpackage :ns)
-
-
-(in-package :cffi)
-#+NIL
-(defun foreign-funcall-form/fsbv-with-libffi (function function-arguments symbols types
-                                              return-type argument-types
-                                              &optional pointerp (abi :default-abi))
-  "A body of foreign-funcall calling the libffi function #'call (ffi_call)."
-  (let ((argument-count (length argument-types)))
-    `(with-foreign-objects ((argument-values :pointer ,argument-count)
-                            ,@(unless (eql return-type :void)
-                                `((result ',return-type))))
-       ,(translate-objects-ret
-         symbols function-arguments types return-type
-         ;; NOTE: We must delay the cif creation until the first call
-         ;; because it's FOREIGN-ALLOC'd, i.e. it gets corrupted by an
-         ;; image save/restore cycle. This way a lib will remain usable
-         ;; through a save/restore cycle if the save happens before any
-         ;; FFI calls will have been made, i.e. nothing is malloc'd yet.
-         `(progn
-            (loop
-	       :for arg :in (list ,@symbols)
-	       :for count :from 0
-	       when (consp arg)
-	       do (break)
-	       :do (setf (mem-aref argument-values :pointer count) arg))
-            (let* ((libffi-cif-cache (load-time-value (cons 'libffi-cif-cache nil)))
-                   (libffi-cif (or ;;(cdr libffi-cif-cache)
-                                   ;; TODO use compare-and-swap to set it and call
-                                   ;; FREE-LIBFFI-CIF when someone else did already.
-                                   (setf (cdr libffi-cif-cache)
-                                         ;; FIXME we should install a finalizer on the cons cell
-                                         ;; that calls FREE-LIBFFI-CIF on the cif (when the function
-                                         ;; gets redefined, and the cif becomes unreachable). but a
-                                         ;; finite world is full of compromises... - attila
-                                         (make-libffi-cif ,function ',return-type
-                                                          ',argument-types ',abi)))))
-              (libffi/call libffi-cif
-                           ,(if pointerp
-                                function
-                                `(foreign-symbol-pointer ,function))
-                           ,(if (eql return-type :void) '(null-pointer) 'result)
-                           argument-values)
-              ,(if (eql return-type :void)
-                   '(values)
-                   '(progn
-		     (print (cffi::translate-from-foreign result (make-instance 'abstract-os::|CGPoint-TCLASS| :name 'ns::|CGPoint|)))
-		     (print result)))))
-	 ))))
-
-(in-package :abstract-os)
-
-(defpackage :ns)
-
 (defparameter *wrapped-selector-table* (make-hash-table))
-
-(cffi:defctype ns::|CGFloat| #+64-bit :double #+32-bit :float)
-(cffi:defctype ns::|NSUInteger| #+64-bit :unsigned-long-long #+32-bit :unsigned-int)
-
-(cffi:defcstruct ns::|CGPath|) ;;fixme
-(cffi:defcstruct ns::|CGContext|) ;;fixme
-(cffi:defcstruct ns::|CGAffineTransform|) ;;fixme
-(cffi:defcstruct ns::|CGSRegionObject|) ;;fixme
-(cffi:defcstruct ns::|CGImage|) ;;fixme
-(cffi:defcstruct ns::|CGColorSpace|) ;;fixme
-(cffi:defcstruct ns::|_NSModalSession|) ;;fixme
-(cffi:defcstruct ns::|OpaqueWindowPtr|) ;;fixme
-(cffi:defcstruct ns::|CGColor|) ;;fixme
-(cffi:defcstruct ns::|__CFDictionary|) ;;fixme
-(cffi:defcstruct ns::|NSEdgeInsets|) ;;fixme
-(cffi:defcstruct ns::|__CFString|) ;;fixme
-(cffi:defcstruct ns::|__CFURL|) ;;fixme
-(cffi:defcstruct ns::|__CAView|) ;;fixme
-(cffi:defcstruct NS::|__CFNotificationCenter|) ;; fixme
-(cffi:defcstruct NS::|__IOHIDEvent|) ;; fixme
-(cffi:defcstruct NS::|__CGEvent|)
-(cffi:defcstruct NS::|_NSZone|)
-(cffi:defcstruct NS::|pthread_override_s|)
-(cffi:defcstruct NS::|ProcessSerialNumber|)
-(cffi:defcstruct NS::__LSASN)
-(cffi:defcstruct NS::|__CFArray|)
-(cffi:defcstruct NS::|Object|)
-(cffi:defcstruct NS::|_CAView|)
-(cffi:defcstruct NS::|objc_method_description|)
-(cffi:defcstruct NS::|ValueInterpolator|)
-(cffi:defcstruct ns::|__CFBundle|) ;;fixme
-(cffi:defcstruct ns::|CATransform3D|) ;;fixme
-(cffi:defcstruct ns::|_CARenderRendererInfo|) ;;fixme
-
-
-(cffi:defcstruct ns::|_NSRange|
-		 (location ns::|NSUInteger|)
-		 (length ns::|NSUInteger|))
-    
-
-(cffi:defcstruct ns::|CGPoint|
-		 (ns::x ns::|CGFloat|)
-		 (ns::y ns::|CGFloat|))
-
-(cffi:defcstruct ns::|CGSize|
-		 (ns::width ns::|CGFloat|)
-		 (ns::height ns::|CGFloat|))
-		 
-
-(cffi:defcstruct ns::|CGRect|
-		 (ns::x ns::|CGFloat|)
-		 (ns::y ns::|CGFloat|)
-		 (ns::width ns::|CGFloat|)
-		 (ns::height ns::|CGFloat|))
-     
-
-(cffi:defcfun (class_copyMethodList "class_copyMethodList") :pointer (cls :pointer) (out-count :pointer))
-(cffi:defcfun (class_copyIvarList "class_copyIvarList") :pointer (cls :pointer) (out-count :pointer))
-(cffi:defcfun (method_copyReturnType "method_copyReturnType") :pointer (m :pointer))
-(cffi:defcfun (method_getNumberOfArguments "method_getNumberOfArguments") :unsigned-int (m :pointer))
-(cffi:defcfun (method_getArgumentType "method_getArgumentType") :void (m :pointer) (index :unsigned-int) (dst :pointer) (dst_len :long-long))
-(cffi:defcfun (method_copyArgumentType "method_copyArgumentType") :pointer (m :pointer) (index :unsigned-int))
-(cffi:defcfun (class_getClassMethod "class_getClassMethod") :pointer (cls :pointer) (name :pointer))
-(cffi:defcfun (class_getInstanceMethod "class_getInstanceMethod") :pointer (cls :pointer) (name :pointer))
-(cffi:defcfun (method_getName "method_getName") :pointer (m :pointer))
-(cffi:defcfun (ivar_getName "ivar_getName") :pointer (m :pointer))
 
 (defmacro make-message-lambda (selector ((&rest arg-types) return-type))
   (let ((arg-syms (mapcar (lambda (_) _ (gensym))
@@ -177,9 +56,6 @@
   ((name :initarg :name :reader objc-method-argument-name)
    (type :initarg :type :reader objc-method-argument-type)))
 
-(defun test3 ()
-  (class-copy-method-list #@NSWindow))
-   
 (defun create-objc-method (m)
   (let* ((sel (method_getName m))
 	 (rt (method_copyReturnType m))
@@ -212,8 +88,6 @@
 	 collect (let* ((m (cffi:mem-aref list :pointer i)))
 		   (create-objc-method m))))))
   
-
-
 (defun class-copy-ivar-list (class)
   (cffi:with-foreign-object (count :unsigned-int)
     (let ((list (class_copyIvarList (ns-object-ptr class) count)))
@@ -309,6 +183,7 @@
   (multiple-value-bind (int end)
       (parse-integer string :start (1+ start) :junk-allowed t)
     (let ((aligned-size (+ 8 (mod 8 int))))
+      ;; this is most likely misguided
       (values (or (case aligned-size
 		    (8 :unsigned-char)
 		    (16 :unsigned-short)
@@ -578,7 +453,9 @@
   (clrhash *wrapped-selector-table*)
   (write-method-bindings (list #@NSObject
 			       #@NSBundle
+			       #@NSNumber
 			       #@NSApplication #@NSRunningApplication #@NSThread #@NSEvent #@NSUserDefaults
+			       #@NSScreen
 			       #@NSNotificationCenter
 			       ;;#@NSWorkspace #@NSWorkspaceOpenConfiguration #@NSAppKitVersion
 			       ;;@NSUserActivity #@NSUserActivityRestoring
@@ -593,7 +470,7 @@
 			       #@NSDate
 			       #@CALayer
 			       #@CAMetalLayer)
-			 "~/abstract-os/ns-bindings.lisp"
+			 "~/abstract-os/cocoa/ns-bindings.lisp"
 			 (list (class_getClassMethod #@NSThread @(detachNewThreadSelector:toTarget:withObject:))
 			       (class_getClassMethod #@NSApplication @(sharedApplication))
 			       ;;(class_getClassMethod #@NSEvent @(addLocalMonitorForEventsMatchingMask:handler:)) ;; bogus
@@ -613,5 +490,5 @@
 			       (class_getClassMethod #@NSAutoreleasePool @(release))
 			       (class_getInstanceMethod #@CALayer @(setContentsScale:))
 			       (class_getClassMethod #@NSBundle @(bundleWithPath:))
+			       (class_getClassMethod #@NSScreen @(screens))
 			       )))
-						     

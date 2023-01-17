@@ -27,9 +27,9 @@
 (defclass monitor-mixin (#+windows win32-monitor-mixin
 			 #+x11 x11-monitor
 			 #+darwin ns-monitor-mixin)
-  ((name)
-   (width-mm)
-   (height-mm)
+  ((name :initarg :name :reader monitor-name)
+   (width-mm :initarg :width-mm :reader monitor-width-mm)
+   (height-mm :initarg :height-mm :reader monitor-height-mm)
    ;; windows who's video mode is current on this monitor
    (window :accessor monitor-window :initform nil)
    (modes)
@@ -147,6 +147,7 @@
 			   #+wayland wayland-window-mixin
 			   #+darwin ns-window-mixin)
   ())
+
 
 (defclass os-window (os-window-mixin)
   ())

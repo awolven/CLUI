@@ -694,7 +694,7 @@
          (make-message-lambda @(encodeWithCAMLWriter:) ((:POINTER) :VOID)))) 
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
-(defun NS::|CA_interpolateValues:::interpolator:| (thing _ g806 g807 interpolator)
+(defun NS::|CA_interpolateValues:::interpolator:| (thing _ g812 g813 interpolator)
   (let ((message-lambda 
          (make-message-lambda @(CA_interpolateValues:::interpolator:) ((:POINTER
                                                                         :POINTER
@@ -703,7 +703,7 @@
                                                                          (:STRUCT
                                                                           NS::|ValueInterpolator|)))
                                                                        :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr g806) (ns-object-ptr g807) (ns-object-ptr interpolator))))
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr g812) (ns-object-ptr g813) (ns-object-ptr interpolator))))
 
 (defun NS::|CAMLType| (thing)
   (let ((message-lambda 
@@ -2750,13 +2750,209 @@
                                                               :DOUBLE)))) 
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
-(defun NS::|run| (thing)
+(defun NS::|encodedBytesAndReturnLength:error:| (thing _ error)
   (let ((message-lambda 
-         (make-message-lambda @(run) (NIL :VOID)))) 
+         (make-message-lambda @(encodedBytesAndReturnLength:error:) (((:POINTER
+                                                                       :UNSIGNED-LONG-LONG)
+                                                                      (:POINTER
+                                                                       :POINTER))
+                                                                     :STRING)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr error))))
+
+(defun NS::|encodedDataAndReturnError:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(encodedDataAndReturnError:) (((:POINTER
+                                                               :POINTER))
+                                                             :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+
+
+
+
+
+
+
+
+
+(defun NS::|matchesProcess:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(matchesProcess:) ((:POINTER) :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _)))) nil t))
+
+(defun NS::|rbs_pid| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(rbs_pid) (NIL :INT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|processPredicate| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(processPredicate) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|copyWithZone:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(copyWithZone:) (((:POINTER
+                                                  (:STRUCT NS::|_NSZone|)))
+                                                :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+
+
+
+(defun NS::|initWithChar:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithChar:) ((:CHAR) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (if _ 1 0))))
+
+(defun NS::|initWithUnsignedChar:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUnsignedChar:) ((:UNSIGNED-CHAR)
+                                                        :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithShort:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithShort:) ((:SHORT) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithUnsignedShort:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUnsignedShort:) ((:UNSIGNED-SHORT)
+                                                         :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithInt:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithInt:) ((:INT) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithUnsignedInt:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUnsignedInt:) ((:UNSIGNED-INT) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithLong:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithLong:) ((:LONG-LONG) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithLongLong:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithLongLong:) ((:LONG-LONG) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithUnsignedLongLong:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUnsignedLongLong:) ((:UNSIGNED-LONG-LONG)
+                                                            :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithDouble:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithDouble:) ((:DOUBLE) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+
+(defun NS::|charValue| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(charValue) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|unsignedCharValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unsignedCharValue) (NIL :UNSIGNED-CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|shortValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(shortValue) (NIL :SHORT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|unsignedShortValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unsignedShortValue) (NIL :UNSIGNED-SHORT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|intValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(intValue) (NIL :INT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|unsignedIntValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unsignedIntValue) (NIL :UNSIGNED-INT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|longValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(longValue) (NIL :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|unsignedLongValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unsignedLongValue) (NIL :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|floatValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(floatValue) (NIL :FLOAT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|doubleValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(doubleValue) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|longLongValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(longLongValue) (NIL :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|unsignedLongLongValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unsignedLongLongValue) (NIL :UNSIGNED-LONG-LONG)))) 
    (funcall message-lambda (ns-object-ptr thing) )))
 
 
+(defun NS::|redactedDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(redactedDescription) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
 
+(defun NS::|boolValue| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(boolValue) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|_cfNumberType| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_cfNumberType) (NIL :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_getValue:forType:| (thing _ for-type)
+  (let ((message-lambda 
+         (make-message-lambda @(_getValue:forType:) (((:POINTER :VOID)
+                                                      :LONG-LONG)
+                                                     :UNSIGNED-CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) for-type)))
+
+(defun NS::|compare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(compare:) ((:POINTER) :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|_reverseCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(_reverseCompare:) ((:POINTER) :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|_getCString:length:multiplier:| (thing _ length multiplier)
+  (let ((message-lambda 
+         (make-message-lambda @(_getCString:length:multiplier:) ((:STRING :INT
+                                                                  :DOUBLE)
+                                                                 :BOOL)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _ length multiplier)))
 
 (defun NS::|encodeWithCoder:| (thing _)
   (let ((message-lambda 
@@ -2767,6 +2963,101 @@
   (let ((message-lambda 
          (make-message-lambda @(initWithCoder:) ((:POINTER) :POINTER)))) 
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|isEqualToNumber:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isEqualToNumber:) ((:POINTER) :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _)))) nil t))
+
+(defun NS::|descriptionWithLocale:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(descriptionWithLocale:) ((:POINTER) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|stringValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringValue) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|integerValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(integerValue) (NIL :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|unsignedIntegerValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unsignedIntegerValue) (NIL :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+
+(defun NS::|decimalValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(decimalValue) (NIL (:ARRAY :CHAR 22))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+
+(defun NS::|initWithBool:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithBool:) ((:CHAR) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (if _ 1 0))))
+
+(defun NS::|initWithInteger:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithInteger:) ((:LONG-LONG) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithUnsignedInteger:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUnsignedInteger:) ((:UNSIGNED-LONG-LONG)
+                                                           :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithUnsignedLong:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUnsignedLong:) ((:UNSIGNED-LONG-LONG)
+                                                        :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|initWithFloat:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithFloat:) ((:FLOAT) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+
+(defun NS::|_scriptingBooleanDescriptor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_scriptingBooleanDescriptor) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_scriptingIntegerDescriptor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_scriptingIntegerDescriptor) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_scriptingNumberDescriptor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_scriptingNumberDescriptor) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_scriptingRealDescriptor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_scriptingRealDescriptor) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_scriptingTypeDescriptor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_scriptingTypeDescriptor) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|run| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(run) (NIL :VOID)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+
+
+
+
 
 (defun NS::|delegate| (thing)
   (let ((message-lambda 
@@ -7169,12 +7460,6 @@
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
 
-(defun NS::|copyWithZone:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(copyWithZone:) (((:POINTER
-                                                  (:STRUCT NS::|_NSZone|)))
-                                                :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
 
 
@@ -8213,6 +8498,365 @@
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
 
+
+
+
+
+(defun NS::|depth| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(depth) (NIL :INT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_displayID| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_displayID) (NIL :INT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|visibleFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(visibleFrame) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|frame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(frame) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_UUIDString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_UUIDString) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|displayLinkWithTarget:selector:| (thing _ selector)
+  (let ((message-lambda 
+         (make-message-lambda @(displayLinkWithTarget:selector:) ((:POINTER
+                                                                   :POINTER)
+                                                                  :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr selector))))
+
+(defun NS::|colorSpace| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(colorSpace) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|backingScaleFactor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(backingScaleFactor) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_currentSpace| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_currentSpace) (NIL :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|backingAlignedRect:options:| (thing _ options)
+  (let ((message-lambda 
+         (make-message-lambda @(backingAlignedRect:options:) (((:STRUCT
+                                                                NS::|CGRect|)
+                                                               :UNSIGNED-LONG-LONG)
+                                                              (:STRUCT
+                                                               NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing)  _ options)))
+
+(defun NS::|convertRectToBacking:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRectToBacking:) (((:STRUCT
+                                                          NS::|CGRect|))
+                                                        (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|convertRectFromBacking:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRectFromBacking:) (((:STRUCT
+                                                            NS::|CGRect|))
+                                                          (:STRUCT
+                                                           NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|deviceDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(deviceDescription) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|canRepresentDisplayGamut:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canRepresentDisplayGamut:) ((:LONG-LONG) :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _))) nil t))
+
+(defun NS::|_screenNumber| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_screenNumber) (NIL :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_copy| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_copy) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_dockOrientation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_dockOrientation) (NIL :UNSIGNED-INT)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_revealedMenuBarHeight| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_revealedMenuBarHeight) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|devicePixelCounts| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(devicePixelCounts) (NIL (:STRUCT NS::|CGSize|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_initWithDisplay:sharedInfo:| (thing _ shared-info)
+  (let ((message-lambda 
+         (make-message-lambda @(_initWithDisplay:sharedInfo:) ((:POINTER
+                                                                :POINTER)
+                                                               :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr shared-info))))
+
+(defun NS::|_isZeroScreen| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_isZeroScreen) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|_layoutMenuBarHeight| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_layoutMenuBarHeight) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_layoutFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_layoutFrame) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_dockRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_dockRect) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_layoutFrameForSafeVisibleFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_layoutFrameForSafeVisibleFrame) (NIL
+                                                                  (:STRUCT
+                                                                   NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_daisyFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_daisyFrame) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_resolution| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_resolution) (NIL (:STRUCT NS::|CGSize|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_updateWithDisplay:sharedInfo:| (thing _ shared-info)
+  (let ((message-lambda 
+         (make-message-lambda @(_updateWithDisplay:sharedInfo:) ((:POINTER
+                                                                  :POINTER)
+                                                                 :VOID)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr shared-info))))
+
+(defun NS::|maximumExtendedDynamicRangeColorComponentValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumExtendedDynamicRangeColorComponentValue) (NIL
+                                                                                 :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|maximumPotentialExtendedDynamicRangeColorComponentValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumPotentialExtendedDynamicRangeColorComponentValue) (NIL
+                                                                                          :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|maximumReferenceExtendedDynamicRangeColorComponentValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumReferenceExtendedDynamicRangeColorComponentValue) (NIL
+                                                                                          :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_dockHidden| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_dockHidden) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|_daisyFrameForSpace:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(_daisyFrameForSpace:) ((:UNSIGNED-LONG-LONG)
+                                                       (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|_restingMenuBarHeight| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_restingMenuBarHeight) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_layoutForcingRevealedMenuBarHeight| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_layoutForcingRevealedMenuBarHeight) (NIL
+                                                                      :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_safeVisibleFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_safeVisibleFrame) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_safeAreaFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_safeAreaFrame) (NIL (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|safeAreaInsets| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(safeAreaInsets) (NIL
+                                                 (:STRUCT NS::|NSEdgeInsets|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|supportedWindowDepths| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(supportedWindowDepths) (NIL (:POINTER :INT))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|bezelPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(bezelPath) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|imageInRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(imageInRect:) (((:STRUCT NS::|CGRect|))
+                                               :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|imageInRect:underWindow:| (thing _ under-window)
+  (let ((message-lambda 
+         (make-message-lambda @(imageInRect:underWindow:) (((:STRUCT
+                                                             NS::|CGRect|)
+                                                            :POINTER)
+                                                           :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _ (ns-object-ptr under-window))))
+
+(defun NS::|_isActiveScreen| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_isActiveScreen) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|_hwModel| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_hwModel) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|maximumFramesPerSecond| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumFramesPerSecond) (NIL :LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|minimumRefreshInterval| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(minimumRefreshInterval) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|maximumRefreshInterval| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumRefreshInterval) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|displayUpdateGranularity| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(displayUpdateGranularity) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|lastDisplayUpdateTimestamp| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lastDisplayUpdateTimestamp) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|auxiliaryTopLeftArea| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(auxiliaryTopLeftArea) (NIL
+                                                       (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|auxiliaryTopRightArea| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(auxiliaryTopRightArea) (NIL
+                                                        (:STRUCT NS::|CGRect|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|userSpaceScaleFactor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(userSpaceScaleFactor) (NIL :DOUBLE)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|displayLinkWithHandler:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(displayLinkWithHandler:) ((:POINTER) :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|_bestSettingWithBitsPerPixel:width:height:refreshRate:exactMatch:| (thing _ width height refresh-rate exact-match)
+  (let ((message-lambda 
+         (make-message-lambda @(_bestSettingWithBitsPerPixel:width:height:refreshRate:exactMatch:) ((:INT
+                                                                                                     :INT
+                                                                                                     :INT
+                                                                                                     :DOUBLE
+                                                                                                     (:POINTER
+                                                                                                      :CHAR))
+                                                                                                    :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _ width height refresh-rate (ns-object-ptr exact-match))))
+
+(defun NS::|_capture:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_capture:) (((:POINTER :POINTER)) :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _)))) nil t))
+
+(defun NS::|_isCaptured| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_isCaptured) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|_releaseCapture:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_releaseCapture:) (((:POINTER :POINTER)) :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _)))) nil t))
+
+(defun NS::|_currentSetting| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_currentSetting) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_availableSettings| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(_availableSettings) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|_bestSettingWithBitsPerPixel:width:height:exactMatch:| (thing _ width height exact-match)
+  (let ((message-lambda 
+         (make-message-lambda @(_bestSettingWithBitsPerPixel:width:height:exactMatch:) ((:INT
+                                                                                         :INT
+                                                                                         :INT
+                                                                                         (:POINTER
+                                                                                          :CHAR))
+                                                                                        :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _ width height (ns-object-ptr exact-match))))
+
+(defun NS::|_bestSettingSimilarToSetting:exactMatch:| (thing _ exact-match)
+  (let ((message-lambda 
+         (make-message-lambda @(_bestSettingSimilarToSetting:exactMatch:) ((:POINTER
+                                                                            (:POINTER
+                                                                             :CHAR))
+                                                                           :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr exact-match))))
+
+(defun NS::|_switchToSetting:error:| (thing _ error)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(_switchToSetting:error:) ((:POINTER
+                                                           (:POINTER :POINTER))
+                                                          :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr error)))) nil t))
+
 (defun NS::|_removeObserver:notificationNamesAndSelectors:object:| (thing _ notification-names-and-selectors object)
   (let ((message-lambda 
          (make-message-lambda @(_removeObserver:notificationNamesAndSelectors:object:) ((:POINTER
@@ -8400,11 +9044,6 @@
                                                             NS::|NSEdgeInsets|))))) 
    (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|safeAreaInsets| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(safeAreaInsets) (NIL
-                                                 (:STRUCT NS::|NSEdgeInsets|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 (defun NS::|_allowRolloverInToolbarControls| (thing)
   (if (= 0  (let ((message-lambda 
@@ -8456,10 +9095,6 @@
    (funcall message-lambda (ns-object-ptr thing) )))
 
 
-(defun NS::|frame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(frame) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
 (defun NS::|_startLiveResize| (thing)
@@ -9021,10 +9656,6 @@
          (make-message-lambda @(addTrackingArea:) ((:POINTER) :VOID)))) 
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
-(defun NS::|colorSpace| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(colorSpace) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 (defun NS::|setBounds:| (thing _)
   (let ((message-lambda 
@@ -9048,10 +9679,6 @@
          (make-message-lambda @(_backingScaleFactorForDrawing) (NIL :DOUBLE)))) 
    (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|backingScaleFactor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(backingScaleFactor) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 (defun NS::|setAutoresizingMask:| (thing _)
   (let ((message-lambda 
@@ -9266,14 +9893,6 @@
          (make-message-lambda @(viewWillDraw) (NIL :VOID)))) 
    (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|backingAlignedRect:options:| (thing _ options)
-  (let ((message-lambda 
-         (make-message-lambda @(backingAlignedRect:options:) (((:STRUCT
-                                                                NS::|CGRect|)
-                                                               :UNSIGNED-LONG-LONG)
-                                                              (:STRUCT
-                                                               NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing)  _ options)))
 
 (defun NS::|willRemoveSubview:| (thing _)
   (let ((message-lambda 
@@ -9293,12 +9912,6 @@
                                                                        NS::|CGRect|))))) 
    (funcall message-lambda (ns-object-ptr thing)  _)))
 
-(defun NS::|convertRectToBacking:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRectToBacking:) (((:STRUCT
-                                                          NS::|CGRect|))
-                                                        (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing)  _)))
 
 (defun NS::|_convertRectFromIntegralizationSpace:| (thing _)
   (let ((message-lambda 
@@ -9308,13 +9921,6 @@
                                                                          NS::|CGRect|))))) 
    (funcall message-lambda (ns-object-ptr thing)  _)))
 
-(defun NS::|convertRectFromBacking:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRectFromBacking:) (((:STRUCT
-                                                            NS::|CGRect|))
-                                                          (:STRUCT
-                                                           NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing)  _)))
 
 (defun NS::|mouse:inRect:| (thing _ in-rect)
   (if (= 0  (let ((message-lambda 
@@ -11737,10 +12343,6 @@
                                                                             :POINTER)))) 
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
-(defun NS::|_layoutFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_layoutFrame) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 (defun NS::|_screenAtPoint:| (thing _)
   (let ((message-lambda 
@@ -11748,11 +12350,6 @@
                                                   :POINTER)))) 
    (funcall message-lambda (ns-object-ptr thing)  _)))
 
-(defun NS::|imageInRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(imageInRect:) (((:STRUCT NS::|CGRect|))
-                                               :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  _)))
 
 (defun NS::|_windowResizeMouseLocationIsInVisibleScrollerThumb:| (thing _)
   (if (= 0  (let ((message-lambda 
@@ -15672,32 +16269,12 @@
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (if suspending-system-constraints 1 0) (ns-object-ptr with-optimized-engine-block))))
 
 
-(defun NS::|intValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(intValue) (NIL :INT)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|floatValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(floatValue) (NIL :FLOAT)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|doubleValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(doubleValue) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
 
-(defun NS::|stringValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(stringValue) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|integerValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(integerValue) (NIL :LONG-LONG)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
+
+
 
 (defun NS::|setEnabled:| (thing _)
   (let ((message-lambda 
@@ -16699,10 +17276,6 @@
 
 
 
-(defun NS::|compare:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(compare:) ((:POINTER) :LONG-LONG)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
 
 
@@ -34251,10 +34824,6 @@
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
 
-(defun NS::|deviceDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(deviceDescription) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 (defun NS::|_initContent:styleMask:backing:defer:contentView:| (thing _ style-mask backing defer content-view)
   (let ((message-lambda 
@@ -34628,10 +35197,6 @@
                                                                  :DOUBLE)))) 
    (funcall message-lambda (ns-object-ptr thing)  _)))
 
-(defun NS::|canRepresentDisplayGamut:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(canRepresentDisplayGamut:) ((:LONG-LONG) :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing)  _))) nil t))
 
 (defun NS::|setToolbar:| (thing _)
   (let ((message-lambda 
@@ -36290,10 +36855,6 @@
          (make-message-lambda @(deepestScreen) (NIL :POINTER)))) 
    (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|userSpaceScaleFactor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(userSpaceScaleFactor) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 (defun NS::|_isConsideredOpenForPersistentState| (thing)
   (if (= 0  (let ((message-lambda 
@@ -42991,301 +43552,67 @@
 
 
 
-(defun NS::|depth| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(depth) (NIL :INT)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_displayID| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_displayID) (NIL :INT)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|visibleFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(visibleFrame) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-
-(defun NS::|_UUIDString| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_UUIDString) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|displayLinkWithTarget:selector:| (thing _ selector)
-  (let ((message-lambda 
-         (make-message-lambda @(displayLinkWithTarget:selector:) ((:POINTER
-                                                                   :POINTER)
-                                                                  :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr selector))))
-
-
-
-(defun NS::|_currentSpace| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_currentSpace) (NIL :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
 
 
 
 
-(defun NS::|_screenNumber| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_screenNumber) (NIL :LONG-LONG)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_copy| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_copy) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_dockOrientation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_dockOrientation) (NIL :UNSIGNED-INT)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_revealedMenuBarHeight| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_revealedMenuBarHeight) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|devicePixelCounts| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(devicePixelCounts) (NIL (:STRUCT NS::|CGSize|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_initWithDisplay:sharedInfo:| (thing _ shared-info)
-  (let ((message-lambda 
-         (make-message-lambda @(_initWithDisplay:sharedInfo:) ((:POINTER
-                                                                :POINTER)
-                                                               :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr shared-info))))
-
-(defun NS::|_isZeroScreen| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_isZeroScreen) (NIL :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
-
-(defun NS::|_layoutMenuBarHeight| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_layoutMenuBarHeight) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
-(defun NS::|_dockRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_dockRect) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_layoutFrameForSafeVisibleFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_layoutFrameForSafeVisibleFrame) (NIL
-                                                                  (:STRUCT
-                                                                   NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_daisyFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_daisyFrame) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_resolution| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_resolution) (NIL (:STRUCT NS::|CGSize|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_updateWithDisplay:sharedInfo:| (thing _ shared-info)
-  (let ((message-lambda 
-         (make-message-lambda @(_updateWithDisplay:sharedInfo:) ((:POINTER
-                                                                  :POINTER)
-                                                                 :VOID)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr shared-info))))
-
-(defun NS::|maximumExtendedDynamicRangeColorComponentValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maximumExtendedDynamicRangeColorComponentValue) (NIL
-                                                                                 :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|maximumPotentialExtendedDynamicRangeColorComponentValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maximumPotentialExtendedDynamicRangeColorComponentValue) (NIL
-                                                                                          :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|maximumReferenceExtendedDynamicRangeColorComponentValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maximumReferenceExtendedDynamicRangeColorComponentValue) (NIL
-                                                                                          :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_dockHidden| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_dockHidden) (NIL :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
-
-(defun NS::|_daisyFrameForSpace:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(_daisyFrameForSpace:) ((:UNSIGNED-LONG-LONG)
-                                                       (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing)  _)))
-
-(defun NS::|_restingMenuBarHeight| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_restingMenuBarHeight) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_layoutForcingRevealedMenuBarHeight| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_layoutForcingRevealedMenuBarHeight) (NIL
-                                                                      :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_safeVisibleFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_safeVisibleFrame) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|_safeAreaFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_safeAreaFrame) (NIL (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
-(defun NS::|supportedWindowDepths| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(supportedWindowDepths) (NIL (:POINTER :INT))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|bezelPath| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(bezelPath) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
-(defun NS::|imageInRect:underWindow:| (thing _ under-window)
-  (let ((message-lambda 
-         (make-message-lambda @(imageInRect:underWindow:) (((:STRUCT
-                                                             NS::|CGRect|)
-                                                            :POINTER)
-                                                           :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  _ (ns-object-ptr under-window))))
-
-(defun NS::|_isActiveScreen| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_isActiveScreen) (NIL :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
-
-(defun NS::|_hwModel| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_hwModel) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|maximumFramesPerSecond| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maximumFramesPerSecond) (NIL :LONG-LONG)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|minimumRefreshInterval| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(minimumRefreshInterval) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|maximumRefreshInterval| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maximumRefreshInterval) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|displayUpdateGranularity| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(displayUpdateGranularity) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|lastDisplayUpdateTimestamp| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(lastDisplayUpdateTimestamp) (NIL :DOUBLE)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|auxiliaryTopLeftArea| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(auxiliaryTopLeftArea) (NIL
-                                                       (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
-
-(defun NS::|auxiliaryTopRightArea| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(auxiliaryTopRightArea) (NIL
-                                                        (:STRUCT NS::|CGRect|))))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
 
-(defun NS::|displayLinkWithHandler:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(displayLinkWithHandler:) ((:POINTER) :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
-(defun NS::|_bestSettingWithBitsPerPixel:width:height:refreshRate:exactMatch:| (thing _ width height refresh-rate exact-match)
-  (let ((message-lambda 
-         (make-message-lambda @(_bestSettingWithBitsPerPixel:width:height:refreshRate:exactMatch:) ((:INT
-                                                                                                     :INT
-                                                                                                     :INT
-                                                                                                     :DOUBLE
-                                                                                                     (:POINTER
-                                                                                                      :CHAR))
-                                                                                                    :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  _ width height refresh-rate (ns-object-ptr exact-match))))
 
-(defun NS::|_capture:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_capture:) (((:POINTER :POINTER)) :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _)))) nil t))
 
-(defun NS::|_isCaptured| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_isCaptured) (NIL :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
 
-(defun NS::|_releaseCapture:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_releaseCapture:) (((:POINTER :POINTER)) :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _)))) nil t))
 
-(defun NS::|_currentSetting| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_currentSetting) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|_availableSettings| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(_availableSettings) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing) )))
 
-(defun NS::|_bestSettingWithBitsPerPixel:width:height:exactMatch:| (thing _ width height exact-match)
-  (let ((message-lambda 
-         (make-message-lambda @(_bestSettingWithBitsPerPixel:width:height:exactMatch:) ((:INT
-                                                                                         :INT
-                                                                                         :INT
-                                                                                         (:POINTER
-                                                                                          :CHAR))
-                                                                                        :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  _ width height (ns-object-ptr exact-match))))
 
-(defun NS::|_bestSettingSimilarToSetting:exactMatch:| (thing _ exact-match)
-  (let ((message-lambda 
-         (make-message-lambda @(_bestSettingSimilarToSetting:exactMatch:) ((:POINTER
-                                                                            (:POINTER
-                                                                             :CHAR))
-                                                                           :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr exact-match))))
 
-(defun NS::|_switchToSetting:error:| (thing _ error)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(_switchToSetting:error:) ((:POINTER
-                                                           (:POINTER :POINTER))
-                                                          :CHAR)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _) (ns-object-ptr error)))) nil t))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (defun NS::|attributes| (thing)
   (let ((message-lambda 
@@ -43956,10 +44283,6 @@
 
 
 
-(defun NS::|descriptionWithLocale:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(descriptionWithLocale:) ((:POINTER) :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
 
 
 (defun NS::|timeIntervalSinceReferenceDate| (thing)
@@ -45895,6 +46218,72 @@
          (make-message-lambda @(optimizationOpportunities:) ((:CHAR) :POINTER)))) 
    (funcall message-lambda (ns-object-ptr thing)  (if _ 1 0))))
 
+(defun NS::|naturalDrawableSizeMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(naturalDrawableSizeMVK) (NIL
+                                                         (:STRUCT NS::|CGSize|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|setMaximumDrawableCountMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMaximumDrawableCountMVK:) ((:UNSIGNED-LONG-LONG)
+                                                              :VOID)))) 
+   (funcall message-lambda (ns-object-ptr thing)  _)))
+
+(defun NS::|setDisplaySyncEnabledMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDisplaySyncEnabledMVK:) ((:CHAR) :VOID)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (if _ 1 0))))
+
+(defun NS::|setColorspaceNameMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setColorspaceNameMVK:) (((:POINTER
+                                                          (:STRUCT
+                                                           NS::|__CFString|)))
+                                                        :VOID)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|setWantsExtendedDynamicRangeContentMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsExtendedDynamicRangeContentMVK:) ((:CHAR)
+                                                                          :VOID)))) 
+   (funcall message-lambda (ns-object-ptr thing)  (if _ 1 0))))
+
+(defun NS::|screenMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(screenMVK) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|updatedDrawableSizeMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updatedDrawableSizeMVK) (NIL
+                                                         (:STRUCT NS::|CGSize|))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|displaySyncEnabledMVK| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(displaySyncEnabledMVK) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|maximumDrawableCountMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumDrawableCountMVK) (NIL
+                                                          :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
+(defun NS::|wantsExtendedDynamicRangeContentMVK| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsExtendedDynamicRangeContentMVK) (NIL :CHAR)))) 
+   (funcall message-lambda (ns-object-ptr thing) ))) nil t))
+
+(defun NS::|colorspaceNameMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(colorspaceNameMVK) (NIL
+                                                    (:POINTER
+                                                     (:STRUCT
+                                                      NS::|__CFString|)))))) 
+   (funcall message-lambda (ns-object-ptr thing) )))
+
 
 
 
@@ -46212,3 +46601,8 @@
   (let ((message-lambda 
          (make-message-lambda @(bundleWithPath:) ((:POINTER) :POINTER)))) 
    (funcall message-lambda (ns-object-ptr thing)  (ns-object-ptr _))))
+
+(defun NS::|screens| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(screens) (NIL :POINTER)))) 
+   (funcall message-lambda (ns-object-ptr thing) )))

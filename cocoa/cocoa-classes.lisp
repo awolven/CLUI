@@ -50,10 +50,10 @@
   ())
 
 (defclass ns-monitor-mixin ()
-  ((display-id :accessor monitor-display-id)
-   (previous-mode)
-   (unit-number)
-   (screen)
+  ((display-id    :initarg  :display-id   :accessor monitor-display-id)
+   (previous-mode :initform nil           :accessor monitor-previous-mode)
+   (unit-number   :initarg  :unit-number  :reader   monitor-unit-number)
+   (screen        :initarg  :screen       :accessor monitor-screen)
    (fallback-refresh-rate :initform 0.0d0 :accessor monitor-fallback-refresh-rate)))
 
 
