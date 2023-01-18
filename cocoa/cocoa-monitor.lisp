@@ -1,4 +1,5 @@
 (in-package :abstract-os)
+(named-readtables:in-readtable :objc-readtable)
 
 (defun get-cocoa-monitor-pos (monitor)
   (let ((bounds (CGDisplayBounds (monitor-display-id monitor))))
@@ -24,6 +25,7 @@
       (make-video-mode :width width :height height :red-bits red-bits
 		       :green-bits green-bits :blue-bits blue-bits))))
 
+#+NOTYET
 (defun get-fallback-refresh-rate (display-id)
   (let ((refresh-rate 60.0f0)
 	(service 0))

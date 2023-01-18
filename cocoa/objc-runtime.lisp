@@ -1,8 +1,11 @@
 (in-package :abstract-os)
+(named-readtables:in-readtable :objc-readtable)
 
 (defun sap-int (sap)
   #+sbcl(sb-sys:sap-int sap)
   #+ccl(ccl::%ptr-to-int sap))
+
+(defvar *trace-callbacks* t)
 
 (defmacro deftraceable-callback (name return-type (&rest args) &body body)
   `(cffi:defcallback ,name ,return-type (,@args)
@@ -49,8 +52,8 @@
 
 (defun super-msg-send (thing selector &rest args)
   (cffi:with-foreign-object (objc-super '(:struct objc_super))
-    (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (ns-object-ptr thing)
-	  (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (class_getSuperclass (object_getClass (ns-object-ptr thing))))
+    (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (objc-object-id thing)
+	  (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (class_getSuperclass (object_getClass (objc-object-id thing))))
     (eval `(objc_msgSendSuper ,objc-super ,selector ,@args))))
 
 (defmacro new-msg-send-super (selector ((&rest arg-types) return-type))
@@ -58,8 +61,8 @@
                           arg-types)))
     `(lambda ,(cons 'target arg-syms)
        (cffi:with-foreign-object (objc-super '(:struct objc_super))
-	 (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (ns-object-ptr target)
-	       (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (class_getSuperclass (object_getClass (ns-object-ptr target))))
+	 (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (objc-object-id target)
+	       (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (class_getSuperclass (object_getClass (objc-object-id target))))
 	 (cffi:foreign-funcall "objc_msgSendSuper"
                              :pointer objc-super
                              :pointer ,selector
@@ -67,14 +70,14 @@
                              ,return-type)))))
 
 #+sbcl
-(defmethod ns-object-ptr ((thing sb-sys:system-area-pointer))
+(defmethod objc-object-id ((thing sb-sys:system-area-pointer))
   thing)
 
 #+ccl
-(defmethod ns-object-ptr ((thing ccl::macptr))
+(defmethod objc-object-id ((thing ccl::macptr))
   thing)
 
-(defmethod ns-object-ptr ((thing null))
+(defmethod objc-object-id ((thing null))
   (cffi:null-pointer))
 
 (defun ff-call (name return-type &rest args)
@@ -94,21 +97,21 @@
   (if (listp return-type)
       (apply #'ff-call "objc_msgSend_stret"
 	     return-type
-	     :pointer (ns-object-ptr object)
+	     :pointer (objc-object-id object)
 	     :pointer message
 	     args)
       (apply #'ff-call "objc_msgSend"
 	     return-type
-	     :pointer (ns-object-ptr object)
+	     :pointer (objc-object-id object)
 	     :pointer message
 	     args)))
 
 
 (defun alloc-init (objc-class)
-  (ns::|init| (alloc objc-class)))
+  (ns:|init| (alloc objc-class)))
 
 (defun alloc (objc-class)
-  (ns::|alloc| objc-class))
+  (ns:|alloc| objc-class))
 
 (defun init (objc-object)
-  (ns::|init| objc-object))
+  (ns:|init| objc-object))

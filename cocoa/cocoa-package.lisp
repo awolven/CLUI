@@ -1,3 +1,7 @@
 (in-package :abstract-os)
 
-(defpackage :ns)
+(defpackage :ns
+  (:export #:|alloc|
+	   #:|init|
+	   #:|addLocalMonitorForEventsMatchingMask:handler:|))
+	

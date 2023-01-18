@@ -3,6 +3,8 @@
 
 (defparameter *wrapped-selector-table* (make-hash-table))
 
+(defvar *export-list* ())
+
 (defmacro make-message-lambda (selector ((&rest arg-types) return-type))
   (let ((arg-syms (mapcar (lambda (_) _ (gensym))
                           arg-types)))
@@ -25,7 +27,7 @@
 (defun NS::|alloc| (class)
   (let ((message-lambda 
          (make-message-lambda @(alloc) (NIL :POINTER)))) 
-   (funcall message-lambda (ns-object-ptr class))))
+   (funcall message-lambda (objc-object-id class))))
 
 (defclass objc-method ()
   ((name :initarg :name :reader objc-method-name)
@@ -90,7 +92,7 @@
   
 (defun class-copy-ivar-list (class)
   (cffi:with-foreign-object (count :unsigned-int)
-    (let ((list (class_copyIvarList (ns-object-ptr class) count)))
+    (let ((list (class_copyIvarList (objc-object-id class) count)))
       (loop for i from 0 below (cffi:mem-aref count :unsigned-int)
 	 collect (ivar_getName (cffi:mem-aref list :pointer i))))))
 
@@ -316,7 +318,7 @@
     (format stream "'~S" type)
     (princ " " stream)
     (when (eq type :pointer)
-      (princ "(ns-object-ptr " stream))
+      (princ "(objc-object-id " stream))
     (when (eq type :char) ;; assuming :char really means :bool (they would use :int otherwise)
       (princ "(if " stream))
     ;;(when (and (listp type) (or (eq :struct (car type)) (eq :union (car type))))
@@ -388,7 +390,7 @@
      initially (when argz (princ " " stream))
      do (with-slots (name type) (car argz)
 	  (when (or (eq type :pointer) (and (consp type) (eq (car type) :pointer)))
-	    (princ "(ns-object-ptr " stream))
+	    (princ "(objc-object-id " stream))
 	  (when (eq type :char)
 	    (princ "(if " stream))
 	  (princ (string-downcase name) stream)
@@ -399,38 +401,40 @@
      when (cdr argz)
      do (princ " " stream)))
 
-(defun process-method (method stream)
-  (terpri stream)
-  (with-slots (name return-type args) method
-    ;; guessing that in objc same selector different class will have the same signature
-    (let ((sel-sym (intern (objc-method-selector method) :ns)))
-      (unless (gethash sel-sym *wrapped-selector-table*)
-	(princ "(defun " stream)
-	(format stream "~S" sel-sym)
-	(setf (gethash sel-sym *wrapped-selector-table*)
-	      sel-sym)
-	(princ " (thing" stream) (process-arg-names1 args stream) (princ ")" stream)
-	(terpri stream)
-	(when (eq return-type :char) ;; we'll assume returning a char actually means a bool
-	  (princ "  (if (= 0" stream))
-	(princ "  (let ((message-lambda " stream)
-	(terpri stream)
-	(princ "         (make-message-lambda @(" stream)
-	(princ (objc-method-selector method) stream)
-	(princ ") " stream) (process-arg-types-and-return-type args return-type stream) (princ "))) " stream)
-	(terpri stream)
-	(princ "   (funcall message-lambda (ns-object-ptr thing) " stream) (process-arg-names2 args stream) (princ "))" stream)
-	(when (eq return-type :char) ;; we'll assume returning a char actually means a bool
-	  (princ ") nil t)" stream))
-	(princ ")" stream)
-	(terpri stream)))))
+(defun process-method (method stream &key (internal? nil))
+  (when (or internal? (not (char= #\_ (char (objc-method-selector method) 0))))
+    (terpri stream)
+    (with-slots (name return-type args) method
+      ;; guessing that in objc same selector different class will have the same signature
+      (let ((sel-sym (intern (objc-method-selector method) :ns)))
+	(unless (gethash sel-sym *wrapped-selector-table*)
+	  (push (objc-method-selector method) *export-list*)
+	  (princ "(defun " stream)
+	  (format stream "~S" sel-sym)
+	  (setf (gethash sel-sym *wrapped-selector-table*)
+		sel-sym)
+	  (princ " (thing" stream) (process-arg-names1 args stream) (princ ")" stream)
+	  (terpri stream)
+	  (when (eq return-type :char) ;; we'll assume returning a char actually means a bool
+	    (princ "  (if (= 0" stream))
+	  (princ "  (let ((message-lambda " stream)
+	  (terpri stream)
+	  (princ "         (make-message-lambda @(" stream)
+	  (princ (objc-method-selector method) stream)
+	  (princ ") " stream) (process-arg-types-and-return-type args return-type stream) (princ "))) " stream)
+	  (terpri stream)
+	  (princ "   (funcall message-lambda (objc-object-id thing) " stream) (process-arg-names2 args stream) (princ "))" stream)
+	  (when (eq return-type :char) ;; we'll assume returning a char actually means a bool
+	    (princ ") nil t)" stream))
+	  (princ ")" stream)
+	  (terpri stream))))))
 
-(defun process-class (class stream)
+(defun process-class (class stream &key (with-internals? nil))
   (let ((methods (class-copy-method-list class)))
     (loop for method in methods
-       do (process-method method stream))))
+       do (process-method method stream :internal? with-internals?))))
 
-(defun write-method-bindings (classes path &optional (extras nil))
+(defun write-method-bindings (classes path extras &key (with-internals? nil))
   ;; for some reason there still sometimes exist methods which don't show up in class-copy-method-list
   ;; those method pointers go in extras       
   (with-open-file (stream path :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -443,14 +447,23 @@
     (loop for class in classes
        for i from 0
 	 do (print i)
-       do (process-class class stream))
+       do (process-class class stream :with-internals? with-internals?))
 
     (loop for m in extras
-	 do (process-method (create-objc-method m) stream))))
+       do (process-method (create-objc-method m) stream))
+
+    (loop for export in *export-list*
+       initially (princ "(export (list " stream)
+       do (terpri stream)
+	 (princ "          'ns::|" stream)
+	 (princ export stream)
+	 (princ "|" stream)
+       finally (princ ") :ns)" stream))))
 	 
 
-(defun wrap-ns ()
+(defun wrap-ns (&key (with-internals? nil))
   (clrhash *wrapped-selector-table*)
+  (setq *export-list* nil)
   (write-method-bindings (list #@NSObject
 			       #@NSBundle
 			       #@NSNumber
@@ -491,4 +504,5 @@
 			       (class_getInstanceMethod #@CALayer @(setContentsScale:))
 			       (class_getClassMethod #@NSBundle @(bundleWithPath:))
 			       (class_getClassMethod #@NSScreen @(screens))
-			       )))
+			       )
+			 :with-internals? with-internals?))

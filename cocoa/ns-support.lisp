@@ -1,4 +1,5 @@
 (in-package :abstract-os)
+(named-readtables:in-readtable :objc-readtable)
 
 (cffi:defctype ns::|NSUInteger| #+64-bit :unsigned-long-long #+32-bit :unsigned-int)
 (cffi:defcstruct ns::|NSEdgeInsets|) ;;fixme
@@ -79,11 +80,11 @@
 	       (list :pointer (cffi:null-pointer)))))
   (apply #'send #@NSArray @(arrayWithObjects:) :pointer args)))
 
-(defun NS::|addLocalMonitorForEventsMatchingMask:handler:| (thing arg0 handler)
-  (send (ns-object-ptr thing) @(addLocalMonitorForEventsMatchingMask:handler:) ':POINTER 
+(defun NS:|addLocalMonitorForEventsMatchingMask:handler:| (thing arg0 handler)
+  (send (objc-object-id thing) @(addLocalMonitorForEventsMatchingMask:handler:) ':POINTER 
 	':UNSIGNED-LONG-LONG arg0
 	':unsigned-long-long 0
-	':POINTER (ns-object-ptr handler)))
+	':POINTER (objc-object-id handler)))
 
 (defun super-init-with-frame (self frame)
   (let ((selector (new-msg-send-super @(initWithFrame:)

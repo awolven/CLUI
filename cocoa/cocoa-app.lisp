@@ -1,4 +1,5 @@
 (in-package :abstract-os)
+(named-readtables:in-readtable :objc-readtable)
 
 (deftraceable-callback application-helper-do-nothing-callback :void ((self :pointer) (_cmd :pointer) (object :pointer))
 ;;  (declare (ignore self _cmd object))
@@ -167,7 +168,7 @@
 	    (setq app-name "Abstract OS Application"))))
 
     (let ((bar [[#@NSMenu @(alloc)] @(init)]))
-      [(ns-object-ptr app) @(setMainMenu:) :pointer bar]
+      [(objc-object-id app) @(setMainMenu:) :pointer bar]
 
       (let ((app-menu-item [bar @(addItemWithTitle:action:keyEquivalent:) :pointer [#@NSString @(string)]
 			   :pointer (cffi:null-pointer) :pointer [#@NSString @(string)]])
@@ -180,7 +181,7 @@
 	 [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
 
 	 (let ((services-menu [[#@NSMenu @(alloc)] @(init)]))
-	  [(ns-object-ptr app) @(setServicesMenu:) :pointer services-menu]
+	  [(objc-object-id app) @(setServicesMenu:) :pointer services-menu]
 	  [app-menu @(addItemWithTitle:action:keyEquivalent:) :pointer (objc-runtime::make-nsstring "Services") :pointer (cffi:null-pointer)
 	  :pointer (objc-runtime::make-nsstring "")]
 
@@ -207,7 +208,7 @@
 	  (let ((window-menu-item [bar @(addItemWithTitle:action:keyEquivalent:) :pointer (objc-runtime::make-nsstring "")
 				  :pointer (cffi:null-pointer) :pointer (objc-runtime::make-nsstring "")])
 		(window-menu [[#@NSMenu @(alloc)] @(initWithTitle:) :pointer (objc-runtime::make-nsstring "Window")]))
-	    [(ns-object-ptr app) @(setWindowsMenu:) :pointer window-menu]
+	    [(objc-object-id app) @(setWindowsMenu:) :pointer window-menu]
 	    [window-menu-item @(setSubmenu:) :pointer window-menu]
 	    [window-menu @(addItemWithTitle:action:keyEquivalent:)
 	    :pointer (objc-runtime::make-nsstring "Minimize")
@@ -226,7 +227,7 @@
 	     :pointer @(toggleFullScreen:) :pointer (objc-runtime::make-nsstring "f")]
 	     @(setKeyEquivalentModifierMask:) :int (logior NSEventModifierFlagControl NSEventModifierFlagCommand)]
 
-	     [(ns-object-ptr app) @(performSelector:withObject:) :pointer @(setAppleMenu:) :pointer app-menu]
+	     [(objc-object-id app) @(performSelector:withObject:) :pointer @(setAppleMenu:) :pointer app-menu]
 	     [bar @(release)]
 	     (values)))))))
 

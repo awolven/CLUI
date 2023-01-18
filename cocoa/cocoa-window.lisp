@@ -10,7 +10,7 @@
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
     (when content-view
-      (ns::|dealloc| content-view))
+      (ns:|dealloc| content-view))
     (values)))
 
 (deftraceable-callback content-view-is-opaque-callback :char ((self :pointer) (_cmd :pointer))
@@ -28,7 +28,7 @@
 
 (defmethod cocoa-window-is-opaque ((window essential-os-window-mixin))
   ;; write other methods for this generic function on other window classes
-  (if (ns::|isOpaque| window)
+  (if (ns:|isOpaque| window)
       *yes*
       *no*))
 
@@ -130,10 +130,10 @@
     (values)))
 
 (defun content-view-mouse-down (content-view event)
-;;  (ns::|setNeedsDisplay:| content-view t)
+;;  (ns:|setNeedsDisplay:| content-view t)
   (input-mouse-clicked (content-view-owner content-view)
 		     :mouse-button-left :press
-		     (translate-flags (ns::|modifierFlags| event)))
+		     (translate-flags (ns:|modifierFlags| event)))
   (values))
 
 (defun translate-flags (event-modifier-flags)
@@ -148,7 +148,7 @@
     (values)))
 
 (defun content-view-mouse-dragged (content-view event)
-  (ns::|mouseMoved:| content-view event)
+  (ns:|mouseMoved:| content-view event)
   (values))
 
 (deftraceable-callback content-view-mouse-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -162,7 +162,7 @@
 (defun content-view-mouse-up (content-view event)
   (input-mouse-clicked (content-view-owner content-view)
 		     :mouse-button-left :release
-		     (translate-flags (ns::|modifierFlags| event)))
+		     (translate-flags (ns:|modifierFlags| event)))
   (values))
 
 (deftraceable-callback content-view-mouse-moved-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -179,14 +179,14 @@
   (let ((window (content-view-owner content-view)))
 
     (if (eq (window-cursor-mode window) :disabled)
-	(let ((dx (- (ns::|deltaX| event) (cursor-warp-delta-x window)))
-	      (dy (- (ns::|deltaY| event) (cursor-warp-delta-y window))))
+	(let ((dx (- (ns:|deltaX| event) (cursor-warp-delta-x window)))
+	      (dy (- (ns:|deltaY| event) (cursor-warp-delta-y window))))
 
 	  (input-cursor-pos window
 			    (+ (virtual-cursor-pos-x window) dx)
 			    (+ (virtual-cursor-pos-y window) dy)))
-	(let ((content-rect (ns::|frame| content-view))
-	      (pos (ns::|locationInWindow| event)))
+	(let ((content-rect (ns:|frame| content-view))
+	      (pos (ns:|locationInWindow| event)))
 
 	  (input-cursor-pos window
 			    (getf pos 'ns::x)
@@ -208,7 +208,7 @@
   (input-mouse-clicked (content-view-owner content-view)
 		       :mouse-button-right
 		       :press
-		       (translate-flags (ns::|modifierFlags| event))))
+		       (translate-flags (ns:|modifierFlags| event))))
 
 (deftraceable-callback content-view-right-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -219,7 +219,7 @@
     (values)))
 
 (defun content-view-right-mouse-dragged (content-view event)
-  (ns::|mouseMoved:| content-view event)
+  (ns:|mouseMoved:| content-view event)
   (values))
   
 (deftraceable-callback content-view-right-mouse-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -234,7 +234,7 @@
   (input-mouse-clicked (content-view-owner content-view)
 		       :mouse-button-right
 		       :release
-		       (translate-flags (ns::|modifierFlags| event))))
+		       (translate-flags (ns:|modifierFlags| event))))
 
 (deftraceable-callback content-view-other-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -245,12 +245,12 @@
     (values)))
 
 (defun content-view-other-mouse-down (content-view event)
-  (ns::|toggleFullScreen:| (content-view-owner content-view) nil)
+  (ns:|toggleFullScreen:| (content-view-owner content-view) nil)
   (input-mouse-clicked (content-view-owner content-view)
 		       (aref #(:mouse-button-right :mouse-button-left :mouse-button-middle)
-			     (ns::|buttonNumber| event))
+			     (ns:|buttonNumber| event))
 		       :press
-		       (translate-flags (ns::|modifierFlags| event))))
+		       (translate-flags (ns:|modifierFlags| event))))
 
 (deftraceable-callback content-view-other-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -261,7 +261,7 @@
     (values)))
 
 (defun content-view-other-mouse-dragged (content-view event)
-  (ns::|mouseMoved:| content-view event)
+  (ns:|mouseMoved:| content-view event)
   (values))
   
 (deftraceable-callback content-view-other-mouse-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -275,9 +275,9 @@
 (defun content-view-other-mouse-up (content-view event)
   (input-mouse-clicked (content-view-owner content-view)
 		       (aref #(:mouse-button-right :mouse-button-left :mouse-button-middle)
-			     (ns::|buttonNumber| event))
+			     (ns:|buttonNumber| event))
 		       :release
-		       (translate-flags (ns::|modifierFlags| event))))
+		       (translate-flags (ns:|modifierFlags| event))))
 
 (deftraceable-callback content-view-other-mouse-exited-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -333,14 +333,14 @@
 (defmethod cocoa-window-did-change-backing-properties ((window constant-refresh-os-window-mixin))
   #+NOTYET
   (let* ((window (content-view-owner content-view))
-	 (content-rect [(ns-object-ptr content-view) @(frame)])
-	 (fb-rect [(ns-object-ptr content-view) @(convertRectToBacking:) :pointer content-rect])
+	 (content-rect [(objc-object-id content-view) @(frame)])
+	 (fb-rect [(objc-object-id content-view) @(convertRectToBacking:) :pointer content-rect])
 	 (x-scale (/ (cffi:mem-aref [[fb-rect @(size)] @(width)] :int) (cffi:mem-aref [[content-rect @(size)] @(width)] :int)))
 	 (y-scale (/ (cffi:mem-aref [[fb-rect @(size)] @(height)] :int) (cffi:mem-aref [[content-rect @(size)] @(height)] :int))))
 
     (when (or (/= x-scale (window-x-scale window)) (/= y-scale (window-y-scale window)))
       (when (and (window-retina? window) (window-layer window))
-	[(ns-object-ptr (window-layer)) @(setContentsScale:) :integer [(ns-object-ptr window) @(backingScaleFactor)]])
+	[(objc-object-id (window-layer)) @(setContentsScale:) :integer [(objc-object-id window) @(backingScaleFactor)]])
 
       (setf (window-x-scale window) x-scale
 	    (window-y-scale window) y-scale)
@@ -366,10 +366,10 @@
   (declare (ignorable rect))
   (format t "~%running draw-rect")
   (finish-output)
-  (ns::|set| (ns::|whiteColor| #@NSColor))
-  (ns::|strokeRect:| #@NSBezierPath (make-ns-rect 0 0 1 1))
-  (NSRectFill (ns::|bounds| view))
-  (ns::|flushGraphics| (window-graphics-context (content-view-owner view)))
+  (ns:|set| (ns:|whiteColor| #@NSColor))
+  (ns:|strokeRect:| #@NSBezierPath (make-nsrect 0 0 1 1))
+  (NSRectFill (ns:|bounds| view))
+  (ns:|flushGraphics| (window-graphics-context (content-view-owner view)))
   (input-window-damaged (content-view-owner view)))
 
 (defmethod content-view-draw-rect ((window constant-refresh-os-window-mixin) (view content-view) rect)
@@ -392,7 +392,7 @@
   #+NIL
   (let ((content-view (window-content-view window)))
     (let ((tracking-area (content-view-tracking-area content-view))
-	  (content-view-ptr (ns-object-ptr content-view)))
+	  (content-view-ptr (objc-object-id content-view)))
     
       (when tracking-area
 	[content-view-ptr @(removeTrackingArea:) :pointer tracking-area]
@@ -414,23 +414,23 @@
   (values))
 
 (defun titled-style? (window)
-  (logtest NSWindowStyleMaskTitled (ns::|styleMask| window)))
+  (logtest NSWindowStyleMaskTitled (ns:|styleMask| window)))
 
 (defun closable-style? (window)
-  (logtest NSWindowStyleMaskClosable (ns::|styleMask| window)))
+  (logtest NSWindowStyleMaskClosable (ns:|styleMask| window)))
 
 (defun miniaturizable-style? (window)
-  (logtest NSWindowStyleMaskMiniaturizable (ns::|styleMask| window)))
+  (logtest NSWindowStyleMaskMiniaturizable (ns:|styleMask| window)))
 
 (defun resizable-style? (window)
-  (logtest NSWindowStyleMaskResizable (ns::|styleMask| window)))
+  (logtest NSWindowStyleMaskResizable (ns:|styleMask| window)))
 
 (defun cocoa-transform-y (y)
   (declare (type real y))
   (coerce (1- (- (getf (CGDisplayBounds (CGMainDisplayID)) 'ns::height) y)) 'double-float))
 
 (defun (setf cocoa-window-title) (string window)
-  (ns::|setTitle:| window (objc-runtime::make-nsstring string))
+  (ns:|setTitle:| window (objc-runtime::make-nsstring string))
   string)
 
 (defun get-cocoa-window-frame-size (window)
@@ -449,8 +449,8 @@
 
 (defun get-cocoa-window-framebuffer-size (window)
   (with-autorelease-pool (pool)
-    (let* ((content-rect (ns::|frame| (window-content-view window))))
-      (let ((fb-rect (ns::|convertRectToBacking:| (window-content-view window) content-rect)))
+    (let* ((content-rect (ns:|frame| (window-content-view window))))
+      (let ((fb-rect (ns:|convertRectToBacking:| (window-content-view window) content-rect)))
 	(values (getf fb-rect 'ns::width) (getf fb-rect 'ns::height))))))
 
 (defun get-cocoa-window-pos (window)
@@ -459,7 +459,7 @@
 
 (defun get-cocoa-window-size (window)
   (with-autorelease-pool (pool)
-    (let ((frame (ns::|frame| (window-content-view window))))
+    (let ((frame (ns:|frame| (window-content-view window))))
       (values (getf frame 'ns::width) (getf frame 'ns::height)))))
 
 (defun iconify-cocoa-window (window)
@@ -491,7 +491,7 @@
   )
 
 (defun cocoa-window-title (window)
-  (let ((ptr [(ns-object-ptr window) @(title)]))
+  (let ((ptr [(objc-object-id window) @(title)]))
     (unless (cffi:null-pointer-p ptr)
       (objc-runtime::extract-nsstring ptr))))
 
@@ -519,12 +519,12 @@
 		 (width (video-mode-width mode))
 		 (height (video-mode-height mode)))
 
-	    (setq content-rect (make-ns-rect xpos ypos width height))))
+	    (setq content-rect (make-nsrect xpos ypos width height))))
 
 	(if (or (null xpos) (null ypos))
-	    (setq content-rect (make-ns-rect 0 0 (or width 640) (or height 480)))
+	    (setq content-rect (make-nsrect 0 0 (or width 640) (or height 480)))
 
-	    (setq content-rect (make-ns-rect xpos
+	    (setq content-rect (make-nsrect xpos
 					     (cocoa-transform-y (1- (+ ypos (or height 480.0d0))))
 					     (or width 640) (or height 480)))))
 
@@ -541,8 +541,8 @@
 	    (when (resizable? window)
 	      (setq style-mask (logior style-mask NSWindowStyleMaskResizable)))))
 
-      (setf (ns-object-ptr window)
-	    (NS::|initWithContentRect:styleMask:backing:defer:|
+      (setf (objc-object-id window)
+	    (NS:|initWithContentRect:styleMask:backing:defer:|
 		 (alloc (objc-window-class *app*))
 		 content-rect
 		 #+NIL(logior NSWindowStyleMaskTitled
@@ -552,7 +552,7 @@
 		 style-mask
 		 NSBackingStoreBuffered nil))
 	
-      (when (cffi:null-pointer-p (ns-object-ptr window))
+      (when (cffi:null-pointer-p (objc-object-id window))
 	(error "Cocoa: Failed to create window."))
 
       (setf (cocoa-window-title window) (or title "Abstract OS"))
@@ -562,7 +562,7 @@
 			   :ptr (alloc-init (objc-window-delegate-class *app*))
 			   :owner window))
 
-      (ns::|setDelegate:| window (window-delegate window))
+      (ns:|setDelegate:| window (window-delegate window))
 	  
       (setf (window-content-view window)
 	    (make-instance 'content-view
@@ -572,11 +572,11 @@
 
 
 
-      (super-init-with-frame (window-content-view window) (ns::|frame| window))
-      (ns::|updateTrackingAreas| (window-content-view window))
+      (super-init-with-frame (window-content-view window) (ns:|frame| window))
+      (ns:|updateTrackingAreas| (window-content-view window))
 
-      (ns::|setContentView:| window (window-content-view window))
-      (ns::|makeFirstResponder:| window (window-content-view window))
+      (ns:|setContentView:| window (window-content-view window))
+      (ns:|makeFirstResponder:| window (window-content-view window))
 
       ;; these can be called once we have a content view
       (multiple-value-bind (width height)
@@ -589,50 +589,50 @@
 	(setf (window-fb-width window) fb-width
 	      (window-fb-height window) fb-height))
 
-      (ns::|registerForDraggedTypes:| (window-content-view window) (array-with-objects (objc-runtime::make-nsstring "NSPasteboardTypedURL")))
+      (ns:|registerForDraggedTypes:| (window-content-view window) (array-with-objects (objc-runtime::make-nsstring "NSPasteboardTypedURL")))
 	
       (if (window-monitor window)
 
-	  (ns::|setLevel:| window (1+ NSMainMenuWindowLevel))
+	  (ns:|setLevel:| window (1+ NSMainMenuWindowLevel))
 	    
 	  (progn
 	      
 	    (when (or (null xpos) (null ypos))
 	      #+NIL
 	      (setf (cascade-point *app*)
-		    (ns::|cascadeTopLeftFromPoint:| window (cascade-point *app*))))
+		    (ns:|cascadeTopLeftFromPoint:| window (cascade-point *app*))))
 
 	    (let ((behavior (if resizable?
 				(logior NSWindowCollectionBehaviorFullScreenPrimary
 					NSWindowCollectionBehaviorManaged)
 				NSWindowCollectionBehaviorFullScreenNone)))
 		  
-	      (ns::|setCollectionBehavior:| window behavior))
+	      (ns:|setCollectionBehavior:| window behavior))
 
 	    (when floating?
-	      (ns::|setLevel:| window NSFloatingWindowLevel))
+	      (ns:|setLevel:| window NSFloatingWindowLevel))
 	      
 	    (when maximized?
-	      (ns::|zoom:| window t))))
+	      (ns:|zoom:| window t))))
 
       (when (and frame-name (not (string= frame-name "")))
-	(ns::|setFrameAutosaveName:| window (objc-runtime::make-nsstring frame-name)))
+	(ns:|setFrameAutosaveName:| window (objc-runtime::make-nsstring frame-name)))
 	  
       (setf (window-retina? window) retina?)
 
       (when transparent?
-	(ns::|setOpaque:| window t)
-	(ns::|setHasShadow:| window t)
-	(ns::|setBackgroundColor:| window (ns::|clearColor| #@NScolor)))
+	(ns:|setOpaque:| window t)
+	(ns:|setHasShadow:| window t)
+	(ns:|setBackgroundColor:| window (ns:|clearColor| #@NScolor)))
 
-      (ns::|setAcceptsMouseMovedEvents:| window t)
+      (ns:|setAcceptsMouseMovedEvents:| window t)
 
-      (ns::|setRestorable:| window nil)
+      (ns:|setRestorable:| window nil)
 
       
 
       (setf (window-graphics-context window)
-	    (ns::|graphicsContextWithWindow:| #@NSGraphicsContext window))
+	    (ns:|graphicsContextWithWindow:| #@NSGraphicsContext window))
 
       t)))
 
@@ -669,20 +669,20 @@
     t))
 
 (defun show-cocoa-window (window)
-  (ns::|setIsVisible:| window t)
+  (ns:|setIsVisible:| window t)
   
   #+NIL
   (with-autorelease-pool (pool)
-    (ns::|orderFront:| window (cffi:null-pointer))))
+    (ns:|orderFront:| window (cffi:null-pointer))))
 
 (defun hide-cocoa-window (window)
   (with-autorelease-pool (pool)
-    (ns::|orderOut:| window (cffi:null-pointer))))
+    (ns:|orderOut:| window (cffi:null-pointer))))
 
 (defun focus-cocoa-window (window)
   (with-autorelease-pool (pool)
-    ;;(ns::|activateIgnoringOtherApps:| *app* t)
-    (ns::|makeKeyAndOrderFront:| window (cffi:null-pointer))))
+    ;;(ns:|activateIgnoringOtherApps:| *app* t)
+    (ns:|makeKeyAndOrderFront:| window (cffi:null-pointer))))
 	      
 (defun set-cocoa-video-mode (monitor video-mode)
   (declare (ignorable monitor video-mode))
@@ -691,11 +691,11 @@
 (defun acquire-monitor (window)
   (set-cocoa-video-mode (window-monitor window) (window-video-mode window))
   (let* ((bounds (CGDisplayBounds (monitor-display-id (window-monitor window))))
-	 (frame (make-ns-rect (getf bounds 'ns::x)
+	 (frame (make-nsrect (getf bounds 'ns::x)
 			      (cocoa-transform-y (1- (+ (getf bounds 'ns::y) (getf bounds 'height))))
 			      (getf bounds 'ns::width)
 			      (getf bounds 'ns::height))))
-    (ns::|setFrame:| frame t)
+    (ns:|setFrame:| frame t)
     (input-monitor-window (window-monitor window) window)))
 
 
@@ -731,12 +731,12 @@
   #+NIL
   (when (eq window (disabled-cursor-window *app*))
     (center-cursor-in-content-area window))
-  (let ((maximized? (ns::|isZoomed| window)))
+  (let ((maximized? (ns:|isZoomed| window)))
     (unless (eq (maximized? window) maximized?)
       (setf (maximized? window) maximized?)
       (input-window-maximize window maximized?)))
-  (let* ((content-rect (ns::|frame| (window-content-view window))))
-    (let ((fb-rect (ns::|convertRectToBacking:| (window-content-view window) content-rect)))
+  (let* ((content-rect (ns:|frame| (window-content-view window))))
+    (let ((fb-rect (ns:|convertRectToBacking:| (window-content-view window) content-rect)))
       (let ((fb-width (getf fb-rect 'ns::width))
 	    (fb-height (getf fb-rect 'ns::height)))
 	(when (or (/= fb-width (window-fb-width window))
@@ -969,22 +969,22 @@
   (sb-int:set-floating-point-modes :traps '())
   (print objc-runtime::ns-app)
   (with-autorelease-pool (pool)
-    (let ((window (ns::|initWithContentRect:styleMask:backing:defer:|
+    (let ((window (ns:|initWithContentRect:styleMask:backing:defer:|
 		       [#@NSWindow @(alloc)]
-		       (make-ns-rect 0 0 300 300)
+		       (make-nsrect 0 0 300 300)
 		       (logior NSWindowStyleMaskTitled
 			       NSWindowStyleMaskClosable
 			       NSWindowStyleMaskMiniaturizable
 			       NSWindowStyleMaskResizable)
 		       NSBackingStoreBuffered nil)))
       (print objc-runtime::ns-app)
-      (ns::|setTitle:| window (objc-runtime::make-nsstring "Look! A Window"))
+      (ns:|setTitle:| window (objc-runtime::make-nsstring "Look! A Window"))
       (print objc-runtime::ns-app)
-      (ns::|setIsVisible:| window t)
+      (ns:|setIsVisible:| window t)
       (print objc-runtime::ns-app)
-      (ns::|makeKeyAndOrderFront:| window nil)
+      (ns:|makeKeyAndOrderFront:| window nil)
       (print objc-runtime::ns-app)
-      (ns::|run| objc-runtime::ns-app)
+      (ns:|run| objc-runtime::ns-app)
       window)))
 
 #|

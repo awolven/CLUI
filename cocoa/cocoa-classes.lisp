@@ -2,7 +2,7 @@
 (named-readtables:in-readtable :objc-readtable)
 
 (defclass ns-object-mixin ()
-  ((ptr :initarg :ptr :accessor ns-object-ptr)))
+  ((ptr :initarg :ptr :accessor objc-object-id)))
 
 (defclass ns-helper (ns-object-mixin)
   ())
@@ -30,7 +30,7 @@
    (keycodes)
    (scancodes)
    (clipboard-string)
-   (cascade-point :initform (make-ns-point 0 0) :accessor cascade-point)
+   (cascade-point :initform (make-nspoint 0 0) :accessor cascade-point)
    (restore-cursor-position-x)
    (restore-cursor-position-y)
    (disabled-cursor-window :accessor disabled-cursor-window)
@@ -43,7 +43,7 @@
    
    ))
 
-(defmethod ns-object-ptr ((app ns-application-mixin))
+(defmethod objc-object-id ((app ns-application-mixin))
   objc-runtime::ns-app)
 
 (defclass application-delegate (ns-object-mixin)
@@ -94,14 +94,14 @@
 					 &allow-other-keys)
   (declare (ignorable initargs))
   (when owner
-    (setf (gethash (sap-int (ns-object-ptr instance))
+    (setf (gethash (sap-int (objc-object-id instance))
 		   (delegate->clos-window-table *app*))
 	  owner))
   (values))
 
 (defmethod initialize-instance :after ((instance content-view) &rest initargs &key &allow-other-keys)
   (declare (ignorable initargs))
-  (setf (gethash (sap-int (ns-object-ptr instance))
+  (setf (gethash (sap-int (objc-object-id instance))
 		 (content-view->clos-content-view-table *app*))
 	instance)
   (values))
