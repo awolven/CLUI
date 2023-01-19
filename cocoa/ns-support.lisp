@@ -100,3 +100,6 @@
 
 (defun make-nspoint (x y)
   (list 'ns::y (coerce y 'double-float) 'ns::x (coerce x 'double-float)))
+
+(defun make-nssize (width height)
+  (list 'ns::width (coerce width 'double-float) 'ns::height (coerce height 'double-float)))

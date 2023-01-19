@@ -20,6 +20,7 @@
    (:file "cocoa/cocoa-package")
    (:file "cocoa/objc-runtime")
    (:file "cocoa/objc-binding")
+   (:file "cocoa/iokit")
    (:file "cocoa/core-foundation")
    (:file "cocoa/core-graphics")
    (:file "cocoa/core-animation")
@@ -30,6 +31,7 @@
    (:file "cocoa/cocoa-event")
    (:file "cocoa/cocoa-monitor")
    (:file "cocoa/cocoa-window")
+   (:file "monitor")
    (:file "abstract-os")
    (:file "api")))
 

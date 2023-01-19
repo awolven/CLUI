@@ -1,7 +1,10 @@
 (in-package :abstract-os)
 
-(defpackage :ns
-  (:export #:|alloc|
-	   #:|init|
-	   #:|addLocalMonitorForEventsMatchingMask:handler:|))
-	
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (ignore-errors (find-package :ns))
+    (defpackage :ns)))
+
+(export '(ns::|alloc|
+	  ns::|init|
+	  ns::|addLocalMonitorForEventsMatchingMask:handler:|)
+	:ns)

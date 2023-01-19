@@ -629,8 +629,6 @@
 
       (ns:|setRestorable:| window nil)
 
-      
-
       (setf (window-graphics-context window)
 	    (ns:|graphicsContextWithWindow:| #@NSGraphicsContext window))
 
@@ -658,7 +656,7 @@
 	(progn
 	  (show-cocoa-window window)
 	  (focus-cocoa-window window)
-	  (acquire-monitor window)
+	  (acquire-cocoa-monitor window)
 	  (when center-cursor?
 	    #+NOTYET
 	    (center-cursor-in-content-area window)))
@@ -682,13 +680,10 @@
 (defun focus-cocoa-window (window)
   (with-autorelease-pool (pool)
     ;;(ns:|activateIgnoringOtherApps:| *app* t)
-    (ns:|makeKeyAndOrderFront:| window (cffi:null-pointer))))
-	      
-(defun set-cocoa-video-mode (monitor video-mode)
-  (declare (ignorable monitor video-mode))
+    (ns:|makeKeyAndOrderFront:| window (cffi:null-pointer)))
   (values))
 
-(defun acquire-monitor (window)
+(defun acquire-cocoa-monitor (window)
   (set-cocoa-video-mode (window-monitor window) (window-video-mode window))
   (let* ((bounds (CGDisplayBounds (monitor-display-id (window-monitor window))))
 	 (frame (make-nsrect (getf bounds 'ns::x)
@@ -697,6 +692,13 @@
 			      (getf bounds 'ns::height))))
     (ns:|setFrame:| frame t)
     (input-monitor-window (window-monitor window) window)))
+
+(defun release-cocoa-monitor (window)
+  (unless (eq (monitor-window (window-monitor window)) 'window)
+    (return-from release-cocoa-monitor (values)))
+  (input-monitor-window (window-monitor window) nil)
+  (restore-cocoa-video-mode (window-monitor window))
+  (values))
 
 
 ;;
@@ -770,7 +772,7 @@
 
 (defun window-did-miniaturize (window)
   (declare (ignorable window))
-  #+NOTYET(release-monitor window)
+  (release-cocoa-monitor window)
   (values))
 
 (deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (notification :pointer))
@@ -782,7 +784,7 @@
 
 (defun window-did-deminiaturize (window)
   (declare (ignorable window))
-  #+NOTYET(acquire-monitor window)
+  (acquire-cocoa-monitor window)
   (values))
 
 (deftraceable-callback window-delegate-window-did-become-key-callback :void ((self :pointer) (notification :pointer))
@@ -1003,5 +1005,95 @@
   return 0;
 |#
 
+(defun set-cocoa-window-monitor (window monitor &key xpos ypos width height refresh-rate)
+  (declare (ignorable refresh-rate))
+  (with-autorelease-pool (pool)
+    
+    (when (eq (window-monitor window) monitor)
+      (if monitor
+	  (when (eq (monitor-window monitor) window)
+	    (acquire-cocoa-monitor window))
+	  (let* ((content-rect (make-nsrect xpos (cocoa-transform-y (1- (+ ypos height))) width height))
+		 (style-mask (ns:|styleMask| window))
+		 (frame-rect (ns:|frameRectForContentRect:styleMask:| window content-rect style-mask)))
+	    (ns:|setFrame:display:| window frame-rect t)))
+      (return-from set-cocoa-window-monitor (values)))
 
-     
+    (when (window-monitor window)
+      (release-cocoa-monitor window))
+
+    (input-window-monitor window monitor)
+
+    (poll-cocoa-events *app*)
+
+    (let ((style-mask (ns:|styleMask| window)))
+
+      (if (window-monitor window)
+	  
+	  (progn
+	    (setq style-mask (logand style-mask (lognot (logior NSWindowStyleMaskTitled NSWindowStyleMaskClosable))))
+	    (setq style-mask (logior style-mask NSWindowStyleMaskBorderless)))
+	  
+	  (progn
+	    
+	    (when (decorated? window)
+	      (setq style-mask (logand style-mask (lognot NSWindowStyleMaskBorderless)))
+	      (setq style-mask (logior style-mask NSWindowStyleMaskTitled NSWindowStyleMaskClosable)))
+	    
+	    (if (resizable? window)
+		
+		(setq style-mask (logior style-mask NSWindowStyleMaskResizable))
+		
+		(setq style-mask (logand style-mask (lognot NSWindowStyleMaskResizable))))))
+
+      (ns:|setStyleMask:| window style-mask)
+
+      (ns:|makeFirstResponder:| window (window-content-view window))
+
+      (if (window-monitor window)
+
+	  (progn
+	    (ns:|setLevel:| window (1+ NSMainMenuWindowLevel))
+	    (ns:|setHasShadow:| window nil)
+
+	    (acquire-cocoa-monitor window))
+
+	  (let* ((content-rect (make-nsrect xpos (cocoa-transform-y (1- (+ ypos height))) width height))
+		 (frame-rect (ns:|frameRectForContentRect:styleMask:| window content-rect style-mask)))
+
+	    (ns:|setFrame:display:| window frame-rect t)
+
+	    (unless (or (eq (window-numer window) :dont-care)
+			(eq (window-denom window) :dont-care))
+	      (ns:|setContentAspectRatio:| window (make-nssize (window-numer window) (window-denom window))))
+
+	    (unless (or (eq (window-min-width window) :dont-care)
+			(eq (window-min-height window) :dont-care))
+	      (ns:|setContentMinSize:| window (make-nssize (window-min-width window) (window-min-height window))))
+
+	    (unless (or (eq (window-max-width window) :dont-care)
+			(eq (window-max-height window) :dont-care))
+	      (ns:|setContentMaxSize:| window (make-nssize (window-max-width window) (window-max-height window))))
+
+	    (if (floating? window)
+		(ns:|setLevel:| window NSFloatingWindowLevel)
+		(ns:|setLevel:| window NSNormalWindowLevel))
+
+	    (let ((behavior))
+	      (if (resizable? window)
+		  (setq behavior (logior NSWindowCollectionBehaviorFullScreenPrimary
+					 NSWindowCollectionBehaviorManaged))
+		  (setq behavior NSWindowCollectionBehaviorFullScreenNone))
+	      
+	      (ns:|setCollectionBehavior:| window behavior))
+
+	    (ns:|setHasShadow:| window t)
+
+	    (ns:|setTitle:| window (ns:|miniwindowTitle| window)))))))
+
+	    
+
+
+	    
+
+	      

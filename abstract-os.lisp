@@ -159,36 +159,42 @@
 	  (declare (type essential-os-window-mixin window))
 	(setf (window-monitor window) monitor))))
 
-(defun input-monitor-window (monitor window)
-  (declare (ignorable monitor window))
-  (values))
 
-(defun input-monitor (monitor &key (action nil) (placement nil))
-  (declare (type monitor-mixin monitor))
-  (declare (type application-mixin *app*))
-  (let ((monitors (application-monitors *app*)))
 
-    (ecase action
-      (:connected
-       (incf (slot-value *app* 'monitor-count))
 
-       (ecase placement
-	 (:insert-first (vector-push-extend nil monitors)
-	  (when (> (length monitors) 1)
-	    (loop for i from (- (length monitors) 2) downto 0
-		  do (setf (aref monitors (1+ i)) (aref monitors i))
-		  finally (setf (aref (slot-value *app* 'monitors) 0) monitor))))
+
+(defun poll-monitors (app)
+  #+darwin(poll-cocoa-monitors app)
+  #+win32(poll-win32-monitors app)
+  #+linux(poll-linux-monitors app))
+
+
+
+
+
+
+
+
+
+  
+  
+(defun set-window-monitor (window monitor &key xpos ypos width height refresh-rate)
+  #+darwin(set-cocoa-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
+  #+windows(set-win32-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
+  #+linux(set-linux-window-monitor window monitor  :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+
+
+
+
+
+
+  
+
+
+      
 	 
-	 (:insert-last (vector-push-extend monitor monitors))))
-
-      (:disconnected
-       (do ((window (application-window-list-head *app*)))
-	   ((window-next window))
-	 
-	 (if (eq (window-monitor window) monitor)
-	       (multiple-value-bind (width height) (get-os-window-size window)
-		 (set-window-monitor *app* window nil 0 0 width height :blah))))))))
-
+  
+#+nil
 (defmethod set-window-monitor ((app application-mixin) window monitor xpos ypos width height refresh-rate)
   (declare (ignorable monitor xpos ypos))
   (declare (type essential-os-window-mixin window))
@@ -208,5 +214,3 @@
 
   (call-next-method))
 
-
-;;

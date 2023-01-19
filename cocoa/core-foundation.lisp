@@ -32,3 +32,33 @@
 
 (defun CFSTR (string)
   (CFStringCreateWithCharacters (cffi:null-pointer) string (length string)))
+
+(cffi:defcfun (CFNumberGetValue "CFNumberGetValue") :boolean (number :pointer) (the-type :long) (value-ptr :pointer))
+
+(defparameter kCFAllocatorDefault (cffi:null-pointer))
+(defconstant kCFNumberIntType 9)
+
+(cffi:defcfun (CFDictionaryGetValue "CFDictionaryGetValue") :pointer
+  (the-dict :pointer)
+  (key :pointer))
+
+
+(cffi:defcfun (CFDictionaryGetValueIfPresent "CFDictionaryGetValueIfPresent") :boolean
+  (the-dict :pointer)
+  (key :pointer)
+  (p-value :pointer))
+
+(cffi:defcfun (CFStringGetMaximumSizeForEncoding "CFStringGetMaximumSizeForEncoding") :long
+  (length :long)
+  (encoding :unsigned-int))
+
+(cffi:defcfun (CFStringGetLength "CFStringGetLength") :long
+  (string :pointer))
+
+(defconstant kCFStringEncodingUTF8 #x08000100)
+
+(cffi:defcfun (CFStringGetCString "CFStringGetCString") :boolean
+  (the-string :pointer)
+  (buffer :pointer)
+  (buffer-size :pointer)
+  (encoding :unsigned-int))

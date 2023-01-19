@@ -7,8 +7,7 @@
   ((name :accessor application-name)
    (exit? :initform nil :accessor application-exit?)
    (window-list-head :initform nil :accessor application-window-list-head)
-   (monitors :initform (make-array 6 :adjustable t :fill-pointer 0)
-	     :reader application-monitors)))
+   (monitors :initform () :accessor application-monitors)))
 
 (defclass abstract-os-application (application-mixin)
   ())
@@ -22,7 +21,12 @@
   (setq *app* instance)
   (setf (application-name instance) (or name "Abstract OS Application"))
   #+darwin(init-cocoa instance)
-  (values))  
+  (values))
+
+(defstruct gamma-ramp
+  (red (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0))
+  (green (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0))
+  (blue (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0)))
 
 (defclass monitor-mixin (#+windows win32-monitor-mixin
 			 #+x11 x11-monitor
@@ -32,11 +36,12 @@
    (height-mm :initarg :height-mm :reader monitor-height-mm)
    ;; windows who's video mode is current on this monitor
    (window :accessor monitor-window :initform nil)
-   (modes)
-   (mode-count)
+   (modes :initform nil :accessor monitor-modes)
    (current-mode)
-   (original-ramp)
+   (original-ramp :initform nil :accessor monitor-original-ramp)
    (current-ramp)))
+
+(defclass monitor (monitor-mixin) ())
 
 (defclass cursor-mixin (#+windows win32-cursor-mixin
 			#+x11 x11-cursor
