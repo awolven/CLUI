@@ -1,6 +1,11 @@
 (in-package :abstract-os)
 (named-readtables:in-readtable :objc-readtable)
 
+(defun terminate-cocoa-application (app)
+  ;; todo: close windows here.
+  (ns:|stop:| app nil)
+  (values))
+
 (deftraceable-callback application-helper-do-nothing-callback :void ((self :pointer) (_cmd :pointer) (object :pointer))
 ;;  (declare (ignore self _cmd object))
   (values))
@@ -69,7 +74,7 @@
 
 (defun application-will-finish-launching (application notification)
   (declare (ignorable application notification))
-  #+NIL(create-menu-bar application)
+  (create-menu-bar application)
   (values))
 
 (deftraceable-callback application-delegate-application-did-finish-launching-callback :void
@@ -243,11 +248,12 @@
 (defun init-cocoa (app)
   (flet ((pre-init-app ()
 	   (setf (application-window-list-head app) nil)
+	   (setf (application-monitors app) nil)
 	   (setf (objc-helper-class app) (make-helper-class))
 	   (setf (objc-application-delegate-class app) (make-application-delegate-class))
 	   (setf (objc-window-class app) (make-window-class))
 	   (setf (objc-window-delegate-class app) (make-window-delegate-class))
-	   (setf (objc-content-view-class app) (make-content-view-class))
+	   (setf (objc-content-view-class app) (make-content-view-class #+vulkan #@MTKView))
 
 	   (setf (delegate->clos-window-table app) (make-hash-table :test #'eq))
 	   (setf (content-view->clos-content-view-table app) (make-hash-table :test #'eq))
@@ -302,7 +308,7 @@
       (unless (initialize-tis app)
 	(return-from init-cocoa nil))
 
-      ;;(poll-monitors-cocoa app)
+      (poll-cocoa-monitors app)
 
       ;; this line of code is what is causing ns::|run| to crash on TouchBar Observer:
       ;;(ns::|setActivationPolicy:| app NSApplicationActivationPolicyRegular)

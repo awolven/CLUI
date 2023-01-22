@@ -7,7 +7,7 @@
   ((name :accessor application-name)
    (exit? :initform nil :accessor application-exit?)
    (window-list-head :initform nil :accessor application-window-list-head)
-   (monitors :initform () :accessor application-monitors)))
+   (monitors :accessor application-monitors)))
 
 (defclass abstract-os-application (application-mixin)
   ())
@@ -37,9 +37,9 @@
    ;; windows who's video mode is current on this monitor
    (window :accessor monitor-window :initform nil)
    (modes :initform nil :accessor monitor-modes)
-   (current-mode)
+   (current-mode :initform nil :accessor monitor-current-mode)
    (original-ramp :initform nil :accessor monitor-original-ramp)
-   (current-ramp)))
+   (current-ramp :initform nil :accessor monitor-current-ramp)))
 
 (defclass monitor (monitor-mixin) ())
 
@@ -48,9 +48,22 @@
 			#+darwin ns-cursor-mixin)
   ())
 
-(defclass essential-rect-mixin ()
-  ((width :accessor width :type real)
-   (height :accessor height :type real)))
+(defclass rect-mixin ()
+  ((x :initarg :x
+      :accessor x
+      :type real)
+   (y :initarg :y
+      :accessor y
+      :type real)
+   (width :initarg :width
+	  :accessor width
+	  :type real)
+   (height :initarg :height
+	   :accessor height
+	   :type real)))
+
+(defclass region (rect-mixin)
+  ())
 
 (defclass hints ()
   ((refresh-rate :accessor hints-refresh-rate :initform 120)))
@@ -63,17 +76,17 @@
   (blue-bits)
   (refresh-rate))
 
-(defclass essential-os-window-mixin ()
-  ((next :type (or null essential-os-window-mixin) :accessor window-next)
+(defclass window-mixin (rect-mixin)
+  ((next :type (or null window-mixin) :accessor window-next)
    (resizable? :type boolean :initform nil :accessor resizable?)
    (decorated? :type boolean :initform nil :accessor decorated?)
+   (iconified? :type boolean :initform nil :accessor iconified?)
    (auto-iconify? :type boolean :initform nil :accessor auto-iconify?)
    (floating? :type boolean :initform nil :accessor floating?)
    (focus-on-show? :type boolean :initform t :accessor focus-on-show?)
    (mouse-passthrough? :type boolean :accessor mouse-passthrough?)
    (should-close? :type boolean :initform nil :accessor should-close?)
    (video-mode :accessor window-video-mode :initform (make-video-mode))
-   (hints :accessor hints :initform (make-instance 'hints))
    (monitor :initform nil :accessor window-monitor)
    (cursor)
    (min-width :initform :dont-care :accessor window-min-width)
@@ -91,25 +104,21 @@
    (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
    (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)
    (raw-mouse-motion? :type boolean :initform nil)
-   (pos-callback :initform nil :type (or null function))
-   (size-callback :initform nil :type (or null function))
-   (close-callback :initform nil :type (or null function))
-   (refresh-callback :initform nil :type (or null function))
-   (focus-callback :initform nil :type (or null function))
-   (iconify-callback :initform nil :type (or null function))
-   (maximize-callback :initform nil :type (or null function))
-   (content-scale-callback :initform nil :type (or null function))
-   (mouse-button-callback :initform nil :type (or null function))
-   (cursor-pos-callback :initform nil :type (or null function))
-   (cursor-enter-callback :initform nil :type (or null function))
-   (scroll-callback :initform nil :type (or null function))
-   (key-callback :initform nil :type (or null function))
-   (char-callback :initform nil :type (or null function))
-   (char-mods-callback :initform nil :type (or null function))
-   (drop-callback :initform nil :type (or null function))))
+   (fully-created? :type boolean :accessor window-fully-created?)))
+		  
 
+(defclass os-window-mixin (window-mixin
+			   #+windows win32-window-mixin
+			   #+x11 x11-window-mixin
+			   #+wayland wayland-window-mixin
+			   #+darwin ns-window-mixin)
+  ())
 
-(defmethod initialize-instance :before ((window essential-os-window-mixin)
+(defclass os-window-with-framebuffer-mixin (os-window-mixin)
+  ((xscale :accessor window-xscale)
+   (yscale :accessor window-yscale)))
+
+(defmethod initialize-instance :before ((window os-window-mixin)
 				       &rest initargs
 				       &key xpos ypos
 					 width height
@@ -140,25 +149,40 @@
 		      focus-on-show? center-cursor? mouse-passthrough?
 		      monitor share frame-name key-menu clear-color
 		      retina?))
-  
+  (setf (window-fully-created? window) nil)
   (apply #'initialize-os-window window initargs)
   (values))
 
+(defmethod initialize-instance :after ((window os-window-mixin) &rest initargs)
+  (setf (window-fully-created? window) t))
+	   
 
-
-(defclass os-window-mixin (essential-os-window-mixin
-			   #+windows win32-window-mixin
-			   #+x11 x11-window-mixin
-			   #+wayland wayland-window-mixin
-			   #+darwin ns-window-mixin)
+(defclass os-window-with-framebuffer (os-window-with-framebuffer-mixin)
   ())
-
 
 (defclass os-window (os-window-mixin)
   ())
 
-(defclass constant-refresh-os-window-mixin (essential-os-window-mixin)
+(defclass constant-refresh-os-window-mixin ()
   ())
 
+(defclass constant-refresh-os-window-with-framebuffer-mixin (constant-refresh-os-window-mixin
+							     os-window-with-framebuffer-mixin)
+  ())
+
+#+darwin
+(defclass metal-window-mixin (constant-refresh-os-window-with-framebuffer-mixin
+			      ns-metal-window-mixin)
+			      
+  ())
+
+(defclass vulkan-window-mixin (#-darwin constant-refresh-os-window-with-framebuffer-mixin
+					#+darwin metal-window-mixin
+					#+windows win32-vulkan-window-mixin
+					#+linux linux-vulkan-window-mixin)
+  ())
+
+(defclass opengl-window-mixin (constant-refresh-os-window-with-framebuffer-mixin)
+  ())
 
 

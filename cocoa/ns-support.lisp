@@ -66,6 +66,10 @@
 
 (defconstant NSEventMaskAny #xffffffffffffffff)
 
+(defconstant NSViewLayerContentsRedrawOnSetNeedsDisplay 1)
+
+(defconstant NSInformationalRequest 10)
+
 (defmacro make-dictionary (&rest objc-values)
   (alexandria:with-gensyms (selector)
     `(let ((,selector (make-message-lambda @(dictionaryWithObjectsAndKeys:)
@@ -91,6 +95,10 @@
 				      (((:struct ns::|CGRect|)) :pointer))))
     (funcall selector self frame)))
 
+(defun super-update-tracking-areas (self)
+  (let ((selector (new-msg-send-super @(updateTrackingAreas) (nil :void))))
+    (funcall selector self)))
+
 (defun NSRectFill (rect)
   (cffi:foreign-funcall "NSRectFill" (:struct ns::|CGRect|) rect :void))
 
@@ -103,3 +111,26 @@
 
 (defun make-nssize (width height)
   (list 'ns::width (coerce width 'double-float) 'ns::height (coerce height 'double-float)))
+
+(cffi:defcfun (NSMouseInRect "NSMouseInRect") :char
+  (point (:struct ns::|CGPoint|))
+  (rect (:struct ns::|CGRect|))
+  (flipped :char))
+
+(defun ns-mouse-in-rect (point rect &optional (flipped? nil))
+  (if (= 1 (NSMouseInRect point rect (if flipped? 1 0)))
+      t
+      nil))
+
+(defun ns-get-x (ns-struct)
+  (getf ns-struct 'ns::x))
+
+(defun ns-get-y (ns-struct)
+  (getf ns-struct 'ns::y))
+
+(defun ns-get-width (ns-struct)
+  (getf ns-struct 'ns::width))
+
+(defun ns-get-height (ns-struct)
+  (getf ns-struct 'ns::height))
+  

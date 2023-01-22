@@ -10,6 +10,7 @@
 	   #:os-window-should-close?
 	   #:poll-application-events
 	   #:wait-application-events
+	   #:get-window-content-scale
 	   #:os-window-title
 	   #:get-os-window-pos
 	   #:set-os-window-pos

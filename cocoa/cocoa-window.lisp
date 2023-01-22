@@ -5,6 +5,346 @@
 
 (defvar w)
 
+(defun get-cocoa-window-fullscreen (window)
+  (ns::|isInFullScreenMode| window))
+
+(defun set-cocoa-window-fullscreen (window value)
+  (ns::|toggleFullScreen:| window value))
+
+(defun get-cocoa-window-closable (window)
+  (with-autorelease-pool (pool)
+    (logtest NSWindowStyleMaskClosable (ns:|styleMask| window))))
+
+(defun set-cocoa-window-closable (window value)
+  (with-autorelease-pool (pool)
+    (let ((style (ns:|styleMask| window)))
+      (if value
+	  (setq style (logior style NSWindowStyleMaskClosable))
+	  (setq style (logand style (lognot NSWindowStyleMaskClosable))))
+      (ns:|setStyleMask:| window style)
+      (values))))
+
+(defun get-cocoa-window-title (window)
+  (with-autorelease-pool (pool)
+    (let ((ptr (ns:|title| window)))
+      (unless (cffi:null-pointer-p ptr)
+	(objc-runtime::extract-nsstring ptr)))))
+
+(defun set-cocoa-window-title (window string)
+  (with-autorelease-pool (ppol)
+    (ns:|setTitle:| window (objc-runtime::make-nsstring string))
+    (values)))
+
+(defun cocoa-window-titled? (window)
+  (with-autorelease-pool (pool)
+    (logtest NSWindowStyleMaskTitled (ns:|styleMask| window))))
+
+(defun set-cocoa-window-titled (window value)
+  (with-autorelease-pool (pool)
+    (let ((style (ns:|styleMask| window)))
+      (if value
+	  (setq style (logior style NSWindowStyleMaskTitled))
+	  (setq style (logand style (lognot NSWindowStyleMaskTitled))))
+      (ns:|setStyleMask:| window style)
+      (values))))
+
+(defun get-cocoa-window-pos (window)
+  (with-autorelease-pool (pool)
+    (let ((content-rect
+	   (ns::|contentRectForFrameRect:| window (ns:|frame| window))))
+      (let ((x (ns-get-x content-rect))
+	    (y (cocoa-transform-y (1- (+ (ns-get-y content-rect) (ns-get-height content-rect))))))
+	(values x y)))))
+
+(defun set-cocoa-window-pos (window x y)
+  (let* ((content-rect (ns:|frame| (window-content-view window)))
+	 (dummy-rect (make-nsrect x (cocoa-transform-y (1- (+ y (ns-get-height content-rect)))) 0 0))
+	 (frame-rect (ns:|frameRectForContentRect:| window dummy-rect)))
+    (ns:|setFrameOrigin:| window (make-nspoint (ns-get-x frame-rect) (ns-get-y frame-rect)))))
+
+(defun get-cocoa-window-size (window)
+  (with-autorelease-pool (pool)
+    (let ((content-rect (ns::|contentRectForFrameRect:| window (ns:|frame| window))))
+      (values (ns-get-width content-rect) (ns-get-height content-rect)))))
+
+(defun set-cocoa-window-size (window width height)
+  (with-autorelease-pool (pool)
+    (let ((monitor (window-monitor window)))
+      (if monitor
+	  (when (eq (monitor-window monitor) window)
+	    (acquire-cocoa-monitor window monitor))
+	  (let* ((content-rect (ns:|contentRectForFrameRect:| window (ns:|frame| window)))
+		 (y (+ (ns-get-y content-rect) (- (ns-get-height content-rect) height)))
+		 (new-content-rect (make-nsrect (ns-get-x content-rect) y width height)))
+	    (ns:|setFrame:display:| window (ns:|frameRectForContentRect:| window new-content-rect) t)))
+      (values))))
+
+(defun set-cocoa-window-size-limits (window min-width min-height max-width max-height)
+  (with-autorelease-pool (pool)
+    (unless (and min-width min-height)
+      (ns:|setContentMinSize:| window (make-nssize 0 0)))
+    (ns:|setContentMinSize:| window (make-nssize min-width min-height))
+    (unless (and max-width max-height)
+      (ns:|setContentMaxSize:| window (make-nssize most-positive-single-float most-positive-single-float)))
+    (ns:|setContentMaxSize:| window (make-nssize max-width max-height))
+    (values)))
+
+(defun get-cocoa-window-aspect-ratio (window)
+  (multiple-value-bind (width height) (get-cocoa-window-size window)
+    (/ width height)))
+
+(defun set-cocoa-window-aspect-ratio (window numer denom)
+  (with-autorelease-pool (pool)
+    (unless (and numer denom)
+      (ns:|setResizeIncrements:| window (make-nssize 1 1)))
+    (ns:|setContentAspectRatio:| window (make-nssize numer denom))))
+
+(defun get-cocoa-window-framebuffer-size (window)
+  (let ((view (window-content-view window)))
+    (with-autorelease-pool (pool)
+      (let* ((content-rect (ns:|frame| view)))
+	(let ((fb-rect (ns:|convertRectToBacking:| view content-rect)))
+	  (values (ns-get-width fb-rect) (ns-get-height fb-rect)))))))
+
+(defun get-cocoa-window-frame-size (window)
+  (with-autorelease-pool (pool)
+    (let* ((content-rect (ns:|frame| (window-content-view window)))
+	   (frame-rect (ns:|frameRectForContentRect:| window content-rect)))
+      (values (- (ns-get-x content-rect) (ns-get-x frame-rect))
+	      (- (+ (ns-get-y frame-rect) (ns-get-height frame-rect))
+		 (ns-get-y content-rect) (ns-get-height content-rect))
+	      (- (+ (ns-get-x frame-rect) (ns-get-width frame-rect))
+		 (ns-get-x content-rect) (ns-get-width content-rect))
+	      (- (ns-get-y content-rect) (ns-get-y frame-rect))))))
+
+(defun get-cocoa-window-content-scale (window)
+  (with-autorelease-pool (pool)
+    (let* ((view (window-content-view window))
+	   (points (ns:|frame| view))
+	   (pixels (ns:|convertRectToBacking:| view points)))
+      (values (/ (ns-get-width pixels) (ns-get-width points))
+	      (/ (ns-get-height pixels) (ns-get-height points))))))
+
+(defun cocoa-window-maximized? (window)
+  (with-autorelease-pool (pool)
+    (ns:|isZoomed| window)))
+
+(defun maximize-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|zoom:| window nil)
+    (values)))
+
+(defun restore-cocoa-window (window)
+  (if (cocoa-window-iconified? window)
+      (deiconfify-cocoa-window window)
+      (maximize-cocoa-window window)))
+
+(defun set-cocoa-window-maximized (window value)
+  (when value
+    (maximize-cocoa-window window))
+  value)
+
+(defun show-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|orderFront:| window nil)))
+
+(defun hide-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|orderOut:| window nil)))
+
+(defun set-cocoa-window-shown (window value)
+  (if value
+      (show-cocoa-window window)
+      (hide-cocoa-window window))
+  value)
+
+(defun set-cocoa-window-hidden (window value)
+  (if value
+      (hide-cocoa-window window)
+      (show-cocoa-window window))
+  value)
+
+(defun request-cocoa-window-attention (window)
+  (declare (ignore window))
+  (ns:|requestUserAttention:| *app* NSInformationalRequest)
+  (values))
+
+(defun cocoa-window-focused? (window)
+  (with-autorelease-pool (pool)
+    (ns:|isKeyWindow| window)))
+
+(defun unfocus-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|deactivate| window)
+    (hide-cocoa-window window)))
+
+(defun focus-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|activateIgnoringOtherApps:| *app* t)
+    (ns:|makeKeyAndOrderFront:| window nil))
+  (values))
+
+(defun set-cocoa-window-focused (window value)
+  (if value
+      (focus-cocoa-window window)
+      (unfocus-cocoa-window window))
+  value)
+
+(defun cocoa-window-iconified? (window)
+  (with-autorelease-pool (pool)
+    (ns:|isMiniaturized| window)))
+
+(defun iconify-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|miniaturize:| window nil)
+    (values)))
+
+(defun deiconify-cocoa-window (window)
+  (with-autorelease-pool (pool)
+    (ns:|deminiaturize:| window nil)
+    (values)))
+
+(defun set-cocoa-window-iconified (window value)
+  (if value
+      (iconify-cocoa-window window)
+      (deiconify-cocoa-window window))
+  value)
+
+(defun cocoa-window-visible? (window)
+  (with-autorelease-pool (pool)
+    (ns:|isVisible| window)))
+
+(defun set-cocoa-window-visible (window value)
+  (with-autorelease-pool (pool)
+    (ns:|setIsVisible:| window value)
+    value))
+
+(defun make-cocoa-window-visible (window)
+  (set-cocoa-window-visible window t)
+  (values))
+
+(defun make-cocoa-window-invisible (window)
+  (set-cocoa-window-visible window nil)
+  (values))
+
+(defun cocoa-window-hovered? (window)
+  (with-autorelease-pool (pool)
+    (let ((point (ns:|mouseLocation| #@NSEvent)))
+      (unless (eq (ns:|windowNumberAtPoint:belowWindowWithWindowNumber:| #@NSWindow point 0)
+		  (ns:|windowNumber| window))
+	(Return-From cocoa-window-hovered? nil))
+      (ns-mouse-in-rect point (ns:|convertRectToScreen:| window (ns:|frame| (window-content-view window)))))))
+
+(defun cocoa-window-framebuffer-transparent? (window)
+  (with-autorelease-pool (pool)
+    (not (or (ns:|isOpaque| window) (ns:|isOpaque| (window-content-view window))))))
+
+(defun cocoa-window-resizable? (window)
+  (with-autorelease-pool (pool)
+    (ns:|isResizable| window)))
+
+(defun set-cocoa-window-resizable (window value)
+  (with-autorelease-pool (pool)
+    (let ((style (ns:|styleMask| window))
+	  (behavior))
+      (if value
+	  (progn (setq style (logior style NSWindowStyleMaskResizable))
+		 (setq behavior (logior NSWindowCollectionBehaviorFullScreenPrimary
+					NSWindowCollectionBehaviorManaged)))
+	  (progn (setq style (logand style (lognot NSWindowStyleMaskResizable)))
+		 (setq behavior NSWindowCollectionBehaviorFullScreenNone)))
+      (ns:|setStyleMask:| window style)
+      (ns:|setCollectionBehavior:| window behavior)
+      (values))))
+
+(defun cocoa-window-decorated? (window)
+  (with-autorelease-pool (pool)
+    (let ((style (ns:|styleMask| window)))
+      (and (or (logtest style NSWindowStyleMaskTitled)
+	       (logtest style NSWindowStyleMaskClosable)
+	       (not (logtest style NSWindowStyleMaskBorderless)))))))
+
+(defun set-cocoa-window-decorated (window value)
+  (with-autorelease-pool (pool)
+    (let ((style (ns:|styleMask| window)))
+      (if value
+	  (setq style (logior style NSWindowStyleMaskTitled NSWindowStyleMaskClosable))
+	  (setq style (logior style NSWindowStyleMaskBorderless)))
+      (ns:|setStyleMask:| window style)
+      (values))))
+
+(defun cocoa-window-floating? (window)
+  (with-autorelease-pool (pool)
+    (ns:|isFloating| window)))
+
+(defun set-cocoa-window-floating (window value)
+  (with-autorelease-pool (pool)
+    (ns:|setFloating:| window value)))
+
+(defun get-cocoa-window-opacity (window)
+  (with-autorelease-pool (pool)
+    (ns:|alphaValue| window)))
+
+(defun set-cocoa-window-opacity (window alpha)
+  (setq alpha (coerce alpha 'single-float))
+  (with-autorelease-pool (pool)
+    (unless (= 1.0f0 alpha)
+      (ns:|setOpaque:| window nil)
+      (ns:|setOpaque:| (window-content-view window) nil))
+    (ns:|setAlphaValue:| window alpha)))
+
+(defun get-cocoa-view-size (view)
+  (with-autorelease-pool (pool)
+    (let ((frame (ns:|frame| view)))
+      (values (ns-get-width frame) (ns-get-height frame)))))
+
+(defun cocoa-raw-mouse-motion-supported? ()
+  nil)
+
+(defun get-cocoa-window-cursor-pos (window)
+  (with-autorelease-pool (pool)
+    (let ((content-rect (ns:|frame| (window-content-view window)))
+	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
+      (values (ns-get-x pos)
+	      (- (ns-get-height content-rect) (ns-get-y pos))))))
+
+(defun set-cocoa-window-cursor-pos (window x y)
+  (with-autorelease-pool (pool)
+    (update-cursor-image window)
+    (let ((content-rect (ns:|frame| (window-content-view window)))
+	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
+      (setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (- (ns-get-x pos)))
+	    (cursor-warp-delta-y window) (+ (cursor-warp-delta-y window) y (- (ns-get-height content-rect)) (ns-get-y pos)))
+
+      (if (window-monitor window)
+	  (CGDisplayMoveCursorToPoint (monitor-display-id (window-monitor window)) (make-nspoint x y))
+	  (let* ((local-rect (make-nsrect x (- (ns-get-height content-rect) y 1) 0 0))
+		 (global-rect (ns:|convertRectToScreen:| window local-rect))
+		 (global-point (make-nspoint (ns-get-x global-rect) (ns-get-y global-rect))))
+
+	    (CGWarpMouseCursorPosition (make-nspoint (ns-get-x global-point)
+						     (cocoa-transform-y (ns-get-y global-point))))))
+
+      (when (eq (cursor-mode window) :disabled)
+	(CGAssociateMouseAndMouseCursorPosition t))
+
+      (values))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (deftraceable-callback content-view-dealloc-callback :void ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
@@ -24,13 +364,9 @@
 (defun content-view-is-opaque (view)
   (let ((window (content-view-owner view)))
     (when window
-      (cocoa-window-is-opaque window))))
-
-(defmethod cocoa-window-is-opaque ((window essential-os-window-mixin))
-  ;; write other methods for this generic function on other window classes
-  (if (ns:|isOpaque| window)
-      *yes*
-      *no*))
+      (if (ns:|isOpaque| window)
+	  *yes*
+	  *no*))))
 
 (deftraceable-callback content-view-can-become-key-view-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
@@ -40,10 +376,15 @@
       (content-view-can-become-key-view content-view))))
 
 (defun content-view-can-become-key-view (content-view)
-  (cocoa-window-can-become-key (content-view-owner content-view)))
+  (if (cocoa-window-can-become-key (content-view-owner content-view))
+      *yes*
+      *no*))
 
-(defmethod cocoa-window-can-become-key ((window essential-os-window-mixin))
-  *yes*)
+(defmethod cocoa-window-can-become-key ((window window-mixin))
+  nil)
+
+(defmethod cocoa-window-can-become-key ((window os-window-mixin))
+  t)
 
 (deftraceable-callback content-view-accepts-first-responder-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
@@ -53,10 +394,15 @@
       (content-view-accepts-first-responder content-view))))
 
 (defun content-view-accepts-first-responder (view)
-  (cocoa-window-accepts-first-responder (content-view-owner view)))
+  (if (cocoa-window-accepts-first-responder (content-view-owner view))
+      *yes*
+      *no*))
 
-(defmethod cocoa-window-accepts-first-responder ((window essential-os-window-mixin))
-  *yes*)
+(defmethod cocoa-window-accepts-first-responder ((window os-window-mixin))
+  t)
+
+(defmethod cocoa-window-accepts-first-responder ((window window-mixin))
+  nil)
 
 (deftraceable-callback content-view-wants-update-layer-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
@@ -70,14 +416,25 @@
 (defun content-view-wants-update-layer (view)
   ;; rather than making a separate content-view class for each window class and dispatching on content-view type
   ;; just dispatch on window type
-  (cocoa-window-wants-update-layer (content-view-owner view)))
+  (if (cocoa-window-wants-update-layer (content-view-owner view))
+      *yes*
+      *no*))
 
-(defmethod cocoa-window-wants-update-layer ((window essential-os-window-mixin))
+(defmethod cocoa-window-wants-update-layer ((window os-window-mixin))
   ;; for example, a method for this generic function for a metal window would answer differently
-  *no*)
+  nil)
 
-(defmethod cocoa-window-wants-update-layer ((window constant-refresh-os-window-mixin))
-  *yes*)
+(deftraceable-callback content-view-draw-in-mtkview-callback :void ((self :pointer) (_cmd :pointer) (view :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       (content-view->clos-content-view-table *app*))))
+    (when content-view
+      (content-view-draw-in-mtkview content-view))
+    (values)))
+
+(defun content-view-draw-in-mtkview (mtkview)
+  (declare (ignorable mtkview))
+  )
 
 (deftraceable-callback content-view-update-layer-callback :void ((self :pointer) (_cmd :pointer))
   ;;  (declare (ignorable _cmd))
@@ -90,7 +447,7 @@
   (cocoa-window-update-view-layer (content-view-owner content-view))
   (values))
 
-(defmethod cocoa-window-update-view-layer ((window essential-os-window-mixin))
+(defmethod cocoa-window-update-view-layer ((window window-mixin))
   (input-window-damage window))
 
 (deftraceable-callback content-view-cursor-update-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -134,6 +491,9 @@
   (input-mouse-clicked (content-view-owner content-view)
 		     :mouse-button-left :press
 		     (translate-flags (ns:|modifierFlags| event)))
+  ;;(ns:|setLayerContentsRedrawPolicy:| content-view NSViewLayerContentsRedrawOnSetNeedsDisplay)
+  ;;(ns:|setEnableSetNeedsDisplay:| content-view t)
+  ;;(ns:|setNeedsDisplay:| content-view t)
   (values))
 
 (defun translate-flags (event-modifier-flags)
@@ -185,12 +545,16 @@
 	  (input-cursor-pos window
 			    (+ (virtual-cursor-pos-x window) dx)
 			    (+ (virtual-cursor-pos-y window) dy)))
-	(let ((content-rect (ns:|frame| content-view))
-	      (pos (ns:|locationInWindow| event)))
-
-	  (input-cursor-pos window
-			    (getf pos 'ns::x)
-			    (- (getf content-rect 'ns::height) (getf pos 'ns::y)))))
+	(let* ((content-rect (ns:|frame| content-view))
+	       (loc (ns:|locationInWindow| event))
+	       (x (ns-get-x loc))
+	       (y (- (ns-get-y content-rect) (ns-get-y loc)))
+	       (abstract-os-event (make-instance 'pointer-motion-event
+						 :x x
+						 :y y
+						 :native-x x
+						 :native-y y)))
+	      (handle-event window abstract-os-event)))
 
     (setf (cursor-warp-delta-x window) 0
 	  (cursor-warp-delta-y window) 0)
@@ -291,7 +655,7 @@
   (let ((window (content-view-owner view)))
     (on-cocoa-other-mouse-exited window event)))
 
-(defmethod on-cocoa-other-mouse-exited ((window essential-os-window-mixin) event)
+(defmethod on-cocoa-other-mouse-exited ((window window-mixin) event)
   (when (eq (window-cursor-mode window) :hidden)
     (show-cursor window))
   (input-cursor-enter window nil))
@@ -310,7 +674,7 @@
   (let ((window (content-view-owner view)))
     (on-cocoa-other-mouse-entered window event)))
 
-(defmethod on-cocoa-other-mouse-entered ((window essential-os-window-mixin) event)
+(defmethod on-cocoa-other-mouse-entered ((window window-mixin) event)
   (declare (ignore event))
   (when (eq (window-cursor-mode window) :hidden)
     (hide-cursor window))
@@ -327,7 +691,7 @@
 (defun content-view-view-did-change-backing-properties (view)
   (cocoa-window-did-change-backing-properties (content-view-owner view)))
 
-(defmethod cocoa-window-did-change-backing-properties ((window essential-os-window-mixin))
+(defmethod cocoa-window-did-change-backing-properties ((window window-mixin))
   (values))
 
 (defmethod cocoa-window-did-change-backing-properties ((window constant-refresh-os-window-mixin))
@@ -346,35 +710,37 @@
 	    (window-y-scale window) y-scale)
       (input-window-content-scale window x-scale y-scale))
 
-    (when (or (/= (cffi:mem-aref [[fb-rect @(size)] @(width)] :int) (window-fb-width window))
-	      (/= (cffi:mem-aref [[fb-rect @(size)] @(height)] :int) (window-fb-height window)))
+    (when (or (/= (cffi:mem-aref [[fb-rect @(size)] @(width)] :int) (framebuffer-width window))
+	      (/= (cffi:mem-aref [[fb-rect @(size)] @(height)] :int) (framebuffer-height window)))
       (input-framebuffer-size window
 			      (cffi:mem-aref [[fb-rect @(size)] @(width)] :int)
 			      (cffi:mem-aref [[fb-rect @(size)] @(height)] :int))))
     
   (values))
 
-(deftraceable-callback content-view-draw-rect-callback :void ((self :pointer) (_cmd :pointer) (rect :pointer))
-;;  (declare (ignorable _cmd))
+(cffi:defcallback content-view-draw-rect-callback :void ((self :pointer) (_cmd :pointer) (rect :pointer))
+  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       (content-view->clos-content-view-table *app*))))
     (when content-view
       (content-view-draw-rect (content-view-owner content-view) content-view rect))
     (values)))
 
-(defmethod content-view-draw-rect ((window essential-os-window-mixin) (view content-view) rect)
+(defmethod content-view-draw-rect ((window os-window-mixin) (view content-view) rect)
   (declare (ignorable rect))
+  (princ 'beloo)
+  (finish-output)
   (format t "~%running draw-rect")
   (finish-output)
   (ns:|set| (ns:|whiteColor| #@NSColor))
   (ns:|strokeRect:| #@NSBezierPath (make-nsrect 0 0 1 1))
   (NSRectFill (ns:|bounds| view))
-  (ns:|flushGraphics| (window-graphics-context (content-view-owner view)))
-  (input-window-damaged (content-view-owner view)))
+  (ns:|flushGraphics| (window-graphics-context window))
+  (input-window-damaged window)
+  )
 
 (defmethod content-view-draw-rect ((window constant-refresh-os-window-mixin) (view content-view) rect)
   (declare (ignorable view))
-  (input-window-damaged (content-view-owner view))
   (values))
 
 (deftraceable-callback content-view-update-tracking-areas-callback :void ((self :pointer) (_cmd :pointer))
@@ -388,15 +754,13 @@
 (defun content-view-update-tracking-areas (view)
   (cocoa-window-update-tracking-areas (content-view-owner view)))
 
-(defmethod cocoa-window-update-tracking-areas ((window essential-os-window-mixin))
-  #+NIL
+(defmethod cocoa-window-update-tracking-areas ((window os-window-mixin))
   (let ((content-view (window-content-view window)))
-    (let ((tracking-area (content-view-tracking-area content-view))
-	  (content-view-ptr (objc-object-id content-view)))
+    (let ((tracking-area (content-view-tracking-area content-view)))
     
       (when tracking-area
-	[content-view-ptr @(removeTrackingArea:) :pointer tracking-area]
-	[tracking-area @(release)])
+	(ns:|removeTrackingArea:| content-view tracking-area)
+	(ns:|release| tracking-area))
 
       (let ((options (logior NSTrackingMouseEnteredAndExited
 			     NSTrackingActiveInKeyWindow
@@ -405,100 +769,29 @@
 			     NSTrackingInVisibleRect
 			     NSTrackingAssumeInside)))
 
-	(setf (content-view-tracking-area content-view)
-	      (init-with-rect [#@NSTrackingArea @(alloc)] (get-bounds content-view) options content-view
-			      (cffi:null-pointer)))
-      
-	[content-view-ptr @(addTrackingArea:) :pointer (content-view-tracking-area content-view)]
-	(super-msg-send content-view @(updateTrackingAreas)))))
+	(setq tracking-area
+	      (setf (content-view-tracking-area content-view)
+		    (ns::|initWithRect:options:owner:userInfo:|
+			 (alloc #@NSTrackingArea) (ns:|bounds| content-view) options content-view nil)))
+
+	(ns:|addTrackingArea:| content-view tracking-area)
+	(super-update-tracking-areas content-view))))
   (values))
 
-(defun titled-style? (window)
-  (logtest NSWindowStyleMaskTitled (ns:|styleMask| window)))
 
-(defun closable-style? (window)
-  (logtest NSWindowStyleMaskClosable (ns:|styleMask| window)))
-
-(defun miniaturizable-style? (window)
-  (logtest NSWindowStyleMaskMiniaturizable (ns:|styleMask| window)))
-
-(defun resizable-style? (window)
-  (logtest NSWindowStyleMaskResizable (ns:|styleMask| window)))
 
 (defun cocoa-transform-y (y)
   (declare (type real y))
-  (coerce (1- (- (getf (CGDisplayBounds (CGMainDisplayID)) 'ns::height) y)) 'double-float))
+  (coerce (1- (- (ns-get-height (CGDisplayBounds (CGMainDisplayID))) y)) 'double-float))
 
-(defun (setf cocoa-window-title) (string window)
-  (ns:|setTitle:| window (objc-runtime::make-nsstring string))
-  string)
 
-(defun get-cocoa-window-frame-size (window)
-  (declare (ignorable window))
-  )
 
-(defun get-cocoa-window-content-scale (window)
-  (declare (ignorable window))
-  (values 2.0d0 2.0d0)
-  )
-
-(defun get-cocoa-window-cursor-pos (window)
-  (declare (ignorable window))
-  (values 100 100)
-  )
-
-(defun get-cocoa-window-framebuffer-size (window)
-  (with-autorelease-pool (pool)
-    (let* ((content-rect (ns:|frame| (window-content-view window))))
-      (let ((fb-rect (ns:|convertRectToBacking:| (window-content-view window) content-rect)))
-	(values (getf fb-rect 'ns::width) (getf fb-rect 'ns::height))))))
-
-(defun get-cocoa-window-pos (window)
-  (declare (ignorable window))
-  )
-
-(defun get-cocoa-window-size (window)
-  (with-autorelease-pool (pool)
-    (let ((frame (ns:|frame| (window-content-view window))))
-      (values (getf frame 'ns::width) (getf frame 'ns::height)))))
-
-(defun iconify-cocoa-window (window)
-  (declare (ignorable window))
-  )
-
-(defun maximize-cocoa-window (window)
-  (declare (ignorable window))
-  )
-
-(defun restore-cocoa-window (window)
-  (declare (ignorable window))
-  )
-
-(defun set-cocoa-window-aspect-ratio (window numer denom)
-  (declare (ignorable window numer denom))
-  )
-
-(defun set-cocoa-window-pos (window x y)
-  (declare (ignorable window x y))
-  )
-
-(defun set-cocoa-window-size-limits (window width height)
-  (declare (ignorable window width height))
-  )
-
-(defun terminate-cocoa-application (app)
-  (declare (ignorable app))
-  )
-
-(defun cocoa-window-title (window)
-  (let ((ptr [(objc-object-id window) @(title)]))
-    (unless (cffi:null-pointer-p ptr)
-      (objc-runtime::extract-nsstring ptr))))
 
 (defun create-native-window (window &rest args
 			     &key (xpos nil) (ypos nil)
 			       (width 640) (height 480)
 			       (title "Abstract OS")
+			       (decorated? t)
 			       (maximized? nil) 
 			       (resizable? t)
 			       (floating? nil)
@@ -506,7 +799,6 @@
 			       (frame-name "Abstract OS")
 			       (retina? t)
 			       &allow-other-keys)
-  (declare (ignorable args))
 
   #+sbcl
   (sb-int:set-floating-point-modes :traps '())
@@ -530,7 +822,7 @@
 
     (let ((style-mask NSWindowStyleMaskMiniaturizable))
 
-      (if (or (window-monitor window) (not (decorated? window)))
+      (if (or (window-monitor window) (not decorated?))
 
 	  (progn
 	    (setq style-mask (logior style-mask NSWindowStyleMaskBorderless)))
@@ -538,7 +830,7 @@
 	  (progn
 	    (setq style-mask (logior style-mask NSWindowStyleMaskTitled NSWindowStyleMaskClosable))
  	    
-	    (when (resizable? window)
+	    (when resizable?
 	      (setq style-mask (logior style-mask NSWindowStyleMaskResizable)))))
 
       (setf (objc-object-id window)
@@ -551,12 +843,10 @@
 			     NSWindowStyleMaskResizable)
 		 style-mask
 		 NSBackingStoreBuffered nil))
-	
+
       (when (cffi:null-pointer-p (objc-object-id window))
 	(error "Cocoa: Failed to create window."))
 
-      (setf (cocoa-window-title window) (or title "Abstract OS"))
-      
       (setf (window-delegate window)
 	    (make-instance 'window-delegate
 			   :ptr (alloc-init (objc-window-delegate-class *app*))
@@ -570,26 +860,13 @@
 			   :owner window
 			   :marked-text (alloc-init #@NSMutableAttributedString)))
 
-
-
       (super-init-with-frame (window-content-view window) (ns:|frame| window))
       (ns:|updateTrackingAreas| (window-content-view window))
+      (ns:|registerForDraggedTypes:| (window-content-view window) (array-with-objects (objc-runtime::make-nsstring "NSPasteboardTypeURL")))
 
       (ns:|setContentView:| window (window-content-view window))
-      (ns:|makeFirstResponder:| window (window-content-view window))
 
-      ;; these can be called once we have a content view
-      (multiple-value-bind (width height)
-	  (get-cocoa-window-size window)
-	(setf (width window) width
-	      (height window) height))
-
-      (multiple-value-bind (fb-width fb-height)
-	  (get-cocoa-window-framebuffer-size window)
-	(setf (window-fb-width window) fb-width
-	      (window-fb-height window) fb-height))
-
-      (ns:|registerForDraggedTypes:| (window-content-view window) (array-with-objects (objc-runtime::make-nsstring "NSPasteboardTypedURL")))
+      (apply #'initialize-window-devices window args)
 	
       (if (window-monitor window)
 
@@ -598,7 +875,6 @@
 	  (progn
 	      
 	    (when (or (null xpos) (null ypos))
-	      #+NIL
 	      (setf (cascade-point *app*)
 		    (ns:|cascadeTopLeftFromPoint:| window (cascade-point *app*))))
 
@@ -625,14 +901,18 @@
 	(ns:|setHasShadow:| window t)
 	(ns:|setBackgroundColor:| window (ns:|clearColor| #@NScolor)))
 
+      (ns:|makeFirstResponder:| window (window-content-view window))
+      (set-cocoa-window-title window (or title "Abstract OS"))
       (ns:|setAcceptsMouseMovedEvents:| window t)
-
       (ns:|setRestorable:| window nil)
 
-      (setf (window-graphics-context window)
-	    (ns:|graphicsContextWithWindow:| #@NSGraphicsContext window))
-
       t)))
+
+(defmethod initialize-window-devices ((window os-window-mixin) &rest args &key &allow-other-keys)
+  (declare (ignore args))
+  (setf (window-graphics-context window)
+	(ns:|graphicsContextWithWindow:| #@NSGraphicsContext window))
+  (values))
 
 (defun create-cocoa-window (window &rest initargs
 			    &key (visible? t)
@@ -656,7 +936,7 @@
 	(progn
 	  (show-cocoa-window window)
 	  (focus-cocoa-window window)
-	  (acquire-cocoa-monitor window)
+	  (acquire-cocoa-monitor window (window-monitor window))
 	  (when center-cursor?
 	    #+NOTYET
 	    (center-cursor-in-content-area window)))
@@ -666,37 +946,24 @@
 	    (focus-cocoa-window window))))
     t))
 
-(defun show-cocoa-window (window)
-  (ns:|setIsVisible:| window t)
-  
-  #+NIL
+
+
+(defun acquire-cocoa-monitor (window monitor)
+  (set-cocoa-video-mode monitor (window-video-mode window))
   (with-autorelease-pool (pool)
-    (ns:|orderFront:| window (cffi:null-pointer))))
+    (let* ((bounds (CGDisplayBounds (monitor-display-id monitor)))
+	   (frame (make-nsrect (ns-get-x bounds)
+			       (cocoa-transform-y (1- (+ (ns-get-y bounds) (ns-get-height bounds))))
+			       (ns-get-width bounds)
+			       (ns-get-height bounds))))
+      (ns:|setFrame:| frame t)
+      ;;(input-monitor-window monitor window)
+      (values))))
 
-(defun hide-cocoa-window (window)
-  (with-autorelease-pool (pool)
-    (ns:|orderOut:| window (cffi:null-pointer))))
-
-(defun focus-cocoa-window (window)
-  (with-autorelease-pool (pool)
-    ;;(ns:|activateIgnoringOtherApps:| *app* t)
-    (ns:|makeKeyAndOrderFront:| window (cffi:null-pointer)))
-  (values))
-
-(defun acquire-cocoa-monitor (window)
-  (set-cocoa-video-mode (window-monitor window) (window-video-mode window))
-  (let* ((bounds (CGDisplayBounds (monitor-display-id (window-monitor window))))
-	 (frame (make-nsrect (getf bounds 'ns::x)
-			      (cocoa-transform-y (1- (+ (getf bounds 'ns::y) (getf bounds 'height))))
-			      (getf bounds 'ns::width)
-			      (getf bounds 'ns::height))))
-    (ns:|setFrame:| frame t)
-    (input-monitor-window (window-monitor window) window)))
-
-(defun release-cocoa-monitor (window)
-  (unless (eq (monitor-window (window-monitor window)) 'window)
+(defun release-cocoa-monitor (window monitor)
+  (unless (eq (monitor-window monitor) window)
     (return-from release-cocoa-monitor (values)))
-  (input-monitor-window (window-monitor window) nil)
+  ;;(input-monitor-window (window-monitor window) nil)
   (restore-cocoa-video-mode (window-monitor window))
   (values))
 
@@ -710,7 +977,7 @@
   (values))
 
 
-(deftraceable-callback window-delegate-window-should-close-callback :void ((self :pointer) (sender :pointer))
+(deftraceable-callback window-delegate-window-should-close-callback :void ((self :pointer) (_cmd :pointer) (sender :pointer))
 ;;  (declare (ignore sender))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
@@ -721,73 +988,82 @@
 (defun ns-window-should-close (window)
   (input-window-close-request window))
 
-(deftraceable-callback window-delegate-window-did-resize-callback :void ((self :pointer) (notification :pointer))
-;;  (declare (ignore notification))
+(deftraceable-callback window-delegate-window-did-resize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
-      (window-did-resize window))
+      (cocoa-window-did-resize window notification))
     (values)))
 
-(defun window-did-resize (window)
-  (declare (ignorable window))
+(defun cocoa-window-did-resize (window notification)
+  (declare (ignorable notification))
   #+NIL
   (when (eq window (disabled-cursor-window *app*))
     (center-cursor-in-content-area window))
-  (let ((maximized? (ns:|isZoomed| window)))
-    (unless (eq (maximized? window) maximized?)
-      (setf (maximized? window) maximized?)
-      (input-window-maximize window maximized?)))
-  (let* ((content-rect (ns:|frame| (window-content-view window))))
-    (let ((fb-rect (ns:|convertRectToBacking:| (window-content-view window) content-rect)))
-      (let ((fb-width (getf fb-rect 'ns::width))
-	    (fb-height (getf fb-rect 'ns::height)))
-	(when (or (/= fb-width (window-fb-width window))
-		  (/= fb-height (window-fb-height window)))
-	  (setf (window-fb-width window) fb-width)
-	  (setf (window-fb-height window) fb-height)
-	  (input-framebuffer-size window fb-width fb-height)))
-      (when (or (/= (getf content-rect 'ns::width) (width window))
-		(/= (getf content-rect 'ns::height) (height window)))
-	(setf (width window) (getf content-rect 'ns::width)
-	      (height window) (getf content-rect 'ns::height))
-	(input-window-size window (getf content-rect 'ns::width) (getf content-rect 'ns::height))))))
+  (let* ((content-rect (ns:|frame| window)))
+    (let* ((maximized? (ns:|isZoomed| window))
+	   (event (make-instance (cond (maximized? 'window-restore-event)
+				       ((not maximized?) 'window-resize-event))
+				 :timestamp (get-internal-real-time)
+				 :new-x (ns-get-x content-rect)
+				 :new-y (ns-get-y content-rect)
+				 :new-width (ns-get-width content-rect)
+				 :new-height (ns-get-height content-rect))))				 
+      (handle-event window event))))
 
-(deftraceable-callback window-delegate-window-did-move-callback :void ((self :pointer) (notification :pointer))
-;;  (declare (ignore notification))
+(deftraceable-callback window-delegate-window-did-move-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
-      (window-did-move window))
+      (cocoa-window-did-move window notification))
     (values)))
 
-(defun window-did-move (window)
-  (declare (ignorable window))
+(defun cocoa-window-did-move (window notification)
+  (declare (ignorable notification))
+  (multiple-value-bind (x y) (get-cocoa-window-pos window)
+    (let ((event (make-instance 'window-move-event
+				:timestamp (get-internal-real-time)
+				:new-x x
+				:new-y y)))
+      (handle-event window event)))
   (values))
 
-(deftraceable-callback window-delegate-window-did-miniaturize-callback :void ((self :pointer) (notification :pointer))
-;;  (declare (ignore notification))
+(deftraceable-callback window-delegate-window-did-miniaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
-      (window-did-miniaturize window))
+      (cocoa-window-did-miniaturize window notification))
     (values)))
 
-(defun window-did-miniaturize (window)
-  (declare (ignorable window))
-  (release-cocoa-monitor window)
+(defun cocoa-window-did-miniaturize (window notification)
+  (declare (ignorable notification))
+  (let ((event (make-instance 'window-iconify-event
+			      :timestamp (get-internal-real-time)
+			      :new-x nil
+			      :new-y nil
+			      :new-width 0
+			      :new-height 0)))
+    (handle-event window event))
   (values))
 
-(deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (notification :pointer))
-;;  (declare (ignore notification))
+(trace release-monitor acquire-monitor release-cocoa-monitor acquire-cocoa-monitor)
+
+(deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
-      (window-did-deminiaturize window))
+      (cocoa-window-did-deminiaturize window notification))
     (values)))
 
-(defun window-did-deminiaturize (window)
-  (declare (ignorable window))
-  (acquire-cocoa-monitor window)
+(defun cocoa-window-did-deminiaturize (window notification)
+  (declare (ignorable notification))
+  (let* ((content-rect (ns:|frame| (window-content-view window)))
+	 (event (make-instance 'window-deiconify-event
+			       :timestamp (get-internal-real-time)
+			       :new-x (ns-get-x content-rect)
+			       :new-y (ns-get-y content-rect)
+			       :new-width (ns-get-width content-rect)
+			       :new-height (ns-get-height content-rect))))
+    (handle-event window event))
   (values))
 
-(deftraceable-callback window-delegate-window-did-become-key-callback :void ((self :pointer) (notification :pointer))
+(deftraceable-callback window-delegate-window-did-become-key-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignore notification))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
@@ -798,7 +1074,7 @@
   (declare (ignorable window))
   (values))
 
-(deftraceable-callback window-delegate-window-did-resign-key-callback :void ((self :pointer) (notification :pointer))
+(deftraceable-callback window-delegate-window-did-resign-key-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignore notification))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
@@ -809,7 +1085,7 @@
   (declare (ignorable window))
   (values))
 
-(deftraceable-callback window-delegate-window-did-change-occlusion-state-callback :void ((self :pointer) (notification :pointer))
+(deftraceable-callback window-delegate-window-did-change-occlusion-state-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignore notification))
   (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
     (when window
@@ -851,10 +1127,10 @@
 				    "v@:@")
     window-delegate-class))
 
-(defun make-content-view-class ()
+(defun make-content-view-class (&optional (super #@NSView))
   (let ((content-view-class
 	 (objc-runtime::objc-allocate-class-pair
-	  #@NSView "AbstractOSContentView" 0)))
+	  super "AbstractOSContentView" 0)))
 
     (objc-runtime::class-add-method content-view-class @(dealloc)
 				    (cffi:callback content-view-dealloc-callback)
@@ -925,6 +1201,9 @@
     (objc-runtime::class-add-method content-view-class @(updateTrackingAreas)
 				    (cffi:callback content-view-update-tracking-areas-callback)
 				    "v@:")
+    (objc-runtime::class-add-method content-view-class @(drawInMTKView:)
+				    (cffi:callback content-view-draw-in-mtkview-callback)
+				    "v@:@")
     content-view-class))
 
 (deftraceable-callback window-can-become-key-window-callback :char ((self :pointer) (_cmd :pointer))
@@ -1012,7 +1291,7 @@
     (when (eq (window-monitor window) monitor)
       (if monitor
 	  (when (eq (monitor-window monitor) window)
-	    (acquire-cocoa-monitor window))
+	    (acquire-cocoa-monitor window monitor))
 	  (let* ((content-rect (make-nsrect xpos (cocoa-transform-y (1- (+ ypos height))) width height))
 		 (style-mask (ns:|styleMask| window))
 		 (frame-rect (ns:|frameRectForContentRect:styleMask:| window content-rect style-mask)))
@@ -1020,9 +1299,9 @@
       (return-from set-cocoa-window-monitor (values)))
 
     (when (window-monitor window)
-      (release-cocoa-monitor window))
+      (release-cocoa-monitor window (window-monitor window)))
 
-    (input-window-monitor window monitor)
+    ;;(input-window-monitor window monitor)
 
     (poll-cocoa-events *app*)
 
@@ -1056,7 +1335,7 @@
 	    (ns:|setLevel:| window (1+ NSMainMenuWindowLevel))
 	    (ns:|setHasShadow:| window nil)
 
-	    (acquire-cocoa-monitor window))
+	    (acquire-cocoa-monitor window (window-monitor window)))
 
 	  (let* ((content-rect (make-nsrect xpos (cocoa-transform-y (1- (+ ypos height))) width height))
 		 (frame-rect (ns:|frameRectForContentRect:styleMask:| window content-rect style-mask)))

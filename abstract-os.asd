@@ -17,6 +17,7 @@
   ((:file "package")
    (:file "app")
    (:file "classes")
+   (:file "events")
    (:file "cocoa/cocoa-package")
    (:file "cocoa/objc-runtime")
    (:file "cocoa/objc-binding")

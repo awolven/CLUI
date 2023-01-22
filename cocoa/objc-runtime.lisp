@@ -1,6 +1,11 @@
 (in-package :abstract-os)
 (named-readtables:in-readtable :objc-readtable)
 
+(cffi:define-foreign-library metalkit
+  (:darwin (:framework "MetalKit")))
+
+(cffi:use-foreign-library metalkit)
+
 (defun sap-int (sap)
   #+sbcl(sb-sys:sap-int sap)
   #+ccl(ccl::%ptr-to-int sap))
@@ -30,6 +35,7 @@
 (cffi:defcfun (object_setInstanceVariable "object_setInstanceVariable") :pointer (object :pointer) (name :string) (value :pointer))
 (cffi:defcfun (object_getClass "object_getClass") :pointer (object :pointer))
 (cffi:defcfun (objc_msgSendSuper "objc_msgSendSuper") :pointer (obj :pointer) (selector :pointer) &rest)
+(cffi:defcfun (class_getProperty "class_getProperty") :pointer (class :pointer) (name :string))
 
 (cffi:defcstruct objc_super
   (reciever :pointer)
@@ -94,7 +100,7 @@
 						    nil)))))
 
 (defun send (object message return-type &rest args)
-  (if (listp return-type)
+  (if (consp return-type)
       (apply #'ff-call "objc_msgSend_stret"
 	     return-type
 	     :pointer (objc-object-id object)

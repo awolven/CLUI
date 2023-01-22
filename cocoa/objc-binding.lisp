@@ -8,8 +8,9 @@
 (defmacro make-message-lambda (selector ((&rest arg-types) return-type))
   (let ((arg-syms (mapcar (lambda (_) _ (gensym))
                           arg-types)))
-    (if (and (listp return-type)
-	     (or (eq (car return-type) :struct)
+    (if (and (consp return-type)
+	     (or (and (eq (car return-type) :struct)
+		      (not (eq (cadr return-type) 'ns::|CGPoint|)))
 		 (eq (car return-type) :union)))
 	`(lambda ,(cons 'target arg-syms)
 	   (cffi:foreign-funcall "objc_msgSend_stret"
@@ -117,6 +118,14 @@
       (values (list :array type int)
 	      (+ 2 end)))))
 
+(defun prep-type (type)
+  (when type
+    (if (stringp type)
+	(read-from-string type)
+	(if (listp type)
+	    (list* (car type) (mapcar #'prep-type (cdr type)))
+	    type))))
+
 (defun parse-struct-or-union (string &key start kind)
   (multiple-value-bind (init term)
       (if (eq kind :union)
@@ -141,8 +150,8 @@
 	      (multiple-value-bind (types end)
 		  (decode-objc-types string :start (1+ start) :terminator term)
 		(values (if (eq kind :struct)
-			    (list :array :char (reduce #'+ (mapcar #'cffi:foreign-type-size types)))
-			    (list :array :char (reduce #'max (mapcar #'cffi:foreign-type-size types))))
+			    (list :array :char (reduce #'+ (mapcar #'cffi:foreign-type-size (mapcar #'prep-type types))))
+			    (list :array :char (reduce #'max (mapcar #'cffi:foreign-type-size (mapcar #'prep-type types)))))
 			(1+ end)))))
 	;; indirection level is 2 or above, expecting only name
 	(progn
@@ -175,7 +184,7 @@
 
 (defun parse-name (string &key start terminator)
   (let ((end (position terminator string :start start)))
-    (values (intern (subseq string start end) :ns)
+    (values (concatenate 'string "ns::|" (subseq string start end) "|")
 	    end)))
 
 (defun parse-bitfield (string &key start)
@@ -370,12 +379,22 @@
 	(terpri stream)))))
 
 (defun process-arg-types-and-return-type (args ret-type stream)
-  (format stream "~S"
-   (list (loop for arg in args
-	    collect (objc-method-argument-type arg))
-	 ;; cffi:foreign-funcall cannot process struct ret-types!!
-	 ret-type)))
-
+  (princ "((" stream)
+  (labels ((foo (type)
+	     (princ " " stream)
+	     (if (listp type)
+		 (progn (princ "(" stream)
+			(loop for typ in type
+			   do (foo typ))
+			(princ ")" stream))
+		 (if (stringp type)
+		     (princ type stream)
+		     (format stream "~S" type)))))
+    (loop for arg in args
+       do (foo (objc-method-argument-type arg)))
+  (princ ") " stream)
+  (foo ret-type)
+  (princ ")" stream)))
 
 (defun process-arg-names1 (args stream)
   (loop for argz on args by #'cdr
@@ -410,7 +429,7 @@
 	(unless (gethash sel-sym *wrapped-selector-table*)
 	  (push (objc-method-selector method) *export-list*)
 	  (princ "(defun " stream)
-	  (format stream "~S" sel-sym)
+	  (format stream "ns::|~A|" (objc-method-selector method))
 	  (setf (gethash sel-sym *wrapped-selector-table*)
 		sel-sym)
 	  (princ " (thing" stream) (process-arg-names1 args stream) (princ ")" stream)
@@ -470,6 +489,7 @@
 			       #@NSApplication #@NSRunningApplication #@NSThread #@NSEvent #@NSUserDefaults
 			       #@NSScreen
 			       #@NSNotificationCenter
+			       #@NSTrackingArea
 			       ;;#@NSWorkspace #@NSWorkspaceOpenConfiguration #@NSAppKitVersion
 			       ;;@NSUserActivity #@NSUserActivityRestoring
 			       ;;#@NSSharingService #@NSSharingServicePicker #@NSPreviewRepresentableActivityItem
@@ -481,6 +501,7 @@
 			       #@NSScreen
 			       #@NSGraphicsContext #@NSBezierPath
 			       #@NSDate
+			       #@MTKView
 			       #@CALayer
 			       #@CAMetalLayer)
 			 "~/abstract-os/cocoa/ns-bindings.lisp"
@@ -499,10 +520,14 @@
 			       (class_getClassMethod #@NSDate @(distantFuture))
 			       (class_getClassMethod
 				#@NSEvent @(otherEventWithType:location:modifierFlags:timestamp:windowNumber:context:subtype:data1:data2:))
+			       (class_getClassMethod
+				#@NSEvent @(mouseLocation))
 			       (class_getClassMethod #@NSAutoreleasePool @(new))
 			       (class_getClassMethod #@NSAutoreleasePool @(release))
 			       (class_getInstanceMethod #@CALayer @(setContentsScale:))
 			       (class_getClassMethod #@NSBundle @(bundleWithPath:))
 			       (class_getClassMethod #@NSScreen @(screens))
+			       (class_getClassMethod #@NSWindow @(windowNumberAtPoint:belowWindowWithWindowNumber:))
+								       
 			       )
 			 :with-internals? with-internals?))

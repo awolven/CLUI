@@ -39,8 +39,6 @@
    (TISCopyCurrentKeyboardLayoutInputSource)
    (TISGetInputSourceProperty)
    (LMGetKeyboardType)
-   
-   
    ))
 
 (defmethod objc-object-id ((app ns-application-mixin))
@@ -69,21 +67,17 @@
 (defclass ns-cursor-mixin ()
   ((object)))
 
-(defclass ns-window-mixin (essential-rect-mixin ns-object-mixin)
+(defclass ns-window-mixin (ns-object-mixin)
   ((delegate :accessor window-delegate)
    (view :accessor window-content-view)
    (context :accessor window-graphics-context)
    (maximized? :initform nil :accessor maximized?)
    (occluded? :initform nil :accessor occluded?)
    (retina? :initform nil :accessor window-retina?)
-   (fbwidth :initform nil :accessor window-fb-width)
-   (fbheight :initform nil :accessor window-fb-height)
-   (xscale :accessor window-x-scale)
-   (yscale :accessor window-y-scale)
    (cursor-warp-delta-x :accessor cursor-warp-delta-x)
    (cursor-warp-delta-y :accessor cursor-warp-delta-y)))
 
-(defclass ns-vulkan-window-mixin (ns-window-mixin)
+(defclass ns-metal-window-mixin (ns-window-mixin)
   ((layer :accessor window-layer)))
 
 (defclass window-delegate (ns-object-mixin)
