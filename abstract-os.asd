@@ -38,13 +38,43 @@
 
 #+windows
 (defsystem abstract-os/win32
-  :depends-on (:noffi)
+  :depends-on ()
   :serial t
   :components
-  ((:file "noffi-patches")
+  (;;#+ccl(:file "../noffi/src/patch-ccl")
+   (:file "../noffi/other/clex/src/clex")
+   (:file "../noffi/other/lalr/lalr")
+   (:file "../noffi/src/file")
+   (:file "../noffi/src/compiler-warn")
+   (:file "../noffi/src/package")
+   (:file "../noffi/src/forward")
+   (:file "../noffi/src/lispdep")
+   (:file "../noffi/src/util")
+   (:file "../noffi/src/string-table")
+   (:file "../noffi/src/define-grammar")
+   (:file "../noffi/src/lexer")
+   (:file "../noffi/src/cpp")
+   (:file "../noffi/src/parsing")
+   (:file "../noffi/src/grammar")
+   (:file "../noffi/src/syntax")
+   (:file "../noffi/src/ffigen")
+   (:file "../noffi/src/adt")
+   (:file "../noffi/src/comp")
+   (:file "../noffi/src/runtime")
+   (:file "../noffi/src/abi-ms-amd64")
+	  
+
+   (:file "noffi-patches")
+
+   (:file "win32/win32")
+   
    (:file "package")
+   (:file "app")
    (:file "classes")
-   (:file "win32/win32-impl")
+   (:file "events")   
+   (:file "win32/win32-classes")
+   (:file "win32/win32-window")
+   (:file "monitor")
    (:file "abstract-os")
    (:file "api")))
 

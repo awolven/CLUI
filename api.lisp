@@ -139,32 +139,32 @@
 
 (defun get-os-window-pos (window)
   #+darwin(get-cocoa-window-pos window)
-  #+win32(get-win32-window-pos window)
+  #+windows(get-win32-window-pos window)
   #+x11(get-x11-window-pos window)
   #+wayland(get-wayland-window-pos window))
 
 (defun set-os-window-pos (window x y)
   #+darwin(set-cocoa-window-pos window x y)
-  #+win32(set-win32-window-pos window x y)
+  #+windows(set-win32-window-pos window x y)
   #+x11(set-x11-window-pos window x y)
   #+wayland(set-wayland-window-pos window x y))
 
 (defun get-os-window-size (window)
   #+darwin(get-cocoa-window-size window)
-  #+win32(get-win32-window-size window)
+  #+windows(get-win32-window-size window)
   #+x11(get-x11-window-size window)
   #+wayland(get-wayland-window-size window))
 
-(defun set-os-window-size (window value)
-  #+darwin(set-cocoa-window-size window value)
-  #+win32(set-win32-window-size window value)
-  #+x11(set-x11-window-size window value)
-  #+wayland(set-wayland-window-size window value))
+(defun set-os-window-size (window width height)
+  #+darwin(set-cocoa-window-size window width height)
+  #+windows(set-win32-window-size window width height)
+  #+x11(set-x11-window-size window width height)
+  #+wayland(set-wayland-window-size window width height))
 
 (defun get-os-window-cursor-pos (window)
   #+darwin
   (get-cocoa-window-cursor-pos window)
-  #+win32
+  #+windows
   (get-win32-window-cursor-pos window)
   #+x11
   (get-x11-window-cursor-pos window)
@@ -174,7 +174,7 @@
 (defun set-os-window-cursor-pos (window x y)
   #+darwin
   (set-cocoa-window-cursor-pos window x y)
-  #+win32
+  #+windows
   (set-win32-window-cursor-pos window x y)
   #+linux
   (get-linux-window-cursor-pos window x y))
@@ -201,7 +201,7 @@
 
 (defun show-os-window (window)
   #+darwin(show-cocoa-window window)
-  #+win32(show-win32-window window)
+  #+windows(show-win32-window window)
   #+x11(show-x11-window window)
   #+wayland(show-wayland-window window))
 
@@ -302,7 +302,7 @@
 
 (defun get-os-window-hovered (window)
   #+darwin(get-cocoa-window-hovered window)
-  #+win32(make-win32-window-hovered window)
+  #+windows(make-win32-window-hovered window)
   #+linux(make-linux-window-hovered window))
 
 (defun get-os-window-resizable (window)
@@ -425,6 +425,18 @@
 
 (defmethod set-window-position ((window os-window-mixin) x y)
   (set-os-window-pos window x y))
+
+(defmethod window-size ((window os-window-mixin))
+  (get-os-window-size window))
+
+(defmethod set-window-size ((window os-window-mixin) width height)
+  (set-os-window-size window width height))
+
+(defmethod window-cursor-position ((window os-window-mixin))
+  (get-os-window-cursor-pos window))
+
+(defmethod set-window-cursor-position ((window os-window-mixin) x y)
+  (set-os-window-cursor-pos window x y))
 
 (defmethod window-maximized? ((window os-window-mixin))
   (get-os-window-maximized window))
@@ -558,3 +570,17 @@
 
 (defmethod request-window-attention ((window os-window-mixin))
   (request-os-window-attention window))
+
+(defun center-cursor-in-client-area (window)
+  (multiple-value-bind (width height) (window-size window)
+    (set-window-cursor-position window (/ width 2) (/ height 2))))
+
+(defun wait-application-events (app)
+  #+darwin(wait-cocoa-events app)
+  #+windows(wait-win32-events app)
+  #+linux(wait-linux-events app))
+
+(defun poll-application-events (app)
+  #+darwin(poll-cocoa-events app)
+  #+windows(poll-win32-events app)
+  #+linux(poll-linux-events app))

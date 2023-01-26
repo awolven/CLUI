@@ -48,12 +48,12 @@
 			     &key (width 640) (height 480) (title "Abstract OS")
 			       (monitor nil)
 			       (share nil)
-			       ;;(resizable? t)
-			       ;;(decorated? t)
-			       ;;(auto-iconify? t)
-			       ;;(floating? t)
-			       ;;(focus-on-show? t)
-			       ;;(mouse-passthrough? nil)
+			       (resizable? t)
+			       (decorated? t)
+			       (auto-iconify? t)
+			       (floating? nil)
+			       (focus-on-show? t)
+			       (mouse-passthrough? nil)
 			       &allow-other-keys)
   (declare (ignore args))
   (declare (ignorable share))
@@ -75,12 +75,12 @@
 	  (video-mode-refresh-rate video-mode) (hints-refresh-rate (hints *app*)))
 
 
-    #+nil
-    (setf 
-	  (resizable? window) resizable?
-	  (decorated? window) decorated?
+
+    (setf ;;(currently-maximized? window) maximized?
+     (currently-resizable? window) resizable?
+	  (currently-decorated? window) decorated?
 	  (auto-iconify? window) auto-iconify?
-	  (floating? window) floating?
+	  (currently-floating? window) floating?
 	  (focus-on-show? window) focus-on-show?
 	  (mouse-passthrough? window) mouse-passthrough?)
     
@@ -90,8 +90,8 @@
 	  (window-min-width window) :dont-care
 	  (window-min-height window) :dont-care
 	  (window-max-width window) :dont-care
-	  (window-numer window) :dont-care
-	  (window-denom window) :dont-care))
+	  (window-aspect-numer window) :dont-care
+	  (window-aspect-denom window) :dont-care))
   t)
 
 #+notyet
@@ -215,3 +215,4 @@
 
   (call-next-method))
 
+ 

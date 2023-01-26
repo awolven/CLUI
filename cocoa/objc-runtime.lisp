@@ -6,10 +6,6 @@
 
 (cffi:use-foreign-library metalkit)
 
-(defun sap-int (sap)
-  #+sbcl(sb-sys:sap-int sap)
-  #+ccl(ccl::%ptr-to-int sap))
-
 (defvar *trace-callbacks* t)
 
 (defmacro deftraceable-callback (name return-type (&rest args) &body body)

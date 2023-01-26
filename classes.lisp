@@ -1,5 +1,9 @@
 (in-package :abstract-os)
 
+(defun sap-int (sap)
+  #+sbcl(sb-sys:sap-int sap)
+  #+ccl(ccl::%ptr-to-int sap))
+
 (defclass application-mixin (#+windows win32-application-mixin
 			     #+x11 x11-application-mixin
 			     #+wayland wayland-application-mixin
@@ -21,6 +25,8 @@
   (setq *app* instance)
   (setf (application-name instance) (or name "Abstract OS Application"))
   #+darwin(init-cocoa instance)
+  ;;#+windows(init-win32 instance)
+  #+linux(init-linux instance)
   (values))
 
 (defstruct gamma-ramp
@@ -78,14 +84,16 @@
 
 (defclass window-mixin (rect-mixin)
   ((next :type (or null window-mixin) :accessor window-next)
-   (resizable? :type boolean :initform nil :accessor resizable?)
-   (decorated? :type boolean :initform nil :accessor decorated?)
-   (iconified? :type boolean :initform nil :accessor iconified?)
+   (maximized? :type boolean :initform nil :accessor currently-maximized?)
+   (resizable? :type boolean :initform nil :accessor currently-resizable?)
+   (decorated? :type boolean :initform nil :accessor currently-decorated?)
+   (iconified? :type boolean :initform nil :accessor currently-iconified?)
    (auto-iconify? :type boolean :initform nil :accessor auto-iconify?)
-   (floating? :type boolean :initform nil :accessor floating?)
+   (floating? :type boolean :initform nil :accessor currently-floating?)
    (focus-on-show? :type boolean :initform t :accessor focus-on-show?)
    (mouse-passthrough? :type boolean :accessor mouse-passthrough?)
    (should-close? :type boolean :initform nil :accessor should-close?)
+   (raw-mouse-motion? :type boolean :initform nil :accessor window-raw-mouse-motion?)
    (video-mode :accessor window-video-mode :initform (make-video-mode))
    (monitor :initform nil :accessor window-monitor)
    (cursor)
@@ -93,8 +101,8 @@
    (min-heigh :initform :dont-care :accessor window-min-height)
    (max-width :initform :dont-care :accessor window-max-width)
    (max-height :initform :dont-care :accessor window-max-height)
-   (numer :initform :dont-care :accessor window-numer)
-   (denom :initform :dont-care :accessor window-denom)
+   (numer :initform :dont-care :accessor window-aspect-numer)
+   (denom :initform :dont-care :accessor window-aspect-denom)
    (sticky-keys? :type boolean :initform nil)
    (sticky-mouse-buttons? :type boolean :initform nil)
    (lock-key-modes? :type boolean :initform nil)
@@ -103,7 +111,6 @@
    (keys)
    (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
    (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)
-   (raw-mouse-motion? :type boolean :initform nil)
    (fully-created? :type boolean :accessor window-fully-created?)))
 		  
 

@@ -98,6 +98,9 @@
 (defclass window-focus-event (window-show-event)
   ())
 
+(defclass window-defocus-event (window-event)
+  ())
+
 (defclass window-hide-event (window-event)
   ())
 
@@ -110,6 +113,9 @@
   ((window :initarg :window)))
 
 (defclass window-created-event (window-manager-event)
+  ())
+
+(defclass window-close-event (window-manager-event)
   ())
   
 

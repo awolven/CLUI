@@ -38,7 +38,6 @@
 		#:c-sizeof-type
 		#:c-addr-of
 		#:c-cast
-		#:with-stack-allocated-structure
 		#:offset-of
 		#:ptr-value
 		#:cval-value

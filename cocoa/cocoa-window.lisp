@@ -1342,8 +1342,8 @@
 
 	    (ns:|setFrame:display:| window frame-rect t)
 
-	    (unless (or (eq (window-numer window) :dont-care)
-			(eq (window-denom window) :dont-care))
+	    (unless (or (eq (window-aspect-numer window) :dont-care)
+			(eq (window-aspect-denom window) :dont-care))
 	      (ns:|setContentAspectRatio:| window (make-nssize (window-numer window) (window-denom window))))
 
 	    (unless (or (eq (window-min-width window) :dont-care)
