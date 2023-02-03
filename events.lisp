@@ -1,22 +1,26 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defgeneric handle-event (client event))
 
-(defclass event ()
+(defclass event-mixin ()
   ((timestamp :initarg :timestamp
 	      :accessor event-timestamp)))
 
-(defmethod handle-event (window (event event))
+(defmethod handle-event ((window window-mixin) (event event-mixin))
+  (values))
+
+#+NOTYET
+(defmethod handle-event ((window desktop-mixin) (event event-mixin))
   (values))
 
 ;; timer event
 
-(defclass timeout-event (event)
+(defclass timeout-event-v0 (event-mixin)
   ())
 
 ;; window-event
 
-(defclass window-event (event)
+(defclass window-event-mixin (event-mixin)
   ((region :initarg :region
 	   :initform nil
 	   :accessor pointer-event-region)
@@ -27,13 +31,13 @@
 
 ;; window-configuration-event
 
-(defclass window-configuration-event (window-event)
+(defclass window-configuration-event-mixin (window-event-mixin)
   ())
 
 ;; window-configuration-event
 ;; window-position-event-mixin
 
-(defclass window-position-event-mixin ()
+(defclass window-position-event-mixin (window-configuration-event-mixin)
   ((new-x :initarg :new-x
 	  :initform nil
 	  :accessor window-position-event-new-x)
@@ -43,8 +47,7 @@
 	  :accessor window-position-event-new-y)))
 
 
-(defclass window-move-event (window-position-event-mixin
-			     window-configuration-event)
+(defclass window-move-event-v0 (window-position-event-mixin)
   ())
 
 ;; window-resize-event-mixin
@@ -56,81 +59,118 @@
    (new-height :initarg :new-height
 	       :accessor window-resize-event-new-height)))
 
-(defclass window-iconify-event (window-resize-event-mixin
-				window-configuration-event)
+(defclass window-resize-event-v0 (window-resize-event-mixin)
   ())
 
-(defmethod handle-event ((window window-mixin) (event window-iconify-event))
+(defclass window-iconify-event-mixin (window-resize-event-mixin)
+  ())
+
+(defclass window-iconify-event-v0 (window-iconify-event-mixin)
+  ())
+
+(defmethod handle-event ((window window-mixin) (event window-iconify-event-mixin))
   (maybe-release-monitor window)
   (call-next-method)
   (values))
 
-(defclass window-deiconify-event (window-resize-event-mixin
-				  window-configuration-event)
+(defclass window-deiconify-event-mixin (window-resize-event-mixin)
   ())
 
-(defmethod handle-event ((window window-mixin) (event window-deiconify-event))
+(defclass window-deiconify-event-v0 (window-deiconfiy-event-mixin)
+  ())
+
+(defmethod handle-event ((window window-mixin) (event window-deiconify-event-mixin))
   (maybe-acquire-monitor window)
   (call-next-method)
   (values))
 
-(defclass window-maximize-event (window-resize-event-mixin
-				 window-configuration-event)
+(defclass window-maximize-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-restore-event (window-resize-event-mixin
-				window-configuration-event)
+(defclass window-maximize-event-v0 (window-maximize-event-mixin)
   ())
 
-(defclass window-resize-event (window-resize-event-mixin
-			       window-configuration-event)
+(defclass window-restore-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-fullscreen-event (window-resize-event-mixin
-				   window-configuration-event)
+(defclass window-restore-event-v0 (window-restore-event-mixin)
+  ())
+
+(defclass window-fullscreen-event-mixin (window-resize-event-mixin)
+  ())
+
+(defclass window-fullscreen-event-v0 (window-fullscreen-event-mixin)
   ())
 
 ;; window-event
 
-(defclass window-show-event (window-event)
+(defclass window-show-event-mixin (window-event-mixin)
   ())
 
-(defclass window-focus-event (window-show-event)
+(defclass window-show-event-v0 (window-show-event-mixin)
   ())
 
-(defclass window-defocus-event (window-event)
+(defclass window-focus-event-mixin (window-show-event-mixin)
   ())
 
-(defclass window-hide-event (window-event)
+(defclass window-focus-event-v0 (window-focus-event-mixin)
   ())
 
-(defclass window-repaint-event (window-event)
+(defclass window-defocus-event-mixin (window-event-mixin)
+  ())
+
+(defclass window-defocus-event-v0 (window-defocus-event-mixin)
+  ())
+
+(defclass window-hide-event-mixin (window-event-mixin)
+  ())
+
+(defclass window-hide-event-v0 (window-hide-event-mixin)
+  ())
+
+(defclass window-repaint-event-mixin (window-event-mixin)
+  ())
+
+(defclass window-repaint-event-v0 (window-repaint-event-mixin)
   ())
 
 ;; window-manager-event
 
-(defclass window-manager-event (event)
+(defclass window-manager-event-mixin (event-mixin)
   ((window :initarg :window)))
 
-(defclass window-created-event (window-manager-event)
+
+(defclass window-created-event-mixin (window-manager-event-mixin)
   ())
 
-(defclass window-close-event (window-manager-event)
+(defclass window-created-event-v0 (window-created-event-mixin)
+  ())
+
+(defclass window-close-event-mixin (window-manager-event-mixin)
+  ())
+
+(defclass window-close-event-v0 (window-close-event-mixin)
   ())
   
 
-(defclass window-destroyed-event (window-manager-event)
+(defclass window-destroyed-event-mixin (window-manager-event-mixin)
   ())
 
-(defclass window-monitor-switched-event (window-manager-event)
+(defclass window-destroyed-event-v0 (window-destroyed-event-mixin)
+  ())
+
+(defclass window-monitor-switched-event-mixin (window-manager-event-mixin)
+  ())
+
+(defclass window-monitor-switched-event-v0 (window-monitor-switched-event-mixin)
   ())
 
 ;; device-event
 
-(defclass device-event (event)
+(defclass device-event-mixin (event-mixin)
   ())
 
-(defclass input-event (device-event)
+(defclass input-event-mixin (device-event-mixin)
   ((window :initarg :window
 	   :accessor event-window)
    
@@ -141,7 +181,7 @@
 (defconstant +pointer-middle-button+ (ash 1 1))
 (defconstant +pointer-right-button+ (ash 1 2))
 
-(defclass pointer-event (input-event)
+(defclass pointer-event-mixin (input-event-mixin)
   ((pointer :initarg :pointer
 	    :accessor pointer-event-pointer)
    (button :initarg :button
@@ -155,44 +195,79 @@
    (native-y :initarg :native-y
 	     :accessor pointer-event-native-y)))
 
-(defclass pointer-button-event (pointer-event)
+(defclass pointer-button-event-mixin (pointer-event-mixin)
   ())
 
-(defclass pointer-button-press-event (pointer-button-event)
+(defclass pointer-button-press-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-button-release-event (pointer-button-event)
+(defclass pointer-button-press-event-v0 (pointer-button-press-event-mixin)
   ())
 
-(defclass pointer-button-hold-event (pointer-button-event)
+(defclass pointer-button-release-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-click-event (pointer-button-event)
+(defclass pointer-button-release-event-v0 (pointer-button-release-event-mixin)
   ())
 
-(defclass pointer-double-click-event (pointer-button-event)
+(defclass pointer-button-hold-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-click-and-hold-event (pointer-button-event)
+(defclass pointer-button-hold-event-v0 (pointer-button-hold-event-mixin)
   ())
 
-(defclass pointer-wheel-event (pointer-event)
+(defclass pointer-click-event-mixin (pointer-button-event-mixin)
+  ())
+
+(defclass pointer-click-event-v0 (pointer-click-event-mixin)
+  ())
+
+(defclass pointer-double-click-event-mixin (pointer-button-event-mixin)
+  ())
+
+(defclass pointer-double-click-event-v0 (pointer-double-click-event-mixin)
+  ())
+
+(defclass pointer-button-hold-and-drag-event-mixin (pointer-click-and-hold-mixin)
+  ())
+
+(defclass pointer-button-hold-and-drag-event-v0 (pointer-click-hold-and-drag-mixin)
+  ())
+
+(defclass pointer-wheel-event-mixin (pointer-event-mixin)
   ((offset :initarg :offset
+	   :initarg :yoffset
 	   :initform 0
-	   :accessor pointer-wheel-event-offset)))
+	   :accessor pointer-wheel-event-offset
+	   :accessor pointer-wheel-event-yoffset)
+   (xoffset :initarg :xoffset
+	    :initform 0
+	    :accessor pointer-wheel-event-xoffset)))
 
-(defclass pointer-motion-event (pointer-event)
+(defclass pointer-wheel-event-v0 (pointer-wheel-event-mixin)
   ())
 
-(defclass pointer-boundary-event (pointer-event)
+(defclass pointer-motion-event-mixin (pointer-event-mixin)
+  ())
+
+(defclass pointer-motion-event-v0 (pointer-motion-event-mixin)
+  ())  
+
+(defclass pointer-boundary-event-mixin (pointer-event-mixin)
   ((kind :initarg :kind
 	 :initform nil
 	 :accessor pointer-boundary-event-kind)))
 
-(defclass pointer-enter-event (pointer-boundary-event)
+(defclass pointer-enter-event-mixin (pointer-boundary-event-mixin)
   ())
 
-(defclass pointer-exit-event (pointer-boundary-event)
+(defclass pointer-enter-event-v0 (pointer-enter-event-mixin)
+  ())
+
+(defclass pointer-exit-event-mixin (pointer-boundary-event-mixin)
+  ())
+
+(defclass pointer-exit-event-v0 (pointer-exit-event-mixin)
   ())
 
 (defconstant +shift-key+ (ash 1 0))
@@ -202,7 +277,7 @@
 (defconstant +super-key+ (ash 1 4))
 (defconstant +hyper-key+ (ash 1 5))
 
-(defclass keyboard-event (input-event)
+(defclass keyboard-event-mixin (input-event-mixin)
   ((key-name :initarg :key-name
 	     :accessor keyboard-event-key-name)
    
@@ -210,16 +285,16 @@
 	      :initarg :character
 	      :accessor keyboard-event-character)))
 
-(defclass key-press-event (keyboard-event)
+(defclass key-press-event-mixin (keyboard-event-mixin)
   ())
 
-(defclass key-release-event (keyboard-event)
+(defclass key-release-event-mixin (keyboard-event-mixin)
   ())
 
-(defclass joystick-event (input-event)
+(defclass joystick-event-mixin (input-event-mixin)
   ())
 
-(defclass spaceball-event (joystick-event)
+(defclass spaceball-event-mixin (joystick-event-mixin)
   ())
 
 (trace handle-event)

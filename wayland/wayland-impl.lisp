@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defclass wayland-window-mixin (essential-rect-mixin)
   ((visible? :type boolean :accessor visible?)

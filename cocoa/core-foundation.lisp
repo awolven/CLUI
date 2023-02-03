@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defconstant kCFCompareLessThan -1)
 (defconstant kCFCompareEqualTo 0)

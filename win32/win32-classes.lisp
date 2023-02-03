@@ -1,64 +1,99 @@
-(in-package :abstract-os)
+(in-package :clui)
 
-(defclass win32-application-mixin ()
-  ((instance)
+(defclass win32:desktop-mixin (clui:display-mixin)
+  ((instance
+    :accessor win32-instance
+    :initform (#_GetModuleHandle nil))
+
    (helper-window-handle)
    (helper-window-class)
-   (main-window-class :initform nil)
-   (device-notification-handle)
-   (acquired-monitor-count :initform 0)
-   (clipboard-string)
-   (keycodes :initform (make-array 512 :element-type '(unsigned-byte 16) :initial-element 0))
+   
+   (main-window-class
+    :accessor main-window-class
+    :initform nil)
+
+   (restore-cursor-pos-x
+    :accessor restore-cursor-pos-x
+    :initform nil)
+   
+   (restore-cursor-pos-y
+    :accessor restore-cursor-pos-y
+    :initform nil)
+   
+   (acquired-monitor-count
+    :accessor acquired-monitor-count
+    :initform nil)
+   
+   (keycodes)
    (scancodes)
    (keynames)
-   (restore-cursor-pos-x :initform nil :accessor restore-cursor-pos-x)
-   (restore-cursor-pos-y :initform nil :accessor restore-cursor-pos-y)
-   (disabled-cursor-window :initform nil :accessor disabled-cursor-window)
-   (captured-cursor-window :initform nil :accessor captured-cursor-window)
+
+   (disabled-cursor-window
+    :accessor disabled-cursor-window
+    :initform nil)
+   
+   (captured-cursor-window
+    :accessor captured-cursor-window
+    :initform nil)
+   
+   (clipboard-string
+    :accessor clipboard-string
+    :initform "")
+   
    (raw-input)
-   (mouse-trail-size)
-   (dinput8-instance)
-   (dinput8-create)
-   (dinput8-api)
-   (xinput-instance)
-   (xinput-get-capabilities)
-   (xinput-get-state)
-   (user32-instance)
-   ;;(user32-set-process-dpi-aware)
-   ;;(user32-change-window-message-filter-ex)
-   ;;(user32-enable-non-client-dpi-scaling)
-   ;;(user32-set-process-dpi-awareness-context)
-   ;;(user32-get-dpi-for-window)
-   ;;(user32-adjust-window-rect-ex-for-dpi)
-   ;;(user32-get-system-metrics-for-dpi)
-   (dwmapi-instance)
-   (dwmapi-is-composition-enabled)
-   (dwmapi-flush)
-   (dwmapi-enable-blur-behind-window)
-   (dwmapi-get-colorization-color)
-   (shcore-instance)
-   (shcore-set-process-dpi-awareness)
-   (shcore-get-dpi-for-monitor)
-   (ntdll-instance)
-   (ntdll-rtl-verify-version-info)))
-
-(defclass win32-handle-mixin ()
-  ((handle :accessor h)))
-
-(defclass win32-monitor-mixin (win32-handle-mixin)
-  ((adapter-name)
-   (display-name)
-   (public-adapter-name)
-   (public-display-name)
-   (modes-pruned? :initform nil :type boolean)
-   (mode-changed? :initform nil :type boolean)))
+   
+   (mouse-trail-size
+    :accessor mouse-trail-size
+    :initform 0)
+   
+   (device-notification-handle)))
 
 
-(defclass win32-cursor-mixin (win32-handle-mixin)
+
+(defclass win32:desktop-with-vulkan-mixin (clui:vulkan-support-mixin win32:desktop-mixin)
   ())
 
-;;
-(defclass win32-window-mixin (win32-handle-mixin)
+(defclass win32:desktop-with-opengl-mixin (clui:opengl-support-mixin win32:desktop-mixin)
+  ())
+
+(defclass win32:desktop-with-vulkan (win32:desktop-with-vulkan-mixin)
+  ())
+
+(defclass win32:desktop-with-opengl (win32:desktop-with-opengl-mixin)
+  ())
+
+
+
+
+
+(defclass win32:screen-mixin (clui:screen-mixin)
+  ())
+
+
+(defmethod initialize-instance ((instance win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (declare (ignorable initargs))
+
+  (call-next-method)
+  (win32-init instance)
+  instance)
+
+
+
+(defclass win32:monitor-mixin (clui:monitor-mixin handle-mixin)
+  ((adapter-name :initarg :adapter-name :accessor adapter-name)
+   (display-name :initarg :display-name :accessor display-name)
+   (modes-pruned? :initarg :modes-pruned? :initform nil :type boolean :accessor modes-pruned?)
+   (mode-changed? :initarg :mode-changed? :initform nil :type boolean :accessor mode-changed?)))
+
+(defmethod initialize-instance ((instance win32:monitor-mixin) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (call-next-method))
+
+
+(defclass win32:cursor-mixin (clui:cursor-mixin handle-mixin)
+  ())
+
+(defclass win32:window-mixin (clui:os-window-mixin handle-mixin)
   ((big-icon)
    (small-icon)
    (cursor-tracked? :type boolean :initform nil :accessor cursor-tracked?)
@@ -72,3 +107,32 @@
    (last-cursor-pos-x)
    (last-cursor-pos-y)
    (high-surrogate)))
+
+(defclass win32:vulkan-window-mixin (win32:window-mixin)
+  ())
+
+(defclass win32:wgl-window-mixin (win32:window-mixin)
+  ())
+
+
+
+(defclass win32:desktop (win32:desktop-mixin)
+  ())
+
+(defclass win32:screen (win32:screen-mixin)
+  ())
+
+(defclass win32:window (win32:window-mixin)
+  ())
+
+(defclass win32:cursor (win32:cursor-mixin)
+  ())
+
+(defclass win32:monitor (win32:monitor-mixin)
+  ())
+
+(defclass win32:vulkan-window (win32:vulkan-window-mixin)
+  ())
+
+(defclass win32:wgl-window (win32:wgl-window-mixin)
+  ())

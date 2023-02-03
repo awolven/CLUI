@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (cffi:defcstruct ns::|CATransform3D|) ;;fixme
 

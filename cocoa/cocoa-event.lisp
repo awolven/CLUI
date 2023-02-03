@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
 (defun make-other-event-with-type (type point modifier-flags timestamp window-number context subtype

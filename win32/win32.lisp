@@ -1,7 +1,8 @@
 (in-package :noffi)
 
 (eval-when (:compile-toplevel)
-  (noffi-syntax t))
+  (noffi-syntax t)
+  (defparameter *last-good-token* nil))
 
 
 (eval-when (:compile-toplevel)

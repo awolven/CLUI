@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (ignore-errors (find-package :ns))
@@ -8,3 +8,32 @@
 	  ns::|init|
 	  ns::|addLocalMonitorForEventsMatchingMask:handler:|)
 	:ns)
+
+(defpackage cocoa
+  (:export monitor
+	   window
+	   cursor
+	   platform
+	   desktop
+	   screen
+	   view
+
+	   metal-view
+	   vulkan-view
+	   nsgl-view
+	   
+	   platform-mixin
+	   desktop-mixin
+	   screen-mixin
+	   window-mixin
+	   view-mixin
+	   cursor-mixin
+	   monitor-mixin
+
+	   vulkan-window-mixin
+	   metal-window-mixin
+	   nsgl-window-mixin
+
+	   metal-window
+	   vulkan-window
+	   nsgl-window))

@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (cffi:defcfun (IOServiceMatching "IOServiceMatching") :pointer (name :string))
 (cffi:defcfun (IOServiceGetMatchingServices "IOServiceGetMatchingServices") :int (main-port :unsigned-int)

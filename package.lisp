@@ -1,6 +1,8 @@
 (in-package :cl-user)
 
-(defpackage :abstract-os
+(defpackage :x11)
+
+(defpackage :clui
   (:use :cl)
   (:export #:*app*
 	   #:exit?
@@ -28,7 +30,48 @@
 	   #:set-os-window-aspect-ratio
 	   #:set-os-window-size-limits
 	   #:destroy-os-window
-	   #:shutdown-application)
+	   #:shutdown-application
+
+	   #:operating-system-mixin
+	   #:unix-mixin
+	   #:linux-mixin
+	   #:bsd-mixin
+	   #:ms-windows-mixin
+	   #:macos-mixin
+	   #:gui-mixin
+	   #:x11-mixin
+	   #:win32-mixin
+	   #:cocoa-mixin
+	   #:wayland-mixin
+
+	   #:homemade-window-mixin
+	   #:homemade-view-mixin
+
+	   #:platform
+	   #:platform-mixin
+	   #:vulkan-support-mixin
+	   #:opengl-support-mixin
+	   #:display
+	   #:display-mixin
+	   #:screen
+	   #:screen-mixin
+	   #:monitor
+	   #:monitor-mixin
+	   #:window
+	   #:window-mixin
+	   #:os-window
+	   #:os-window-mixin
+	   #:cursor
+	   #:cursor-mixin
+
+
+	   )
+	   
+
+  
+
+
+
   #+vulkan
   (:export #:get-required-instance-extensions)
   #-darwin

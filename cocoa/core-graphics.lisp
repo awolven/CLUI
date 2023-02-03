@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defconstant kCGEventSourceStatePrivate -1)
 (defconstant kCGEventSourceStateCombinedSessionState 0)

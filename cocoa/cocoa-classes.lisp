@@ -1,55 +1,84 @@
-(in-package :abstract-os)
-(named-readtables:in-readtable :objc-readtable)
+(in-package :clui)
 
-(defclass ns-object-mixin ()
-  ((ptr :initarg :ptr :accessor objc-object-id)))
+(defclass objc-object-mixin ()
+  ((id :initarg :ptr :accessor objc-object-id)))
 
-(defclass ns-helper (ns-object-mixin)
+(defclass ns-helper (objc-object-mixin)
   ())
 
-(defclass ns-application-mixin ()
-  ((helper-class :accessor objc-helper-class)
-   (application-delegate-class :accessor objc-application-delegate-class)
-   (window-class :accessor objc-window-class)
-   (window-delegate-class :accessor objc-window-delegate-class)
-   (content-view-class :accessor objc-content-view-class)
-   
-   (delegate->clos-window-table	:accessor delegate->clos-window-table)
-   (content-view->clos-content-view-table :accessor content-view->clos-content-view-table)
-   
-   (event-source :accessor application-event-source)
-   (delegate :accessor application-delegate)
-   (cursor-hidden?)
-   (input-source :initform nil :accessor tis-input-source)
-   (hid-manager)
-   (unicode-data :initform nil :accessor application-unicode-data)
-   (helper :initform nil :accessor application-helper)
-   (key-up-monitor :accessor key-up-monitor)
-   (nib-objects)
-   (keynames)
-   (keycodes)
-   (scancodes)
-   (clipboard-string)
-   (cascade-point :initform (make-nspoint 0 0) :accessor cascade-point)
-   (restore-cursor-position-x)
-   (restore-cursor-position-y)
-   (disabled-cursor-window :accessor disabled-cursor-window)
-   (tis-bundle :initform nil :accessor tis-bundle)
-   (kTISPropertyUnicodeKeyLayoutData)
+(defclass cocoa:desktop-mixin (clui:display-mixin)
+  ((kTISPropertyUnicodeKeyLayoutData)
    (TISCopyCurrentKeyboardLayoutInputSource)
    (TISGetInputSourceProperty)
    (LMGetKeyboardType)
-   ))
+   
+   (helper-class
+    :accessor objc-helper-class)
+   
+   (helper :initform nil
+	   :accessor application-helper)
+   
+   (application-delegate-class
+    :accessor objc-application-delegate-class)
+   
+   (window-class
+    :accessor objc-window-class)
+   
+   (window-delegate-class
+    :accessor objc-window-delegate-class)
+   
+   (content-view-class
+    :accessor objc-content-view-class)
+   
+   (delegate->clos-window-table
+    :accessor delegate->clos-window-table)
+   
+   (content-view->clos-content-view-table
+    :accessor content-view->clos-content-view-table)
 
-(defmethod objc-object-id ((app ns-application-mixin))
+   (delegate :accessor application-delegate)
+
+   (restore-cursor-position-x)
+   (restore-cursor-position-y)
+
+   (disabled-cursor-window
+    :accessor disabled-cursor-window
+    :initform nil)
+
+   (clipboard-string
+    :accessor clipboard-string
+    :initform "")
+
+   (cursor-hidden?)
+
+   (cascade-point :initform (make-nspoint 0 0) :accessor cascade-point)
+   
+   (event-source :accessor desktop-event-source)
+
+   (keynames)
+   (keycodes)
+   (scancodes)
+
+   (key-up-monitor :accessor key-up-monitor)
+   (unicode-data :initform nil :accessor desktop-unicode-data)
+   (input-source :initform nil :accessor tis-input-source)
+   (tis-bundle :initform nil :accessor tis-bundle)
+   (hid-manager)
+   (nib-objects)))
+
+(defmethod objc-object-id ((app cocoa:desktop-mixin))
   objc-runtime::ns-app)
 
-(defclass application-delegate (ns-object-mixin)
+(defclass application-delegate (obj-object-mixin)
   ())
 
-(defclass ns-monitor-mixin ()
-  ((display-id    :initarg  :display-id
-		  :accessor monitor-display-id)
+(defclass cocoa:screen-mixin (clui:screen-mixin objc-object-mixin)
+  ())
+
+
+(defclass cocoa:monitor-mixin (clui:monitor-mixin)
+  ((display-id :initarg  :display-id
+	       :accessor monitor-display-id)
    
    (previous-video-mode :initform nil
 			:accessor monitor-previous-video-mode)
@@ -64,10 +93,10 @@
 			  :accessor monitor-fallback-refresh-rate)))
 
 
-(defclass ns-cursor-mixin ()
+(defclass cocoa:cursor-mixin (clui:cursor-mixin)
   ((object)))
 
-(defclass ns-window-mixin (ns-object-mixin)
+(defclass cocoa:window-mixin (clui:os-window-mixin objc-object-mixin)
   ((delegate :accessor window-delegate)
    (view :accessor window-content-view)
    (context :accessor window-graphics-context)
@@ -77,8 +106,11 @@
    (cursor-warp-delta-x :accessor cursor-warp-delta-x)
    (cursor-warp-delta-y :accessor cursor-warp-delta-y)))
 
-(defclass ns-metal-window-mixin (ns-window-mixin)
+(defclass cocoa:metal-window-mixin (cocoa:window-mixin)
   ((layer :accessor window-layer)))
+
+(defclass cocoa:nsgl-window-mixin (cocoa:window-mixin)
+  ())
 
 (defclass window-delegate (ns-object-mixin)
   ((owner :initarg :owner :accessor window-delegate-owner)))
@@ -89,7 +121,7 @@
    (marked-text :initarg :marked-text :reader content-view-marked-text)))
 
 
-(defmethod initialize-instance :after ((instance ns-window-mixin) &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance :after ((instance cocoa:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-cocoa-window instance initargs))
 
 (defmethod initialize-instance :after ((instance window-delegate) &rest initargs
@@ -108,6 +140,31 @@
 		 (content-view->clos-content-view-table *app*))
 	instance)
   (values))
-  
-(defclass ns-screen (ns-object-mixin)
+
+
+(defclass cocoa:desktop (cocoa:desktop-mixin)
+  ())
+			  
+(defclass cocoa:screen (cocoa:screen-mixin)
+  ())
+
+(defclass cocoa:window (cocoa:window-mixin)
+  ())
+
+(defclass cocoa:cursor (cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa:monitor (cocoa:monitor-mixin)
+  ())
+
+(defclass cocoa:metal-window (cocoa:metal-window-mixin)
+  ())
+
+(defclass cocoa:vulkan-window-mixin (vulkan-window-mixin cocoa:metal-window-mixin)
+  ())
+
+(defclass cocoa:vulkan-window (cocoa:vulkan-window-mixin)
+  ())
+
+(defclass cocoa:opengl-window (opengl-window-mixin cocoa:nsgl-window-mixin)
   ())

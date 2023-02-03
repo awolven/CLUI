@@ -1,52 +1,8 @@
-(in-package :abstract-os)
-
-(defvar *app* nil)
-
-(defmethod default-application-class-for-window ((window window-mixin))
-  'abstract-os-application)
-
-(defmethod default-window-class-for-application ((app application-mixin))
-  'os-window)
-
-(defun input-framebuffer-size (window width height)
-  (declare (ignorable window width height))
-  (values))
-
-(defun input-window-damage (window)
-  (declare (ignore window))
-  (values))
-
-(defun input-cursor-pos (window pos-x pos-y)
-  (declare (ignorable window pos-x pos-y))
-  (values))
-
-(defun input-mouse-clicked (window button action mods)
-  (declare (ignorable window button action mods))
-  (values))
-
-(defun input-cursor-enter (window entered?)
-  (declare (ignorable window entered?))
-  (values))
-
-(defun show-cursor (window)
-  (declare (ignorable window))
-  (values))
-
-(defun hide-cursor (window)
-  (declare (ignorable window))
-  (values))
-
-(defmethod input-window-damaged (window)
-  (declare (ignorable window))
-  (values))
-
-(defun input-window-close-request (window)
-  (declare (ignorable window))
-  (values))
+(in-package :clui)
 
 (defun initialize-os-window (window &rest args
-			     &key (width 640) (height 480) (title "Abstract OS")
-			       (monitor nil)
+			     &key (width 640) (height 480) (title "clui")
+			     (display (default-display))
 			       (share nil)
 			       (resizable? t)
 			       (decorated? t)
@@ -59,16 +15,11 @@
   (declare (ignorable share))
   (assert title)
 
-  (unless *app*
-    (make-instance (default-application-class-for-window window)))
-
-  ;;require-init-or-return
-
   (when (or (<= width 0) (<= height 0))
     (error "Invalid window size: ~AX~A" width height))
 
-  (setf (window-next window) (application-window-list-head *app*))
-  (setf (application-window-list-head *app*) window)
+  (setf (window-next window) (display-window-list-head display))
+  (setf (display-window-list-head display) window)
   (let (#+NIL(video-mode (application-default-video-mode window)))
     #+NIL(setf (video-mode-width video-mode) width
 	  (video-mode-height video-mode) height
@@ -84,8 +35,7 @@
 	  (focus-on-show? window) focus-on-show?
 	  (mouse-passthrough? window) mouse-passthrough?)
     
-    (setf (window-monitor window) monitor
-	  (window-cursor-mode window) :normal
+    (setf (window-cursor-mode window) :normal
 
 	  (window-min-width window) :dont-care
 	  (window-min-height window) :dont-care
@@ -111,69 +61,15 @@
 		  when (= (aref mouse-buttons button) +press+)
 		    do (input-mouse-click window button +release+ 0))))))
   (values))
-  
-#+NIL
-(defun input-window-pos (window x y)
-  (if (null window)
-      (warn "window was nil in input-window-pos")
-      (locally
-	  (declare (type os-window-mixin window))
-	(when (slot-value window 'pos-callback)
-	  (funcall (slot-value window 'pos-callback)
-		   window x y))))
-  (values))
 
-#+NIL
-(defun input-window-size (window width height)
-  (if (null window)
-      (warn "window was nil in input-window-size")
-      (locally
-	  (declare (type os-window-mixin window))
-	(when (slot-value window 'size-callback)
-	  (funcall (slot-value window 'size-callback)
-		   window width height))))
-  (values))
 
-#+NIL
-(defun input-window-iconify (window iconified?)
-  (if (null window)
-      (warn "window was nil in input-window-iconify")
-      (locally
-	  (declare (type os-window-mixin window))
-	(when (slot-value window 'iconify-callback)
-	  (funcall (slot-value window 'iconify-callback)
-		   window iconified?))))
-  (values))
-
-#+NIL
-(defun input-window-maximize (window maximized?)
-  (if (null window)
-      (warn "window was nil in input-window-maximize")
-      (locally
-	  (declare (type os-window-mixin window))
-	(when (slot-value window 'maximize-callback)
-	  (funcall (slot-value window 'maximize-callback)
-		   window maximized?))))
-  (values))
-
-#+NIL
-(defun input-window-monitor (window monitor)
-  (if (null window)
-      (warn "window was nil in input-window-monitor")
-      (locally
-	  (declare (type os-window-mixin window))
-	(setf (window-monitor window) monitor))))
-
-(defun poll-monitors (app)
-  #+darwin(poll-cocoa-monitors app)
-  #+win32(poll-win32-monitors app)
-  #+linux(poll-linux-monitors app))
+(defun poll-monitors (display)
+  #+darwin(poll-cocoa-monitors display)
+  #+windows(poll-win32-monitors display)
+  #+linux(poll-linux-monitors display))
 
   
-(defun set-window-monitor (window monitor &key xpos ypos width height refresh-rate)
-  #+darwin(set-cocoa-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
-  #+windows(set-win32-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
-  #+linux(set-linux-window-monitor window monitor  :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+
 
 (defun acquire-monitor (window monitor)
   #+darwin(acquire-cocoa-monitor window monitor)
@@ -185,6 +81,38 @@
   #+windows(release-win32-monitor window monitor)
   #+linux(release-linux-monitor window monitor))
 
+(defun capture-cursor (window)
+  #+windows(capture-win32-cursor window))
+
+(defun update-cursor-image (window)
+  #+windows(update-win32-cursor-image window))
+
+(defun release-cursor (app)
+  #+windows(release-win32-cursor app))
+
+(defun enable-cursor (window)
+  (when (window-raw-mouse-motion? window)
+    (enable-raw-mouse-motion window))
+  (setf (disabled-cursor-window (window-display window)) nil)
+  (release-cursor (window-display window))
+  (set-os-window-cursor-pos window
+			    (restore-cursor-pos-x (window-display window))
+			    (restore-cursor-pos-y (window-display window)))
+  (update-cursor-image window)
+  (values))
+
+(defun disable-cursor (window)
+  (setf (disabled-cursor-window (window-display window)) window)
+  (multiple-value-bind (x y) (get-os-window-cursor-pos window)
+    (setf (restore-cursor-pos-x (window-display window)) x
+	  (restore-cursor-pos-y (window-display window)) y)
+    (update-cursor-image window)
+    (center-cursor-in-content-area window)
+    (capture-cursor window)
+    (when (window-raw-mouse-motion? window)
+      (enable-raw-mouse-motion window))
+    (values)))
+
 (defun maybe-acquire-monitor (window)
   (let ((monitor (window-monitor window)))
     (when monitor
@@ -194,25 +122,6 @@
   (let ((monitor (window-monitor window)))
     (when monitor
       (release-monitor window monitor))))
-  
-#+nil
-(defmethod set-window-monitor ((app application-mixin) window monitor xpos ypos width height refresh-rate)
-  (declare (ignorable monitor xpos ypos))
-  (declare (type os-window-mixin window))
-  (when (or (minusp width) (minusp height))
-    (warn "invalid window size: ~AX~A" width height)
-    (return-from set-window-monitor))
 
-  (when (and (not (eq refresh-rate :dont-care))
-	     (minusp refresh-rate))
-    (warn "invalid refresh rate: ~A" refresh-rate)
-    (return-from set-window-monitor))
-
-  (let ((video-mode (window-video-mode window)))
-    (setf (video-mode-width video-mode) width)
-    (setf (video-mode-height video-mode) height)
-    (setf (video-mode-refresh-rate video-mode) refresh-rate))
-
-  (call-next-method))
 
  

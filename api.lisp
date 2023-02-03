@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 #+vulkan
 (defun get-required-instance-extensions ()
@@ -9,6 +9,9 @@
 
 (defgeneric window-fullscreen? (window))
 (defgeneric (setf window-fullscreen?) (value window))
+
+(defgeneric window-monitor (window))
+(defgeneric (setf window-monitor) (monitor window))
 
 (defgeneric window-closable? (window))
 (defgeneric (setf window-closable?) (value window))
@@ -99,12 +102,15 @@
 
 (defun get-os-window-fullscreen (window)
   #+darwin(get-cocoa-window-fullscreen window)
-  #+windows(get-win32-window-fullscreen window)
+  #+windows(and (window-monitor window) t)
   #+linux(get-linux-window-fullscreen window))
+
+(defun get-primary-monitor (&optional (display (default-display)))
+  (car (display-monitors display)))
 
 (defun set-os-window-fullscreen (window value)
   #+darwin(set-cocoa-window-fullscreen window value)
-  #+windows(set-win32-window-fullscreen window value)
+  #+windows(setf (window-monitor window) (when value (get-primary-monitor)))
   #+linux(set-linux-window-fullscreen window value))
 
 (defun get-os-window-closable (window)
@@ -160,6 +166,27 @@
   #+windows(set-win32-window-size window width height)
   #+x11(set-x11-window-size window width height)
   #+wayland(set-wayland-window-size window width height))
+
+(defun set-os-window-monitor (window monitor &key xpos ypos width height (refresh-rate :dont-care))
+  (declare (type os-window-mixin window))
+  
+  (when (or (minusp width) (minusp height))
+    (warn "invalid window size: ~AX~A" width height)
+    (return-from set-os-window-monitor (values)))
+
+  (when (and (not (eq refresh-rate :dont-care))
+	     (minusp refresh-rate))
+    (warn "invalid refresh rate: ~A" refresh-rate)
+    (return-from set-os-window-monitor (values)))
+  
+  (let ((video-mode (window-video-mode window)))
+    (setf (video-mode-width video-mode) width)
+    (setf (video-mode-height video-mode) height)
+    (setf (video-mode-refresh-rate video-mode) refresh-rate))
+  
+  #+darwin(set-cocoa-window-monitor window monitor xpos ypos width height refresh-rate)
+  #+windows(set-win32-window-monitor window monitor xpos ypos width height refresh-rate)
+  #+linux(set-linux-window-monitor window monitor xpos ypos width height refresh-rate))
 
 (defun get-os-window-cursor-pos (window)
   #+darwin
@@ -302,8 +329,8 @@
 
 (defun get-os-window-hovered (window)
   #+darwin(get-cocoa-window-hovered window)
-  #+windows(make-win32-window-hovered window)
-  #+linux(make-linux-window-hovered window))
+  #+windows(get-win32-window-hovered window)
+  #+linux(get-linux-window-hovered window))
 
 (defun get-os-window-resizable (window)
   #+darwin(get-cocoa-window-resizable window)
@@ -395,12 +422,20 @@
   #+windows(request-win32-window-attention window)
   #+linux(request-linux-window-attention window))
 
+(defun get-default-screen-workarea ()
+  #+windows(get-win32-desktop-workarea))
 
 (defmethod window-fullscreen? ((window os-window-mixin))
   (get-os-window-fullscreen window))
 
 (defmethod (setf window-fullscreen?) (value (window os-window-mixin))
   (set-os-window-fullscreen window value))
+
+(defmethod (setf window-monitor) ((monitor monitor-mixin) (window os-window-mixin))
+  (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea)
+    (let ((refresh-rate 60))
+      (set-os-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
+      monitor)))
 
 (defmethod window-closable? ((window os-window-mixin))
   (get-os-window-closable window))
@@ -431,6 +466,9 @@
 
 (defmethod set-window-size ((window os-window-mixin) width height)
   (set-os-window-size window width height))
+
+(defmethod set-window-monitor ((window os-window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-os-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
 (defmethod window-cursor-position ((window os-window-mixin))
   (get-os-window-cursor-pos window))
@@ -571,7 +609,7 @@
 (defmethod request-window-attention ((window os-window-mixin))
   (request-os-window-attention window))
 
-(defun center-cursor-in-client-area (window)
+(defun center-cursor-in-content-area (window)
   (multiple-value-bind (width height) (window-size window)
     (set-window-cursor-position window (/ width 2) (/ height 2))))
 
@@ -584,3 +622,4 @@
   #+darwin(poll-cocoa-events app)
   #+windows(poll-win32-events app)
   #+linux(poll-linux-events app))
+

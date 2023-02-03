@@ -1,42 +1,103 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defun sap-int (sap)
   #+sbcl(sb-sys:sap-int sap)
   #+ccl(ccl::%ptr-to-int sap))
 
-(defclass application-mixin (#+windows win32-application-mixin
-			     #+x11 x11-application-mixin
-			     #+wayland wayland-application-mixin
-			     #+darwin ns-application-mixin)
-  ((name :accessor application-name)
-   (exit? :initform nil :accessor application-exit?)
-   (window-list-head :initform nil :accessor application-window-list-head)
-   (monitors :accessor application-monitors)))
+(defvar *displays* ())
 
-(defclass abstract-os-application (application-mixin)
+(defmacro get-displays ()
+  ;; this way we can read, setf, and push (get-displays)
+  `*displays*)
+
+(defun default-display ()
+  (let ((displays (get-displays)))
+    (if displays
+	(first displays)
+	(apply #'make-instance 'display
+	       #+windows #+windows :win32 t
+	       #+darwin #+darwin :cocoa t
+	       #+unix #+unix :x11 t
+	       (append
+		(when (find-package :%vk)
+		  (list :vulkan t))
+		#+darwin
+		(when (find-package :%mtl)
+		  (list :metal t))
+		(when (find-package :%gl)
+		  (list :opengl t)))))))
+
+(defclass operating-system-mixin ()
   ())
 
-(defmethod initialize-instance :before ((instance application-mixin)
-					&rest initargs
-					&key (name "Abstract OS Application")
-					  &allow-other-keys)
+(defclass unix-mixin (operating-system-mixin)
+  ())
+
+(defclass linux-mixin (unix-mixin)
+  ())
+
+(defclass bsd-mixin (unix-mixin)
+  ())
+
+(defclass ms-windows-mixin (operating-system-mixin)
+  ())
+
+(defclass macos-mixin (unix-mixin)
+  ())
+
+(defclass gui-mixin ()
+  ())
+
+(defclass x11-mixin (gui-mixin)
+  ())
+
+(defclass win32-mixin (gui-mixin)
+  ())
+
+(defclass cocoa-mixin (gui-mixin)
+  ())
+
+(defclass wayland-mixin (gui-mixin)
+  ())
+
+(defclass vulkan-support-mixin ()
+  ())
+
+(defclass opengl-support-mixin ()
+  ())
+
+(defclass display-mixin ()
+  ((window-list-head
+    :accessor display-window-list-head
+    :initform nil)
+   
+   (monitors
+    :accessor display-monitors
+    :initform ())))
+
+(defclass screen-mixin ()
+  ())
+
+(defclass handle-mixin ()
+  ((handle :accessor h)))
+
+(defmethod initialize-instance ((instance display-mixin)
+				&rest initargs
+				&key
+				&allow-other-keys)
 					
   (declare (ignore initargs))
-  (setq *app* instance)
-  (setf (application-name instance) (or name "Abstract OS Application"))
-  #+darwin(init-cocoa instance)
-  ;;#+windows(init-win32 instance)
-  #+linux(init-linux instance)
-  (values))
+  (call-next-method)
+  (setf (display-monitors instance) (poll-monitors instance))
+  (push instance (get-displays))  
+  instance)
 
 (defstruct gamma-ramp
   (red (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0))
   (green (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0))
   (blue (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0)))
 
-(defclass monitor-mixin (#+windows win32-monitor-mixin
-			 #+x11 x11-monitor
-			 #+darwin ns-monitor-mixin)
+(defclass monitor-mixin ()
   ((name :initarg :name :reader monitor-name)
    (width-mm :initarg :width-mm :reader monitor-width-mm)
    (height-mm :initarg :height-mm :reader monitor-height-mm)
@@ -47,14 +108,13 @@
    (original-ramp :initform nil :accessor monitor-original-ramp)
    (current-ramp :initform nil :accessor monitor-current-ramp)))
 
-(defclass monitor (monitor-mixin) ())
-
-(defclass cursor-mixin (#+windows win32-cursor-mixin
-			#+x11 x11-cursor
-			#+darwin ns-cursor-mixin)
+(defclass cursor-mixin ()
   ())
 
-(defclass rect-mixin ()
+(defclass region-mixin ()
+  ())
+
+(defclass rect-mixin (region-mixin)
   ((x :initarg :x
       :accessor x
       :type real)
@@ -68,12 +128,6 @@
 	   :accessor height
 	   :type real)))
 
-(defclass region (rect-mixin)
-  ())
-
-(defclass hints ()
-  ((refresh-rate :accessor hints-refresh-rate :initform 120)))
-
 (defstruct video-mode
   (width)
   (height)
@@ -83,7 +137,8 @@
   (refresh-rate))
 
 (defclass window-mixin (rect-mixin)
-  ((next :type (or null window-mixin) :accessor window-next)
+  ((display :initarg :display :reader window-display)
+   (next :type (or null window-mixin) :accessor window-next)
    (maximized? :type boolean :initform nil :accessor currently-maximized?)
    (resizable? :type boolean :initform nil :accessor currently-resizable?)
    (decorated? :type boolean :initform nil :accessor currently-decorated?)
@@ -95,7 +150,7 @@
    (should-close? :type boolean :initform nil :accessor should-close?)
    (raw-mouse-motion? :type boolean :initform nil :accessor window-raw-mouse-motion?)
    (video-mode :accessor window-video-mode :initform (make-video-mode))
-   (monitor :initform nil :accessor window-monitor)
+   (monitor :initform nil :reader window-monitor :writer (setf %window-monitor))
    (cursor)
    (min-width :initform :dont-care :accessor window-min-width)
    (min-heigh :initform :dont-care :accessor window-min-height)
@@ -110,20 +165,28 @@
    (mouse-buttons)
    (keys)
    (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
-   (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)
-   (fully-created? :type boolean :accessor window-fully-created?)))
+   (virtual-cursor-pos-y :accessor virtual-cursor-pos-y))
+  (:default-initargs :display (default-display)))
 		  
 
-(defclass os-window-mixin (window-mixin
-			   #+windows win32-window-mixin
-			   #+x11 x11-window-mixin
-			   #+wayland wayland-window-mixin
-			   #+darwin ns-window-mixin)
+(defclass os-window-mixin (window-mixin)
+  ())
+
+(defclass homemade-window-mixin (window-mixin)
+  ())
+
+(defclass homemade-view-mixin (homemade-window-mixin)
   ())
 
 (defclass os-window-with-framebuffer-mixin (os-window-mixin)
   ((xscale :accessor window-xscale)
    (yscale :accessor window-yscale)))
+
+(defclass vulkan-window-mixin (os-window-with-framebuffer-mixin)
+  ())
+
+(defclass opengl-window-mixin (os-window-with-framebuffer-mixin)
+  ())
 
 (defmethod initialize-instance :before ((window os-window-mixin)
 				       &rest initargs
@@ -156,19 +219,8 @@
 		      focus-on-show? center-cursor? mouse-passthrough?
 		      monitor share frame-name key-menu clear-color
 		      retina?))
-  (setf (window-fully-created? window) nil)
   (apply #'initialize-os-window window initargs)
   (values))
-
-(defmethod initialize-instance :after ((window os-window-mixin) &rest initargs)
-  (setf (window-fully-created? window) t))
-	   
-
-(defclass os-window-with-framebuffer (os-window-with-framebuffer-mixin)
-  ())
-
-(defclass os-window (os-window-mixin)
-  ())
 
 (defclass constant-refresh-os-window-mixin ()
   ())
@@ -176,20 +228,3 @@
 (defclass constant-refresh-os-window-with-framebuffer-mixin (constant-refresh-os-window-mixin
 							     os-window-with-framebuffer-mixin)
   ())
-
-#+darwin
-(defclass metal-window-mixin (constant-refresh-os-window-with-framebuffer-mixin
-			      ns-metal-window-mixin)
-			      
-  ())
-
-(defclass vulkan-window-mixin (#-darwin constant-refresh-os-window-with-framebuffer-mixin
-					#+darwin metal-window-mixin
-					#+windows win32-vulkan-window-mixin
-					#+linux linux-vulkan-window-mixin)
-  ())
-
-(defclass opengl-window-mixin (constant-refresh-os-window-with-framebuffer-mixin)
-  ())
-
-

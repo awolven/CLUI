@@ -1,3 +1,3 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defvar *app*)

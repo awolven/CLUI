@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
 (defun terminate-cocoa-application (app)
@@ -24,7 +24,7 @@
   
 
 (defun make-helper-class ()
-  (let ((helper-class (objc-runtime::objc-allocate-class-pair #@NSObject "AbstractOSAppHelper" 0)))
+  (let ((helper-class (objc-runtime::objc-allocate-class-pair #@NSObject "CluiAppHelper" 0)))
     (objc-runtime::class-add-method helper-class @(doNothing:)
 				    (cffi:callback application-helper-do-nothing-callback)
 				    "v@:@")
@@ -106,7 +106,7 @@
 
 (defun make-application-delegate-class ()
   (let ((application-delegate-class (objc-runtime::objc-allocate-class-pair
-				     #@NSObject "AbstractOSApplicationDelegate" 0)))
+				     #@NSObject "CluiApplicationDelegate" 0)))
     (objc-runtime::class-add-method application-delegate-class @(applicationShouldTerminate:)
 				    (cffi:callback application-delegate-application-should-terminate-callback)
 				    "@@:@")
@@ -170,7 +170,7 @@
       (let ((progname "" #+NIL(_NSGetProgname)))
 	(if (not (string= progname ""))
 	    (setq app-name progname)
-	    (setq app-name "Abstract OS Application"))))
+	    (setq app-name "Clui Application"))))
 
     (let ((bar [[#@NSMenu @(alloc)] @(init)]))
       [(objc-object-id app) @(setMainMenu:) :pointer bar]

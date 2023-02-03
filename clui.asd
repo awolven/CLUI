@@ -1,16 +1,16 @@
-(defsystem abstract-os
+(defsystem clui
   :serial t
   :depends-on
-  (#+darwin :abstract-os/cocoa
-	    #+windows :abstract-os/win32
-	    #+linux :abstract-os/linux)
+  (#+darwin :clui/cocoa
+	    #+windows :clui/win32
+	    #+linux :clui/linux)
   :components
   (#-darwin
    (:file "noffi-patches")
 ))
 
 #+darwin
-(defsystem abstract-os/cocoa
+(defsystem clui/cocoa
   :depends-on (:objc-runtime)
   :serial t
   :components
@@ -37,7 +37,7 @@
    (:file "api")))
 
 #+windows
-(defsystem abstract-os/win32
+(defsystem clui/win32
   :depends-on ()
   :serial t
   :components
@@ -62,6 +62,7 @@
    (:file "../noffi/src/comp")
    (:file "../noffi/src/runtime")
    (:file "../noffi/src/abi-ms-amd64")
+   (:file "win32/boot-ht")
 	  
 
    (:file "noffi-patches")
@@ -69,17 +70,24 @@
    (:file "win32/win32")
    
    (:file "package")
+   (:file "protocols")
    (:file "app")
    (:file "classes")
-   (:file "events")   
+   (:file "events")
+   (:file "win32/win32-package")
    (:file "win32/win32-classes")
+   (:file "compute-concrete-class")
+   (:file "win32/win32-init")
    (:file "win32/win32-window")
+   (:file "win32/win32-monitor")
    (:file "monitor")
    (:file "abstract-os")
-   (:file "api")))
+   (:file "api")
+
+   #+NIL(:file "win32/test")))
 
 #+linux
-(defsystem abstract-os/linux
+(defsystem clui/linux
   :depends-on (:noffi)
   :serial t
   :components

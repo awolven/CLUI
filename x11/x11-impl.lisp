@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 
 (defclass x11-window-manager ()

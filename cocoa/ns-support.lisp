@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
 (cffi:defctype ns::|NSUInteger| #+64-bit :unsigned-long-long #+32-bit :unsigned-int)

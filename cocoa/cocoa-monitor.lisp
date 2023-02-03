@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
 (defun get-cocoa-display-name (display-id &optional (screen nil))

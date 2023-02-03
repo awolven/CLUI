@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
 (defparameter *wrapped-selector-table* (make-hash-table))
@@ -457,7 +457,7 @@
   ;; for some reason there still sometimes exist methods which don't show up in class-copy-method-list
   ;; those method pointers go in extras       
   (with-open-file (stream path :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (princ "(in-package :abstract-os)" stream)
+    (princ "(in-package :clui)" stream)
     (terpri stream)
     (princ "(named-readtables:in-readtable :objc-readtable)" stream)
     (terpri stream)
@@ -504,7 +504,7 @@
 			       #@MTKView
 			       #@CALayer
 			       #@CAMetalLayer)
-			 "~/abstract-os/cocoa/ns-bindings.lisp"
+			 "~/clui/cocoa/ns-bindings.lisp"
 			 (list (class_getClassMethod #@NSThread @(detachNewThreadSelector:toTarget:withObject:))
 			       (class_getClassMethod #@NSApplication @(sharedApplication))
 			       ;;(class_getClassMethod #@NSEvent @(addLocalMonitorForEventsMatchingMask:handler:)) ;; bogus

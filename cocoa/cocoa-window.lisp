@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
 (defvar *trace-callbacks* t)
@@ -549,12 +549,12 @@
 	       (loc (ns:|locationInWindow| event))
 	       (x (ns-get-x loc))
 	       (y (- (ns-get-y content-rect) (ns-get-y loc)))
-	       (abstract-os-event (make-instance 'pointer-motion-event
-						 :x x
-						 :y y
-						 :native-x x
-						 :native-y y)))
-	      (handle-event window abstract-os-event)))
+	       (clui-event (make-instance 'pointer-motion-event
+					  :x x
+					  :y y
+					  :native-x x
+					  :native-y y)))
+	      (handle-event window clui-event)))
 
     (setf (cursor-warp-delta-x window) 0
 	  (cursor-warp-delta-y window) 0)
@@ -790,13 +790,13 @@
 (defun create-native-window (window &rest args
 			     &key (xpos nil) (ypos nil)
 			       (width 640) (height 480)
-			       (title "Abstract OS")
+			       (title "clui")
 			       (decorated? t)
 			       (maximized? nil) 
 			       (resizable? t)
 			       (floating? nil)
 			       (transparent? nil)
-			       (frame-name "Abstract OS")
+			       (frame-name "clui")
 			       (retina? t)
 			       &allow-other-keys)
 
@@ -902,7 +902,7 @@
 	(ns:|setBackgroundColor:| window (ns:|clearColor| #@NScolor)))
 
       (ns:|makeFirstResponder:| window (window-content-view window))
-      (set-cocoa-window-title window (or title "Abstract OS"))
+      (set-cocoa-window-title window (or title "clui"))
       (ns:|setAcceptsMouseMovedEvents:| window t)
       (ns:|setRestorable:| window nil)
 
@@ -1100,7 +1100,7 @@
     
 (defun make-window-delegate-class ()
   (let ((window-delegate-class (objc-runtime::objc-allocate-class-pair
-				#@NSObject "AbstractOSWindowDelegate" 0)))
+				#@NSObject "CluiWindowDelegate" 0)))
     (objc-runtime::class-add-method window-delegate-class @(windowShouldClose:)
 				    (cffi:callback window-delegate-window-should-close-callback)
 				    "v@:@")
@@ -1130,7 +1130,7 @@
 (defun make-content-view-class (&optional (super #@NSView))
   (let ((content-view-class
 	 (objc-runtime::objc-allocate-class-pair
-	  super "AbstractOSContentView" 0)))
+	  super "CluiSContentView" 0)))
 
     (objc-runtime::class-add-method content-view-class @(dealloc)
 				    (cffi:callback content-view-dealloc-callback)
@@ -1217,7 +1217,7 @@
 (defun make-window-class ()
   (let ((window-class
 	 (objc-runtime::objc-allocate-class-pair
-	  #@NSWindow "AbstractOSWindow" 0)))
+	  #@NSWindow "CluiWindow" 0)))
     (objc-runtime::class-add-method window-class @(canBecomeKeyWindow)
 				    (cffi:callback window-can-become-key-window-callback)
 				    "c@:")

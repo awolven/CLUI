@@ -1,4 +1,4 @@
-(in-package :abstract-os)
+(in-package :clui)
 
 (defun %refresh-video-modes (monitor)
   (let ((modes nil))
@@ -8,8 +8,8 @@
 
   (setq modes
 	#+darwin(get-cocoa-video-modes monitor)
-	#+windows(get-win32-video-modes monitor)
-	#+linux(get-linux-video-modes monitor))
+	#+windows(get-win32-monitor-video-modes monitor)
+	#+linux(get-linux-monitor-video-modes monitor))
 
   (unless modes
     (return-from %refresh-video-modes nil))
@@ -23,21 +23,21 @@
 
 ;; Event API:
 
-(defun input-monitor (app monitor &key (action nil) (placement nil))
+(defun input-monitor (display monitor &key (action nil) (placement nil))
   (declare (type monitor-mixin monitor))
-  (declare (type application-mixin app))
+  (declare (type display-mixin display))
   (ecase action
     (:connected
 
      (ecase placement
-       (:insert-first (push monitor (application-monitors app)))
+       (:insert-first (push monitor (display-monitors display)))
 	 
-       (:insert-last (setf (application-monitors app)
-			   (nconc (application-monitors app) (list monitor))))))
+       (:insert-last (setf (display-monitors display)
+			   (nconc (display-monitors display) (list monitor))))))
 
     (:disconnected
-     (do ((window (application-window-list-head app)))
-	 ((window-next window))
+     (do ((window (display-window-list-head display) (window-next window)))
+	 ((not window))
 	 
        (when (eq (window-monitor window) monitor)
 	 (multiple-value-bind (width height) (get-os-window-size window)
@@ -45,8 +45,8 @@
 	   (multiple-value-bind (xoff yoff) (get-os-window-frame-size window)
 	     (set-os-window-pos window xoff yoff)))))
 
-     (setf (application-monitors app)
-	   (remove monitor (application-monitors app)))))
+     (setf (display-monitors display)
+	   (remove monitor (display-monitors display)))))
   (values))
 
 (defun input-monitor-window (monitor window)
@@ -95,7 +95,7 @@
 	 (setq least-rate-diff rate-diff)
 	 (setq least-color-diff color-diff)
 
-       finally (return closest))))
+       finally (return (or closest current)))))
 
 (defun compare-video-modes (fm sm)
   (let ((fbpp (+ (video-mode-red-bits fm)
