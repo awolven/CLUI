@@ -4,7 +4,11 @@
   ())
 
 #+ccl
-(defmethod ccl:validate-superclass ((a protocol-class) (b standard-class))
+(defmethod ccl:validate-superclass ((class protocol-class) (super standard-class))
+  t)
+
+#+sbcl
+(defmethod sb-mop:validate-superclass ((class protocol-class) (super standard-class))
   t)
 
 (defgeneric compute-concrete-class (protocol &rest args))
@@ -239,127 +243,127 @@
 
 
 ;; events
-(defclass timeout-event ()
+(defclass timeout-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
 ;; window events
-(defclass window-move-event ()
+(defclass window-move-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-resize-event ()
+(defclass window-resize-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-iconify-event ()
+(defclass window-iconify-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-deiconify-event ()
+(defclass window-deiconify-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-maximize-event ()
+(defclass window-maximize-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-restore-event ()
+(defclass window-restore-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-fullscreen-event ()
+(defclass window-fullscreen-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-show-event ()
+(defclass window-show-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-focus-event ()
+(defclass window-focus-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-defocus-event ()
+(defclass window-defocus-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-hide-event ()
+(defclass window-hide-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-repaint-event ()
+(defclass window-repaint-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
 ;; window manager (desktop) events
-(defclass window-created-event ()
+(defclass window-created-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-close-event ()
+(defclass window-close-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-destroyed-event ()
+(defclass window-destroyed-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass window-monitor-switched-event ()
+(defclass window-monitor-switched-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
 ;; pointer events
-(defclass pointer-button-press-event ()
+(defclass pointer-button-press-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-button-release-event ()
+(defclass pointer-button-release-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-button-click-event ()
+(defclass pointer-button-click-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-button-double-click-event ()
+(defclass pointer-button-double-click-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-button-hold-event ()
+(defclass pointer-button-hold-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-button-hold-and-drag-event ()
+(defclass pointer-button-hold-and-drag-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-wheel-event ()
+(defclass pointer-wheel-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-motion-event ()
+(defclass pointer-motion-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-enter-event ()
+(defclass pointer-enter-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-exit-event ()
+(defclass pointer-exit-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
 ;; keyboard events
-(defclass key-press-event ()
+(defclass key-press-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass key-release-event ()
+(defclass key-release-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass character-event ()
+(defclass character-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
@@ -368,43 +372,43 @@
   ()
   (:metaclass protocol-class))
 
-(defclass monitor-connected-event ()
+(defclass monitor-connected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass monitor-disconnected-event ()
+(defclass monitor-disconnected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass keyboard-connected-event ()
+(defclass keyboard-connected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass keyboard-disconnected-event ()
+(defclass keyboard-disconnected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-connected-event ()
+(defclass pointer-connected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass pointer-disconnected-event ()
+(defclass pointer-disconnected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass joystick-connected-event ()
+(defclass joystick-connected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass joystick-disconnected-event ()
+(defclass joystick-disconnected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass spaceball-connected-event ()
+(defclass spaceball-connected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
-(defclass spaceball-disconnected-event ()
+(defclass spaceball-disconnected-event (display-dependent)
   ()
   (:metaclass protocol-class))
 

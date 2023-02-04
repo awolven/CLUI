@@ -1,9 +1,7 @@
 (defsystem clui
   :serial t
   :depends-on
-  (#+darwin :clui/cocoa
-	    #+windows :clui/win32
-	    #+linux :clui/linux)
+  (#+darwin :clui/cocoa #+windows :clui/win32 #+linux :clui/linux)
   :components
   (#-darwin
    (:file "noffi-patches")
@@ -15,10 +13,12 @@
   :serial t
   :components
   ((:file "package")
+   (:file "protocols")
    (:file "app")
    (:file "classes")
    (:file "events")
    (:file "cocoa/cocoa-package")
+   (:file "x11/x11-package")
    (:file "cocoa/objc-runtime")
    (:file "cocoa/objc-binding")
    (:file "cocoa/iokit")
@@ -28,6 +28,8 @@
    (:file "cocoa/ns-support")
    (:file "cocoa/ns-bindings")
    (:file "cocoa/cocoa-classes")
+   (:file "x11/x11-classes")
+   (:file "compute-concrete-class")
    (:file "cocoa/cocoa-app")
    (:file "cocoa/cocoa-event")
    (:file "cocoa/cocoa-monitor")

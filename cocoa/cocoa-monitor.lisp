@@ -159,7 +159,7 @@
 		finally (return-from get-cocoa-display-fallback-refresh-rate refresh-rate)))
 	(IOObjectRelease (cffi:mem-aref it :unsigned-int))))))
 
-(defun poll-cocoa-monitors (app)
+(defun poll-cocoa-monitors (desktop)
   (cffi:with-foreign-object (p-display-count :unsigned-int)
    (CGGetOnlineDisplayList 0 (cffi:null-pointer) p-display-count)
     (let* ((display-count (cffi:mem-aref p-display-count :unsigned-int)))
@@ -168,18 +168,18 @@
 
 	(mapcar #'(lambda (monitor)
 		    (setf (monitor-screen monitor) nil))
-		(application-monitors app))
+		(display-monitors desktop))
 	
-	(let ((disconnected (copy-list (application-monitors app))))
+	(let ((disconnected (copy-list (display-monitors desktop))))
 	  
 	  (loop for i from 0 below display-count
-	     with display
+	     with display-id
 	     with unit-number
 	     with screen
 	     with found?
-	     do (setq display (cffi:mem-aref p-displays :unsigned-int i))
-	     unless (CGDisplayIsAsleep display)
-	     do (setq unit-number (CGDisplayUnitNumber display))
+	     do (setq display-id (cffi:mem-aref p-displays :unsigned-int i))
+	     unless (CGDisplayIsAsleep display-id)
+	     do (setq unit-number (CGDisplayUnitNumber display-id))
 	       (setq screen nil)
 
 	       (block nil
@@ -202,30 +202,31 @@
 		   (return)))
 	       
 	     unless found?
-	     do (let ((size (CGDisplayScreenSize display))
-		      (name (get-cocoa-display-name display screen))
+	     do (let ((size (CGDisplayScreenSize display-id))
+		      (name (get-cocoa-display-name display-id screen))
 		      (monitor)
 		      (mode))
 		  (when name
 		    (setq monitor (make-instance 'monitor
+						 :display desktop
 						 :name name
 						 :width-mm (getf size 'ns::width)
 						 :height-mm (getf size 'ns::height)
-						 :display-id display
+						 :display-id display-id
 						 :unit-number unit-number
 						 :screen screen))
 		    
-		    (setq mode (CGDisplayCopyDisplayMode display))
+		    (setq mode (CGDisplayCopyDisplayMode display-id))
 		    
 		    (when (zerop (CGDisplayModeGetRefreshRate mode))
-		      (setf (monitor-fallback-refresh-rate monitor) (get-cocoa-display-fallback-refresh-rate display)))
+		      (setf (monitor-fallback-refresh-rate monitor) (get-cocoa-display-fallback-refresh-rate display-id)))
 		    
 		    (CGDisplayModeRelease mode)
 		    
-		    (input-monitor app monitor :action :connected :placement :insert-last))))
+		    (input-monitor desktop monitor :action :connected :placement :insert-last))))
 
 	  (loop for discon in disconnected
-	     do (input-monitor app discon :action :disconnected)))))))
+	     do (input-monitor desktop discon :action :disconnected)))))))
 
 (defun set-cocoa-video-mode (monitor desired-video-mode)
   (let ((current (get-cocoa-video-mode monitor))

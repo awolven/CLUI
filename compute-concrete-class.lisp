@@ -1,10 +1,12 @@
 (in-package :clui)
 
 (defmethod compute-concrete-class ((protocol display)
-				   &rest initargs &key (x11 nil) (wayland nil) (vulkan nil) (opengl nil)
+				   &rest initargs &key (x11 nil) (wayland nil)
+						    #+darwin (metal nil)
+						    (vulkan nil) (opengl nil)
 				   &allow-other-keys)
   (declare (ignorable wayland initargs))
-  (cond (x11 (find-class 'x11::local-server))
+  (cond (x11 (find-class 'x11:local-server))
 	(t #+windows (cond (vulkan (find-class 'win32:desktop-with-vulkan))
 			   (opengl (find-class 'win32:desktop-with-opengl))
 			   (t (find-class 'win32:desktop)))
@@ -17,7 +19,7 @@
 			 (t (find-class 'xll::local-server))))))
 
 (defmethod compute-concrete-class ((protocol display-dependent)
-				   &rest initargs &key display &allow-other-keys)
+				   &rest initargs &key (display (default-display))  &allow-other-keys)
   (apply #'compute-concrete-class-with-display protocol display initargs))
 
 #+windows
@@ -36,7 +38,7 @@
   (declare (ignore initargs))
   (find-class 'cocoa:monitor))
 
-#+unix
+
 (defmethod compute-concrete-class-with-display ((protocol monitor) (display x11:server-mixin)
 						&rest initargs
 						&key
@@ -52,7 +54,7 @@
   (declare (ignore initargs))
   (find-class 'wayland:monitor))
 
-(defmethod compute-concrete-class-with-display ((protocol window) display &rest initargs)
+(defmethod compute-concrete-class-with-display ((protocol window) display &rest initargs &key &allow-other-keys)
   (apply #'compute-concrete-window-class display (getf initargs :parent) initargs))
 
 #+windows
@@ -113,19 +115,19 @@
       (find-class 'wayland:opengl-window errorp)
       (find-class 'wayland:window errorp)))
 
-#+(or unix x11)
+#+unix
 (defmethod get-an-x11-window-class (display errorp &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   (find-class 'x11:window errorp))
 
-#+(or unix x11)
+#+unix
 (defmethod get-an-x11-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'x11:vulkan-window errorp)
       (find-class 'x11:window errorp)))
 
-#+(or unix x11)
+#+unix
 (defmethod get-an-x11-window-class ((desktop clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
@@ -142,7 +144,6 @@
 
 #+darwin
 (defmethod compute-concrete-window-class (desktop (parent cocoa:screen-mixin) &rest initargs)
-  (declare (ignore desktop))
   (apply #'get-a-cocoa-window-class desktop t initargs))
 
 #+linux
@@ -150,9 +151,8 @@
   (declare (ignore desktop))
   (apply #'get-a-wayland-window-class desktop t initargs))
 
-#+(or unix x11)
+#+unix
 (defmethod compute-concrete-window-class (display (parent x11:screen-mixin) &rest initargs)
-  (declare (ignore display))
   (apply #'get-an-x11-window-class display t initargs))
 
 #+windows
@@ -161,17 +161,16 @@
 
 #+darwin
 (defmethod compute-concrete-window-class ((desktop cocoa:desktop-mixin) (parent null) &rest initargs)
-  (declare (ignore desktop))
   (apply #'get-a-cocoa-window-class desktop t initargs))
 
 #+linux
 (defmethod compute-concrete-window-class ((desktop wayland:desktop-mixin) (parent null) &rest initargs)
   (apply #'get-a-wayland-window-class desktop t initargs))
 
-#+(or unix x11)
+#+unix
 (defmethod compute-concrete-window-class ((display x11:server-mixin) (parent null) &rest initargs)
   ;; todo: maybe do somthing different in case of remote-server instead of local-server
-  (apply #'get-an-x11-window-class desktop t initargs))
+  (apply #'get-an-x11-window-class display t initargs))
 
 ;; if it is not a toplevel window then:
 ;; on windows it is an os-window with a parent (this may be called a view for abstraction sake)
@@ -248,7 +247,7 @@
   (declare (ignorable display initargs))
   (find-class 'cocoa:nsgl-view))
 
-#+(or unix x11)
+#+unix
 (defmethod compute-concrete-window-class ((display x11:server-mixin) (parent x11:window-mixin) &rest initargs)
   (apply #'get-an-x11-window-class t initargs))
 
@@ -266,4 +265,105 @@
 (defmethod compute-concrete-window-class (display (parent clui:homemade-window-mixin) &rest initargs)
   (declare (ignore display initargs))
   (class-of parent))
+
+
+(defmethod compute-concrete-class-with-display ((protocol timeout-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:timeout-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-move-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-move-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-resize-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-resize-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-iconify-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-iconify-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-deiconify-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-deiconify-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-maximize-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-maximize-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-restore-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-restore-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-fullscreen-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-fullscreen-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-show-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-show-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-focus-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-focus-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-defocus-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-defocus-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-hide-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-hide-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-repaint-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-repaint-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-created-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-created-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-close-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-close-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-destroyed-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-destroyed-event))
+
+(defmethod compute-concrete-class-with-display ((protocol window-monitor-switched-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:window-monitor-switched-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-button-press-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-button-press-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-button-release-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-button-release-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-button-hold-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-button-hold-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-button-hold-and-drag-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-button-hold-and-drag-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-wheel-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-wheel-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-motion-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-motion-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-enter-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-enter-event))
+
+(defmethod compute-concrete-class-with-display ((protocol pointer-exit-event) display &rest initargs &key &allow-other-keys)
+  (declare (ignore display initargs))
+  (find-class 'clui.v0:pointer-exit-event))
 

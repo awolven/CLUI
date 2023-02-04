@@ -23,7 +23,7 @@
   (let (#+NIL(video-mode (application-default-video-mode window)))
     #+NIL(setf (video-mode-width video-mode) width
 	  (video-mode-height video-mode) height
-	  (video-mode-refresh-rate video-mode) (hints-refresh-rate (hints *app*)))
+	  (video-mode-refresh-rate video-mode) 0.0f0)
 
 
 

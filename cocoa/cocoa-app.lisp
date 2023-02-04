@@ -13,11 +13,10 @@
 (deftraceable-callback application-helper-selected-keyboard-input-source-changed-callback :void
     ((self :pointer) (_cmd :pointer) (object :pointer))
 ;;  (declare (ignorable self _cmd))
-  (application-helper-selected-keyboard-input-source-changed *app* object)
+  (application-helper-selected-keyboard-input-source-changed object)
   (values))
 
-(defun application-helper-selected-keyboard-input-source-changed (application object)
-  (declare (ignorable application))
+(defun application-helper-selected-keyboard-input-source-changed (object)
   (declare (ignore object))
   #+NOTYET
   (update-unicode-data application))
@@ -39,27 +38,23 @@
 
 (deftraceable-callback application-delegate-application-should-terminate-callback :pointer
     ((self :pointer) (_cmd :pointer) (notification :pointer))
-;;  (declare (ignorable self _cmd))
-  (let ((application *app*))
-    (when application
-      (application-should-terminate application notification))))
+  ;;  (declare (ignorable self _cmd))
+  (application-should-terminate notification))
 
-(defun application-should-terminate (application notification)
-  (declare (ignorable application notification))
-  application)
+(defun application-should-terminate (notification)
+  (declare (ignorable notification))
+  (values))
 
 (deftraceable-callback application-delegate-application-did-change-screen-parameters-callback :void
     ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignorable self _cmd))
   (format t "~%application-did-change-screen-parameters")
   (finish-output)
-  (let ((application *app*))
-    (when application
-      (application-did-change-screen-parameters application notification))
-    (values)))
+  (application-did-change-screen-parameters notification)
+  (values))
 
-(defun application-did-change-screen-parameters (application notification)
-  (declare (ignorable application notification))
+(defun application-did-change-screen-parameters (notification)
+  (declare (ignorable notification))
   (values))
 
 (deftraceable-callback application-delegate-application-will-finish-launching-callback :void
@@ -67,39 +62,34 @@
 ;;  (declare (ignorable self _cmd))
   (format t "~%application-will-finish-launching")
   (finish-output)
-  (let ((application *app*))
-    (when application
-      (application-will-finish-launching application notification))
-    (values)))
+  (application-will-finish-launching notification)
+  (values))
 
-(defun application-will-finish-launching (application notification)
-  (declare (ignorable application notification))
-  (create-menu-bar application)
+(defun application-will-finish-launching (notification)
+  (declare (ignorable notification))
+  (create-menu-bar)
   (values))
 
 (deftraceable-callback application-delegate-application-did-finish-launching-callback :void
     ((self :pointer) (_cmd :pointer) (notification :pointer))
-;;  (declare (ignorable self _cmd))
-  (let ((application *app*))
-    (when application
-      (application-did-finish-launching application notification))
-    (values)))
+  ;;  (declare (ignorable self _cmd))
+  (application-did-finish-launching notification)
+  (values))
 
-(defmethod application-did-finish-launching (application notification)
+(defmethod application-did-finish-launching (notification)
+  (declare (ignorable notification))
   (values))
 
 
 
 (deftraceable-callback application-delegate-application-did-hide-callback :void
     ((self :pointer) (_cmd :pointer) (notification :pointer))
-;;  (declare (ignorable self _cmd))
-  (let ((application *app*))
-    (when application
-      (application-did-hide application notification))
-    (values)))
+  ;;  (declare (ignorable self _cmd))
+  (application-did-hide notification)
+  (values))
 
-(defun application-did-hide (application notification)
-  (declare (ignorable application notification))
+(defun application-did-hide (notification)
+  (declare (ignorable notification))
   (values))
 
 
@@ -163,8 +153,8 @@
 	(setf (ccl:current-directory) (cffi:foreign-string-to-lisp p-resources-path))
 	t))))
 
-(defun create-menu-bar (app)
-  (let ((app-name (application-name app)))
+(defun create-menu-bar ()
+  (let ((app-name "CLUI"))
 
     (unless app-name
       (let ((progname "" #+NIL(_NSGetProgname)))
@@ -173,7 +163,7 @@
 	    (setq app-name "Clui Application"))))
 
     (let ((bar [[#@NSMenu @(alloc)] @(init)]))
-      [(objc-object-id app) @(setMainMenu:) :pointer bar]
+      [objc-runtime::ns-app @(setMainMenu:) :pointer bar]
 
       (let ((app-menu-item [bar @(addItemWithTitle:action:keyEquivalent:) :pointer [#@NSString @(string)]
 			   :pointer (cffi:null-pointer) :pointer [#@NSString @(string)]])
@@ -186,7 +176,7 @@
 	 [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
 
 	 (let ((services-menu [[#@NSMenu @(alloc)] @(init)]))
-	  [(objc-object-id app) @(setServicesMenu:) :pointer services-menu]
+	  [objc-runtime::ns-app @(setServicesMenu:) :pointer services-menu]
 	  [app-menu @(addItemWithTitle:action:keyEquivalent:) :pointer (objc-runtime::make-nsstring "Services") :pointer (cffi:null-pointer)
 	  :pointer (objc-runtime::make-nsstring "")]
 
@@ -213,7 +203,7 @@
 	  (let ((window-menu-item [bar @(addItemWithTitle:action:keyEquivalent:) :pointer (objc-runtime::make-nsstring "")
 				  :pointer (cffi:null-pointer) :pointer (objc-runtime::make-nsstring "")])
 		(window-menu [[#@NSMenu @(alloc)] @(initWithTitle:) :pointer (objc-runtime::make-nsstring "Window")]))
-	    [(objc-object-id app) @(setWindowsMenu:) :pointer window-menu]
+	    [objc-runtime::ns-app @(setWindowsMenu:) :pointer window-menu]
 	    [window-menu-item @(setSubmenu:) :pointer window-menu]
 	    [window-menu @(addItemWithTitle:action:keyEquivalent:)
 	    :pointer (objc-runtime::make-nsstring "Minimize")
@@ -232,7 +222,7 @@
 	     :pointer @(toggleFullScreen:) :pointer (objc-runtime::make-nsstring "f")]
 	     @(setKeyEquivalentModifierMask:) :int (logior NSEventModifierFlagControl NSEventModifierFlagCommand)]
 
-	     [(objc-object-id app) @(performSelector:withObject:) :pointer @(setAppleMenu:) :pointer app-menu]
+	     [objc-runtime::ns-app @(performSelector:withObject:) :pointer @(setAppleMenu:) :pointer app-menu]
 	     [bar @(release)]
 	     (values)))))))
 
@@ -242,24 +232,13 @@
 
 (defun closure-like-thingy-named-block (event)
   (unless (zerop (logand (ns::|modifierFlags| event) NSEventModifierFlagCommand))
-    (ns::|sendEvent:| (ns::|keyWindow| *app*) event))
+    (ns::|sendEvent:| (ns::|keyWindow| objc-runtime::ns-app) event))
   event)
   
 (defun init-cocoa (app)
   (flet ((pre-init-app ()
-	   (setf (application-window-list-head app) nil)
-	   (setf (application-monitors app) nil)
-	   (setf (objc-helper-class app) (make-helper-class))
-	   (setf (objc-application-delegate-class app) (make-application-delegate-class))
-	   (setf (objc-window-class app) (make-window-class))
-	   (setf (objc-window-delegate-class app) (make-window-delegate-class))
-	   (setf (objc-content-view-class app) (make-content-view-class #+vulkan #@MTKView))
-
-	   (setf (delegate->clos-window-table app) (make-hash-table :test #'eq))
-	   (setf (content-view->clos-content-view-table app) (make-hash-table :test #'eq))
-  
 	   (setf (application-helper app) (alloc-init (objc-helper-class app)))
-
+	   
 	   (when (cffi:null-pointer-p (application-helper app))
 	     (error "Cocoa: failed to create application helper."))
   
@@ -297,18 +276,16 @@
 
       ;;(create-key-tables app)
 
-      (setf (application-event-source app) (CGEventSourceCreate 0))
+      (setf (desktop-event-source app) (CGEventSourceCreate 0))
 
-      (when (cffi:null-pointer-p (application-event-source app))
+      (when (cffi:null-pointer-p (desktop-event-source app))
 	(return-from init-cocoa nil))
 
-      (CGEventSourceSetLocalEventsSuppressionInterval (application-event-source app) 0.0d0)
+      (CGEventSourceSetLocalEventsSuppressionInterval (desktop-event-source app) 0.0d0)
 
       #+NOTYET
       (unless (initialize-tis app)
 	(return-from init-cocoa nil))
-
-      (poll-cocoa-monitors app)
 
       ;; this line of code is what is causing ns::|run| to crash on TouchBar Observer:
       ;;(ns::|setActivationPolicy:| app NSApplicationActivationPolicyRegular)
@@ -319,7 +296,7 @@
   (when (tis-input-source app)
     (CFRelease (tis-input-source app))
     (setf (tis-input-source app) nil)
-    (setf (application-unicode-data app) nil))
+    (setf (desktop-unicode-data app) nil))
 
   (let ((source (TISCopyCurrentKeyboardLayoutInputSource)))
   
@@ -333,7 +310,7 @@
       (when (cffi:null-pointer-p data)
 	(error "Cocoa: Failed to retrieve keyboard layout unicode data."))
       
-      (setf (application-unicode-data app) data)
+      (setf (desktop-unicode-data app) data)
       
       t)))
 

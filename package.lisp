@@ -2,6 +2,36 @@
 
 (defpackage :x11)
 
+(defpackage :clui.v0
+  (:export #:timeout-event
+	   #:window-move-event
+	   #:window-resize-event
+	   #:window-iconify-event
+	   #:window-deiconify-event
+	   #:window-maximize-event
+	   #:window-restore-event
+	   #:window-fullscreen-event
+	   #:window-show-event
+	   #:window-focus-event
+	   #:window-defocus-event
+	   #:window-hide-event
+	   #:window-repaint-event
+	   #:window-created-event
+	   #:window-close-event
+	   #:window-destroyed-event
+	   #:window-monitor-switched-event
+	   #:pointer-button-press-event
+	   #:pointer-button-release-event
+	   #:pointer-button-hold-event
+	   #:pointer-click-event
+	   #:pointer-double-click-event
+	   #:pointer-button-hold-and-drag-event
+	   #:pointer-wheel-event
+	   #:pointer-motion-event
+	   #:pointer-enter-event
+	   #:pointer-exit-event))
+	   
+
 (defpackage :clui
   (:use :cl)
   (:export #:*app*

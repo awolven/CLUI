@@ -166,7 +166,7 @@
 
 (defun request-cocoa-window-attention (window)
   (declare (ignore window))
-  (ns:|requestUserAttention:| *app* NSInformationalRequest)
+  (ns:|requestUserAttention:| (window-display window) NSInformationalRequest)
   (values))
 
 (defun cocoa-window-focused? (window)
@@ -180,7 +180,7 @@
 
 (defun focus-cocoa-window (window)
   (with-autorelease-pool (pool)
-    (ns:|activateIgnoringOtherApps:| *app* t)
+    (ns:|activateIgnoringOtherApps:| (window-display window) t)
     (ns:|makeKeyAndOrderFront:| window nil))
   (values))
 
@@ -348,7 +348,7 @@
 (deftraceable-callback content-view-dealloc-callback :void ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (ns:|dealloc| content-view))
     (values)))
@@ -356,7 +356,7 @@
 (deftraceable-callback content-view-is-opaque-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (if content-view
 	(content-view-is-opaque content-view)
 	*yes*)))
@@ -371,7 +371,7 @@
 (deftraceable-callback content-view-can-become-key-view-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-can-become-key-view content-view))))
 
@@ -389,7 +389,7 @@
 (deftraceable-callback content-view-accepts-first-responder-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-accepts-first-responder content-view))))
 
@@ -407,7 +407,7 @@
 (deftraceable-callback content-view-wants-update-layer-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (if content-view
       (content-view-wants-update-layer content-view)
       (progn (break)
@@ -427,7 +427,7 @@
 (deftraceable-callback content-view-draw-in-mtkview-callback :void ((self :pointer) (_cmd :pointer) (view :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-draw-in-mtkview content-view))
     (values)))
@@ -439,7 +439,7 @@
 (deftraceable-callback content-view-update-layer-callback :void ((self :pointer) (_cmd :pointer))
   ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-update-layer content-view))))
 
@@ -448,12 +448,12 @@
   (values))
 
 (defmethod cocoa-window-update-view-layer ((window window-mixin))
-  (input-window-damage window))
+  #+NIL(input-window-damage window))
 
 (deftraceable-callback content-view-cursor-update-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-cursor-update content-view event))
     (values)))
@@ -470,7 +470,7 @@
 (deftraceable-callback content-view-accepts-first-mouse-callback :bool ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-accepts-first-mouse content-view))))
 
@@ -481,20 +481,16 @@
 (deftraceable-callback content-view-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-mouse-down content-view event))
     (values)))
 
 (defun content-view-mouse-down (content-view event)
-;;  (ns:|setNeedsDisplay:| content-view t)
-  (input-mouse-clicked (content-view-owner content-view)
-		     :mouse-button-left :press
-		     (translate-flags (ns:|modifierFlags| event)))
-  ;;(ns:|setLayerContentsRedrawPolicy:| content-view NSViewLayerContentsRedrawOnSetNeedsDisplay)
-  ;;(ns:|setEnableSetNeedsDisplay:| content-view t)
-  ;;(ns:|setNeedsDisplay:| content-view t)
-  (values))
+  (let ((clui-event (make-instance 'pointer-button-press-event
+				   :button +pointer-left-button+
+				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
+    (handle-event (content-view-owner content-view) clui-event)))
 
 (defun translate-flags (event-modifier-flags)
   event-modifier-flags)
@@ -502,7 +498,7 @@
 (deftraceable-callback content-view-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-mouse-dragged content-view event))
     (values)))
@@ -514,21 +510,22 @@
 (deftraceable-callback content-view-mouse-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-mouse-up content-view event))
     (values)))
 
 (defun content-view-mouse-up (content-view event)
-  (input-mouse-clicked (content-view-owner content-view)
-		     :mouse-button-left :release
-		     (translate-flags (ns:|modifierFlags| event)))
+  (let ((clui-event (make-instance 'pointer-button-release-event
+				   :button +pointer-left-button+
+				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
+    (handle-event (content-view-owner content-view) clui-event))
   (values))
 
 (deftraceable-callback content-view-mouse-moved-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-mouse-moved content-view event))
     (values)))
@@ -563,21 +560,21 @@
 (deftraceable-callback content-view-right-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-right-mouse-down content-view event))
     (values)))
 
 (defun content-view-right-mouse-down (content-view event)
-  (input-mouse-clicked (content-view-owner content-view)
-		       :mouse-button-right
-		       :press
-		       (translate-flags (ns:|modifierFlags| event))))
+  (let ((clui-event (make-instance 'pointer-button-press-event
+				   :button +pointer-right-button+
+				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
+    (handle-event (content-view-owner content-view) clui-event)))
 
 (deftraceable-callback content-view-right-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-right-mouse-dragged content-view event))
     (values)))
@@ -589,37 +586,38 @@
 (deftraceable-callback content-view-right-mouse-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-right-mouse-up content-view event))
     (values)))
 
 (defun content-view-right-mouse-up (content-view event)
-  (input-mouse-clicked (content-view-owner content-view)
-		       :mouse-button-right
-		       :release
-		       (translate-flags (ns:|modifierFlags| event))))
+  (let ((clui-event (make-instance 'pointer-button-release-event
+				   :button +pointer-right-button+
+				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
+    (handle-event (content-view-owner content-view) clui-event))
+  (values))
 
 (deftraceable-callback content-view-other-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-other-mouse-down content-view event))
     (values)))
 
 (defun content-view-other-mouse-down (content-view event)
   (ns:|toggleFullScreen:| (content-view-owner content-view) nil)
-  (input-mouse-clicked (content-view-owner content-view)
-		       (aref #(:mouse-button-right :mouse-button-left :mouse-button-middle)
-			     (ns:|buttonNumber| event))
-		       :press
-		       (translate-flags (ns:|modifierFlags| event))))
+  (let ((clui-event (make-instance 'pointer-button-press-event
+				   :button (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
+						 (ns:|buttonNumber| event))
+				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
+    (handle-event (content-view-owner content-view) clui-event)))
 
 (deftraceable-callback content-view-other-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-other-mouse-dragged content-view event))
     (values)))
@@ -631,22 +629,22 @@
 (deftraceable-callback content-view-other-mouse-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-other-mouse-up content-view event))
     (values)))
 
 (defun content-view-other-mouse-up (content-view event)
-  (input-mouse-clicked (content-view-owner content-view)
-		       (aref #(:mouse-button-right :mouse-button-left :mouse-button-middle)
-			     (ns:|buttonNumber| event))
-		       :release
-		       (translate-flags (ns:|modifierFlags| event))))
+  (let ((clui-event (make-instance 'pointer-button-release-event
+				   :button (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
+						 (ns:|buttonNumber| event))
+				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
+    (handle-event (content-view-owner content-view) clui-event)))
 
 (deftraceable-callback content-view-other-mouse-exited-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-other-mouse-exited content-view event))
     (values)))
@@ -664,7 +662,7 @@
 (deftraceable-callback content-view-other-mouse-entered-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-other-mouse-entered content-view event))
     (values)))
@@ -683,7 +681,7 @@
 (deftraceable-callback content-view-view-did-change-backing-properties-callback :void ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-view-did-change-backing-properties content-view))
     (values)))
@@ -721,22 +719,20 @@
 (cffi:defcallback content-view-draw-rect-callback :void ((self :pointer) (_cmd :pointer) (rect :pointer))
   (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+			       *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-draw-rect (content-view-owner content-view) content-view rect))
     (values)))
 
 (defmethod content-view-draw-rect ((window os-window-mixin) (view content-view) rect)
   (declare (ignorable rect))
-  (princ 'beloo)
-  (finish-output)
   (format t "~%running draw-rect")
   (finish-output)
   (ns:|set| (ns:|whiteColor| #@NSColor))
   (ns:|strokeRect:| #@NSBezierPath (make-nsrect 0 0 1 1))
   (NSRectFill (ns:|bounds| view))
   (ns:|flushGraphics| (window-graphics-context window))
-  (input-window-damaged window)
+  #+NIL(input-window-damaged window)
   )
 
 (defmethod content-view-draw-rect ((window constant-refresh-os-window-mixin) (view content-view) rect)
@@ -745,8 +741,7 @@
 
 (deftraceable-callback content-view-update-tracking-areas-callback :void ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
-  (let ((content-view (gethash (sap-int self)
-			       (content-view->clos-content-view-table *app*))))
+  (let ((content-view (gethash (sap-int self) *content-view->clos-content-view-table*)))
     (when content-view
       (content-view-update-tracking-areas content-view))
     (values)))
@@ -835,7 +830,7 @@
 
       (setf (objc-object-id window)
 	    (NS:|initWithContentRect:styleMask:backing:defer:|
-		 (alloc (objc-window-class *app*))
+		 (alloc (objc-window-class (window-display window)))
 		 content-rect
 		 #+NIL(logior NSWindowStyleMaskTitled
 			     NSWindowStyleMaskClosable
@@ -849,14 +844,14 @@
 
       (setf (window-delegate window)
 	    (make-instance 'window-delegate
-			   :ptr (alloc-init (objc-window-delegate-class *app*))
+			   :ptr (alloc-init (objc-window-delegate-class (window-display window)))
 			   :owner window))
 
       (ns:|setDelegate:| window (window-delegate window))
 	  
       (setf (window-content-view window)
 	    (make-instance 'content-view
-			   :ptr (alloc (objc-content-view-class *app*))
+			   :ptr (alloc (objc-content-view-class (window-display window)))
 			   :owner window
 			   :marked-text (alloc-init #@NSMutableAttributedString)))
 
@@ -875,8 +870,8 @@
 	  (progn
 	      
 	    (when (or (null xpos) (null ypos))
-	      (setf (cascade-point *app*)
-		    (ns:|cascadeTopLeftFromPoint:| window (cascade-point *app*))))
+	      (setf (cascade-point (window-display window))
+		    (ns:|cascadeTopLeftFromPoint:| window (cascade-point (window-display window)))))
 
 	    (let ((behavior (if resizable?
 				(logior NSWindowCollectionBehaviorFullScreenPrimary
@@ -979,7 +974,7 @@
 
 (deftraceable-callback window-delegate-window-should-close-callback :void ((self :pointer) (_cmd :pointer) (sender :pointer))
 ;;  (declare (ignore sender))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (ns-window-should-close window))
     (values)))
@@ -989,7 +984,7 @@
   (input-window-close-request window))
 
 (deftraceable-callback window-delegate-window-did-resize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (cocoa-window-did-resize window notification))
     (values)))
@@ -997,7 +992,7 @@
 (defun cocoa-window-did-resize (window notification)
   (declare (ignorable notification))
   #+NIL
-  (when (eq window (disabled-cursor-window *app*))
+  (when (eq window (disabled-cursor-window (window-display window)))
     (center-cursor-in-content-area window))
   (let* ((content-rect (ns:|frame| window)))
     (let* ((maximized? (ns:|isZoomed| window))
@@ -1007,11 +1002,11 @@
 				 :new-x (ns-get-x content-rect)
 				 :new-y (ns-get-y content-rect)
 				 :new-width (ns-get-width content-rect)
-				 :new-height (ns-get-height content-rect))))				 
+				 :new-height (ns-get-height content-rect))))
       (handle-event window event))))
 
 (deftraceable-callback window-delegate-window-did-move-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (cocoa-window-did-move window notification))
     (values)))
@@ -1027,7 +1022,7 @@
   (values))
 
 (deftraceable-callback window-delegate-window-did-miniaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (cocoa-window-did-miniaturize window notification))
     (values)))
@@ -1046,7 +1041,7 @@
 (trace release-monitor acquire-monitor release-cocoa-monitor acquire-cocoa-monitor)
 
 (deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (cocoa-window-did-deminiaturize window notification))
     (values)))
@@ -1065,7 +1060,7 @@
 
 (deftraceable-callback window-delegate-window-did-become-key-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignore notification))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (window-did-become-key window))
     (values)))
@@ -1076,7 +1071,7 @@
 
 (deftraceable-callback window-delegate-window-did-resign-key-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignore notification))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (window-did-resign-key window))
     (values)))
@@ -1087,7 +1082,7 @@
 
 (deftraceable-callback window-delegate-window-did-change-occlusion-state-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignore notification))
-  (let ((window (gethash (sap-int self) (delegate->clos-window-table *app*))))
+  (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
       (window-did-change-occlusion-state window))
     (values)))
@@ -1303,7 +1298,7 @@
 
     ;;(input-window-monitor window monitor)
 
-    (poll-cocoa-events *app*)
+    (poll-cocoa-events (window-display window))
 
     (let ((style-mask (ns:|styleMask| window)))
 

@@ -17,7 +17,7 @@
 	(apply #'make-instance 'display
 	       #+windows #+windows :win32 t
 	       #+darwin #+darwin :cocoa t
-	       #+unix #+unix :x11 t
+	       #+(or linux freebsd openbsd) #+(or linux freebsd openbsd) :x11 t
 	       (append
 		(when (find-package :%vk)
 		  (list :vulkan t))
@@ -88,7 +88,7 @@
 					
   (declare (ignore initargs))
   (call-next-method)
-  (setf (display-monitors instance) (poll-monitors instance))
+  (poll-monitors instance)
   (push instance (get-displays))  
   instance)
 
@@ -188,7 +188,7 @@
 (defclass opengl-window-mixin (os-window-with-framebuffer-mixin)
   ())
 
-(defmethod initialize-instance :before ((window os-window-mixin)
+(defmethod initialize-instance ((window os-window-mixin)
 				       &rest initargs
 				       &key xpos ypos
 					 width height
@@ -220,7 +220,8 @@
 		      monitor share frame-name key-menu clear-color
 		      retina?))
   (apply #'initialize-os-window window initargs)
-  (values))
+  (call-next-method)
+  window)
 
 (defclass constant-refresh-os-window-mixin ()
   ())

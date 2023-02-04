@@ -1,10 +1,15 @@
 (in-package :clui)
+(named-readtables:in-readtable :objc-readtable)
 
 (defclass objc-object-mixin ()
   ((id :initarg :ptr :accessor objc-object-id)))
 
 (defclass ns-helper (objc-object-mixin)
   ())
+
+(defvar *delegate->clos-window-table* (make-hash-table :test #'eq))
+(defvar *content-view->clos-content-view-table* (make-hash-table :test #'eq))
+
 
 (defclass cocoa:desktop-mixin (clui:display-mixin)
   ((kTISPropertyUnicodeKeyLayoutData)
@@ -13,28 +18,28 @@
    (LMGetKeyboardType)
    
    (helper-class
-    :accessor objc-helper-class)
+    :accessor objc-helper-class
+    :initform (make-helper-class))
    
    (helper :initform nil
 	   :accessor application-helper)
    
    (application-delegate-class
-    :accessor objc-application-delegate-class)
+    :accessor objc-application-delegate-class
+    :initform (make-application-delegate-class))
    
    (window-class
-    :accessor objc-window-class)
+    :accessor objc-window-class
+    :initform (make-window-class))
    
    (window-delegate-class
-    :accessor objc-window-delegate-class)
+    :accessor objc-window-delegate-class
+    :initform (make-window-delegate-class))
    
    (content-view-class
-    :accessor objc-content-view-class)
-   
-   (delegate->clos-window-table
-    :accessor delegate->clos-window-table)
-   
-   (content-view->clos-content-view-table
-    :accessor content-view->clos-content-view-table)
+    :accessor objc-content-view-class
+    :initform (apply #'make-content-view-class (when (find-package '%vk)
+						 (list #@MTKView))))
 
    (delegate :accessor application-delegate)
 
@@ -69,6 +74,12 @@
 (defmethod objc-object-id ((app cocoa:desktop-mixin))
   objc-runtime::ns-app)
 
+(defmethod initialize-instance ((instance cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (declare (ignorable initargs))
+  (call-next-method)
+  (init-cocoa instance)
+  instance)
+
 (defclass application-delegate (obj-object-mixin)
   ())
 
@@ -92,6 +103,10 @@
    (fallback-refresh-rate :initform 0.0d0
 			  :accessor monitor-fallback-refresh-rate)))
 
+(defmethod initialize-instance ((instance cocoa:monitor-mixin) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (call-next-method))
+
 
 (defclass cocoa:cursor-mixin (clui:cursor-mixin)
   ((object)))
@@ -112,10 +127,10 @@
 (defclass cocoa:nsgl-window-mixin (cocoa:window-mixin)
   ())
 
-(defclass window-delegate (ns-object-mixin)
+(defclass window-delegate (objc-object-mixin)
   ((owner :initarg :owner :accessor window-delegate-owner)))
 
-(defclass content-view (ns-object-mixin)
+(defclass content-view (objc-object-mixin)
   ((owner :initarg :owner :accessor content-view-owner)
    (tracking-area :initform nil :accessor content-view-tracking-area)
    (marked-text :initarg :marked-text :reader content-view-marked-text)))
@@ -129,15 +144,13 @@
 					 &allow-other-keys)
   (declare (ignorable initargs))
   (when owner
-    (setf (gethash (sap-int (objc-object-id instance))
-		   (delegate->clos-window-table *app*))
+    (setf (gethash (sap-int (objc-object-id instance)) *delegate->clos-window-table*)
 	  owner))
   (values))
 
 (defmethod initialize-instance :after ((instance content-view) &rest initargs &key &allow-other-keys)
   (declare (ignorable initargs))
-  (setf (gethash (sap-int (objc-object-id instance))
-		 (content-view->clos-content-view-table *app*))
+  (setf (gethash (sap-int (objc-object-id instance)) *content-view->clos-content-view-table*)
 	instance)
   (values))
 
@@ -166,5 +179,5 @@
 (defclass cocoa:vulkan-window (cocoa:vulkan-window-mixin)
   ())
 
-(defclass cocoa:opengl-window (opengl-window-mixin cocoa:nsgl-window-mixin)
+(defclass cocoa:nsgl-window (opengl-window-mixin cocoa:nsgl-window-mixin)
   ())

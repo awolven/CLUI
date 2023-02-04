@@ -10,30 +10,33 @@
 	:ns)
 
 (defpackage cocoa
-  (:export monitor
-	   window
-	   cursor
-	   platform
-	   desktop
-	   screen
-	   view
+  (:export #:monitor
+	   #:window
+	   #:cursor
+	   #:platform
+	   #:desktop
+	   #:screen
+	   #:view
 
-	   metal-view
-	   vulkan-view
-	   nsgl-view
+	   #:metal-view
+	   #:vulkan-view
+	   #:nsgl-view
 	   
-	   platform-mixin
-	   desktop-mixin
-	   screen-mixin
-	   window-mixin
-	   view-mixin
-	   cursor-mixin
-	   monitor-mixin
+	   #:platform-mixin
+	   #:desktop-mixin
+	   #:screen-mixin
+	   #:window-mixin
+	   #:view-mixin
+	   #:cursor-mixin
+	   #:monitor-mixin
 
-	   vulkan-window-mixin
-	   metal-window-mixin
-	   nsgl-window-mixin
+	   #:vulkan-window-mixin
+	   #:metal-window-mixin
+	   #:nsgl-window-mixin
 
-	   metal-window
-	   vulkan-window
-	   nsgl-window))
+	   #:desktop-with-metal
+	   #:desktop-with-opengl	   
+
+	   #:metal-window
+	   #:vulkan-window
+	   #:nsgl-window))

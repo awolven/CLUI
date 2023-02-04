@@ -15,7 +15,7 @@
 
 ;; timer event
 
-(defclass timeout-event-v0 (event-mixin)
+(defclass clui.v0:timeout-event (event-mixin)
   ())
 
 ;; window-event
@@ -23,11 +23,11 @@
 (defclass window-event-mixin (event-mixin)
   ((region :initarg :region
 	   :initform nil
-	   :accessor pointer-event-region)
+	   :accessor window-event-region)
    
    (native-region :initarg :region
 		  :initform nil
-		  :accessor pointer-event-native-region)))
+		  :accessor window-event-native-region)))
 
 ;; window-configuration-event
 
@@ -47,7 +47,7 @@
 	  :accessor window-position-event-new-y)))
 
 
-(defclass window-move-event-v0 (window-position-event-mixin)
+(defclass clui.v0:window-move-event (window-position-event-mixin)
   ())
 
 ;; window-resize-event-mixin
@@ -59,13 +59,13 @@
    (new-height :initarg :new-height
 	       :accessor window-resize-event-new-height)))
 
-(defclass window-resize-event-v0 (window-resize-event-mixin)
+(defclass clui.v0:window-resize-event (window-resize-event-mixin)
   ())
 
 (defclass window-iconify-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-iconify-event-v0 (window-iconify-event-mixin)
+(defclass clui.v0:window-iconify-event (window-iconify-event-mixin)
   ())
 
 (defmethod handle-event ((window window-mixin) (event window-iconify-event-mixin))
@@ -76,7 +76,7 @@
 (defclass window-deiconify-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-deiconify-event-v0 (window-deiconfiy-event-mixin)
+(defclass clui.v0:window-deiconify-event (window-deiconfiy-event-mixin)
   ())
 
 (defmethod handle-event ((window window-mixin) (event window-deiconify-event-mixin))
@@ -87,19 +87,19 @@
 (defclass window-maximize-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-maximize-event-v0 (window-maximize-event-mixin)
+(defclass clui.v0:window-maximize-event (window-maximize-event-mixin)
   ())
 
 (defclass window-restore-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-restore-event-v0 (window-restore-event-mixin)
+(defclass clui.v0:window-restore-event (window-restore-event-mixin)
   ())
 
 (defclass window-fullscreen-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass window-fullscreen-event-v0 (window-fullscreen-event-mixin)
+(defclass clui.v0:window-fullscreen-event (window-fullscreen-event-mixin)
   ())
 
 ;; window-event
@@ -107,31 +107,31 @@
 (defclass window-show-event-mixin (window-event-mixin)
   ())
 
-(defclass window-show-event-v0 (window-show-event-mixin)
+(defclass clui.v0:window-show-event (window-show-event-mixin)
   ())
 
 (defclass window-focus-event-mixin (window-show-event-mixin)
   ())
 
-(defclass window-focus-event-v0 (window-focus-event-mixin)
+(defclass clui.v0:window-focus-event (window-focus-event-mixin)
   ())
 
 (defclass window-defocus-event-mixin (window-event-mixin)
   ())
 
-(defclass window-defocus-event-v0 (window-defocus-event-mixin)
+(defclass clui.v0:window-defocus-event (window-defocus-event-mixin)
   ())
 
 (defclass window-hide-event-mixin (window-event-mixin)
   ())
 
-(defclass window-hide-event-v0 (window-hide-event-mixin)
+(defclass clui.v0:window-hide-event (window-hide-event-mixin)
   ())
 
 (defclass window-repaint-event-mixin (window-event-mixin)
   ())
 
-(defclass window-repaint-event-v0 (window-repaint-event-mixin)
+(defclass clui.v0:window-repaint-event (window-repaint-event-mixin)
   ())
 
 ;; window-manager-event
@@ -143,26 +143,26 @@
 (defclass window-created-event-mixin (window-manager-event-mixin)
   ())
 
-(defclass window-created-event-v0 (window-created-event-mixin)
+(defclass clui.v0:window-created-event (window-created-event-mixin)
   ())
 
 (defclass window-close-event-mixin (window-manager-event-mixin)
   ())
 
-(defclass window-close-event-v0 (window-close-event-mixin)
+(defclass clui.v0:window-close-event (window-close-event-mixin)
   ())
   
 
 (defclass window-destroyed-event-mixin (window-manager-event-mixin)
   ())
 
-(defclass window-destroyed-event-v0 (window-destroyed-event-mixin)
+(defclass clui.v0:window-destroyed-event (window-destroyed-event-mixin)
   ())
 
 (defclass window-monitor-switched-event-mixin (window-manager-event-mixin)
   ())
 
-(defclass window-monitor-switched-event-v0 (window-monitor-switched-event-mixin)
+(defclass clui.v0:window-monitor-switched-event (window-monitor-switched-event-mixin)
   ())
 
 ;; device-event
@@ -201,37 +201,37 @@
 (defclass pointer-button-press-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-button-press-event-v0 (pointer-button-press-event-mixin)
+(defclass clui.v0:pointer-button-press-event (pointer-button-press-event-mixin)
   ())
 
 (defclass pointer-button-release-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-button-release-event-v0 (pointer-button-release-event-mixin)
+(defclass clui.v0:pointer-button-release-event (pointer-button-release-event-mixin)
   ())
 
 (defclass pointer-button-hold-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-button-hold-event-v0 (pointer-button-hold-event-mixin)
+(defclass clui.v0:pointer-button-hold-event (pointer-button-hold-event-mixin)
   ())
 
 (defclass pointer-click-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-click-event-v0 (pointer-click-event-mixin)
+(defclass clui.v0:pointer-click-event (pointer-click-event-mixin)
   ())
 
 (defclass pointer-double-click-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass pointer-double-click-event-v0 (pointer-double-click-event-mixin)
+(defclass clui.v0:pointer-double-click-event (pointer-double-click-event-mixin)
   ())
 
 (defclass pointer-button-hold-and-drag-event-mixin (pointer-click-and-hold-mixin)
   ())
 
-(defclass pointer-button-hold-and-drag-event-v0 (pointer-click-hold-and-drag-mixin)
+(defclass clui.v0:pointer-button-hold-and-drag-event (pointer-click-hold-and-drag-mixin)
   ())
 
 (defclass pointer-wheel-event-mixin (pointer-event-mixin)
@@ -244,13 +244,13 @@
 	    :initform 0
 	    :accessor pointer-wheel-event-xoffset)))
 
-(defclass pointer-wheel-event-v0 (pointer-wheel-event-mixin)
+(defclass clui.v0:pointer-wheel-event (pointer-wheel-event-mixin)
   ())
 
 (defclass pointer-motion-event-mixin (pointer-event-mixin)
   ())
 
-(defclass pointer-motion-event-v0 (pointer-motion-event-mixin)
+(defclass clui.v0:pointer-motion-event (pointer-motion-event-mixin)
   ())  
 
 (defclass pointer-boundary-event-mixin (pointer-event-mixin)
@@ -261,13 +261,13 @@
 (defclass pointer-enter-event-mixin (pointer-boundary-event-mixin)
   ())
 
-(defclass pointer-enter-event-v0 (pointer-enter-event-mixin)
+(defclass clui.v0:pointer-enter-event (pointer-enter-event-mixin)
   ())
 
 (defclass pointer-exit-event-mixin (pointer-boundary-event-mixin)
   ())
 
-(defclass pointer-exit-event-v0 (pointer-exit-event-mixin)
+(defclass clui.v0:pointer-exit-event (pointer-exit-event-mixin)
   ())
 
 (defconstant +shift-key+ (ash 1 0))

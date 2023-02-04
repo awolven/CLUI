@@ -772,7 +772,7 @@ int decorated;
 
 		   (#.#_WM_PAINT ;; 15
 
-		    (handle-event window (make-instance 'window-repaint-event-v0))
+		    (handle-event window (make-instance 'window-repaint-event))
 
 		    (default-paint-win32-window window)
 
@@ -787,7 +787,7 @@ int decorated;
 
 		   (#.#_WM_SETFOCUS ;; 7
 
-		    (handle-event window (make-instance 'window-focus-event-v0))
+		    (handle-event window (make-instance 'window-focus-event))
 
 		    (when frame-action?
 		      (go break))
@@ -816,20 +816,20 @@ int decorated;
 			(capture-win32-cursor window))
 
 		      (unless (eq (currently-iconified? window) iconified?)
-			(let ((event (make-instance 'window-iconify-event-v0)))
+			(let ((event (make-instance 'window-iconify-event)))
 			  (handle-event window event)))
 
 		      (unless (eq (currently-maximized? window) maximized?)
 			(let ((event (make-instance (if maximized?
-							'window-maximize-event-v0
-							'window-restore-event-v0))))
+							'window-maximize-event
+							'window-restore-event))))
 			  (handle-event window event)))
 
 		      (when (or (/= width (round (width window)))
 				(/= height (round (height window))))
 			(setf (width window) width
 			      (height window) height)
-			(let ((event (make-instance 'window-resize-event-v0)))
+			(let ((event (make-instance 'window-resize-event)))
 			  (handle-event window event)))
 
 		      (when (and (window-monitor window)
@@ -854,7 +854,7 @@ int decorated;
 		    (when (eq (captured-cursor-window (window-display window)) window)
 		      (capture-win32-cursor window))
 
-		    (let ((event (make-instance 'window-move-event-v0
+		    (let ((event (make-instance 'window-move-event
 						:new-x (#_GET_X_LPARAM lParam)
 						:new-y (#_GET_Y_LPARAM lParam))))
 
@@ -968,7 +968,7 @@ int decorated;
 		    (when (and monitor auto-iconify?)
 		      (iconify-win32-window window))
 
-		    (handle-event window (make-instance 'window-defocus-event-v0))
+		    (handle-event window (make-instance 'window-defocus-event))
 		    (return 0))
 
 		   (#.#_WM_SYSCOMMAND ;; 274
@@ -990,7 +990,7 @@ int decorated;
 
 		   (#.#_WM_CLOSE ;; 16
 		    (go break)
-		    (handle-event (window-display window) (make-instance 'window-close-event-v0
+		    (handle-event (window-display window) (make-instance 'window-close-event
 									 :window window))
 		    (return 0))
 
@@ -1096,7 +1096,7 @@ int decorated;
 		   (#.#_WM_MOUSEMOVE ;; 512
 		    (let* ((x (#_GET_X_LPARAM lParam))
 			   (y (#_GET_Y_LPARAM lParam))
-			   (event (make-instance 'pointer-motion-event-v0
+			   (event (make-instance 'pointer-motion-event
 						 :x x
 						 :y y)))
 		      (handle-event window event))
@@ -1746,7 +1746,7 @@ HMONITOR handle;
 	      (setq window (application-window-list-head app))
 
 	      (loop while window
-		    do (handle-event window (make-instance 'window-close-event-v0))
+		    do (handle-event window (make-instance 'window-close-event))
 		       (setq window (window-next window))))
 
 	    (progn
@@ -1785,7 +1785,7 @@ HMONITOR handle;
 		     (setq window (application-window-list-head app))
 
 		     (loop while window
-			   do (handle-event window (make-instance 'window-close-event-v0))
+			   do (handle-event window (make-instance 'window-close-event))
 			      (setq window (window-next window))))
 
 		   (progn
