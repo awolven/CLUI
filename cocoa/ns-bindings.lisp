@@ -267,10 +267,10 @@
          (make-message-lambda @(encodeWithCAMLWriter:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|CA_interpolateValues:::interpolator:| (thing _ g766 g767 interpolator)
+(defun ns::|CA_interpolateValues:::interpolator:| (thing _ g754 g755 interpolator)
   (let ((message-lambda 
          (make-message-lambda @(CA_interpolateValues:::interpolator:) (( :POINTER :POINTER :POINTER ( :POINTER ( :STRUCT ns::|ValueInterpolator|)))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id g766) (objc-object-id g767) (objc-object-id interpolator))))
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id g754) (objc-object-id g755) (objc-object-id interpolator))))
 
 (defun ns::|CAMLType| (thing)
   (let ((message-lambda 
@@ -4027,125 +4027,36 @@
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 
-
-
-
-(defun ns::|isEmpty| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isEmpty) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|addObserverForName:object:queue:usingBlock:| (thing _ object queue using-block)
+(defun ns::|size| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(addObserverForName:object:queue:usingBlock:) (( :POINTER :POINTER :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id object) (objc-object-id queue) (objc-object-id using-block))))
-
-(defun ns::|removeObserver:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeObserver:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|postNotificationName:object:| (thing _ object)
-  (let ((message-lambda 
-         (make-message-lambda @(postNotificationName:object:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id object))))
-
-(defun ns::|postNotification:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(postNotification:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|addObserver:selector:name:object:| (thing _ selector name object)
-  (let ((message-lambda 
-         (make-message-lambda @(addObserver:selector:name:object:) (( :POINTER :POINTER :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id selector) (objc-object-id name) (objc-object-id object))))
-
-(defun ns::|postNotificationName:object:userInfo:| (thing _ object user-info)
-  (let ((message-lambda 
-         (make-message-lambda @(postNotificationName:object:userInfo:) (( :POINTER :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id object) (objc-object-id user-info))))
-
-(defun ns::|removeObserver:name:object:| (thing _ name object)
-  (let ((message-lambda 
-         (make-message-lambda @(removeObserver:name:object:) (( :POINTER :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id name) (objc-object-id object))))
-
-
-
-
-(defun ns::|userInfo| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(userInfo) (()  :POINTER)))) 
+         (make-message-lambda @(size) (()  ( :STRUCT ns::|CGSize|))))) 
    (funcall message-lambda (objc-object-id thing) )))
 
 
 
 
-(defun ns::|options| (thing)
+
+
+
+
+(defun ns::|itemAtIndex:| (thing _)
   (let ((message-lambda 
-         (make-message-lambda @(options) (()  :UNSIGNED-LONG-LONG)))) 
+         (make-message-lambda @(itemAtIndex:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|itemArray| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(itemArray) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|initWithRect:options:owner:userInfo:| (thing _ options owner user-info)
-  (let ((message-lambda 
-         (make-message-lambda @(initWithRect:options:owner:userInfo:) (( ( :STRUCT ns::|CGRect|) :UNSIGNED-LONG-LONG :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id owner) (objc-object-id user-info))))
-
-(defun ns::|mouseMoved:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(mouseMoved:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|rect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(rect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|owner| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(owner) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|initWithRect:options:pressureConfigurations:owner:userInfo:| (thing _ options pressure-configurations owner user-info)
-  (let ((message-lambda 
-         (make-message-lambda @(initWithRect:options:pressureConfigurations:owner:userInfo:) (( ( :STRUCT ns::|CGRect|) :UNSIGNED-LONG-LONG :POINTER :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id pressure-configurations) (objc-object-id owner) (objc-object-id user-info))))
-
-(defun ns::|pressureConfigurations| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(pressureConfigurations) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|gestureBehaviors| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(gestureBehaviors) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setGestureBehaviors:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setGestureBehaviors:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-
-
-
-
-(defun ns::|setHidden:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setHidden:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
 
 (defun ns::|identifier| (thing)
   (let ((message-lambda 
          (make-message-lambda @(identifier) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-
-(defun ns::|prepareForReuse| (thing)
+(defun ns::|update| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(prepareForReuse) (()  :VOID)))) 
+         (make-message-lambda @(update) (()  :VOID)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|setIdentifier:| (thing _)
@@ -4153,3270 +4064,40 @@
          (make-message-lambda @(setIdentifier:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-
-
-(defun ns::|layout| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layout) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-
-(defun ns::|resetCursorRects| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(resetCursorRects) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setNeedsDisplay:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNeedsDisplay:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|invalidateIntrinsicContentSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(invalidateIntrinsicContentSize) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|layer| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layer) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setBackgroundColor:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBackgroundColor:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-(defun ns::|setCompositingFilter:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setCompositingFilter:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|bounds| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(bounds) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFrame:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFrame:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertPoint:toView:| (thing _ to-view)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPoint:toView:) (( ( :STRUCT ns::|CGPoint|) :POINTER)  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-view))))
-
-(defun ns::|visibleRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(visibleRect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|isFlipped| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isFlipped) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|addCursorRect:cursor:| (thing _ cursor)
-  (let ((message-lambda 
-         (make-message-lambda @(addCursorRect:cursor:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id cursor))))
-
-(defun ns::|allowsVibrancy| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(allowsVibrancy) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|isOpaque| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isOpaque) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|wantsUpdateLayer| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsUpdateLayer) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|updateLayer| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(updateLayer) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|enableGeometryInWindowDidChangeNotification| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(enableGeometryInWindowDidChangeNotification) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|disableGeometryInWindowDidChangeNotification| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(disableGeometryInWindowDidChangeNotification) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setNeedsLayout:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNeedsLayout:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|superview| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(superview) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertRect:toView:| (thing _ to-view)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRect:toView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-view))))
-
-(defun ns::|initWithFrame:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(initWithFrame:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|widthAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(widthAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setTranslatesAutoresizingMaskIntoConstraints:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setTranslatesAutoresizingMaskIntoConstraints:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|addGestureRecognizer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(addGestureRecognizer:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fittingSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fittingSize) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|removeConstraint:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeConstraint:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setContentCompressionResistancePriority:forOrientation:| (thing _ for-orientation)
-  (let ((message-lambda 
-         (make-message-lambda @(setContentCompressionResistancePriority:forOrientation:) (( :FLOAT :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ for-orientation)))
-
-(defun ns::|setContentHuggingPriority:forOrientation:| (thing _ for-orientation)
-  (let ((message-lambda 
-         (make-message-lambda @(setContentHuggingPriority:forOrientation:) (( :FLOAT :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ for-orientation)))
-
-(defun ns::|intrinsicContentSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(intrinsicContentSize) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidChangeEffectiveAppearance| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidChangeEffectiveAppearance) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|setWantsLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setWantsLayer:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setShouldBeArchived:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setShouldBeArchived:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|addSubview:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(addSubview:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|addSubview:positioned:relativeTo:| (thing _ positioned relative-to)
-  (let ((message-lambda 
-         (make-message-lambda @(addSubview:positioned:relativeTo:) (( :POINTER :LONG-LONG :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) positioned (objc-object-id relative-to))))
-
-(defun ns::|addConstraint:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(addConstraint:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|centerXAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(centerXAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|heightAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(heightAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|bottomAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(bottomAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|addConstraints:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(addConstraints:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setIgnoreHitTest:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setIgnoreHitTest:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|leadingAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(leadingAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setAllowedTouchTypes:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAllowedTouchTypes:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|gestureRecognizers| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(gestureRecognizers) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidMoveToWindow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidMoveToWindow) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|removeFromSuperview| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(removeFromSuperview) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|animator| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(animator) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|backgroundColor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(backgroundColor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setCornerRadius:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setCornerRadius:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|alignmentRectInsets| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(alignmentRectInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setUserInterfaceLayoutDirection:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setUserInterfaceLayoutDirection:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|hitTest:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(hitTest:) (( ( :STRUCT ns::|CGPoint|))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertPoint:fromView:| (thing _ from-view)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPoint:fromView:) (( ( :STRUCT ns::|CGPoint|) :POINTER)  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id from-view))))
-
-(defun ns::|nextEventMatchingMask:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nextEventMatchingMask:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setBoundsOrigin:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBoundsOrigin:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setAnimations:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAnimations:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|gestureRecognizerShouldBegin:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(gestureRecognizerShouldBegin:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|tag| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(tag) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|subviews| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(subviews) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|isHiddenOrHasHiddenAncestor| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isHiddenOrHasHiddenAncestor) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-
-
-
-
-
-
-(defun ns::|toolTip| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(toolTip) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setToolTip:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setToolTip:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|performKeyEquivalent:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(performKeyEquivalent:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|layoutSubtreeIfNeeded| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layoutSubtreeIfNeeded) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setAlphaValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAlphaValue:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setOpaque:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setOpaque:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|display| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(display) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-
-
-
-
-(defun ns::|accessibilityHelpAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityHelpAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsHelpAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsHelpAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|accessibilityFocusedAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityFocusedAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsFocusedAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsFocusedAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|accessibilitySetFocusedAttribute:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilitySetFocusedAttribute:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|accessibilityParentAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityParentAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsParentAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsParentAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|accessibilityWindowAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityWindowAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsWindowAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsWindowAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|accessibilityTopLevelUIElementAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityTopLevelUIElementAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsTopLevelUIElementAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsTopLevelUIElementAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|accessibilityPositionAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPositionAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsPositionAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsPositionAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|accessibilitySizeAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilitySizeAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsSizeAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsSizeAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-
-
-
-
-(defun ns::|accessibilityHorizontalUnitDescriptionAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityHorizontalUnitDescriptionAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityVerticalUnitDescriptionAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityVerticalUnitDescriptionAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertRect:fromView:| (thing _ from-view)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRect:fromView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id from-view))))
-
-
-(defun ns::|removeTrackingArea:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeTrackingArea:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|addTrackingArea:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(addTrackingArea:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-(defun ns::|setBounds:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBounds:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setLayer:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|makeBackingLayer| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(makeBackingLayer) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-(defun ns::|setAutoresizingMask:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAutoresizingMask:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setNextKeyView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNextKeyView:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setFrameOrigin:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFrameOrigin:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|alignmentRectForFrame:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(alignmentRectForFrame:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|removeConstraints:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeConstraints:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|autoresizingMask| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(autoresizingMask) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|drawRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(drawRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|mouseDownCanMoveWindow| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(mouseDownCanMoveWindow) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|convertSize:fromView:| (thing _ from-view)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSize:fromView:) (( ( :STRUCT ns::|CGSize|) :POINTER)  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id from-view))))
-
-(defun ns::|animations| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(animations) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|cornerRadius| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(cornerRadius) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|lockFocus| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(lockFocus) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|unlockFocus| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(unlockFocus) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-
-
-(defun ns::|designatedFocusRingView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(designatedFocusRingView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-
-(defun ns::|convertRectToLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRectToLayer:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|shouldDelayWindowOrderingForEvent:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(shouldDelayWindowOrderingForEvent:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|setFrameSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFrameSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-(defun ns::|setSubviews:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setSubviews:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|leftAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(leftAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|trailingAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(trailingAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|centerYAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(centerYAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|declaredLayoutConstraints| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(declaredLayoutConstraints) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|wantsLayer| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsLayer) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setLayerContentsRedrawPolicy:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setLayerContentsRedrawPolicy:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|displayIfNeeded| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(displayIfNeeded) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|preferredLayoutAttributesFittingAttributes:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(preferredLayoutAttributesFittingAttributes:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|replaceSubview:with:| (thing _ with)
-  (let ((message-lambda 
-         (make-message-lambda @(replaceSubview:with:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with))))
-
-(defun ns::|updateConstraints| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(updateConstraints) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_widthVariable| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_widthVariable) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_heightVariable| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_heightVariable) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewWillDraw| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewWillDraw) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|willRemoveSubview:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(willRemoveSubview:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-
-(defun ns::|mouse:inRect:| (thing _ in-rect)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(mouse:inRect:) (( ( :STRUCT ns::|CGPoint|) ( :STRUCT ns::|CGRect|))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  _ in-rect))) nil t))
-
-(defun ns::|convertSize:toView:| (thing _ to-view)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSize:toView:) (( ( :STRUCT ns::|CGSize|) :POINTER)  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-view))))
-
-(defun ns::|scrollRectToVisible:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(scrollRectToVisible:) (( ( :STRUCT ns::|CGRect|))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  _))) nil t))
-
-(defun ns::|setNeedsDisplayInRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNeedsDisplayInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setKeyboardFocusRingNeedsDisplayInRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setKeyboardFocusRingNeedsDisplayInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|isDescendantOf:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isDescendantOf:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|nextKeyView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nextKeyView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|previousKeyView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(previousKeyView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setPostsFrameChangedNotifications:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setPostsFrameChangedNotifications:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setPostsBoundsChangedNotifications:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setPostsBoundsChangedNotifications:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|scrollPoint:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(scrollPoint:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|displayRectIgnoringOpacity:inContext:| (thing _ in-context)
-  (let ((message-lambda 
-         (make-message-lambda @(displayRectIgnoringOpacity:inContext:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id in-context))))
-
-(defun ns::|getRectsBeingDrawn:count:| (thing _ count)
-  (let ((message-lambda 
-         (make-message-lambda @(getRectsBeingDrawn:count:) (( ( :POINTER ( :POINTER ( :STRUCT ns::|CGRect|))) ( :POINTER :LONG-LONG))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id count))))
-
-(defun ns::|convertPointToBacking:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPointToBacking:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|inLiveResize| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(inLiveResize) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|preservesContentDuringLiveResize| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(preservesContentDuringLiveResize) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|getRectsExposedDuringLiveResize:count:| (thing _ count)
-  (let ((message-lambda 
-         (make-message-lambda @(getRectsExposedDuringLiveResize:count:) (( ( :ARRAY ( :STRUCT ns::|CGRect|) 4) ( :POINTER :LONG-LONG))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id count))))
-
-(defun ns::|canDraw| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(canDraw) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|enclosingScrollView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(enclosingScrollView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|dragImage:at:offset:event:pasteboard:source:slideBack:| (thing _ at offset event pasteboard source slide-back)
-  (let ((message-lambda 
-         (make-message-lambda @(dragImage:at:offset:event:pasteboard:source:slideBack:) (( :POINTER ( :STRUCT ns::|CGPoint|) ( :STRUCT ns::|CGSize|) :POINTER :POINTER :POINTER :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at offset (objc-object-id event) (objc-object-id pasteboard) (objc-object-id source) (if slide-back 1 0))))
-
-(defun ns::|registerForDraggedTypes:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(registerForDraggedTypes:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|unregisterDraggedTypes| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(unregisterDraggedTypes) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|acceptsFirstMouse:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(acceptsFirstMouse:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|needsPanelToBecomeKey| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(needsPanelToBecomeKey) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|draggingEntered:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(draggingEntered:) (( :POINTER)  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|draggingUpdated:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(draggingUpdated:) (( :POINTER)  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|draggingExited:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(draggingExited:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|performDragOperation:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(performDragOperation:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|scrollWheel:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(scrollWheel:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|scrollRect:by:| (thing _ by)
-  (let ((message-lambda 
-         (make-message-lambda @(scrollRect:by:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ by)))
-
-(defun ns::|menuForEvent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(menuForEvent:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|removeFromSuperviewWithoutNeedingDisplay| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(removeFromSuperviewWithoutNeedingDisplay) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|bitmapImageRepForCachingDisplayInRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(bitmapImageRepForCachingDisplayInRect:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|cacheDisplayInRect:toBitmapImageRep:| (thing _ to-bitmap-image-rep)
-  (let ((message-lambda 
-         (make-message-lambda @(cacheDisplayInRect:toBitmapImageRep:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-bitmap-image-rep))))
-
-(defun ns::|postsFrameChangedNotifications| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(postsFrameChangedNotifications) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|viewDidMoveToSuperview| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidMoveToSuperview) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFlipped:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFlipped:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|registeredDraggedTypes| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(registeredDraggedTypes) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFocusRingType:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFocusRingType:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|headerView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(headerView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|translatesAutoresizingMaskIntoConstraints| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(translatesAutoresizingMaskIntoConstraints) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setNextResponder:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNextResponder:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|animationForKey:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(animationForKey:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|centerScanRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(centerScanRect:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|invalidateIntrinsicContentSizeForCell:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(invalidateIntrinsicContentSizeForCell:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|invalidateConstraints| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(invalidateConstraints) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|lockFocusIfCanDraw| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(lockFocusIfCanDraw) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setContentStyle:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setContentStyle:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|frameForAlignmentRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(frameForAlignmentRect:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|sortSubviewsUsingBlock:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(sortSubviewsUsingBlock:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|firstBaselineOffsetFromTop| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(firstBaselineOffsetFromTop) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|baselineOffsetFromBottom| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(baselineOffsetFromBottom) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|touchBarHitTestInsets| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(touchBarHitTestInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|performMnemonic:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(performMnemonic:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|noteFocusRingMaskChanged| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(noteFocusRingMaskChanged) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertPointFromBacking:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPointFromBacking:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|lastBaselineOffsetFromBottom| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(lastBaselineOffsetFromBottom) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|layerContentsRedrawPolicy| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layerContentsRedrawPolicy) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|effectiveContentStyle| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(effectiveContentStyle) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|constraintForIdentifier:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(constraintForIdentifier:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setCompositingOperation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setCompositingOperation:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|compositingOperation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(compositingOperation) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setClipsToBounds:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setClipsToBounds:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|alphaValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(alphaValue) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|willOpenMenu:withEvent:| (thing _ with-event)
-  (let ((message-lambda 
-         (make-message-lambda @(willOpenMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
-
-(defun ns::|didCloseMenu:withEvent:| (thing _ with-event)
-  (let ((message-lambda 
-         (make-message-lambda @(didCloseMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
-
-(defun ns::|prepareMenu:withEvent:| (thing _ with-event)
-  (let ((message-lambda 
-         (make-message-lambda @(prepareMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
-
-(defun ns::|prepareForMenu:withEvent:| (thing _ with-event)
-  (let ((message-lambda 
-         (make-message-lambda @(prepareForMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
-
-(defun ns::|accessibilityPopUpMenuCreated:forSubview:returningAccessibilityParent:| (thing _ for-subview returning-accessibility-parent)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPopUpMenuCreated:forSubview:returningAccessibilityParent:) (( :POINTER :POINTER ( :POINTER :POINTER))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-subview) (objc-object-id returning-accessibility-parent))))
-
-(defun ns::|accessibilityPopUpMenuClosed:accessibilityParent:| (thing _ accessibility-parent)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPopUpMenuClosed:accessibilityParent:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id accessibility-parent))))
-
-(defun ns::|print:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(print:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|worksWhenModal| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(worksWhenModal) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|topAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(topAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|trackingAreas| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(trackingAreas) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nextValidKeyView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nextValidKeyView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|focusRingType| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(focusRingType) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertSizeToBacking:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSizeToBacking:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setAllowsVibrancy:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAllowsVibrancy:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|canBecomeKeyView| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(canBecomeKeyView) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|heartBeat:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(heartBeat:) (( ( :POINTER ( :ARRAY :CHAR 27)))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|opaqueAncestor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(opaqueAncestor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityWindowPointForShowMenu| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityWindowPointForShowMenu) (()  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|drawFocusRingMask| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(drawFocusRingMask) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityAuditParent| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAuditParent) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityDrawFocusRing| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityDrawFocusRing) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilitySectionsAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilitySectionsAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityAuditHierarchy| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAuditHierarchy) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityAuditLabel| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAuditLabel) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityAuditContrast| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAuditContrast) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|deepestAccessibilityDescendants| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(deepestAccessibilityDescendants) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setUpGState| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(setUpGState) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|rightAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(rightAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|updateConstraintsForSubtreeIfNeeded| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(updateConstraintsForSubtreeIfNeeded) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|constraintsDidChangeInEngine:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(constraintsDidChangeInEngine:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|allocateGState| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(allocateGState) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewWillMoveToSuperview:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(viewWillMoveToSuperview:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setBoundsSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBoundsSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|translateOriginToPoint:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(translateOriginToPoint:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|scaleUnitSquareToSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(scaleUnitSquareToSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|adjustScroll:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(adjustScroll:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|previousValidKeyView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(previousValidKeyView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFrameRotation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFrameRotation:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setBoundsRotation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBoundsRotation:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|rotateByAngle:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(rotateByAngle:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|autoscroll:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(autoscroll:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|enclosingMenuItem| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(enclosingMenuItem) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewWithTag:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(viewWithTag:) (( :LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|beginDraggingSessionWithItems:event:source:| (thing _ event source)
-  (let ((message-lambda 
-         (make-message-lambda @(beginDraggingSessionWithItems:event:source:) (( :POINTER :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id event) (objc-object-id source))))
-
-(defun ns::|constraints| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(constraints) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewWillStartLiveResize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewWillStartLiveResize) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidEndLiveResize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidEndLiveResize) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|updateTrackingAreas| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(updateTrackingAreas) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertRectFromLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRectFromLayer:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|interpretKeyEvents:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(interpretKeyEvents:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|candidateListTouchBarItem| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(candidateListTouchBarItem) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|lastBaselineAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(lastBaselineAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidChangeBackingProperties| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidChangeBackingProperties) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewWillMoveToWindow:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(viewWillMoveToWindow:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setAutoresizesSubviews:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAutoresizesSubviews:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|replaceSubview:with:options:completionHandler:| (thing _ with options completion-handler)
-  (let ((message-lambda 
-         (make-message-lambda @(replaceSubview:with:options:completionHandler:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with) options (objc-object-id completion-handler))))
-
-(defun ns::|setNeedsUpdateConstraints:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNeedsUpdateConstraints:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|acceptsTouchEvents| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(acceptsTouchEvents) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|ignoreHitTest| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(ignoreHitTest) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|shouldBeArchived| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(shouldBeArchived) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|displayRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(displayRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-(defun ns::|focusRingMaskBounds| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(focusRingMaskBounds) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityPopUpMenuParent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPopUpMenuParent:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|compositingFilter| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(compositingFilter) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_ancestorSharedWithItem:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_ancestorSharedWithItem:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|shadow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(shadow) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setShadow:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setShadow:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|backgroundFilters| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(backgroundFilters) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setBackgroundFilters:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBackgroundFilters:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|contentFilters| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(contentFilters) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setContentFilters:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setContentFilters:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|clipsToBounds| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(clipsToBounds) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|contentHuggingPriorityForOrientation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(contentHuggingPriorityForOrientation:) (( :LONG-LONG)  :FLOAT)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|contentCompressionResistancePriorityForOrientation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(contentCompressionResistancePriorityForOrientation:) (( :LONG-LONG)  :FLOAT)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|layoutRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layoutRect) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|firstBaselineAnchor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(firstBaselineAnchor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|discardCursorRects| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(discardCursorRects) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|cursorUpdate:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(cursorUpdate:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|prepareForDragOperation:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(prepareForDragOperation:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|concludeDragOperation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(concludeDragOperation:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|helpRequested:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(helpRequested:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|addTrackingRect:owner:userData:assumeInside:| (thing _ owner user-data assume-inside)
-  (let ((message-lambda 
-         (make-message-lambda @(addTrackingRect:owner:userData:assumeInside:) (( ( :STRUCT ns::|CGRect|) :POINTER ( :POINTER :VOID) :CHAR)  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id owner) (objc-object-id user-data) (if assume-inside 1 0))))
-
-(defun ns::|removeTrackingRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeTrackingRect:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|trackEventsMatchingMask:timeout:mode:handler:| (thing _ timeout mode handler)
-  (let ((message-lambda 
-         (make-message-lambda @(trackEventsMatchingMask:timeout:mode:handler:) (( :UNSIGNED-LONG-LONG :DOUBLE :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ timeout (objc-object-id mode) (objc-object-id handler))))
-
-(defun ns::|recursiveDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(recursiveDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|wantsRestingTouches| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsRestingTouches) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|allowedTouchTypes| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(allowedTouchTypes) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|isDrawingFindIndicator| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isDrawingFindIndicator) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|removeAllToolTips| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(removeAllToolTips) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsis_frame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_frame) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setLayerContentsPlacement:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setLayerContentsPlacement:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|drawLayer:inContext:| (thing _ in-context)
-  (let ((message-lambda 
-         (make-message-lambda @(drawLayer:inContext:) (( :POINTER ( :POINTER ( :STRUCT ns::|CGContext|)))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id in-context))))
-
-(defun ns::|actionForLayer:forKey:| (thing _ for-key)
-  (let ((message-lambda 
-         (make-message-lambda @(actionForLayer:forKey:) (( :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-key))))
-
-(defun ns::|functionRow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(functionRow) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|needsDisplay| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(needsDisplay) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|resizeWithOldSuperviewSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(resizeWithOldSuperviewSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|hasAmbiguousLayout| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(hasAmbiguousLayout) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setUpdateLayerHandler:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setUpdateLayerHandler:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|alignmentLayoutRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(alignmentLayoutRect) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ancestorSharedWithView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ancestorSharedWithView:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|wantsBestResolutionOpenGLSurface| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsBestResolutionOpenGLSurface) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|renewGState| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(renewGState) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setPressureConfiguration:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setPressureConfiguration:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|pressureConfiguration| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(pressureConfiguration) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|canDrawConcurrently| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(canDrawConcurrently) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|autoresizesSubviews| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(autoresizesSubviews) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|needsLayout| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(needsLayout) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|needsUpdateConstraints| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(needsUpdateConstraints) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|loggingDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(loggingDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|didBecomeActiveFirstResponder| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(didBecomeActiveFirstResponder) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|didResignActiveFirstResponder| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(didResignActiveFirstResponder) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|addToolTipRect:owner:userData:| (thing _ owner user-data)
-  (let ((message-lambda 
-         (make-message-lambda @(addToolTipRect:owner:userData:) (( ( :STRUCT ns::|CGRect|) :POINTER ( :POINTER :VOID))  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id owner) (objc-object-id user-data))))
-
-(defun ns::|wantsExtendedDynamicRangeOpenGLSurface| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsExtendedDynamicRangeOpenGLSurface) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setWantsExtendedDynamicRangeOpenGLSurface:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setWantsExtendedDynamicRangeOpenGLSurface:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|convertPointFromBase:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPointFromBase:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|prepareContentInRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(prepareContentInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setHorizontalContentSizeConstraintActive:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setHorizontalContentSizeConstraintActive:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setVerticalContentSizeConstraintActive:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setVerticalContentSizeConstraintActive:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|rectForPage:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(rectForPage:) (( :LONG-LONG)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|printJobTitle| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(printJobTitle) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|geometryInWindowDidChange| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(geometryInWindowDidChange) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidHide| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidHide) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidUnhide| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidUnhide) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|isRotatedOrScaledFromBase| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isRotatedOrScaledFromBase) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-(defun ns::|removeToolTip:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeToolTip:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|inputContext| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(inputContext) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityFocusRingMaskBounds| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityFocusRingMaskBounds) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertPointToLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPointToLayer:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|sortSubviewsUsingFunction:context:| (thing _ context)
-  (let ((message-lambda 
-         (make-message-lambda @(sortSubviewsUsingFunction:context:) (( ( :POINTER :POINTER) ( :POINTER :VOID))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id context))))
-
-(defun ns::|resizeSubviewsWithOldSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(resizeSubviewsWithOldSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|canDrawSubviewsIntoLayer| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(canDrawSubviewsIntoLayer) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsis_valueOfVariable:didChangeInEngine:| (thing _ did-change-in-engine)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_valueOfVariable:didChangeInEngine:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id did-change-in-engine))))
-
-(defun ns::|convertSizeFromBacking:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSizeFromBacking:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|preparedContentRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(preparedContentRect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|overlayBounds| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(overlayBounds) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|needsToDrawRect:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(needsToDrawRect:) (( ( :STRUCT ns::|CGRect|))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  _))) nil t))
-
-(defun ns::|showActiveFirstResponderIndication| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(showActiveFirstResponderIndication) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|drawOverlayRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(drawOverlayRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|visibleAccessibleOrLeafSubviews| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(visibleAccessibleOrLeafSubviews) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityAuditPotentialChildren| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAuditPotentialChildren) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|canSmoothFontsInLayer| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(canSmoothFontsInLayer) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|displayIgnoringOpacity| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(displayIgnoringOpacity) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|isInTouchBar| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isInTouchBar) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|showDefinitionForAttributedString:range:options:baselineOriginProvider:| (thing _ range options baseline-origin-provider)
-  (let ((message-lambda 
-         (make-message-lambda @(showDefinitionForAttributedString:range:options:baselineOriginProvider:) (( :POINTER ( :STRUCT ns::|_NSRange|) :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) range (objc-object-id options) (objc-object-id baseline-origin-provider))))
-
-(defun ns::|wantsDefaultClipping| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsDefaultClipping) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|isInFullScreenMode| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isInFullScreenMode) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|locationOfPrintRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(locationOfPrintRect:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|rectForSmartMagnificationAtPoint:inRect:| (thing _ in-rect)
-  (let ((message-lambda 
-         (make-message-lambda @(rectForSmartMagnificationAtPoint:inRect:) (( ( :STRUCT ns::|CGPoint|) ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ in-rect)))
-
-(defun ns::|isRotatedFromBase| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isRotatedFromBase) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|didAddSubview:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(didAddSubview:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|adjustPageHeightNew:top:bottom:limit:| (thing _ top bottom limit)
-  (let ((message-lambda 
-         (make-message-lambda @(adjustPageHeightNew:top:bottom:limit:) (( ( :POINTER :DOUBLE) :DOUBLE :DOUBLE :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) top bottom limit)))
-
-(defun ns::|knowsPageRange:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(knowsPageRange:) (( ( :POINTER ( :STRUCT ns::|_NSRange|)))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|knowsPagesFirst:last:| (thing _ last)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(knowsPagesFirst:last:) (( ( :POINTER :LONG-LONG) ( :POINTER :LONG-LONG))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id last)))) nil t))
-
-(defun ns::|revealContext:rectsForItem:| (thing _ rects-for-item)
-  (let ((message-lambda 
-         (make-message-lambda @(revealContext:rectsForItem:) (( :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id rects-for-item))))
-
-(defun ns::|addLayoutGuide:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(addLayoutGuide:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|rectPreservedDuringLiveResize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(rectPreservedDuringLiveResize) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|view:customToolTip:drawInView:displayInfo:| (thing _ custom-tool-tip draw-in-view display-info)
-  (let ((message-lambda 
-         (make-message-lambda @(view:customToolTip:drawInView:displayInfo:) (( :POINTER :LONG-LONG :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) custom-tool-tip (objc-object-id draw-in-view) (objc-object-id display-info))))
-
-(defun ns::|view:customToolTip:frameForToolTipWithDisplayInfo:| (thing _ custom-tool-tip frame-for-tool-tip-with-display-info)
-  (let ((message-lambda 
-         (make-message-lambda @(view:customToolTip:frameForToolTipWithDisplayInfo:) (( :POINTER :LONG-LONG :POINTER)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) custom-tool-tip (objc-object-id frame-for-tool-tip-with-display-info))))
-
-(defun ns::|view:customToolTip:fadeOutAllowedForToolTipWithDisplayInfo:| (thing _ custom-tool-tip fade-out-allowed-for-tool-tip-with-display-info)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(view:customToolTip:fadeOutAllowedForToolTipWithDisplayInfo:) (( :POINTER :LONG-LONG :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) custom-tool-tip (objc-object-id fade-out-allowed-for-tool-tip-with-display-info)))) nil t))
-
-(defun ns::|nsis_frameInEngine:forLayoutGuide:withRounding:| (thing _ for-layout-guide with-rounding)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_frameInEngine:forLayoutGuide:withRounding:) (( :POINTER :POINTER :CHAR)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-layout-guide) (if with-rounding 1 0))))
-
-(defun ns::|accessibilityPopUpMenuCreated:returningAccessibilityParent:| (thing _ returning-accessibility-parent)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPopUpMenuCreated:returningAccessibilityParent:) (( :POINTER ( :POINTER :POINTER))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id returning-accessibility-parent))))
-
-(defun ns::|setCanDrawSubviewsIntoLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setCanDrawSubviewsIntoLayer:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setCanDrawConcurrently:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setCanDrawConcurrently:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|removeAllGestureRecognizers| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(removeAllGestureRecognizers) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|hideActiveFirstResponderIndication| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(hideActiveFirstResponderIndication) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|layerContentsPlacement| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layerContentsPlacement) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|compareGeometry:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(compareGeometry:) (( :POINTER)  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|nsli_engineToUserScalingCoefficientsInEngine:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_engineToUserScalingCoefficientsInEngine:) (( :POINTER)  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setPreparedContentRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setPreparedContentRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|boundsOrigin| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(boundsOrigin) (()  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFrameTransform:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFrameTransform:) (( ( :STRUCT ns::|CGAffineTransform|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|frameRotation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(frameRotation) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|convertPointFromLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPointFromLayer:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertSizeToLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSizeToLayer:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertSizeFromLayer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSizeFromLayer:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|removeGestureRecognizer:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeGestureRecognizer:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|displayIfNeededInRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(displayIfNeededInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|displayIfNeededIgnoringOpacity| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(displayIfNeededIgnoringOpacity) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|displayIfNeededInRectIgnoringOpacity:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(displayIfNeededInRectIgnoringOpacity:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|cacheDisplayInRect:toBitmapImageRep:includeSubviews:| (thing _ to-bitmap-image-rep include-subviews)
-  (let ((message-lambda 
-         (make-message-lambda @(cacheDisplayInRect:toBitmapImageRep:includeSubviews:) (( ( :STRUCT ns::|CGRect|) :POINTER :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-bitmap-image-rep) (if include-subviews 1 0))))
-
-(defun ns::|layoutGuides| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layoutGuides) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setWantsBestResolutionOpenGLSurface:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setWantsBestResolutionOpenGLSurface:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setGestureRecognizers:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setGestureRecognizers:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|effectiveAppearanceDidChange| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(effectiveAppearanceDidChange) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setMaskView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setMaskView:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|maskView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maskView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|computed_effectiveSemanticContext| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(computed_effectiveSemanticContext) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsis_layoutRectFromHostingViewInEngine:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_layoutRectFromHostingViewInEngine:) (( :POINTER)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|nsis_unroundedFrame| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_unroundedFrame) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsis_rawAlignmentRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_rawAlignmentRect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|disableLayoutFlushing| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(disableLayoutFlushing) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|enableLayoutFlushing| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(enableLayoutFlushing) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|frameTransform| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(frameTransform) (()  ( :STRUCT ns::|CGAffineTransform|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFrameCenterRotation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFrameCenterRotation:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|frameCenterRotation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(frameCenterRotation) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|frameOrigin| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(frameOrigin) (()  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|frameSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(frameSize) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|wantsExtendedDynamicRange| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsExtendedDynamicRange) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setWantsExtendedDynamicRange:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setWantsExtendedDynamicRange:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|boundsSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(boundsSize) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|boundsRotation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(boundsRotation) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setLayerUsesCoreImageFilters:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setLayerUsesCoreImageFilters:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|layerUsesCoreImageFilters| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(layerUsesCoreImageFilters) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|convertPointToBase:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertPointToBase:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertSizeToBase:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSizeToBase:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertSizeFromBase:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertSizeFromBase:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertRectToBase:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRectToBase:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|convertRectFromBase:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(convertRectFromBase:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|gState| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(gState) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|releaseGState| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(releaseGState) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|lockFocusIfCanDrawInContext:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(lockFocusIfCanDrawInContext:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|setAcceptsTouchEvents:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAcceptsTouchEvents:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setWantsRestingTouches:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setWantsRestingTouches:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|gesturesEnabled| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(gesturesEnabled) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setGesturesEnabled:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setGesturesEnabled:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|displayRectIgnoringOpacity:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(displayRectIgnoringOpacity:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|usesConstraintsInsteadOfAutoresizing| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(usesConstraintsInsteadOfAutoresizing) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setUsesConstraintsInsteadOfAutoresizing:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setUsesConstraintsInsteadOfAutoresizing:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|isHorizontalContentSizeConstraintActive| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isHorizontalContentSizeConstraintActive) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|isVerticalContentSizeConstraintActive| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isVerticalContentSizeConstraintActive) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|scrollPoint:fromView:| (thing _ from-view)
-  (let ((message-lambda 
-         (make-message-lambda @(scrollPoint:fromView:) (( ( :POINTER ( :STRUCT ns::|CGPoint|)) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id from-view))))
-
-(defun ns::|translateRectsNeedingDisplayInRect:by:| (thing _ by)
-  (let ((message-lambda 
-         (make-message-lambda @(translateRectsNeedingDisplayInRect:by:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ by)))
-
-(defun ns::|removeCursorRect:cursor:| (thing _ cursor)
-  (let ((message-lambda 
-         (make-message-lambda @(removeCursorRect:cursor:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id cursor))))
-
-(defun ns::|shouldDrawColor| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(shouldDrawColor) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|postsBoundsChangedNotifications| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(postsBoundsChangedNotifications) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|willSendMenuNeedsUpdate:withEvent:| (thing _ with-event)
-  (let ((message-lambda 
-         (make-message-lambda @(willSendMenuNeedsUpdate:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
-
-(defun ns::|updateLayerHandler| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(updateLayerHandler) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewDidChangeBackingProperties:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(viewDidChangeBackingProperties:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|activeDrawingRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(activeDrawingRect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|showDefinitionForAttributedString:atPoint:| (thing _ at-point)
-  (let ((message-lambda 
-         (make-message-lambda @(showDefinitionForAttributedString:atPoint:) (( :POINTER ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at-point)))
-
-(defun ns::|contentStyle| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(contentStyle) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|computed_inSelectedTableRow| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(computed_inSelectedTableRow) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|computed_titlebarIsForcingDisplayOfDividers| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(computed_titlebarIsForcingDisplayOfDividers) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|computed_allowRolloverInToolbarControls| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(computed_allowRolloverInToolbarControls) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|fontSmoothingBackgroundColor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fontSmoothingBackgroundColor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFontSmoothingBackgroundColor:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFontSmoothingBackgroundColor:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|shouldSetFontSmoothingBackgroundColor| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(shouldSetFontSmoothingBackgroundColor) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsli_minXVariable| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_minXVariable) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_minYVariable| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_minYVariable) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_superitem| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_superitem) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|dataWithEPSInsideRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(dataWithEPSInsideRect:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|dataWithPDFInsideRect:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(dataWithPDFInsideRect:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|dragFile:fromRect:slideBack:event:| (thing _ from-rect slide-back event)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(dragFile:fromRect:slideBack:event:) (( :POINTER ( :STRUCT ns::|CGRect|) :CHAR :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) from-rect (if slide-back 1 0) (objc-object-id event)))) nil t))
-
-(defun ns::|dragPromisedFilesOfTypes:fromRect:source:slideBack:event:| (thing _ from-rect source slide-back event)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(dragPromisedFilesOfTypes:fromRect:source:slideBack:event:) (( :POINTER ( :STRUCT ns::|CGRect|) :POINTER :CHAR :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) from-rect (objc-object-id source) (if slide-back 1 0) (objc-object-id event)))) nil t))
-
-(defun ns::|removeLayoutGuide:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeLayoutGuide:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:onBehalfOfLayoutGuide:| (thing _ into-expression with-coefficient for-constraint on-behalf-of-layout-guide)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:onBehalfOfLayoutGuide:) (( :INT :POINTER :DOUBLE :POINTER :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id into-expression) with-coefficient (objc-object-id for-constraint) (objc-object-id on-behalf-of-layout-guide)))) nil t))
-
-(defun ns::|nsli_lowersExpressionRelativeToConstraintContainer| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_lowersExpressionRelativeToConstraintContainer) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsli_layoutEngine| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_layoutEngine) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_installedConstraints| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_installedConstraints) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_removeConstraint:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_removeConstraint:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|constraintsAffectingLayoutForOrientation:ofItem:| (thing _ of-item)
-  (let ((message-lambda 
-         (make-message-lambda @(constraintsAffectingLayoutForOrientation:ofItem:) (( :LONG-LONG :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id of-item))))
-
-(defun ns::|nsli_convertSizeToEngineSpace:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_convertSizeToEngineSpace:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|nsli_convertSizeFromEngineSpace:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_convertSizeFromEngineSpace:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|nsli_defaultResolvedValue:forSymbolicConstant:inConstraint:error:| (thing _ for-symbolic-constant in-constraint error)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_defaultResolvedValue:forSymbolicConstant:inConstraint:error:) (( ( :POINTER :DOUBLE) :POINTER :POINTER ( :POINTER :POINTER))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-symbolic-constant) (objc-object-id in-constraint) (objc-object-id error)))) nil t))
-
-(defun ns::|nsli_constraintWithAnchor:relatedBy:toAnchor:withSystemSpacingMultipliedBy:| (thing _ related-by to-anchor with-system-spacing-multiplied-by)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_constraintWithAnchor:relatedBy:toAnchor:withSystemSpacingMultipliedBy:) (( :POINTER :LONG-LONG :POINTER :DOUBLE)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) related-by (objc-object-id to-anchor) with-system-spacing-multiplied-by)))
-
-(defun ns::|nsli_isRTL| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_isRTL) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsli_itemDescribingLayoutDirectionForConstraint:toItem:| (thing _ to-item)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_itemDescribingLayoutDirectionForConstraint:toItem:) (( :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-item))))
-
-(defun ns::|nsli_addConstraint:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_addConstraint:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|nsli_boundsWidthVariable| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_boundsWidthVariable) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_boundsHeightVariable| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_boundsHeightVariable) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_description| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_description) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:| (thing _ into-expression with-coefficient for-constraint)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:) (( :INT :POINTER :DOUBLE :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id into-expression) with-coefficient (objc-object-id for-constraint)))) nil t))
-
-(defun ns::|nsli_lowerAttribute:intoExpression:withCoefficient:container:| (thing _ into-expression with-coefficient container)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_lowerAttribute:intoExpression:withCoefficient:container:) (( :INT :POINTER :DOUBLE :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id into-expression) with-coefficient (objc-object-id container)))) nil t))
-
-(defun ns::|constraintsAffectingLayoutForOrientation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(constraintsAffectingLayoutForOrientation:) (( :LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|nsli_layoutRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_layoutRect) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_resolvedValue:forSymbolicConstant:inConstraint:error:| (thing _ for-symbolic-constant in-constraint error)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_resolvedValue:forSymbolicConstant:inConstraint:error:) (( ( :POINTER :DOUBLE) :POINTER :POINTER ( :POINTER :POINTER))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-symbolic-constant) (objc-object-id in-constraint) (objc-object-id error)))) nil t))
-
-(defun ns::|nsli_descriptionIncludesPointer| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_descriptionIncludesPointer) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsli_autoresizingMask| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_autoresizingMask) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_isFlipped| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_isFlipped) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsli_piercingToken| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_piercingToken) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_setPiercingToken:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_setPiercingToken:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|nsli_isCollectingConstraintChangesForLaterCoordinatedFlush:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_isCollectingConstraintChangesForLaterCoordinatedFlush:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|nsis_shouldIntegralizeVariable:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsis_shouldIntegralizeVariable:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|nsis_valueOfVariableIsUserObservable:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsis_valueOfVariableIsUserObservable:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|nsis_descriptionOfVariable:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_descriptionOfVariable:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|nsis_orientationHintForVariable:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsis_orientationHintForVariable:) (( :POINTER)  :INT)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|widthAdjustLimit| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(widthAdjustLimit) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|adjustPageWidthNew:left:right:limit:| (thing _ left right limit)
-  (let ((message-lambda 
-         (make-message-lambda @(adjustPageWidthNew:left:right:limit:) (( ( :POINTER :DOUBLE) :DOUBLE :DOUBLE :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) left right limit)))
-
-(defun ns::|heightAdjustLimit| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(heightAdjustLimit) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|pageFooter| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(pageFooter) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|pageHeader| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(pageHeader) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|drawSheetBorderWithSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(drawSheetBorderWithSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|drawPageBorderWithSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(drawPageBorderWithSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|beginDocument| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(beginDocument) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|endDocument| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endDocument) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|endPage| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endPage) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|writePDFInsideRect:toPasteboard:| (thing _ to-pasteboard)
-  (let ((message-lambda 
-         (make-message-lambda @(writePDFInsideRect:toPasteboard:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-pasteboard))))
-
-(defun ns::|writeEPSInsideRect:toPasteboard:| (thing _ to-pasteboard)
-  (let ((message-lambda 
-         (make-message-lambda @(writeEPSInsideRect:toPasteboard:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-pasteboard))))
-
-(defun ns::|beginPageInRect:atPlacement:| (thing _ at-placement)
-  (let ((message-lambda 
-         (make-message-lambda @(beginPageInRect:atPlacement:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ at-placement)))
-
-(defun ns::|beginPrologueBBox:creationDate:createdBy:fonts:forWhom:pages:title:| (thing _ creation-date created-by fonts for-whom pages title)
-  (let ((message-lambda 
-         (make-message-lambda @(beginPrologueBBox:creationDate:createdBy:fonts:forWhom:pages:title:) (( ( :STRUCT ns::|CGRect|) :POINTER :POINTER :POINTER :POINTER :LONG-LONG :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id creation-date) (objc-object-id created-by) (objc-object-id fonts) (objc-object-id for-whom) pages (objc-object-id title))))
-
-(defun ns::|endHeaderComments| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endHeaderComments) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|endPrologue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endPrologue) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|beginSetup| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(beginSetup) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|endSetup| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endSetup) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|beginPage:label:bBox:fonts:| (thing _ label b-box fonts)
-  (let ((message-lambda 
-         (make-message-lambda @(beginPage:label:bBox:fonts:) (( :LONG-LONG :POINTER ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id label) b-box (objc-object-id fonts))))
-
-(defun ns::|beginPageSetupRect:placement:| (thing _ placement)
-  (let ((message-lambda 
-         (make-message-lambda @(beginPageSetupRect:placement:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ placement)))
-
-(defun ns::|addToPageSetup| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(addToPageSetup) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|endPageSetup| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endPageSetup) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|beginTrailer| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(beginTrailer) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|endTrailer| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(endTrailer) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|enterFullScreenMode:withOptions:| (thing _ with-options)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(enterFullScreenMode:withOptions:) (( :POINTER :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-options)))) nil t))
-
-(defun ns::|exitFullScreenModeWithOptions:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(exitFullScreenModeWithOptions:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|reuseIdentifier| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(reuseIdentifier) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ns_widgetType| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ns_widgetType) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ns_containerWidgetType| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ns_containerWidgetType) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|exerciseAmbiguityInLayout| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(exerciseAmbiguityInLayout) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_addConstraint:mutuallyExclusiveConstraints:| (thing _ mutually-exclusive-constraints)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_addConstraint:mutuallyExclusiveConstraints:) (( :POINTER ( :POINTER :POINTER))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id mutually-exclusive-constraints))))
-
-(defun ns::|nsli_engineToUserScalingCoefficients| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_engineToUserScalingCoefficients) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|nsli_layoutAnchorForAttribute:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_layoutAnchorForAttribute:) (( :LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|nsli_canHostIndependentVariableAnchor| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(nsli_canHostIndependentVariableAnchor) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|nsli_swapContainerForOutgoingConstraint:toIncomingConstraint:| (thing _ to-incoming-constraint)
-  (let ((message-lambda 
-         (make-message-lambda @(nsli_swapContainerForOutgoingConstraint:toIncomingConstraint:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-incoming-constraint))))
-
-(defun ns::|engine:markerForConstraintToBreakAmongConstraints:| (thing _ marker-for-constraint-to-break-among-constraints)
-  (let ((message-lambda 
-         (make-message-lambda @(engine:markerForConstraintToBreakAmongConstraints:) (( :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id marker-for-constraint-to-break-among-constraints))))
-
-(defun ns::|engine:willBreakConstraint:dueToMutuallyExclusiveConstraints:| (thing _ will-break-constraint due-to-mutually-exclusive-constraints)
-  (let ((message-lambda 
-         (make-message-lambda @(engine:willBreakConstraint:dueToMutuallyExclusiveConstraints:) (( :POINTER :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id will-break-constraint) (objc-object-id due-to-mutually-exclusive-constraints))))
-
-(defun ns::|solutionDidChangeInEngine:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(solutionDidChangeInEngine:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|measureMin:max:ideal:| (thing _ max ideal)
-  (let ((message-lambda 
-         (make-message-lambda @(measureMin:max:ideal:) (( ( :POINTER ( :STRUCT ns::|CGSize|)) ( :POINTER ( :STRUCT ns::|CGSize|)) ( :POINTER ( :STRUCT ns::|CGSize|)))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id max) (objc-object-id ideal))))
-
-(defun ns::|layoutMarginsGuide| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(layoutMarginsGuide) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|safeAreaLayoutGuide| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(safeAreaLayoutGuide) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|computedSafeAreaInsets| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(computedSafeAreaInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|computedSafeAreaRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(computedSafeAreaRect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|recursiveConstraintDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(recursiveConstraintDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|recursiveConstraintIdentifierDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(recursiveConstraintIdentifierDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|declaredLayoutRules| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(declaredLayoutRules) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|textLayerShouldEnableFontSmoothing:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(textLayerShouldEnableFontSmoothing:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|removeConstraintWithIdentifier:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(removeConstraintWithIdentifier:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-
-
-
-
-
-
-
-(defun ns::|setEnabled:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setEnabled:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setTarget:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setTarget:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|target| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(target) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|isEnabled| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isEnabled) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|action| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(action) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setTag:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setTag:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setRepresentedObject:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setRepresentedObject:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setBaseWritingDirection:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setBaseWritingDirection:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setAction:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAction:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setAlignment:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAlignment:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|alignment| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(alignment) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|formatter| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(formatter) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFormatter:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFormatter:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|objectValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(objectValue) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setObjectValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setObjectValue:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setStringValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setStringValue:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|lineBreakMode| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(lineBreakMode) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|baseWritingDirection| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(baseWritingDirection) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setLineBreakMode:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setLineBreakMode:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-(defun ns::|controlSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(controlSize) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setControlSize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setControlSize:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-
-
-
-
-
-
-(defun ns::|setContinuous:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setContinuous:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-
-
-(defun ns::|setHighlighted:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setHighlighted:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|isContinuous| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isContinuous) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|mouseDown:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(mouseDown:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-(defun ns::|acceptsFirstResponder| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(acceptsFirstResponder) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|isHighlighted| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isHighlighted) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-
-
-
-(defun ns::|accessibilityHelpStringForChild:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityHelpStringForChild:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|accessibilityIsChildFocusable:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsChildFocusable:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|accessibilitySetFocus:forChild:| (thing _ for-child)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilitySetFocus:forChild:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-child))))
-
-(defun ns::|accessibilityPositionOfChild:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPositionOfChild:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|accessibilitySizeOfChild:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilitySizeOfChild:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-(defun ns::|accessibilityEnabledAttribute| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityEnabledAttribute) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|accessibilityIsEnabledAttributeSettable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityIsEnabledAttributeSettable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|cell| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(cell) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|setDoubleValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setDoubleValue:) (( :DOUBLE)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setTouchBarInsetMitigation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setTouchBarInsetMitigation:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setTouchBarRestingMitigation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setTouchBarRestingMitigation:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|touchBarInsetMitigation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(touchBarInsetMitigation) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|touchBarRestingMitigation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(touchBarRestingMitigation) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|font| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(font) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setFont:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFont:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|performClick:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(performClick:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|attributedStringValue| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(attributedStringValue) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-(defun ns::|sizeToFit| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(sizeToFit) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setAttributedStringValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAttributedStringValue:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|becomeKeyWindow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(becomeKeyWindow) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|representedObject| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(representedObject) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setIntValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setIntValue:) (( :INT)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setIntegerValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setIntegerValue:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setFloatValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setFloatValue:) (( :FLOAT)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|sendAction:to:| (thing _ to)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(sendAction:to:) (( :POINTER :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to)))) nil t))
-
-(defun ns::|setCell:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setCell:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|abortEditing| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(abortEditing) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|updateCell:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(updateCell:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|selectedCell| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(selectedCell) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|keyDown:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(keyDown:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|resignFirstResponder| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(resignFirstResponder) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setRefusesFirstResponder:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setRefusesFirstResponder:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|selectCell:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(selectCell:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|resignKeyWindow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(resignKeyWindow) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|updateCellInside:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(updateCellInside:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|becomeFirstResponder| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(becomeFirstResponder) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-(defun ns::|refusesFirstResponder| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(refusesFirstResponder) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-
-(defun ns::|backgroundStyle| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(backgroundStyle) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|drawWithExpansionFrame:inView:| (thing _ in-view)
-  (let ((message-lambda 
-         (make-message-lambda @(drawWithExpansionFrame:inView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id in-view))))
-
-(defun ns::|getPeriodicDelay:interval:| (thing _ interval)
-  (let ((message-lambda 
-         (make-message-lambda @(getPeriodicDelay:interval:) (( ( :POINTER :FLOAT) ( :POINTER :FLOAT))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id interval))))
-
-(defun ns::|setNextState| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(setNextState) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|sendActionOnMask| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(sendActionOnMask) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|drawCell:| (thing _)
+(defun ns::|initWithTitle:| (thing _)
   (let ((message-lambda 
-         (make-message-lambda @(drawCell:) (( :POINTER)  :VOID)))) 
+         (make-message-lambda @(initWithTitle:) (( :POINTER)  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|currentEditor| (thing)
+(defun ns::|addItem:| (thing _)
   (let ((message-lambda 
-         (make-message-lambda @(currentEditor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|validateEditing| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(validateEditing) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|usesSingleLineMode| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(usesSingleLineMode) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|endEditing:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(endEditing:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|sendActionOn:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(sendActionOn:) (( :UNSIGNED-LONG-LONG)  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|takeIntValueFrom:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(takeIntValueFrom:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|takeIntegerValueFrom:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(takeIntegerValueFrom:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|takeFloatValueFrom:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(takeFloatValueFrom:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|takeDoubleValueFrom:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(takeDoubleValueFrom:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|takeStringValueFrom:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(takeStringValueFrom:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|takeObjectValueFrom:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(takeObjectValueFrom:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setUsesSingleLineMode:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setUsesSingleLineMode:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|mouseDownFlags| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(mouseDownFlags) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-(defun ns::|setNeedsDisplay| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(setNeedsDisplay) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-(defun ns::|touchesBeganWithEvent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(touchesBeganWithEvent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|touchesMovedWithEvent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(touchesMovedWithEvent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|touchesEndedWithEvent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(touchesEndedWithEvent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|touchesCancelledWithEvent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(touchesCancelledWithEvent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setAllowsExpansionToolTips:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAllowsExpansionToolTips:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|allowsLogicalLayoutDirection| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(allowsLogicalLayoutDirection) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|allowsExpansionToolTips| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(allowsExpansionToolTips) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|keyUp:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(keyUp:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|accessibilityPostNotification:context:| (thing _ context)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPostNotification:context:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id context))))
-
-(defun ns::|textView:willChangeSelectionFromCharacterRange:toCharacterRange:| (thing _ will-change-selection-from-character-range to-character-range)
-  (let ((message-lambda 
-         (make-message-lambda @(textView:willChangeSelectionFromCharacterRange:toCharacterRange:) (( :POINTER ( :STRUCT ns::|_NSRange|) ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) will-change-selection-from-character-range to-character-range)))
-
-(defun ns::|setFloatingPointFormat:left:right:| (thing _ left right)
-  (let ((message-lambda 
-         (make-message-lambda @(setFloatingPointFormat:left:right:) (( :CHAR :UNSIGNED-LONG-LONG :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0) left right)))
-
-(defun ns::|setAllowsLogicalLayoutDirection:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAllowsLogicalLayoutDirection:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|cellIfExists| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(cellIfExists) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|selectedTag| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(selectedTag) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|sizeThatFits:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(sizeThatFits:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|ignoresMultiClick| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(ignoresMultiClick) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setIgnoresMultiClick:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setIgnoresMultiClick:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-
-
-(defun ns::|skipEditValidation| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(skipEditValidation) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setSkipEditValidation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setSkipEditValidation:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|editWithFrame:editor:delegate:event:| (thing _ editor delegate event)
-  (let ((message-lambda 
-         (make-message-lambda @(editWithFrame:editor:delegate:event:) (( ( :STRUCT ns::|CGRect|) :POINTER :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id editor) (objc-object-id delegate) (objc-object-id event))))
-
-(defun ns::|selectWithFrame:editor:delegate:start:length:| (thing _ editor delegate start length)
-  (let ((message-lambda 
-         (make-message-lambda @(selectWithFrame:editor:delegate:start:length:) (( ( :STRUCT ns::|CGRect|) :POINTER :POINTER :LONG-LONG :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id editor) (objc-object-id delegate) start length)))
-
-(defun ns::|textViewDidChangeSelection:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(textViewDidChangeSelection:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|calcSize| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(calcSize) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|drawCellInside:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(drawCellInside:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|expansionFrameWithFrame:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(expansionFrameWithFrame:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|addTarget:action:forControlEvents:| (thing _ action for-control-events)
-  (let ((message-lambda 
-         (make-message-lambda @(addTarget:action:forControlEvents:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) for-control-events)))
-
-(defun ns::|removeTarget:action:forControlEvents:| (thing _ action for-control-events)
-  (let ((message-lambda 
-         (make-message-lambda @(removeTarget:action:forControlEvents:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) for-control-events)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(defun ns::|state| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(state) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-(defun ns::|setType:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setType:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-
-
-
-
-(defun ns::|setState:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setState:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-
-(defun ns::|setImage:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setImage:) (( :POINTER)  :VOID)))) 
+         (make-message-lambda @(addItem:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-
-
 
 (defun ns::|setTitle:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(setTitle:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-
-
-(defun ns::|keyEquivalent| (thing)
+(defun ns::|supermenu| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(keyEquivalent) (()  :POINTER)))) 
+         (make-message-lambda @(supermenu) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|image| (thing)
+(defun ns::|numberOfItems| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(image) (()  :POINTER)))) 
+         (make-message-lambda @(numberOfItems) (()  :LONG-LONG)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
+(defun ns::|removeItem:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeItem:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-
-
-
-
+(defun ns::|removeAllItems| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(removeAllItems) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|title| (thing)
   (let ((message-lambda 
@@ -7426,23 +4107,15 @@
 
 
 
-
-
-
-
-
 (defun ns::|setAccessibilitySubrole:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(setAccessibilitySubrole:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|setDrawsBackground:| (thing _)
+(defun ns::|setUserInterfaceLayoutDirection:| (thing _)
   (let ((message-lambda 
-         (make-message-lambda @(setDrawsBackground:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-
-
+         (make-message-lambda @(setUserInterfaceLayoutDirection:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
 
 (defun ns::|accessibilitySubrole| (thing)
   (let ((message-lambda 
@@ -7459,13 +4132,16 @@
          (make-message-lambda @(accessibilityIncrementButton) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
+(defun ns::|removeItemAtIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeItemAtIndex:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
 
 
 (defun ns::|accessibilityChildren| (thing)
   (let ((message-lambda 
          (make-message-lambda @(accessibilityChildren) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
-
 
 (defun ns::|accessibilityRole| (thing)
   (let ((message-lambda 
@@ -7482,13 +4158,10 @@
          (make-message-lambda @(accessibilityIndex) (()  :LONG-LONG)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-
 (defun ns::|accessibilityCustomActions| (thing)
   (let ((message-lambda 
          (make-message-lambda @(accessibilityCustomActions) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
-
-
 
 
 
@@ -7497,17 +4170,25 @@
          (make-message-lambda @(accessibilityChildrenInNavigationOrder) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|controlView| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(controlView) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 (defun ns::|isAccessibilityElement| (thing)
   (if (= 0  (let ((message-lambda 
          (make-message-lambda @(isAccessibilityElement) (()  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing) ))) nil t))
 
+(defun ns::|indexOfItem:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfItem:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
+(defun ns::|insertItem:atIndex:| (thing _ at-index)
+  (let ((message-lambda 
+         (make-message-lambda @(insertItem:atIndex:) (( :POINTER :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at-index)))
+
+(defun ns::|performKeyEquivalent:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(performKeyEquivalent:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
 
 (defun ns::|accessibilityRowCount| (thing)
   (let ((message-lambda 
@@ -7545,117 +4226,42 @@
    (funcall message-lambda (objc-object-id thing) )))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(defun ns::|mouseEntered:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(mouseEntered:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|mouseExited:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(mouseExited:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
 (defun ns::|accessibilityTitle| (thing)
   (let ((message-lambda 
          (make-message-lambda @(accessibilityTitle) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|accessibilityElementWithParent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityElementWithParent:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-(defun ns::|setControlView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setControlView:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|interiorBackgroundStyle| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(interiorBackgroundStyle) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|textAlignmentPolicy| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(textAlignmentPolicy) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|titleRectForBounds:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(titleRectForBounds:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
 
 (defun ns::|setAccessibilityLabel:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(setAccessibilityLabel:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-
-
-(defun ns::|isBordered| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isBordered) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setBordered:| (thing _)
+(defun ns::|font| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(setBordered:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+         (make-message-lambda @(font) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
 
-
-(defun ns::|cellSizeForBounds:| (thing _)
+(defun ns::|setFont:| (thing _)
   (let ((message-lambda 
-         (make-message-lambda @(cellSizeForBounds:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setControlTint:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setControlTint:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-
-(defun ns::|setAllowsEditingTextAttributes:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAllowsEditingTextAttributes:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-
-(defun ns::|accessibilityPostNotification:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPostNotification:) (( :POINTER)  :VOID)))) 
+         (make-message-lambda @(setFont:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
+(defun ns::|sizeToFit| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(sizeToFit) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|indexOfItemWithTarget:andAction:| (thing _ and-action)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfItemWithTarget:andAction:) (( :POINTER :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id and-action))))
+
+
+(defun ns::|performActionForItemAtIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(performActionForItemAtIndex:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
 
 (defun ns::|isAccessibilityFocused| (thing)
   (if (= 0  (let ((message-lambda 
@@ -8897,6 +5503,5913 @@
          (make-message-lambda @(setAccessibilityCustomActions:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
+(defun ns::|insertItemWithTitle:action:keyEquivalent:atIndex:| (thing _ action key-equivalent at-index)
+  (let ((message-lambda 
+         (make-message-lambda @(insertItemWithTitle:action:keyEquivalent:atIndex:) (( :POINTER :POINTER :POINTER :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) (objc-object-id key-equivalent) at-index)))
+
+
+(defun ns::|autoenablesItems| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(autoenablesItems) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|itemWithTitle:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(itemWithTitle:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|indexOfItemWithSubmenu:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfItemWithSubmenu:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|addItemWithTitle:action:keyEquivalent:| (thing _ action key-equivalent)
+  (let ((message-lambda 
+         (make-message-lambda @(addItemWithTitle:action:keyEquivalent:) (( :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) (objc-object-id key-equivalent))))
+
+
+(defun ns::|minimumWidth| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(minimumWidth) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|showsStateColumn| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(showsStateColumn) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|appearanceParent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(appearanceParent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAppearanceParent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAppearanceParent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|storyboard| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(storyboard) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|presentControllerAsModalWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(presentControllerAsModalWindow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityResultsForSearchPredicate:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityResultsForSearchPredicate:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityHeaderForColumnIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityHeaderForColumnIndex:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|accessibilityHeaderForRowIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityHeaderForRowIndex:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|accessibilityAuditIssues| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAuditIssues) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityAuditIssues:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityAuditIssues:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|isAccessibilityAutoInteractable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isAccessibilityAutoInteractable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setAccessibilityAutoInteractable:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityAutoInteractable:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|accessibilityContainerType| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityContainerType) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityContainerType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityContainerType:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|accessibilityUserInputLabels| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityUserInputLabels) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityUserInputLabels:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityUserInputLabels:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityCustomContent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityCustomContent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityCustomContent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityCustomContent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityAttributedUserInputLabels| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAttributedUserInputLabels) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityAttributedUserInputLabels:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityAttributedUserInputLabels:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityPath:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityPath:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityCustomChoosers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityCustomChoosers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityCustomChoosers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityCustomChoosers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityEmbeddedImageDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityEmbeddedImageDescription) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityEmbeddedImageDescription:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityEmbeddedImageDescription:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|isAccessibilityEnhancedUserInterface| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isAccessibilityEnhancedUserInterface) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setAccessibilityEnhancedUserInterface:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityEnhancedUserInterface:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|accessibilityFunctionRowTopLevelElements| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityFunctionRowTopLevelElements) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityFunctionRowTopLevelElements:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityFunctionRowTopLevelElements:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|isAccessibilityMimicNativeView| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isAccessibilityMimicNativeView) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setAccessibilityMimicNativeView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityMimicNativeView:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|accessibilitySections| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilitySections) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilitySections:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilitySections:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityHeaderGroup| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityHeaderGroup) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityHeaderGroup:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityHeaderGroup:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityFrameInParentSpace| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityFrameInParentSpace) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityFrameInParentSpace:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityFrameInParentSpace:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|accessibilityPreviousContentSibling| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPreviousContentSibling) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setPreviousContentSibling:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPreviousContentSibling:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityNextContentSibling| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityNextContentSibling) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setNextContentSibling:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNextContentSibling:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityContentSiblingAbove| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityContentSiblingAbove) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityContentSiblingAbove:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityContentSiblingAbove:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityContentSiblingBelow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityContentSiblingBelow) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityContentSiblingBelow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityContentSiblingBelow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityChartDescriptor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityChartDescriptor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAccessibilityChartDescriptor:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityChartDescriptor:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityOverridesAlwaysTakePrecedence| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityOverridesAlwaysTakePrecedence) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setAccessibilityOverridesAlwaysTakePrecedence:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAccessibilityOverridesAlwaysTakePrecedence:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|indexOfItemWithRepresentedObject:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfItemWithRepresentedObject:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|indexOfItemWithTag:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfItemWithTag:) (( :LONG-LONG)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setAutoenablesItems:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAutoenablesItems:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|indexOfItemWithTitle:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfItemWithTitle:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|popUpMenuPositioningItem:atLocation:inView:| (thing _ at-location in-view)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(popUpMenuPositioningItem:atLocation:inView:) (( :POINTER ( :STRUCT ns::|CGPoint|) :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at-location (objc-object-id in-view)))) nil t))
+
+(defun ns::|cancelTracking| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cancelTracking) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setShowsStateColumn:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setShowsStateColumn:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|helpRequested:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(helpRequested:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setSubmenu:forItem:| (thing _ for-item)
+  (let ((message-lambda 
+         (make-message-lambda @(setSubmenu:forItem:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-item))))
+
+(defun ns::|setMenuRepresentation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMenuRepresentation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|recordKeyboardShortcutEvent:withKeyEquivalent:modifierMask:title:| (thing _ with-key-equivalent modifier-mask title)
+  (let ((message-lambda 
+         (make-message-lambda @(recordKeyboardShortcutEvent:withKeyEquivalent:modifierMask:title:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-key-equivalent) modifier-mask (objc-object-id title))))
+
+(defun ns::|itemChanged:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(itemChanged:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|attachedMenu| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(attachedMenu) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isAttached| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isAttached) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|locationForSubmenu:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(locationForSubmenu:) (( :POINTER)  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|popUpMenuPositioningItem:atLocation:inView:appearance:| (thing _ at-location in-view appearance)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(popUpMenuPositioningItem:atLocation:inView:appearance:) (( :POINTER ( :STRUCT ns::|CGPoint|) :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at-location (objc-object-id in-view) (objc-object-id appearance)))) nil t))
+
+(defun ns::|menuBarHeight| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(menuBarHeight) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setSupermenu:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSupermenu:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setItemArray:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setItemArray:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|itemWithTag:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(itemWithTag:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setMenuChangedMessagesEnabled:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMenuChangedMessagesEnabled:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|menuChangedMessagesEnabled| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(menuChangedMessagesEnabled) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|propertiesToUpdate| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(propertiesToUpdate) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|menuRepresentation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(menuRepresentation) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setContextMenuRepresentation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setContextMenuRepresentation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|contextMenuRepresentation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(contextMenuRepresentation) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setTearOffMenuRepresentation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTearOffMenuRepresentation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|tearOffMenuRepresentation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(tearOffMenuRepresentation) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isTornOff| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isTornOff) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setMinimumWidth:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMinimumWidth:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|allowsContextMenuPlugIns| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsContextMenuPlugIns) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setAllowsContextMenuPlugIns:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsContextMenuPlugIns:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|highlightItem:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(highlightItem:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|highlightedItem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(highlightedItem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|cancelTrackingWithoutAnimation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cancelTrackingWithoutAnimation) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+
+
+
+(defun ns::|setHidden:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setHidden:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+(defun ns::|state| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(state) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setEnabled:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setEnabled:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setTarget:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTarget:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|target| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(target) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|isEnabled| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isEnabled) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setState:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setState:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+(defun ns::|action| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(action) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithTitle:action:keyEquivalent:| (thing _ action key-equivalent)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithTitle:action:keyEquivalent:) (( :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) (objc-object-id key-equivalent))))
+
+(defun ns::|setAttributedTitle:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAttributedTitle:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setImage:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setImage:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setTag:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTag:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setRepresentedObject:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setRepresentedObject:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setSubmenu:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSubmenu:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setAction:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAction:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|view| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(view) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|keyEquivalent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(keyEquivalent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|keyEquivalentModifierMask| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(keyEquivalentModifierMask) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|image| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(image) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|attributedTitle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(attributedTitle) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|indentationLevel| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(indentationLevel) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setView:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+(defun ns::|tag| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(tag) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+
+(defun ns::|isHighlighted| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isHighlighted) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+(defun ns::|isHiddenOrHasHiddenAncestor| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isHiddenOrHasHiddenAncestor) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+
+
+(defun ns::|controlView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(controlView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|toolTip| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(toolTip) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setToolTip:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setToolTip:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|submenu| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(submenu) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isAlternate| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isAlternate) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isSeparatorItem| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isSeparatorItem) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setKeyEquivalentModifierMask:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setKeyEquivalentModifierMask:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setAlternate:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAlternate:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|setControlView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setControlView:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setKeyEquivalent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setKeyEquivalent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+(defun ns::|hasSubmenu| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(hasSubmenu) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|representedObject| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(representedObject) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setTitleWithMnemonic:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTitleWithMnemonic:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|backgroundStyle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(backgroundStyle) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|mnemonic| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(mnemonic) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isDestructive| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isDestructive) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setDestructive:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDestructive:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|allowsKeyEquivalentWhenHidden| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsKeyEquivalentWhenHidden) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|onStateImage| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(onStateImage) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|offStateImage| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(offStateImage) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|mixedStateImage| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(mixedStateImage) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|copyNormalizedTitle:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(copyNormalizedTitle:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|menuItemOrSubmenuNeedsShortcutLocalization| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(menuItemOrSubmenuNeedsShortcutLocalization) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|userKeyEquivalent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(userKeyEquivalent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|scheduleKeyboardAwareShortcutUpdate| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(scheduleKeyboardAwareShortcutUpdate) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|userKeyEquivalentModifierMask| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(userKeyEquivalentModifierMask) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|keyEquivalentSharingMode| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(keyEquivalentSharingMode) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|parentItem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(parentItem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAllowsKeyEquivalentWhenHidden:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsKeyEquivalentWhenHidden:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setAllowsAutomaticKeyEquivalentLocalization:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsAutomaticKeyEquivalentLocalization:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|allowsAutomaticKeyEquivalentLocalization| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsAutomaticKeyEquivalentLocalization) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setAllowsAutomaticKeyEquivalentMirroring:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsAutomaticKeyEquivalentMirroring:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|allowsAutomaticKeyEquivalentMirroring| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsAutomaticKeyEquivalentMirroring) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setKeyEquivalentSharingMode:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setKeyEquivalentSharingMode:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setMnemonicLocation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMnemonicLocation:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|mnemonicLocation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(mnemonicLocation) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setOnStateImage:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setOnStateImage:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setOffStateImage:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setOffStateImage:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setMixedStateImage:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMixedStateImage:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setIndentationLevel:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setIndentationLevel:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|recognizerWillBeginAnimation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(recognizerWillBeginAnimation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|recognizerDidUpdateAnimation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(recognizerDidUpdateAnimation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|recognizerDidCancelAnimation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(recognizerDidCancelAnimation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|recognizerDidCompleteAnimation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(recognizerDidCompleteAnimation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|recognizerDidDismissAnimation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(recognizerDidDismissAnimation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|invokeActionBlock:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(invokeActionBlock:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setActionBlock:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setActionBlock:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|shouldMenuItemBeUpdatedDueToNotification| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldMenuItemBeUpdatedDueToNotification) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|initWithPasteboardPropertyList:ofType:| (thing _ of-type)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithPasteboardPropertyList:ofType:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id of-type))))
+
+(defun ns::|stringWithoutAmpersand| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringWithoutAmpersand) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|writableTypesForPasteboard:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(writableTypesForPasteboard:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|pasteboardPropertyListForType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(pasteboardPropertyListForType:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|rangeOfGraphicalSegmentAtIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfGraphicalSegmentAtIndex:) (( :UNSIGNED-LONG-LONG)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|NS_isSourceOver| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(NS_isSourceOver) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|sizeWithAttributes:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(sizeWithAttributes:) (( :POINTER)  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|boundingRectWithSize:options:attributes:context:| (thing _ options attributes context)
+  (let ((message-lambda 
+         (make-message-lambda @(boundingRectWithSize:options:attributes:context:) (( ( :STRUCT ns::|CGSize|) :LONG-LONG :POINTER :POINTER)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id attributes) (objc-object-id context))))
+
+(defun ns::|drawInRect:withAttributes:| (thing _ with-attributes)
+  (let ((message-lambda 
+         (make-message-lambda @(drawInRect:withAttributes:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id with-attributes))))
+
+(defun ns::|drawAtPoint:withAttributes:| (thing _ with-attributes)
+  (let ((message-lambda 
+         (make-message-lambda @(drawAtPoint:withAttributes:) (( ( :STRUCT ns::|CGPoint|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id with-attributes))))
+
+(defun ns::|drawWithRect:options:attributes:context:| (thing _ options attributes context)
+  (let ((message-lambda 
+         (make-message-lambda @(drawWithRect:options:attributes:context:) (( ( :STRUCT ns::|CGRect|) :LONG-LONG :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id attributes) (objc-object-id context))))
+
+(defun ns::|boundingRectWithSize:options:attributes:| (thing _ options attributes)
+  (let ((message-lambda 
+         (make-message-lambda @(boundingRectWithSize:options:attributes:) (( ( :STRUCT ns::|CGSize|) :LONG-LONG :POINTER)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id attributes))))
+
+(defun ns::|drawWithRect:options:attributes:| (thing _ options attributes)
+  (let ((message-lambda 
+         (make-message-lambda @(drawWithRect:options:attributes:) (( ( :STRUCT ns::|CGRect|) :LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id attributes))))
+
+(defun ns::|hasColorGlyphsInRange:attributes:| (thing _ attributes)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(hasColorGlyphsInRange:attributes:) (( ( :STRUCT ns::|_NSRange|) :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id attributes)))) nil t))
+
+(defun ns::|stringByStrippingLeadingAndTrailingWhitespaceAndQuotes| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByStrippingLeadingAndTrailingWhitespaceAndQuotes) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByAppendingPathExtensionForType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAppendingPathExtensionForType:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|stringByAppendingPathComponent:conformingToType:| (thing _ conforming-to-type)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAppendingPathComponent:conformingToType:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id conforming-to-type))))
+
+(defun ns::|imageMetadataFromFileName| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(imageMetadataFromFileName) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|scaleableResourceMetadataFromFileName| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(scaleableResourceMetadataFromFileName) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isSpace| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isSpace) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isDelete| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isDelete) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|stringByTrimmingCharactersInCFCharacterSet:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByTrimmingCharactersInCFCharacterSet:) (( ( :POINTER ( :STRUCT ns::|__CFCharacterSet|)))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|stringByTrimmingLastCharacter| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByTrimmingLastCharacter) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByReplacingCharactersInSet:withCharacter:| (thing _ with-character)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByReplacingCharactersInSet:withCharacter:) (( ( :POINTER ( :STRUCT ns::|__CFCharacterSet|)) :UNSIGNED-INT)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) with-character)))
+
+(defun ns::|stringByReplacingCharacter:withCharacter:| (thing _ with-character)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByReplacingCharacter:withCharacter:) (( :UNSIGNED-INT :UNSIGNED-INT)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ with-character)))
+
+(defun ns::|endsSentence| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(endsSentence) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isLeftAssociative| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isLeftAssociative) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isPlainSpace| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isPlainSpace) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isSpaceOrReturn| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isSpaceOrReturn) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isNewlineOrReturn| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isNewlineOrReturn) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isTripledPunctuation| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isTripledPunctuation) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|looksLikeEmailAddress| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(looksLikeEmailAddress) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|looksLikeNumberInput| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(looksLikeNumberInput) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|looksLikeURL| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(looksLikeURL) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isNaturallyRTL| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isNaturallyRTL) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|containsSubstring:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(containsSubstring:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|editDistanceFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(editDistanceFrom:) (( :POINTER)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+(defun ns::|ls_visuallyOrderCharactersReturningError:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(ls_visuallyOrderCharactersReturningError:) (( ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|ls_matchesStringForPluginQuery:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(ls_matchesStringForPluginQuery:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|ls_cleanForPluginQuery| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(ls_cleanForPluginQuery) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|ls_matchesForPluginQuery:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(ls_matchesForPluginQuery:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|ls_isRecursiveKey| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(ls_isRecursiveKey) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|ls_updatedKey| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(ls_updatedKey) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|firstCharacter| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(firstCharacter) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|componentsByLanguage:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(componentsByLanguage:) (( :INT)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|pinyinStringFromPinyinWithToneNumber| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pinyinStringFromPinyinWithToneNumber) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|zhuyinSyllableFromPinyinSyllable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(zhuyinSyllableFromPinyinSyllable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByStrippingDiacritics| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByStrippingDiacritics) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|toneFromPinyinSyllableWithNumber| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(toneFromPinyinSyllableWithNumber) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|strokeStringFromNumberString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(strokeStringFromNumberString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByApplyingPinyinToneMarkToFirstSyllableWithToneNumber:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByApplyingPinyinToneMarkToFirstSyllableWithToneNumber:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|simplifiedChineseCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(simplifiedChineseCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|traditionalChinesePinyinCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(traditionalChinesePinyinCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|traditionalChineseZhuyinCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(traditionalChineseZhuyinCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+
+(defun ns::|UTF8String| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(UTF8String) (()  :STRING)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+
+(defun ns::|lengthOfBytesUsingEncoding:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(lengthOfBytesUsingEncoding:) (( :UNSIGNED-LONG-LONG)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|length| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(length) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|getBytes:maxLength:usedLength:encoding:options:range:remainingRange:| (thing _ max-length used-length encoding options range remaining-range)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(getBytes:maxLength:usedLength:encoding:options:range:remainingRange:) (( ( :POINTER :VOID) :UNSIGNED-LONG-LONG ( :POINTER :UNSIGNED-LONG-LONG) :UNSIGNED-LONG-LONG :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|) ( :POINTER ( :STRUCT ns::|_NSRange|)))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) max-length (objc-object-id used-length) encoding options range (objc-object-id remaining-range)))) nil t))
+
+(defun ns::|initWithFormat:arguments:| (thing _ arguments)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithFormat:arguments:) (( :POINTER ( :ARRAY ( :STRUCT ns::|__va_list_tag|) 1))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) arguments)))
+
+(defun ns::|mutableCopyWithZone:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(mutableCopyWithZone:) (( ( :POINTER ( :STRUCT ns::|_NSZone|)))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|cString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cString) (()  :STRING)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|compare:options:range:locale:| (thing _ options range locale)
+  (let ((message-lambda 
+         (make-message-lambda @(compare:options:range:locale:) (( :POINTER :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|) :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options range (objc-object-id locale))))
+
+(defun ns::|cStringUsingEncoding:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(cStringUsingEncoding:) (( :UNSIGNED-LONG-LONG)  :STRING)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|lowercaseStringWithLocale:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(lowercaseStringWithLocale:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|uppercaseStringWithLocale:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(uppercaseStringWithLocale:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|characterAtIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(characterAtIndex:) (( :UNSIGNED-LONG-LONG)  :UNSIGNED-SHORT)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|getCharacters:range:| (thing _ range)
+  (let ((message-lambda 
+         (make-message-lambda @(getCharacters:range:) (( ( :POINTER :UNSIGNED-SHORT) ( :STRUCT ns::|_NSRange|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) range)))
+
+(defun ns::|substringWithRange:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(substringWithRange:) (( ( :STRUCT ns::|_NSRange|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|isEqualToString:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isEqualToString:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|fastestEncoding| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(fastestEncoding) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|smallestEncoding| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(smallestEncoding) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithContentsOfFile:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithContentsOfFile:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|initWithContentsOfURL:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithContentsOfURL:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+
+(defun ns::|cStringLength| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cStringLength) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|getCString:maxLength:encoding:| (thing _ max-length encoding)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(getCString:maxLength:encoding:) (( :STRING :UNSIGNED-LONG-LONG :UNSIGNED-LONG-LONG)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ max-length encoding))) nil t))
+
+(defun ns::|hasPrefix:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(hasPrefix:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|hasSuffix:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(hasSuffix:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|getLineStart:end:contentsEnd:forRange:| (thing _ end contents-end for-range)
+  (let ((message-lambda 
+         (make-message-lambda @(getLineStart:end:contentsEnd:forRange:) (( ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :UNSIGNED-LONG-LONG) ( :STRUCT ns::|_NSRange|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id end) (objc-object-id contents-end) for-range)))
+
+
+(defun ns::|getParagraphStart:end:contentsEnd:forRange:| (thing _ end contents-end for-range)
+  (let ((message-lambda 
+         (make-message-lambda @(getParagraphStart:end:contentsEnd:forRange:) (( ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :UNSIGNED-LONG-LONG) ( :STRUCT ns::|_NSRange|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id end) (objc-object-id contents-end) for-range)))
+
+(defun ns::|initWithString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithString:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|fileSystemRepresentation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(fileSystemRepresentation) (()  :STRING)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|formatConfiguration| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(formatConfiguration) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByAppendingPathComponent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAppendingPathComponent:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|lastPathComponent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lastPathComponent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByDeletingPathExtension| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByDeletingPathExtension) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|pathExtension| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pathExtension) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|lowercaseString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lowercaseString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|caseInsensitiveCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(caseInsensitiveCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|getFileSystemRepresentation:maxLength:| (thing _ max-length)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(getFileSystemRepresentation:maxLength:) (( :STRING :UNSIGNED-LONG-LONG)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ max-length))) nil t))
+
+(defun ns::|stringByDeletingLastPathComponent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByDeletingLastPathComponent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|rangeOfString:options:| (thing _ options)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfString:options:) (( :POINTER :UNSIGNED-LONG-LONG)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options)))
+
+(defun ns::|containsString:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(containsString:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|initWithFormat:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithFormat:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|substringFromIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(substringFromIndex:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|rangeOfString:options:range:| (thing _ options range)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfString:options:range:) (( :POINTER :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options range)))
+
+(defun ns::|dataUsingEncoding:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dataUsingEncoding:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|substringToIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(substringToIndex:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|initWithData:encoding:| (thing _ encoding)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithData:encoding:) (( :POINTER :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) encoding)))
+
+(defun ns::|stringByAppendingFormat:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAppendingFormat:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|stringByAppendingPathExtension:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAppendingPathExtension:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|stringByAppendingString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAppendingString:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|stringByReplacingOccurrencesOfString:withString:| (thing _ with-string)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByReplacingOccurrencesOfString:withString:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-string))))
+
+(defun ns::|pathComponents| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pathComponents) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByReplacingCharactersInRange:withString:| (thing _ with-string)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByReplacingCharactersInRange:withString:) (( ( :STRUCT ns::|_NSRange|) :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id with-string))))
+
+(defun ns::|stringByExpandingTildeInPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByExpandingTildeInPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|componentsSeparatedByString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(componentsSeparatedByString:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|rangeOfCharacterFromSet:options:| (thing _ options)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfCharacterFromSet:options:) (( :POINTER :UNSIGNED-LONG-LONG)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options)))
+
+(defun ns::|rangeOfCharacterFromSet:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfCharacterFromSet:) (( :POINTER)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|initWithCharacters:length:| (thing _ length)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCharacters:length:) (( ( :POINTER :UNSIGNED-SHORT) :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) length)))
+
+(defun ns::|stringByApplyingTransform:reverse:| (thing _ reverse)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByApplyingTransform:reverse:) (( :POINTER :CHAR)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if reverse 1 0))))
+
+(defun ns::|rangeOfString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfString:) (( :POINTER)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|initWithBytesNoCopy:length:encoding:freeWhenDone:| (thing _ length encoding free-when-done)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithBytesNoCopy:length:encoding:freeWhenDone:) (( ( :POINTER :VOID) :UNSIGNED-LONG-LONG :UNSIGNED-LONG-LONG :CHAR)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) length encoding (if free-when-done 1 0))))
+
+(defun ns::|initWithCString:encoding:| (thing _ encoding)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCString:encoding:) (( :STRING :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ encoding)))
+
+(defun ns::|compare:options:| (thing _ options)
+  (let ((message-lambda 
+         (make-message-lambda @(compare:options:) (( :POINTER :UNSIGNED-LONG-LONG)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options)))
+
+(defun ns::|propertyList| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(propertyList) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|capitalizedString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(capitalizedString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByPaddingToLength:withString:startingAtIndex:| (thing _ with-string starting-at-index)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByPaddingToLength:withString:startingAtIndex:) (( :UNSIGNED-LONG-LONG :POINTER :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id with-string) starting-at-index)))
+
+(defun ns::|stringByStandardizingPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByStandardizingPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithUTF8String:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithUTF8String:) (( :STRING)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|stringByReplacingOccurrencesOfString:withString:options:range:| (thing _ with-string options range)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByReplacingOccurrencesOfString:withString:options:range:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-string) options range)))
+
+(defun ns::|enumerateSubstringsInRange:options:usingBlock:| (thing _ options using-block)
+  (let ((message-lambda 
+         (make-message-lambda @(enumerateSubstringsInRange:options:usingBlock:) (( ( :STRUCT ns::|_NSRange|) :UNSIGNED-LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id using-block))))
+
+(defun ns::|writeToFile:atomically:| (thing _ atomically)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeToFile:atomically:) (( :POINTER :CHAR)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if atomically 1 0)))) nil t))
+
+(defun ns::|rangeOfComposedCharacterSequenceAtIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfComposedCharacterSequenceAtIndex:) (( :UNSIGNED-LONG-LONG)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|uppercaseString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(uppercaseString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|rangeOfCharacterFromSet:options:range:| (thing _ options range)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfCharacterFromSet:options:range:) (( :POINTER :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options range)))
+
+(defun ns::|stringByTrimmingCharactersInSet:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByTrimmingCharactersInSet:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|initWithContentsOfFile:encoding:error:| (thing _ encoding error)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithContentsOfFile:encoding:error:) (( :POINTER :UNSIGNED-LONG-LONG ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) encoding (objc-object-id error))))
+
+(defun ns::|componentsSeparatedByCharactersInSet:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(componentsSeparatedByCharactersInSet:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|getCharacters:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(getCharacters:) (( ( :POINTER :UNSIGNED-SHORT))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|writeToFile:atomically:encoding:error:| (thing _ atomically encoding error)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeToFile:atomically:encoding:error:) (( :POINTER :CHAR :UNSIGNED-LONG-LONG ( :POINTER :POINTER))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if atomically 1 0) encoding (objc-object-id error)))) nil t))
+
+(defun ns::|writeToURL:atomically:| (thing _ atomically)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeToURL:atomically:) (( :POINTER :CHAR)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if atomically 1 0)))) nil t))
+
+(defun ns::|writeToURL:atomically:encoding:error:| (thing _ atomically encoding error)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeToURL:atomically:encoding:error:) (( :POINTER :CHAR :UNSIGNED-LONG-LONG ( :POINTER :POINTER))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if atomically 1 0) encoding (objc-object-id error)))) nil t))
+
+(defun ns::|scriptingIsEqualTo:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingIsEqualTo:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingIsLessThanOrEqualTo:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingIsLessThanOrEqualTo:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingIsLessThan:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingIsLessThan:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingIsGreaterThanOrEqualTo:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingIsGreaterThanOrEqualTo:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingIsGreaterThan:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingIsGreaterThan:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingBeginsWith:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingBeginsWith:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingEndsWith:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingEndsWith:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scriptingContains:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scriptingContains:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|compare:options:range:| (thing _ options range)
+  (let ((message-lambda 
+         (make-message-lambda @(compare:options:range:) (( :POINTER :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|))  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options range)))
+
+(defun ns::|variantFittingPresentationWidth:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(variantFittingPresentationWidth:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|initWithCharactersNoCopy:length:freeWhenDone:| (thing _ length free-when-done)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCharactersNoCopy:length:freeWhenDone:) (( ( :POINTER :UNSIGNED-SHORT) :UNSIGNED-LONG-LONG :CHAR)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) length (if free-when-done 1 0))))
+
+(defun ns::|getBytes:maxLength:filledLength:encoding:allowLossyConversion:range:remainingRange:| (thing _ max-length filled-length encoding allow-lossy-conversion range remaining-range)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(getBytes:maxLength:filledLength:encoding:allowLossyConversion:range:remainingRange:) (( :STRING :UNSIGNED-LONG-LONG ( :POINTER :UNSIGNED-LONG-LONG) :UNSIGNED-LONG-LONG :CHAR ( :STRUCT ns::|_NSRange|) ( :POINTER ( :STRUCT ns::|_NSRange|)))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ max-length (objc-object-id filled-length) encoding (if allow-lossy-conversion 1 0) range (objc-object-id remaining-range)))) nil t))
+
+(defun ns::|decomposedStringWithCanonicalMapping| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(decomposedStringWithCanonicalMapping) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|precomposedStringWithCanonicalMapping| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(precomposedStringWithCanonicalMapping) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|decomposedStringWithCompatibilityMapping| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(decomposedStringWithCompatibilityMapping) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|precomposedStringWithCompatibilityMapping| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(precomposedStringWithCompatibilityMapping) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|canBeConvertedToEncoding:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canBeConvertedToEncoding:) (( :UNSIGNED-LONG-LONG)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _))) nil t))
+
+(defun ns::|lossyCString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lossyCString) (()  :STRING)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|dataUsingEncoding:allowLossyConversion:| (thing _ allow-lossy-conversion)
+  (let ((message-lambda 
+         (make-message-lambda @(dataUsingEncoding:allowLossyConversion:) (( :UNSIGNED-LONG-LONG :CHAR)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (if allow-lossy-conversion 1 0))))
+
+(defun ns::|quotedStringRepresentation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(quotedStringRepresentation) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|getCString:maxLength:range:remainingRange:| (thing _ max-length range remaining-range)
+  (let ((message-lambda 
+         (make-message-lambda @(getCString:maxLength:range:remainingRange:) (( :STRING :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|) ( :POINTER ( :STRUCT ns::|_NSRange|)))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ max-length range (objc-object-id remaining-range))))
+
+(defun ns::|getCString:maxLength:| (thing _ max-length)
+  (let ((message-lambda 
+         (make-message-lambda @(getCString:maxLength:) (( :STRING :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ max-length)))
+
+(defun ns::|getCString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(getCString:) (( :STRING)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|initWithFormat:locale:arguments:| (thing _ locale arguments)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithFormat:locale:arguments:) (( :POINTER :POINTER ( :ARRAY ( :STRUCT ns::|__va_list_tag|) 1))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id locale) arguments)))
+
+(defun ns::|isAbsolutePath| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isAbsolutePath) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|stringByResolvingSymlinksInPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByResolvingSymlinksInPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|capitalizedStringWithLocale:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(capitalizedStringWithLocale:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|initWithCString:length:| (thing _ length)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCString:length:) (( :STRING :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ length)))
+
+(defun ns::|initWithBytesNoCopy:length:encoding:deallocator:| (thing _ length encoding deallocator)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithBytesNoCopy:length:encoding:deallocator:) (( ( :POINTER :VOID) :UNSIGNED-LONG-LONG :UNSIGNED-LONG-LONG :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) length encoding (objc-object-id deallocator))))
+
+(defun ns::|initWithCharactersNoCopy:length:deallocator:| (thing _ length deallocator)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCharactersNoCopy:length:deallocator:) (( ( :POINTER :UNSIGNED-SHORT) :UNSIGNED-LONG-LONG :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) length (objc-object-id deallocator))))
+
+(defun ns::|initWithCStringNoCopy:length:freeWhenDone:| (thing _ length free-when-done)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCStringNoCopy:length:freeWhenDone:) (( :STRING :UNSIGNED-LONG-LONG :CHAR)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ length (if free-when-done 1 0))))
+
+(defun ns::|initWithFormat:locale:| (thing _ locale)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithFormat:locale:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id locale))))
+
+(defun ns::|stringByAbbreviatingWithTildeInPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAbbreviatingWithTildeInPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringsByAppendingPaths:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringsByAppendingPaths:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|completePathIntoString:caseSensitive:matchesIntoArray:filterTypes:| (thing _ case-sensitive matches-into-array filter-types)
+  (let ((message-lambda 
+         (make-message-lambda @(completePathIntoString:caseSensitive:matchesIntoArray:filterTypes:) (( ( :POINTER :POINTER) :CHAR ( :POINTER :POINTER) :POINTER)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if case-sensitive 1 0) (objc-object-id matches-into-array) (objc-object-id filter-types))))
+
+(defun ns::|stringByConvertingPathToURL| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByConvertingPathToURL) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByConvertingURLToPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByConvertingURLToPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|writableTypeIdentifiersForItemProvider| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(writableTypeIdentifiersForItemProvider) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|loadDataWithTypeIdentifier:forItemProviderCompletionHandler:| (thing _ for-item-provider-completion-handler)
+  (let ((message-lambda 
+         (make-message-lambda @(loadDataWithTypeIdentifier:forItemProviderCompletionHandler:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-item-provider-completion-handler))))
+
+
+
+(defun ns::|matchesPattern:caseInsensitive:| (thing _ case-insensitive)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(matchesPattern:caseInsensitive:) (( :POINTER :CHAR)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if case-insensitive 1 0)))) nil t))
+
+(defun ns::|matchesPattern:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(matchesPattern:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|initWithCString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithCString:) (( :STRING)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|initWithValidatedFormat:validFormatSpecifiers:locale:arguments:error:| (thing _ valid-format-specifiers locale arguments error)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithValidatedFormat:validFormatSpecifiers:locale:arguments:error:) (( :POINTER :POINTER :POINTER ( :ARRAY ( :STRUCT ns::|__va_list_tag|) 1) ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id valid-format-specifiers) (objc-object-id locale) arguments (objc-object-id error))))
+
+(defun ns::|initWithContentsOfURL:encoding:error:| (thing _ encoding error)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithContentsOfURL:encoding:error:) (( :POINTER :UNSIGNED-LONG-LONG ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) encoding (objc-object-id error))))
+
+(defun ns::|initWithContentsOfURL:usedEncoding:error:| (thing _ used-encoding error)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithContentsOfURL:usedEncoding:error:) (( :POINTER ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id used-encoding) (objc-object-id error))))
+
+(defun ns::|initWithContentsOfFile:usedEncoding:error:| (thing _ used-encoding error)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithContentsOfFile:usedEncoding:error:) (( :POINTER ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id used-encoding) (objc-object-id error))))
+
+(defun ns::|rangeOfString:options:range:locale:| (thing _ options range locale)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfString:options:range:locale:) (( :POINTER :UNSIGNED-LONG-LONG ( :STRUCT ns::|_NSRange|) :POINTER)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options range (objc-object-id locale))))
+
+(defun ns::|localizedCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|localizedCaseInsensitiveCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedCaseInsensitiveCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|localizedStandardCompare:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedStandardCompare:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|rangeOfComposedCharacterSequencesForRange:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rangeOfComposedCharacterSequencesForRange:) (( ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|commonPrefixWithString:options:| (thing _ options)
+  (let ((message-lambda 
+         (make-message-lambda @(commonPrefixWithString:options:) (( :POINTER :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) options)))
+
+(defun ns::|localizedHasPrefix:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(localizedHasPrefix:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|localizedHasSuffix:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(localizedHasSuffix:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|localizedCaseInsensitiveContainsString:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(localizedCaseInsensitiveContainsString:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|localizedStandardContainsString:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(localizedStandardContainsString:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|localizedStandardRangeOfString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedStandardRangeOfString:) (( :POINTER)  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|localizedUppercaseString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedUppercaseString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|localizedLowercaseString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedLowercaseString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|localizedCapitalizedString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(localizedCapitalizedString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByFoldingWithOptions:locale:| (thing _ locale)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByFoldingWithOptions:locale:) (( :UNSIGNED-LONG-LONG :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id locale))))
+
+(defun ns::|lineRangeForRange:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(lineRangeForRange:) (( ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|paragraphRangeForRange:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(paragraphRangeForRange:) (( ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|enumerateLinesUsingBlock:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(enumerateLinesUsingBlock:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|displayableString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(displayableString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|getExternalRepresentation:extendedAttributes:forWritingToURLOrPath:usingEncoding:error:| (thing _ extended-attributes for-writing-to-u-r-l-or-path using-encoding error)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(getExternalRepresentation:extendedAttributes:forWritingToURLOrPath:usingEncoding:error:) (( ( :POINTER :POINTER) ( :POINTER :POINTER) :POINTER :UNSIGNED-LONG-LONG ( :POINTER :POINTER))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id extended-attributes) (objc-object-id for-writing-to-u-r-l-or-path) using-encoding (objc-object-id error)))) nil t))
+
+(defun ns::|initWithData:usedEncoding:| (thing _ used-encoding)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithData:usedEncoding:) (( :POINTER ( :POINTER :UNSIGNED-LONG-LONG))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id used-encoding))))
+
+(defun ns::|propertyListFromStringsFileFormat| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(propertyListFromStringsFileFormat) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|maximumLengthOfBytesUsingEncoding:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumLengthOfBytesUsingEncoding:) (( :UNSIGNED-LONG-LONG)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|stringByAddingPercentEscapes| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAddingPercentEscapes) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|standardizedURLPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(standardizedURLPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByRemovingPercentEscapes| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByRemovingPercentEscapes) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByAddingPercentEncodingWithAllowedCharacters:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAddingPercentEncodingWithAllowedCharacters:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|stringByRemovingPercentEncoding| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByRemovingPercentEncoding) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringByAddingPercentEscapesUsingEncoding:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByAddingPercentEscapesUsingEncoding:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|stringByReplacingPercentEscapesUsingEncoding:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringByReplacingPercentEscapesUsingEncoding:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|stringMarkingUpcaseTransitionsWithDelimiter2:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringMarkingUpcaseTransitionsWithDelimiter2:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|linguisticTagsInRange:scheme:options:orthography:tokenRanges:| (thing _ scheme options orthography token-ranges)
+  (let ((message-lambda 
+         (make-message-lambda @(linguisticTagsInRange:scheme:options:orthography:tokenRanges:) (( ( :STRUCT ns::|_NSRange|) :POINTER :UNSIGNED-LONG-LONG :POINTER ( :POINTER :POINTER))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id scheme) options (objc-object-id orthography) (objc-object-id token-ranges))))
+
+(defun ns::|enumerateLinguisticTagsInRange:scheme:options:orthography:usingBlock:| (thing _ scheme options orthography using-block)
+  (let ((message-lambda 
+         (make-message-lambda @(enumerateLinguisticTagsInRange:scheme:options:orthography:usingBlock:) (( ( :STRUCT ns::|_NSRange|) :POINTER :UNSIGNED-LONG-LONG :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id scheme) options (objc-object-id orthography) (objc-object-id using-block))))
+
+(defun ns::|significantText| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(significantText) (()  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+(defun ns::|isEmpty| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isEmpty) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|addObserverForName:object:queue:usingBlock:| (thing _ object queue using-block)
+  (let ((message-lambda 
+         (make-message-lambda @(addObserverForName:object:queue:usingBlock:) (( :POINTER :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id object) (objc-object-id queue) (objc-object-id using-block))))
+
+(defun ns::|removeObserver:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeObserver:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|postNotificationName:object:| (thing _ object)
+  (let ((message-lambda 
+         (make-message-lambda @(postNotificationName:object:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id object))))
+
+(defun ns::|postNotification:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(postNotification:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|addObserver:selector:name:object:| (thing _ selector name object)
+  (let ((message-lambda 
+         (make-message-lambda @(addObserver:selector:name:object:) (( :POINTER :POINTER :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id selector) (objc-object-id name) (objc-object-id object))))
+
+(defun ns::|postNotificationName:object:userInfo:| (thing _ object user-info)
+  (let ((message-lambda 
+         (make-message-lambda @(postNotificationName:object:userInfo:) (( :POINTER :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id object) (objc-object-id user-info))))
+
+(defun ns::|removeObserver:name:object:| (thing _ name object)
+  (let ((message-lambda 
+         (make-message-lambda @(removeObserver:name:object:) (( :POINTER :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id name) (objc-object-id object))))
+
+
+
+
+(defun ns::|userInfo| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(userInfo) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+(defun ns::|options| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(options) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithRect:options:owner:userInfo:| (thing _ options owner user-info)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithRect:options:owner:userInfo:) (( ( :STRUCT ns::|CGRect|) :UNSIGNED-LONG-LONG :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id owner) (objc-object-id user-info))))
+
+(defun ns::|mouseMoved:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(mouseMoved:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|rect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(rect) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|owner| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(owner) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithRect:options:pressureConfigurations:owner:userInfo:| (thing _ options pressure-configurations owner user-info)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithRect:options:pressureConfigurations:owner:userInfo:) (( ( :STRUCT ns::|CGRect|) :UNSIGNED-LONG-LONG :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ options (objc-object-id pressure-configurations) (objc-object-id owner) (objc-object-id user-info))))
+
+(defun ns::|pressureConfigurations| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pressureConfigurations) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|gestureBehaviors| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(gestureBehaviors) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setGestureBehaviors:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setGestureBehaviors:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+
+
+
+
+
+(defun ns::|prepareForReuse| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(prepareForReuse) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+(defun ns::|layout| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layout) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+(defun ns::|resetCursorRects| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(resetCursorRects) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setNeedsDisplay:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNeedsDisplay:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|invalidateIntrinsicContentSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(invalidateIntrinsicContentSize) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|layer| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layer) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setBackgroundColor:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBackgroundColor:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|setCompositingFilter:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCompositingFilter:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|bounds| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(bounds) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFrame:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFrame:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertPoint:toView:| (thing _ to-view)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPoint:toView:) (( ( :STRUCT ns::|CGPoint|) :POINTER)  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-view))))
+
+(defun ns::|visibleRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(visibleRect) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isFlipped| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isFlipped) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|addCursorRect:cursor:| (thing _ cursor)
+  (let ((message-lambda 
+         (make-message-lambda @(addCursorRect:cursor:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id cursor))))
+
+(defun ns::|allowsVibrancy| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsVibrancy) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isOpaque| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isOpaque) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|wantsUpdateLayer| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsUpdateLayer) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|updateLayer| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updateLayer) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|enableGeometryInWindowDidChangeNotification| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(enableGeometryInWindowDidChangeNotification) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|disableGeometryInWindowDidChangeNotification| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(disableGeometryInWindowDidChangeNotification) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setNeedsLayout:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNeedsLayout:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|superview| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(superview) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertRect:toView:| (thing _ to-view)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRect:toView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-view))))
+
+(defun ns::|initWithFrame:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithFrame:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|widthAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(widthAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setTranslatesAutoresizingMaskIntoConstraints:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTranslatesAutoresizingMaskIntoConstraints:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|addGestureRecognizer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addGestureRecognizer:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|fittingSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(fittingSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|removeConstraint:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeConstraint:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setContentCompressionResistancePriority:forOrientation:| (thing _ for-orientation)
+  (let ((message-lambda 
+         (make-message-lambda @(setContentCompressionResistancePriority:forOrientation:) (( :FLOAT :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ for-orientation)))
+
+(defun ns::|setContentHuggingPriority:forOrientation:| (thing _ for-orientation)
+  (let ((message-lambda 
+         (make-message-lambda @(setContentHuggingPriority:forOrientation:) (( :FLOAT :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ for-orientation)))
+
+(defun ns::|intrinsicContentSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(intrinsicContentSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidChangeEffectiveAppearance| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidChangeEffectiveAppearance) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|setWantsLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsLayer:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setShouldBeArchived:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setShouldBeArchived:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|addSubview:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addSubview:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|addSubview:positioned:relativeTo:| (thing _ positioned relative-to)
+  (let ((message-lambda 
+         (make-message-lambda @(addSubview:positioned:relativeTo:) (( :POINTER :LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) positioned (objc-object-id relative-to))))
+
+(defun ns::|addConstraint:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addConstraint:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|centerXAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(centerXAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|heightAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(heightAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|bottomAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(bottomAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|addConstraints:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addConstraints:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setIgnoreHitTest:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setIgnoreHitTest:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|leadingAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(leadingAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAllowedTouchTypes:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowedTouchTypes:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|gestureRecognizers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(gestureRecognizers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidMoveToWindow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidMoveToWindow) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|removeFromSuperview| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(removeFromSuperview) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|animator| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(animator) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|backgroundColor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(backgroundColor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setCornerRadius:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCornerRadius:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|alignmentRectInsets| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(alignmentRectInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|hitTest:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(hitTest:) (( ( :STRUCT ns::|CGPoint|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertPoint:fromView:| (thing _ from-view)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPoint:fromView:) (( ( :STRUCT ns::|CGPoint|) :POINTER)  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id from-view))))
+
+(defun ns::|nextEventMatchingMask:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nextEventMatchingMask:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setBoundsOrigin:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBoundsOrigin:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setAnimations:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAnimations:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|gestureRecognizerShouldBegin:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(gestureRecognizerShouldBegin:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+
+
+(defun ns::|subviews| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(subviews) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|layoutSubtreeIfNeeded| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layoutSubtreeIfNeeded) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setAlphaValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAlphaValue:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setOpaque:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setOpaque:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|display| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(display) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+
+
+(defun ns::|accessibilityHelpAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityHelpAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsHelpAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsHelpAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|accessibilityFocusedAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityFocusedAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsFocusedAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsFocusedAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|accessibilitySetFocusedAttribute:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilitySetFocusedAttribute:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityParentAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityParentAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsParentAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsParentAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|accessibilityWindowAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityWindowAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsWindowAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsWindowAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|accessibilityTopLevelUIElementAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityTopLevelUIElementAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsTopLevelUIElementAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsTopLevelUIElementAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|accessibilityPositionAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPositionAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsPositionAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsPositionAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|accessibilitySizeAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilitySizeAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsSizeAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsSizeAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+
+
+
+
+(defun ns::|accessibilityHorizontalUnitDescriptionAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityHorizontalUnitDescriptionAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityVerticalUnitDescriptionAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityVerticalUnitDescriptionAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertRect:fromView:| (thing _ from-view)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRect:fromView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id from-view))))
+
+
+(defun ns::|removeTrackingArea:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeTrackingArea:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|addTrackingArea:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addTrackingArea:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|setBounds:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBounds:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setLayer:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|makeBackingLayer| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(makeBackingLayer) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+(defun ns::|setAutoresizingMask:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAutoresizingMask:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setNextKeyView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNextKeyView:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setFrameOrigin:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFrameOrigin:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|alignmentRectForFrame:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(alignmentRectForFrame:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|removeConstraints:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeConstraints:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|autoresizingMask| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(autoresizingMask) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|drawRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(drawRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|mouseDownCanMoveWindow| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(mouseDownCanMoveWindow) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|convertSize:fromView:| (thing _ from-view)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSize:fromView:) (( ( :STRUCT ns::|CGSize|) :POINTER)  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id from-view))))
+
+(defun ns::|animations| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(animations) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|cornerRadius| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cornerRadius) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|lockFocus| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lockFocus) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|unlockFocus| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unlockFocus) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+(defun ns::|designatedFocusRingView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(designatedFocusRingView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+(defun ns::|convertRectToLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRectToLayer:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|shouldDelayWindowOrderingForEvent:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldDelayWindowOrderingForEvent:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|setFrameSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFrameSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+(defun ns::|setSubviews:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSubviews:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|leftAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(leftAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|trailingAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(trailingAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|centerYAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(centerYAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|declaredLayoutConstraints| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(declaredLayoutConstraints) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|wantsLayer| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsLayer) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setLayerContentsRedrawPolicy:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setLayerContentsRedrawPolicy:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|displayIfNeeded| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(displayIfNeeded) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|preferredLayoutAttributesFittingAttributes:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(preferredLayoutAttributesFittingAttributes:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|replaceSubview:with:| (thing _ with)
+  (let ((message-lambda 
+         (make-message-lambda @(replaceSubview:with:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with))))
+
+(defun ns::|updateConstraints| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updateConstraints) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_widthVariable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_widthVariable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_heightVariable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_heightVariable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillDraw| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillDraw) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|willRemoveSubview:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(willRemoveSubview:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+(defun ns::|mouse:inRect:| (thing _ in-rect)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(mouse:inRect:) (( ( :STRUCT ns::|CGPoint|) ( :STRUCT ns::|CGRect|))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ in-rect))) nil t))
+
+(defun ns::|convertSize:toView:| (thing _ to-view)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSize:toView:) (( ( :STRUCT ns::|CGSize|) :POINTER)  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-view))))
+
+(defun ns::|scrollRectToVisible:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(scrollRectToVisible:) (( ( :STRUCT ns::|CGRect|))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _))) nil t))
+
+(defun ns::|setNeedsDisplayInRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNeedsDisplayInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setKeyboardFocusRingNeedsDisplayInRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setKeyboardFocusRingNeedsDisplayInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|isDescendantOf:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isDescendantOf:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|nextKeyView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nextKeyView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|previousKeyView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(previousKeyView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setPostsFrameChangedNotifications:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPostsFrameChangedNotifications:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setPostsBoundsChangedNotifications:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPostsBoundsChangedNotifications:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|scrollPoint:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(scrollPoint:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|displayRectIgnoringOpacity:inContext:| (thing _ in-context)
+  (let ((message-lambda 
+         (make-message-lambda @(displayRectIgnoringOpacity:inContext:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id in-context))))
+
+(defun ns::|getRectsBeingDrawn:count:| (thing _ count)
+  (let ((message-lambda 
+         (make-message-lambda @(getRectsBeingDrawn:count:) (( ( :POINTER ( :POINTER ( :STRUCT ns::|CGRect|))) ( :POINTER :LONG-LONG))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id count))))
+
+(defun ns::|convertPointToBacking:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPointToBacking:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|inLiveResize| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(inLiveResize) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|preservesContentDuringLiveResize| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(preservesContentDuringLiveResize) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|getRectsExposedDuringLiveResize:count:| (thing _ count)
+  (let ((message-lambda 
+         (make-message-lambda @(getRectsExposedDuringLiveResize:count:) (( ( :ARRAY ( :STRUCT ns::|CGRect|) 4) ( :POINTER :LONG-LONG))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id count))))
+
+(defun ns::|canDraw| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canDraw) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|enclosingScrollView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(enclosingScrollView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|dragImage:at:offset:event:pasteboard:source:slideBack:| (thing _ at offset event pasteboard source slide-back)
+  (let ((message-lambda 
+         (make-message-lambda @(dragImage:at:offset:event:pasteboard:source:slideBack:) (( :POINTER ( :STRUCT ns::|CGPoint|) ( :STRUCT ns::|CGSize|) :POINTER :POINTER :POINTER :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at offset (objc-object-id event) (objc-object-id pasteboard) (objc-object-id source) (if slide-back 1 0))))
+
+(defun ns::|registerForDraggedTypes:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(registerForDraggedTypes:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|unregisterDraggedTypes| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(unregisterDraggedTypes) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|acceptsFirstMouse:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(acceptsFirstMouse:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|needsPanelToBecomeKey| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(needsPanelToBecomeKey) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|draggingEntered:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(draggingEntered:) (( :POINTER)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|draggingUpdated:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(draggingUpdated:) (( :POINTER)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|draggingExited:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(draggingExited:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|performDragOperation:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(performDragOperation:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|scrollWheel:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(scrollWheel:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|scrollRect:by:| (thing _ by)
+  (let ((message-lambda 
+         (make-message-lambda @(scrollRect:by:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ by)))
+
+(defun ns::|menuForEvent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(menuForEvent:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|removeFromSuperviewWithoutNeedingDisplay| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(removeFromSuperviewWithoutNeedingDisplay) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|bitmapImageRepForCachingDisplayInRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(bitmapImageRepForCachingDisplayInRect:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|cacheDisplayInRect:toBitmapImageRep:| (thing _ to-bitmap-image-rep)
+  (let ((message-lambda 
+         (make-message-lambda @(cacheDisplayInRect:toBitmapImageRep:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-bitmap-image-rep))))
+
+(defun ns::|postsFrameChangedNotifications| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(postsFrameChangedNotifications) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|viewDidMoveToSuperview| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidMoveToSuperview) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFlipped:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFlipped:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|registeredDraggedTypes| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(registeredDraggedTypes) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFocusRingType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFocusRingType:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|headerView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(headerView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|translatesAutoresizingMaskIntoConstraints| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(translatesAutoresizingMaskIntoConstraints) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setNextResponder:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNextResponder:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|animationForKey:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(animationForKey:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|centerScanRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(centerScanRect:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|invalidateIntrinsicContentSizeForCell:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(invalidateIntrinsicContentSizeForCell:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|invalidateConstraints| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(invalidateConstraints) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|lockFocusIfCanDraw| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(lockFocusIfCanDraw) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setContentStyle:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setContentStyle:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|frameForAlignmentRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(frameForAlignmentRect:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|sortSubviewsUsingBlock:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(sortSubviewsUsingBlock:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|firstBaselineOffsetFromTop| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(firstBaselineOffsetFromTop) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|baselineOffsetFromBottom| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(baselineOffsetFromBottom) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|touchBarHitTestInsets| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(touchBarHitTestInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|performMnemonic:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(performMnemonic:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|noteFocusRingMaskChanged| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(noteFocusRingMaskChanged) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertPointFromBacking:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPointFromBacking:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|lastBaselineOffsetFromBottom| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lastBaselineOffsetFromBottom) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|layerContentsRedrawPolicy| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layerContentsRedrawPolicy) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|effectiveContentStyle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(effectiveContentStyle) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|constraintForIdentifier:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(constraintForIdentifier:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setCompositingOperation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCompositingOperation:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|compositingOperation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(compositingOperation) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setClipsToBounds:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setClipsToBounds:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|alphaValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(alphaValue) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|willOpenMenu:withEvent:| (thing _ with-event)
+  (let ((message-lambda 
+         (make-message-lambda @(willOpenMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
+
+(defun ns::|didCloseMenu:withEvent:| (thing _ with-event)
+  (let ((message-lambda 
+         (make-message-lambda @(didCloseMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
+
+(defun ns::|prepareMenu:withEvent:| (thing _ with-event)
+  (let ((message-lambda 
+         (make-message-lambda @(prepareMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
+
+(defun ns::|prepareForMenu:withEvent:| (thing _ with-event)
+  (let ((message-lambda 
+         (make-message-lambda @(prepareForMenu:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
+
+(defun ns::|accessibilityPopUpMenuCreated:forSubview:returningAccessibilityParent:| (thing _ for-subview returning-accessibility-parent)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPopUpMenuCreated:forSubview:returningAccessibilityParent:) (( :POINTER :POINTER ( :POINTER :POINTER))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-subview) (objc-object-id returning-accessibility-parent))))
+
+(defun ns::|accessibilityPopUpMenuClosed:accessibilityParent:| (thing _ accessibility-parent)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPopUpMenuClosed:accessibilityParent:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id accessibility-parent))))
+
+(defun ns::|print:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(print:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|worksWhenModal| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(worksWhenModal) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|topAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(topAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|trackingAreas| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(trackingAreas) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nextValidKeyView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nextValidKeyView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|focusRingType| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(focusRingType) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertSizeToBacking:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSizeToBacking:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setAllowsVibrancy:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsVibrancy:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|canBecomeKeyView| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canBecomeKeyView) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|heartBeat:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(heartBeat:) (( ( :POINTER ( :ARRAY :CHAR 27)))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|opaqueAncestor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(opaqueAncestor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityWindowPointForShowMenu| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityWindowPointForShowMenu) (()  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|drawFocusRingMask| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(drawFocusRingMask) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityAuditParent| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAuditParent) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityDrawFocusRing| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityDrawFocusRing) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilitySectionsAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilitySectionsAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityAuditHierarchy| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAuditHierarchy) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityAuditLabel| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAuditLabel) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityAuditContrast| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAuditContrast) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|deepestAccessibilityDescendants| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(deepestAccessibilityDescendants) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setUpGState| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(setUpGState) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|rightAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(rightAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|updateConstraintsForSubtreeIfNeeded| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updateConstraintsForSubtreeIfNeeded) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|constraintsDidChangeInEngine:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(constraintsDidChangeInEngine:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|allocateGState| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(allocateGState) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillMoveToSuperview:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillMoveToSuperview:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setBoundsSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBoundsSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|translateOriginToPoint:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(translateOriginToPoint:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|scaleUnitSquareToSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(scaleUnitSquareToSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|adjustScroll:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(adjustScroll:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|previousValidKeyView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(previousValidKeyView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFrameRotation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFrameRotation:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setBoundsRotation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBoundsRotation:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|rotateByAngle:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rotateByAngle:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|autoscroll:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(autoscroll:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|enclosingMenuItem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(enclosingMenuItem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWithTag:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWithTag:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|beginDraggingSessionWithItems:event:source:| (thing _ event source)
+  (let ((message-lambda 
+         (make-message-lambda @(beginDraggingSessionWithItems:event:source:) (( :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id event) (objc-object-id source))))
+
+(defun ns::|constraints| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(constraints) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillStartLiveResize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillStartLiveResize) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidEndLiveResize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidEndLiveResize) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|updateTrackingAreas| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updateTrackingAreas) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertRectFromLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRectFromLayer:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|interpretKeyEvents:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(interpretKeyEvents:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|candidateListTouchBarItem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(candidateListTouchBarItem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|lastBaselineAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lastBaselineAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidChangeBackingProperties| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidChangeBackingProperties) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillMoveToWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillMoveToWindow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setAutoresizesSubviews:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAutoresizesSubviews:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|replaceSubview:with:options:completionHandler:| (thing _ with options completion-handler)
+  (let ((message-lambda 
+         (make-message-lambda @(replaceSubview:with:options:completionHandler:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with) options (objc-object-id completion-handler))))
+
+(defun ns::|setNeedsUpdateConstraints:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setNeedsUpdateConstraints:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|acceptsTouchEvents| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(acceptsTouchEvents) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|ignoreHitTest| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(ignoreHitTest) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|shouldBeArchived| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldBeArchived) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|displayRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(displayRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+(defun ns::|focusRingMaskBounds| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(focusRingMaskBounds) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityPopUpMenuParent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPopUpMenuParent:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|compositingFilter| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(compositingFilter) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_ancestorSharedWithItem:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_ancestorSharedWithItem:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|shadow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(shadow) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setShadow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setShadow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|backgroundFilters| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(backgroundFilters) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setBackgroundFilters:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBackgroundFilters:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|contentFilters| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(contentFilters) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setContentFilters:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setContentFilters:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|clipsToBounds| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(clipsToBounds) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|contentHuggingPriorityForOrientation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(contentHuggingPriorityForOrientation:) (( :LONG-LONG)  :FLOAT)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|contentCompressionResistancePriorityForOrientation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(contentCompressionResistancePriorityForOrientation:) (( :LONG-LONG)  :FLOAT)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|layoutRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layoutRect) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|firstBaselineAnchor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(firstBaselineAnchor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|discardCursorRects| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(discardCursorRects) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|cursorUpdate:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(cursorUpdate:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|prepareForDragOperation:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(prepareForDragOperation:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|concludeDragOperation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(concludeDragOperation:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|addTrackingRect:owner:userData:assumeInside:| (thing _ owner user-data assume-inside)
+  (let ((message-lambda 
+         (make-message-lambda @(addTrackingRect:owner:userData:assumeInside:) (( ( :STRUCT ns::|CGRect|) :POINTER ( :POINTER :VOID) :CHAR)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id owner) (objc-object-id user-data) (if assume-inside 1 0))))
+
+(defun ns::|removeTrackingRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeTrackingRect:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|trackEventsMatchingMask:timeout:mode:handler:| (thing _ timeout mode handler)
+  (let ((message-lambda 
+         (make-message-lambda @(trackEventsMatchingMask:timeout:mode:handler:) (( :UNSIGNED-LONG-LONG :DOUBLE :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ timeout (objc-object-id mode) (objc-object-id handler))))
+
+(defun ns::|recursiveDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(recursiveDescription) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|wantsRestingTouches| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsRestingTouches) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|allowedTouchTypes| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(allowedTouchTypes) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isDrawingFindIndicator| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isDrawingFindIndicator) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|removeAllToolTips| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(removeAllToolTips) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsis_frame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_frame) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setLayerContentsPlacement:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setLayerContentsPlacement:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|drawLayer:inContext:| (thing _ in-context)
+  (let ((message-lambda 
+         (make-message-lambda @(drawLayer:inContext:) (( :POINTER ( :POINTER ( :STRUCT ns::|CGContext|)))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id in-context))))
+
+(defun ns::|actionForLayer:forKey:| (thing _ for-key)
+  (let ((message-lambda 
+         (make-message-lambda @(actionForLayer:forKey:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-key))))
+
+(defun ns::|functionRow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(functionRow) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|needsDisplay| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(needsDisplay) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|resizeWithOldSuperviewSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(resizeWithOldSuperviewSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|hasAmbiguousLayout| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(hasAmbiguousLayout) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setUpdateLayerHandler:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setUpdateLayerHandler:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|alignmentLayoutRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(alignmentLayoutRect) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|ancestorSharedWithView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(ancestorSharedWithView:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|wantsBestResolutionOpenGLSurface| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsBestResolutionOpenGLSurface) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|renewGState| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(renewGState) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setPressureConfiguration:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPressureConfiguration:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|pressureConfiguration| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pressureConfiguration) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|canDrawConcurrently| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canDrawConcurrently) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|autoresizesSubviews| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(autoresizesSubviews) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|needsLayout| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(needsLayout) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|needsUpdateConstraints| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(needsUpdateConstraints) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|loggingDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(loggingDescription) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|didBecomeActiveFirstResponder| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(didBecomeActiveFirstResponder) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|didResignActiveFirstResponder| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(didResignActiveFirstResponder) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|addToolTipRect:owner:userData:| (thing _ owner user-data)
+  (let ((message-lambda 
+         (make-message-lambda @(addToolTipRect:owner:userData:) (( ( :STRUCT ns::|CGRect|) :POINTER ( :POINTER :VOID))  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id owner) (objc-object-id user-data))))
+
+(defun ns::|wantsExtendedDynamicRangeOpenGLSurface| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsExtendedDynamicRangeOpenGLSurface) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setWantsExtendedDynamicRangeOpenGLSurface:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsExtendedDynamicRangeOpenGLSurface:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|convertPointFromBase:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPointFromBase:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|prepareContentInRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(prepareContentInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setHorizontalContentSizeConstraintActive:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setHorizontalContentSizeConstraintActive:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setVerticalContentSizeConstraintActive:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setVerticalContentSizeConstraintActive:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|rectForPage:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(rectForPage:) (( :LONG-LONG)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|printJobTitle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(printJobTitle) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|geometryInWindowDidChange| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(geometryInWindowDidChange) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidHide| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidHide) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidUnhide| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidUnhide) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isRotatedOrScaledFromBase| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isRotatedOrScaledFromBase) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+(defun ns::|removeToolTip:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeToolTip:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|inputContext| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(inputContext) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityFocusRingMaskBounds| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityFocusRingMaskBounds) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertPointToLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPointToLayer:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|sortSubviewsUsingFunction:context:| (thing _ context)
+  (let ((message-lambda 
+         (make-message-lambda @(sortSubviewsUsingFunction:context:) (( ( :POINTER :POINTER) ( :POINTER :VOID))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id context))))
+
+(defun ns::|resizeSubviewsWithOldSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(resizeSubviewsWithOldSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|canDrawSubviewsIntoLayer| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canDrawSubviewsIntoLayer) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsis_valueOfVariable:didChangeInEngine:| (thing _ did-change-in-engine)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_valueOfVariable:didChangeInEngine:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id did-change-in-engine))))
+
+(defun ns::|convertSizeFromBacking:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSizeFromBacking:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|preparedContentRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(preparedContentRect) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|overlayBounds| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(overlayBounds) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|needsToDrawRect:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(needsToDrawRect:) (( ( :STRUCT ns::|CGRect|))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _))) nil t))
+
+(defun ns::|showActiveFirstResponderIndication| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(showActiveFirstResponderIndication) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|drawOverlayRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(drawOverlayRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|visibleAccessibleOrLeafSubviews| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(visibleAccessibleOrLeafSubviews) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityAuditPotentialChildren| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityAuditPotentialChildren) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|canSmoothFontsInLayer| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canSmoothFontsInLayer) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|displayIgnoringOpacity| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(displayIgnoringOpacity) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|isInTouchBar| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isInTouchBar) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|showDefinitionForAttributedString:range:options:baselineOriginProvider:| (thing _ range options baseline-origin-provider)
+  (let ((message-lambda 
+         (make-message-lambda @(showDefinitionForAttributedString:range:options:baselineOriginProvider:) (( :POINTER ( :STRUCT ns::|_NSRange|) :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) range (objc-object-id options) (objc-object-id baseline-origin-provider))))
+
+(defun ns::|wantsDefaultClipping| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsDefaultClipping) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isInFullScreenMode| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isInFullScreenMode) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|locationOfPrintRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(locationOfPrintRect:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|rectForSmartMagnificationAtPoint:inRect:| (thing _ in-rect)
+  (let ((message-lambda 
+         (make-message-lambda @(rectForSmartMagnificationAtPoint:inRect:) (( ( :STRUCT ns::|CGPoint|) ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _ in-rect)))
+
+(defun ns::|isRotatedFromBase| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isRotatedFromBase) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|didAddSubview:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(didAddSubview:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|adjustPageHeightNew:top:bottom:limit:| (thing _ top bottom limit)
+  (let ((message-lambda 
+         (make-message-lambda @(adjustPageHeightNew:top:bottom:limit:) (( ( :POINTER :DOUBLE) :DOUBLE :DOUBLE :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) top bottom limit)))
+
+(defun ns::|knowsPageRange:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(knowsPageRange:) (( ( :POINTER ( :STRUCT ns::|_NSRange|)))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|knowsPagesFirst:last:| (thing _ last)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(knowsPagesFirst:last:) (( ( :POINTER :LONG-LONG) ( :POINTER :LONG-LONG))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id last)))) nil t))
+
+(defun ns::|revealContext:rectsForItem:| (thing _ rects-for-item)
+  (let ((message-lambda 
+         (make-message-lambda @(revealContext:rectsForItem:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id rects-for-item))))
+
+(defun ns::|addLayoutGuide:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addLayoutGuide:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|rectPreservedDuringLiveResize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(rectPreservedDuringLiveResize) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|view:customToolTip:drawInView:displayInfo:| (thing _ custom-tool-tip draw-in-view display-info)
+  (let ((message-lambda 
+         (make-message-lambda @(view:customToolTip:drawInView:displayInfo:) (( :POINTER :LONG-LONG :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) custom-tool-tip (objc-object-id draw-in-view) (objc-object-id display-info))))
+
+(defun ns::|view:customToolTip:frameForToolTipWithDisplayInfo:| (thing _ custom-tool-tip frame-for-tool-tip-with-display-info)
+  (let ((message-lambda 
+         (make-message-lambda @(view:customToolTip:frameForToolTipWithDisplayInfo:) (( :POINTER :LONG-LONG :POINTER)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) custom-tool-tip (objc-object-id frame-for-tool-tip-with-display-info))))
+
+(defun ns::|view:customToolTip:fadeOutAllowedForToolTipWithDisplayInfo:| (thing _ custom-tool-tip fade-out-allowed-for-tool-tip-with-display-info)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(view:customToolTip:fadeOutAllowedForToolTipWithDisplayInfo:) (( :POINTER :LONG-LONG :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) custom-tool-tip (objc-object-id fade-out-allowed-for-tool-tip-with-display-info)))) nil t))
+
+(defun ns::|nsis_frameInEngine:forLayoutGuide:withRounding:| (thing _ for-layout-guide with-rounding)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_frameInEngine:forLayoutGuide:withRounding:) (( :POINTER :POINTER :CHAR)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-layout-guide) (if with-rounding 1 0))))
+
+(defun ns::|accessibilityPopUpMenuCreated:returningAccessibilityParent:| (thing _ returning-accessibility-parent)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPopUpMenuCreated:returningAccessibilityParent:) (( :POINTER ( :POINTER :POINTER))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id returning-accessibility-parent))))
+
+(defun ns::|setCanDrawSubviewsIntoLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCanDrawSubviewsIntoLayer:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setCanDrawConcurrently:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCanDrawConcurrently:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|removeAllGestureRecognizers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(removeAllGestureRecognizers) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|hideActiveFirstResponderIndication| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(hideActiveFirstResponderIndication) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|layerContentsPlacement| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layerContentsPlacement) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|compareGeometry:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(compareGeometry:) (( :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|nsli_engineToUserScalingCoefficientsInEngine:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_engineToUserScalingCoefficientsInEngine:) (( :POINTER)  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setPreparedContentRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPreparedContentRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|boundsOrigin| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(boundsOrigin) (()  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFrameTransform:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFrameTransform:) (( ( :STRUCT ns::|CGAffineTransform|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|frameRotation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(frameRotation) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|convertPointFromLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPointFromLayer:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertSizeToLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSizeToLayer:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertSizeFromLayer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSizeFromLayer:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|removeGestureRecognizer:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeGestureRecognizer:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|displayIfNeededInRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(displayIfNeededInRect:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|displayIfNeededIgnoringOpacity| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(displayIfNeededIgnoringOpacity) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|displayIfNeededInRectIgnoringOpacity:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(displayIfNeededInRectIgnoringOpacity:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|cacheDisplayInRect:toBitmapImageRep:includeSubviews:| (thing _ to-bitmap-image-rep include-subviews)
+  (let ((message-lambda 
+         (make-message-lambda @(cacheDisplayInRect:toBitmapImageRep:includeSubviews:) (( ( :STRUCT ns::|CGRect|) :POINTER :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-bitmap-image-rep) (if include-subviews 1 0))))
+
+(defun ns::|layoutGuides| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layoutGuides) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setWantsBestResolutionOpenGLSurface:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsBestResolutionOpenGLSurface:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setGestureRecognizers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setGestureRecognizers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|effectiveAppearanceDidChange| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(effectiveAppearanceDidChange) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setMaskView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMaskView:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|maskView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maskView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|computed_effectiveSemanticContext| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(computed_effectiveSemanticContext) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsis_layoutRectFromHostingViewInEngine:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_layoutRectFromHostingViewInEngine:) (( :POINTER)  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|nsis_unroundedFrame| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_unroundedFrame) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsis_rawAlignmentRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_rawAlignmentRect) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|disableLayoutFlushing| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(disableLayoutFlushing) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|enableLayoutFlushing| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(enableLayoutFlushing) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|frameTransform| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(frameTransform) (()  ( :STRUCT ns::|CGAffineTransform|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFrameCenterRotation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFrameCenterRotation:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|frameCenterRotation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(frameCenterRotation) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|frameOrigin| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(frameOrigin) (()  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|frameSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(frameSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|wantsExtendedDynamicRange| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsExtendedDynamicRange) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setWantsExtendedDynamicRange:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsExtendedDynamicRange:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|boundsSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(boundsSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|boundsRotation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(boundsRotation) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setLayerUsesCoreImageFilters:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setLayerUsesCoreImageFilters:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|layerUsesCoreImageFilters| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(layerUsesCoreImageFilters) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|convertPointToBase:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertPointToBase:) (( ( :STRUCT ns::|CGPoint|))  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertSizeToBase:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSizeToBase:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertSizeFromBase:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertSizeFromBase:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertRectToBase:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRectToBase:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|convertRectFromBase:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(convertRectFromBase:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|gState| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(gState) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|releaseGState| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(releaseGState) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|lockFocusIfCanDrawInContext:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(lockFocusIfCanDrawInContext:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|setAcceptsTouchEvents:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAcceptsTouchEvents:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setWantsRestingTouches:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsRestingTouches:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|gesturesEnabled| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(gesturesEnabled) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setGesturesEnabled:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setGesturesEnabled:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|displayRectIgnoringOpacity:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(displayRectIgnoringOpacity:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|usesConstraintsInsteadOfAutoresizing| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(usesConstraintsInsteadOfAutoresizing) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setUsesConstraintsInsteadOfAutoresizing:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setUsesConstraintsInsteadOfAutoresizing:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|isHorizontalContentSizeConstraintActive| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isHorizontalContentSizeConstraintActive) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isVerticalContentSizeConstraintActive| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isVerticalContentSizeConstraintActive) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|scrollPoint:fromView:| (thing _ from-view)
+  (let ((message-lambda 
+         (make-message-lambda @(scrollPoint:fromView:) (( ( :POINTER ( :STRUCT ns::|CGPoint|)) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id from-view))))
+
+(defun ns::|translateRectsNeedingDisplayInRect:by:| (thing _ by)
+  (let ((message-lambda 
+         (make-message-lambda @(translateRectsNeedingDisplayInRect:by:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ by)))
+
+(defun ns::|removeCursorRect:cursor:| (thing _ cursor)
+  (let ((message-lambda 
+         (make-message-lambda @(removeCursorRect:cursor:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id cursor))))
+
+(defun ns::|shouldDrawColor| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldDrawColor) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|postsBoundsChangedNotifications| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(postsBoundsChangedNotifications) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|willSendMenuNeedsUpdate:withEvent:| (thing _ with-event)
+  (let ((message-lambda 
+         (make-message-lambda @(willSendMenuNeedsUpdate:withEvent:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-event))))
+
+(defun ns::|updateLayerHandler| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updateLayerHandler) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidChangeBackingProperties:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidChangeBackingProperties:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|activeDrawingRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(activeDrawingRect) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|showDefinitionForAttributedString:atPoint:| (thing _ at-point)
+  (let ((message-lambda 
+         (make-message-lambda @(showDefinitionForAttributedString:atPoint:) (( :POINTER ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at-point)))
+
+(defun ns::|contentStyle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(contentStyle) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|computed_inSelectedTableRow| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(computed_inSelectedTableRow) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|computed_titlebarIsForcingDisplayOfDividers| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(computed_titlebarIsForcingDisplayOfDividers) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|computed_allowRolloverInToolbarControls| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(computed_allowRolloverInToolbarControls) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|fontSmoothingBackgroundColor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(fontSmoothingBackgroundColor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFontSmoothingBackgroundColor:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFontSmoothingBackgroundColor:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|shouldSetFontSmoothingBackgroundColor| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldSetFontSmoothingBackgroundColor) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsli_minXVariable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_minXVariable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_minYVariable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_minYVariable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_superitem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_superitem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|dataWithEPSInsideRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dataWithEPSInsideRect:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|dataWithPDFInsideRect:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dataWithPDFInsideRect:) (( ( :STRUCT ns::|CGRect|))  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|dragFile:fromRect:slideBack:event:| (thing _ from-rect slide-back event)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(dragFile:fromRect:slideBack:event:) (( :POINTER ( :STRUCT ns::|CGRect|) :CHAR :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) from-rect (if slide-back 1 0) (objc-object-id event)))) nil t))
+
+(defun ns::|dragPromisedFilesOfTypes:fromRect:source:slideBack:event:| (thing _ from-rect source slide-back event)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(dragPromisedFilesOfTypes:fromRect:source:slideBack:event:) (( :POINTER ( :STRUCT ns::|CGRect|) :POINTER :CHAR :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) from-rect (objc-object-id source) (if slide-back 1 0) (objc-object-id event)))) nil t))
+
+(defun ns::|removeLayoutGuide:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeLayoutGuide:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:onBehalfOfLayoutGuide:| (thing _ into-expression with-coefficient for-constraint on-behalf-of-layout-guide)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:onBehalfOfLayoutGuide:) (( :INT :POINTER :DOUBLE :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id into-expression) with-coefficient (objc-object-id for-constraint) (objc-object-id on-behalf-of-layout-guide)))) nil t))
+
+(defun ns::|nsli_lowersExpressionRelativeToConstraintContainer| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_lowersExpressionRelativeToConstraintContainer) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsli_layoutEngine| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_layoutEngine) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_installedConstraints| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_installedConstraints) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_removeConstraint:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_removeConstraint:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|constraintsAffectingLayoutForOrientation:ofItem:| (thing _ of-item)
+  (let ((message-lambda 
+         (make-message-lambda @(constraintsAffectingLayoutForOrientation:ofItem:) (( :LONG-LONG :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id of-item))))
+
+(defun ns::|nsli_convertSizeToEngineSpace:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_convertSizeToEngineSpace:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|nsli_convertSizeFromEngineSpace:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_convertSizeFromEngineSpace:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|nsli_defaultResolvedValue:forSymbolicConstant:inConstraint:error:| (thing _ for-symbolic-constant in-constraint error)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_defaultResolvedValue:forSymbolicConstant:inConstraint:error:) (( ( :POINTER :DOUBLE) :POINTER :POINTER ( :POINTER :POINTER))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-symbolic-constant) (objc-object-id in-constraint) (objc-object-id error)))) nil t))
+
+(defun ns::|nsli_constraintWithAnchor:relatedBy:toAnchor:withSystemSpacingMultipliedBy:| (thing _ related-by to-anchor with-system-spacing-multiplied-by)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_constraintWithAnchor:relatedBy:toAnchor:withSystemSpacingMultipliedBy:) (( :POINTER :LONG-LONG :POINTER :DOUBLE)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) related-by (objc-object-id to-anchor) with-system-spacing-multiplied-by)))
+
+(defun ns::|nsli_isRTL| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_isRTL) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsli_itemDescribingLayoutDirectionForConstraint:toItem:| (thing _ to-item)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_itemDescribingLayoutDirectionForConstraint:toItem:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-item))))
+
+(defun ns::|nsli_addConstraint:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_addConstraint:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|nsli_boundsWidthVariable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_boundsWidthVariable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_boundsHeightVariable| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_boundsHeightVariable) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_description| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_description) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:| (thing _ into-expression with-coefficient for-constraint)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:) (( :INT :POINTER :DOUBLE :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id into-expression) with-coefficient (objc-object-id for-constraint)))) nil t))
+
+(defun ns::|nsli_lowerAttribute:intoExpression:withCoefficient:container:| (thing _ into-expression with-coefficient container)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_lowerAttribute:intoExpression:withCoefficient:container:) (( :INT :POINTER :DOUBLE :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id into-expression) with-coefficient (objc-object-id container)))) nil t))
+
+(defun ns::|constraintsAffectingLayoutForOrientation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(constraintsAffectingLayoutForOrientation:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|nsli_layoutRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_layoutRect) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_resolvedValue:forSymbolicConstant:inConstraint:error:| (thing _ for-symbolic-constant in-constraint error)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_resolvedValue:forSymbolicConstant:inConstraint:error:) (( ( :POINTER :DOUBLE) :POINTER :POINTER ( :POINTER :POINTER))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-symbolic-constant) (objc-object-id in-constraint) (objc-object-id error)))) nil t))
+
+(defun ns::|nsli_descriptionIncludesPointer| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_descriptionIncludesPointer) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsli_autoresizingMask| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_autoresizingMask) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_isFlipped| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_isFlipped) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsli_piercingToken| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_piercingToken) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_setPiercingToken:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_setPiercingToken:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|nsli_isCollectingConstraintChangesForLaterCoordinatedFlush:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_isCollectingConstraintChangesForLaterCoordinatedFlush:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|nsis_shouldIntegralizeVariable:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsis_shouldIntegralizeVariable:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|nsis_valueOfVariableIsUserObservable:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsis_valueOfVariableIsUserObservable:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|nsis_descriptionOfVariable:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_descriptionOfVariable:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|nsis_orientationHintForVariable:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsis_orientationHintForVariable:) (( :POINTER)  :INT)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|widthAdjustLimit| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(widthAdjustLimit) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|adjustPageWidthNew:left:right:limit:| (thing _ left right limit)
+  (let ((message-lambda 
+         (make-message-lambda @(adjustPageWidthNew:left:right:limit:) (( ( :POINTER :DOUBLE) :DOUBLE :DOUBLE :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) left right limit)))
+
+(defun ns::|heightAdjustLimit| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(heightAdjustLimit) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|pageFooter| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pageFooter) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|pageHeader| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pageHeader) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|drawSheetBorderWithSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(drawSheetBorderWithSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|drawPageBorderWithSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(drawPageBorderWithSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|beginDocument| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(beginDocument) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|endDocument| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endDocument) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|endPage| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endPage) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|writePDFInsideRect:toPasteboard:| (thing _ to-pasteboard)
+  (let ((message-lambda 
+         (make-message-lambda @(writePDFInsideRect:toPasteboard:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-pasteboard))))
+
+(defun ns::|writeEPSInsideRect:toPasteboard:| (thing _ to-pasteboard)
+  (let ((message-lambda 
+         (make-message-lambda @(writeEPSInsideRect:toPasteboard:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-pasteboard))))
+
+(defun ns::|beginPageInRect:atPlacement:| (thing _ at-placement)
+  (let ((message-lambda 
+         (make-message-lambda @(beginPageInRect:atPlacement:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ at-placement)))
+
+(defun ns::|beginPrologueBBox:creationDate:createdBy:fonts:forWhom:pages:title:| (thing _ creation-date created-by fonts for-whom pages title)
+  (let ((message-lambda 
+         (make-message-lambda @(beginPrologueBBox:creationDate:createdBy:fonts:forWhom:pages:title:) (( ( :STRUCT ns::|CGRect|) :POINTER :POINTER :POINTER :POINTER :LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id creation-date) (objc-object-id created-by) (objc-object-id fonts) (objc-object-id for-whom) pages (objc-object-id title))))
+
+(defun ns::|endHeaderComments| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endHeaderComments) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|endPrologue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endPrologue) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|beginSetup| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(beginSetup) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|endSetup| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endSetup) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|beginPage:label:bBox:fonts:| (thing _ label b-box fonts)
+  (let ((message-lambda 
+         (make-message-lambda @(beginPage:label:bBox:fonts:) (( :LONG-LONG :POINTER ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id label) b-box (objc-object-id fonts))))
+
+(defun ns::|beginPageSetupRect:placement:| (thing _ placement)
+  (let ((message-lambda 
+         (make-message-lambda @(beginPageSetupRect:placement:) (( ( :STRUCT ns::|CGRect|) ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ placement)))
+
+(defun ns::|addToPageSetup| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(addToPageSetup) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|endPageSetup| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endPageSetup) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|beginTrailer| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(beginTrailer) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|endTrailer| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endTrailer) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|enterFullScreenMode:withOptions:| (thing _ with-options)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(enterFullScreenMode:withOptions:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id with-options)))) nil t))
+
+(defun ns::|exitFullScreenModeWithOptions:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(exitFullScreenModeWithOptions:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|reuseIdentifier| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(reuseIdentifier) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|ns_widgetType| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(ns_widgetType) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|ns_containerWidgetType| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(ns_containerWidgetType) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|exerciseAmbiguityInLayout| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(exerciseAmbiguityInLayout) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_addConstraint:mutuallyExclusiveConstraints:| (thing _ mutually-exclusive-constraints)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_addConstraint:mutuallyExclusiveConstraints:) (( :POINTER ( :POINTER :POINTER))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id mutually-exclusive-constraints))))
+
+(defun ns::|nsli_engineToUserScalingCoefficients| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_engineToUserScalingCoefficients) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nsli_layoutAnchorForAttribute:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_layoutAnchorForAttribute:) (( :LONG-LONG)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|nsli_canHostIndependentVariableAnchor| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(nsli_canHostIndependentVariableAnchor) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|nsli_swapContainerForOutgoingConstraint:toIncomingConstraint:| (thing _ to-incoming-constraint)
+  (let ((message-lambda 
+         (make-message-lambda @(nsli_swapContainerForOutgoingConstraint:toIncomingConstraint:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-incoming-constraint))))
+
+(defun ns::|engine:markerForConstraintToBreakAmongConstraints:| (thing _ marker-for-constraint-to-break-among-constraints)
+  (let ((message-lambda 
+         (make-message-lambda @(engine:markerForConstraintToBreakAmongConstraints:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id marker-for-constraint-to-break-among-constraints))))
+
+(defun ns::|engine:willBreakConstraint:dueToMutuallyExclusiveConstraints:| (thing _ will-break-constraint due-to-mutually-exclusive-constraints)
+  (let ((message-lambda 
+         (make-message-lambda @(engine:willBreakConstraint:dueToMutuallyExclusiveConstraints:) (( :POINTER :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id will-break-constraint) (objc-object-id due-to-mutually-exclusive-constraints))))
+
+(defun ns::|solutionDidChangeInEngine:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(solutionDidChangeInEngine:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|measureMin:max:ideal:| (thing _ max ideal)
+  (let ((message-lambda 
+         (make-message-lambda @(measureMin:max:ideal:) (( ( :POINTER ( :STRUCT ns::|CGSize|)) ( :POINTER ( :STRUCT ns::|CGSize|)) ( :POINTER ( :STRUCT ns::|CGSize|)))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id max) (objc-object-id ideal))))
+
+(defun ns::|layoutMarginsGuide| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(layoutMarginsGuide) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|safeAreaLayoutGuide| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(safeAreaLayoutGuide) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|computedSafeAreaInsets| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(computedSafeAreaInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|computedSafeAreaRect| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(computedSafeAreaRect) (()  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|recursiveConstraintDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(recursiveConstraintDescription) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|recursiveConstraintIdentifierDescription| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(recursiveConstraintIdentifierDescription) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|declaredLayoutRules| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(declaredLayoutRules) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|textLayerShouldEnableFontSmoothing:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(textLayerShouldEnableFontSmoothing:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|removeConstraintWithIdentifier:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeConstraintWithIdentifier:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|setBaseWritingDirection:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBaseWritingDirection:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+(defun ns::|setAlignment:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAlignment:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|alignment| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(alignment) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|formatter| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(formatter) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setFormatter:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFormatter:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|objectValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(objectValue) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setObjectValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setObjectValue:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setStringValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setStringValue:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|lineBreakMode| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(lineBreakMode) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|baseWritingDirection| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(baseWritingDirection) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setLineBreakMode:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setLineBreakMode:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+(defun ns::|controlSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(controlSize) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setControlSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setControlSize:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+
+
+
+
+
+
+(defun ns::|setContinuous:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setContinuous:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+
+(defun ns::|setHighlighted:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setHighlighted:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|isContinuous| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isContinuous) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|mouseDown:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(mouseDown:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|acceptsFirstResponder| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(acceptsFirstResponder) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+
+
+
+
+(defun ns::|accessibilityHelpStringForChild:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityHelpStringForChild:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityIsChildFocusable:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsChildFocusable:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|accessibilitySetFocus:forChild:| (thing _ for-child)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilitySetFocus:forChild:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-child))))
+
+(defun ns::|accessibilityPositionOfChild:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPositionOfChild:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilitySizeOfChild:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilitySizeOfChild:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|accessibilityEnabledAttribute| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityEnabledAttribute) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|accessibilityIsEnabledAttributeSettable| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(accessibilityIsEnabledAttributeSettable) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|cell| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cell) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|setDoubleValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDoubleValue:) (( :DOUBLE)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setTouchBarInsetMitigation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTouchBarInsetMitigation:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setTouchBarRestingMitigation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTouchBarRestingMitigation:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|touchBarInsetMitigation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(touchBarInsetMitigation) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|touchBarRestingMitigation| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(touchBarRestingMitigation) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+(defun ns::|performClick:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(performClick:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|attributedStringValue| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(attributedStringValue) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+(defun ns::|setAttributedStringValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAttributedStringValue:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|becomeKeyWindow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(becomeKeyWindow) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+(defun ns::|setIntValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setIntValue:) (( :INT)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setIntegerValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setIntegerValue:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setFloatValue:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setFloatValue:) (( :FLOAT)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|sendAction:to:| (thing _ to)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(sendAction:to:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to)))) nil t))
+
+(defun ns::|setCell:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCell:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|abortEditing| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(abortEditing) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|updateCell:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(updateCell:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|selectedCell| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(selectedCell) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|keyDown:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(keyDown:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|resignFirstResponder| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(resignFirstResponder) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setRefusesFirstResponder:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setRefusesFirstResponder:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|selectCell:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(selectCell:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|resignKeyWindow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(resignKeyWindow) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|updateCellInside:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(updateCellInside:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|becomeFirstResponder| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(becomeFirstResponder) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+(defun ns::|refusesFirstResponder| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(refusesFirstResponder) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+
+
+
+
+(defun ns::|drawWithExpansionFrame:inView:| (thing _ in-view)
+  (let ((message-lambda 
+         (make-message-lambda @(drawWithExpansionFrame:inView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id in-view))))
+
+(defun ns::|getPeriodicDelay:interval:| (thing _ interval)
+  (let ((message-lambda 
+         (make-message-lambda @(getPeriodicDelay:interval:) (( ( :POINTER :FLOAT) ( :POINTER :FLOAT))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id interval))))
+
+(defun ns::|setNextState| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(setNextState) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|sendActionOnMask| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(sendActionOnMask) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|drawCell:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(drawCell:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|currentEditor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(currentEditor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|validateEditing| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(validateEditing) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|usesSingleLineMode| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(usesSingleLineMode) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|endEditing:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(endEditing:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|sendActionOn:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(sendActionOn:) (( :UNSIGNED-LONG-LONG)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|takeIntValueFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(takeIntValueFrom:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|takeIntegerValueFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(takeIntegerValueFrom:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|takeFloatValueFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(takeFloatValueFrom:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|takeDoubleValueFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(takeDoubleValueFrom:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|takeStringValueFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(takeStringValueFrom:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|takeObjectValueFrom:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(takeObjectValueFrom:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setUsesSingleLineMode:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setUsesSingleLineMode:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|mouseDownFlags| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(mouseDownFlags) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+(defun ns::|setNeedsDisplay| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(setNeedsDisplay) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+(defun ns::|touchesBeganWithEvent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(touchesBeganWithEvent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|touchesMovedWithEvent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(touchesMovedWithEvent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|touchesEndedWithEvent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(touchesEndedWithEvent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|touchesCancelledWithEvent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(touchesCancelledWithEvent:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setAllowsExpansionToolTips:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsExpansionToolTips:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|allowsLogicalLayoutDirection| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsLogicalLayoutDirection) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|allowsExpansionToolTips| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(allowsExpansionToolTips) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|keyUp:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(keyUp:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|accessibilityPostNotification:context:| (thing _ context)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPostNotification:context:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id context))))
+
+(defun ns::|textView:willChangeSelectionFromCharacterRange:toCharacterRange:| (thing _ will-change-selection-from-character-range to-character-range)
+  (let ((message-lambda 
+         (make-message-lambda @(textView:willChangeSelectionFromCharacterRange:toCharacterRange:) (( :POINTER ( :STRUCT ns::|_NSRange|) ( :STRUCT ns::|_NSRange|))  ( :STRUCT ns::|_NSRange|))))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) will-change-selection-from-character-range to-character-range)))
+
+(defun ns::|setFloatingPointFormat:left:right:| (thing _ left right)
+  (let ((message-lambda 
+         (make-message-lambda @(setFloatingPointFormat:left:right:) (( :CHAR :UNSIGNED-LONG-LONG :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0) left right)))
+
+(defun ns::|setAllowsLogicalLayoutDirection:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsLogicalLayoutDirection:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|cellIfExists| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(cellIfExists) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|selectedTag| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(selectedTag) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|sizeThatFits:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(sizeThatFits:) (( ( :STRUCT ns::|CGSize|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|ignoresMultiClick| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(ignoresMultiClick) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setIgnoresMultiClick:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setIgnoresMultiClick:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+
+(defun ns::|skipEditValidation| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(skipEditValidation) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setSkipEditValidation:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSkipEditValidation:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|editWithFrame:editor:delegate:event:| (thing _ editor delegate event)
+  (let ((message-lambda 
+         (make-message-lambda @(editWithFrame:editor:delegate:event:) (( ( :STRUCT ns::|CGRect|) :POINTER :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id editor) (objc-object-id delegate) (objc-object-id event))))
+
+(defun ns::|selectWithFrame:editor:delegate:start:length:| (thing _ editor delegate start length)
+  (let ((message-lambda 
+         (make-message-lambda @(selectWithFrame:editor:delegate:start:length:) (( ( :STRUCT ns::|CGRect|) :POINTER :POINTER :LONG-LONG :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id editor) (objc-object-id delegate) start length)))
+
+(defun ns::|textViewDidChangeSelection:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(textViewDidChangeSelection:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|calcSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(calcSize) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|drawCellInside:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(drawCellInside:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|expansionFrameWithFrame:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(expansionFrameWithFrame:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|addTarget:action:forControlEvents:| (thing _ action for-control-events)
+  (let ((message-lambda 
+         (make-message-lambda @(addTarget:action:forControlEvents:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) for-control-events)))
+
+(defun ns::|removeTarget:action:forControlEvents:| (thing _ action for-control-events)
+  (let ((message-lambda 
+         (make-message-lambda @(removeTarget:action:forControlEvents:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id action) for-control-events)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|setType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setType:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|setDrawsBackground:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDrawsBackground:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|mouseEntered:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(mouseEntered:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|mouseExited:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(mouseExited:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|accessibilityElementWithParent:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityElementWithParent:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+(defun ns::|interiorBackgroundStyle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(interiorBackgroundStyle) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|textAlignmentPolicy| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(textAlignmentPolicy) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|titleRectForBounds:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(titleRectForBounds:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGRect|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+
+
+(defun ns::|isBordered| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isBordered) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setBordered:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setBordered:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+(defun ns::|cellSizeForBounds:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(cellSizeForBounds:) (( ( :STRUCT ns::|CGRect|))  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setControlTint:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setControlTint:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+
+(defun ns::|setAllowsEditingTextAttributes:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setAllowsEditingTextAttributes:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+(defun ns::|accessibilityPostNotification:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(accessibilityPostNotification:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8949,10 +11462,6 @@
          (make-message-lambda @(setSelectable:) (( :CHAR)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
-(defun ns::|setTitleWithMnemonic:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setTitleWithMnemonic:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 (defun ns::|hitTestForEvent:inRect:ofView:| (thing _ in-rect of-view)
   (let ((message-lambda 
@@ -9041,10 +11550,6 @@
          (make-message-lambda @(updateTrackingAreaWithFrame:inView:) (( ( :STRUCT ns::|CGRect|) :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  _ (objc-object-id in-view))))
 
-(defun ns::|mnemonic| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(mnemonic) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|drawingRectForBounds:| (thing _)
   (let ((message-lambda 
@@ -9384,230 +11889,50 @@
          (make-message-lambda @(setFieldEditorTextContainer:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityResultsForSearchPredicate:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityResultsForSearchPredicate:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityHeaderForColumnIndex:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityHeaderForColumnIndex:) (( :LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
 
-(defun ns::|accessibilityHeaderForRowIndex:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityHeaderForRowIndex:) (( :LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
 
-(defun ns::|accessibilityAuditIssues| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAuditIssues) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityAuditIssues:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityAuditIssues:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|isAccessibilityAutoInteractable| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isAccessibilityAutoInteractable) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
 
-(defun ns::|setAccessibilityAutoInteractable:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityAutoInteractable:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
-(defun ns::|accessibilityContainerType| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityContainerType) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityContainerType:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityContainerType:) (( :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
 
-(defun ns::|accessibilityUserInputLabels| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityUserInputLabels) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityUserInputLabels:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityUserInputLabels:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityCustomContent| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityCustomContent) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityCustomContent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityCustomContent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityAttributedUserInputLabels| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityAttributedUserInputLabels) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityAttributedUserInputLabels:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityAttributedUserInputLabels:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityPath| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPath) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityPath:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityPath:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityCustomChoosers| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityCustomChoosers) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityCustomChoosers:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityCustomChoosers:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityEmbeddedImageDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityEmbeddedImageDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityEmbeddedImageDescription:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityEmbeddedImageDescription:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|isAccessibilityEnhancedUserInterface| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isAccessibilityEnhancedUserInterface) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
 
-(defun ns::|setAccessibilityEnhancedUserInterface:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityEnhancedUserInterface:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
-(defun ns::|accessibilityFunctionRowTopLevelElements| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityFunctionRowTopLevelElements) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityFunctionRowTopLevelElements:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityFunctionRowTopLevelElements:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|isAccessibilityMimicNativeView| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(isAccessibilityMimicNativeView) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
 
-(defun ns::|setAccessibilityMimicNativeView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityMimicNativeView:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
-(defun ns::|accessibilitySections| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilitySections) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilitySections:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilitySections:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityHeaderGroup| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityHeaderGroup) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityHeaderGroup:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityHeaderGroup:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityFrameInParentSpace| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityFrameInParentSpace) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityFrameInParentSpace:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityFrameInParentSpace:) (( ( :STRUCT ns::|CGRect|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
 
-(defun ns::|accessibilityPreviousContentSibling| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityPreviousContentSibling) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setPreviousContentSibling:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setPreviousContentSibling:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityNextContentSibling| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityNextContentSibling) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setNextContentSibling:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setNextContentSibling:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityContentSiblingAbove| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityContentSiblingAbove) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityContentSiblingAbove:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityContentSiblingAbove:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityContentSiblingBelow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityContentSiblingBelow) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityContentSiblingBelow:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityContentSiblingBelow:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityChartDescriptor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(accessibilityChartDescriptor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAccessibilityChartDescriptor:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityChartDescriptor:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|accessibilityOverridesAlwaysTakePrecedence| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(accessibilityOverridesAlwaysTakePrecedence) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
 
-(defun ns::|setAccessibilityOverridesAlwaysTakePrecedence:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAccessibilityOverridesAlwaysTakePrecedence:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
 
 (defun ns::|accessibilityCurrentEditor| (thing)
@@ -9739,15 +12064,7 @@
          (make-message-lambda @(isEntryAcceptable:) (( :POINTER)  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
 
-(defun ns::|setMnemonicLocation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setMnemonicLocation:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
 
-(defun ns::|mnemonicLocation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(mnemonicLocation) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|controlTint| (thing)
   (let ((message-lambda 
@@ -10627,6 +12944,531 @@
          (make-message-lambda @(accessibilityIsTabsAttributeSettable) (()  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing) ))) nil t))
 
+
+
+
+
+
+
+(defun ns::|close| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(close) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+(defun ns::|document| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(document) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWindow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+
+
+(defun ns::|showWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(showWindow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|isWindowLoaded| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isWindowLoaded) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setContentViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setContentViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|initWithWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithWindow:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|prepareForSegue:sender:| (thing _ sender)
+  (let ((message-lambda 
+         (make-message-lambda @(prepareForSegue:sender:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id sender))))
+
+(defun ns::|shouldPerformSegueWithIdentifier:sender:| (thing _ sender)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldPerformSegueWithIdentifier:sender:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id sender)))) nil t))
+
+(defun ns::|setStoryboard:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setStoryboard:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|contentViewController| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(contentViewController) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|presentViewController:asPopoverRelativeToRect:ofView:preferredEdge:behavior:| (thing _ as-popover-relative-to-rect of-view preferred-edge behavior)
+  (let ((message-lambda 
+         (make-message-lambda @(presentViewController:asPopoverRelativeToRect:ofView:preferredEdge:behavior:) (( :POINTER ( :STRUCT ns::|CGRect|) :POINTER :UNSIGNED-LONG-LONG :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) as-popover-relative-to-rect (objc-object-id of-view) preferred-edge behavior)))
+
+
+(defun ns::|presentingViewController| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(presentingViewController) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|performSegueWithIdentifier:sender:| (thing _ sender)
+  (let ((message-lambda 
+         (make-message-lambda @(performSegueWithIdentifier:sender:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id sender))))
+
+(defun ns::|dismissController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dismissController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|synchronizeWindowTitleWithDocumentName| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(synchronizeWindowTitleWithDocumentName) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setDocumentEdited:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDocumentEdited:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|windowNibName| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(windowNibName) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithWindowNibName:owner:| (thing _ owner)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithWindowNibName:owner:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id owner))))
+
+(defun ns::|setDocument:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDocument:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|shouldCloseDocument| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldCloseDocument) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|initWithWindowNibName:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithWindowNibName:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|windowDidLoad| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(windowDidLoad) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|shouldCascadeWindows| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(shouldCascadeWindows) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|setShouldCascadeWindows:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setShouldCascadeWindows:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setWindowFrameAutosaveName:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWindowFrameAutosaveName:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setShouldCloseDocument:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setShouldCloseDocument:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|windowFrameAutosaveName| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(windowFrameAutosaveName) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|windowNibPath| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(windowNibPath) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|loadWindow| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(loadWindow) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|windowTitleForDocumentDisplayName:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(windowTitleForDocumentDisplayName:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|windowWillLoad| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(windowWillLoad) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|initWithWindowNibPath:owner:| (thing _ owner)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithWindowNibPath:owner:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id owner))))
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|beginRequestWithExtensionContext:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(beginRequestWithExtensionContext:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|preferredMaximumSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(preferredMaximumSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|preferredMinimumSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(preferredMinimumSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setPreferredContentSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPreferredContentSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|initWithNibName:bundle:| (thing _ bundle)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithNibName:bundle:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id bundle))))
+
+
+(defun ns::|parentViewController| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(parentViewController) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|preferredScreenOrigin| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(preferredScreenOrigin) (()  ( :STRUCT ns::|CGPoint|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|maximumSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|extensionContext| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(extensionContext) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|sourceItemView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(sourceItemView) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setSourceItemView:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSourceItemView:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setPreferredScreenOrigin:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPreferredScreenOrigin:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|viewDidLayout| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidLayout) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|commitEditingWithDelegate:didCommitSelector:contextInfo:| (thing _ did-commit-selector context-info)
+  (let ((message-lambda 
+         (make-message-lambda @(commitEditingWithDelegate:didCommitSelector:contextInfo:) (( :POINTER :POINTER ( :POINTER :VOID))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id did-commit-selector) (objc-object-id context-info))))
+
+(defun ns::|commitEditing| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(commitEditing) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|loadView| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(loadView) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|discardEditing| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(discardEditing) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|commitEditingAndReturnError:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(commitEditingAndReturnError:) (( ( :POINTER :POINTER))  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+
+(defun ns::|nibName| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nibName) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|nibBundle| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(nibBundle) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+
+
+
+(defun ns::|presentViewControllerAsModalWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(presentViewControllerAsModalWindow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|presentWindowControllerAsModalWindow:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(presentWindowControllerAsModalWindow:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|presentViewControllerAsSheet:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(presentViewControllerAsSheet:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|presentWindowControllerAsSheet:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(presentWindowControllerAsSheet:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|addChildViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(addChildViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|didMoveToParentViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(didMoveToParentViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|isViewLoaded| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isViewLoaded) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|childViewControllers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(childViewControllers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setChildViewControllers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setChildViewControllers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|presentedViewControllers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(presentedViewControllers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|constrainServiceScreenFrameBlock| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(constrainServiceScreenFrameBlock) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setConstrainServiceScreenFrameBlock:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setConstrainServiceScreenFrameBlock:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|updateViewConstraints| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updateViewConstraints) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillLayout| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillLayout) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidLoad| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidLoad) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|presentedWindowControllers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(presentedWindowControllers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|definesPresentationContext| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(definesPresentationContext) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|dismissViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dismissViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|presentViewController:animator:| (thing _ animator)
+  (let ((message-lambda 
+         (make-message-lambda @(presentViewController:animator:) (( :POINTER :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id animator))))
+
+(defun ns::|canPerformUnwindSegueAction:fromViewController:withSender:| (thing _ from-view-controller with-sender)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canPerformUnwindSegueAction:fromViewController:withSender:) (( :POINTER :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id from-view-controller) (objc-object-id with-sender)))) nil t))
+
+(defun ns::|removeChildViewControllerAtIndex:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(removeChildViewControllerAtIndex:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|insertChildViewController:atIndex:| (thing _ at-index)
+  (let ((message-lambda 
+         (make-message-lambda @(insertChildViewController:atIndex:) (( :POINTER :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) at-index)))
+
+(defun ns::|moveChildViewControllerAtIndex:toIndex:| (thing _ to-index)
+  (let ((message-lambda 
+         (make-message-lambda @(moveChildViewControllerAtIndex:toIndex:) (( :LONG-LONG :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _ to-index)))
+
+(defun ns::|removeFromParentViewController| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(removeFromParentViewController) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|willMoveToParentViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(willMoveToParentViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|showInParentViewController| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(showInParentViewController) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|showChildViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(showChildViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|preferredContentSize| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(preferredContentSize) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|preferredContentSizeDidChangeForViewController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(preferredContentSizeDidChangeForViewController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|childViewControllerDidChangePreferredContentSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(childViewControllerDidChangePreferredContentSize:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|presentedViewControllerDidChangePreferredContentSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(presentedViewControllerDidChangePreferredContentSize:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|beginAppearanceTransition:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(beginAppearanceTransition:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|endAppearanceTransition| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(endAppearanceTransition) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillAppear| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillAppear) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewWillDisappear| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillDisappear) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidAppear| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidAppear) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|viewDidDisappear| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(viewDidDisappear) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+
+(defun ns::|objectDidBeginEditing:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(objectDidBeginEditing:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|objectDidEndEditing:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(objectDidEndEditing:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
+(defun ns::|transitionFromViewController:toViewController:options:completionHandler:| (thing _ to-view-controller options completion-handler)
+  (let ((message-lambda 
+         (make-message-lambda @(transitionFromViewController:toViewController:options:completionHandler:) (( :POINTER :POINTER :UNSIGNED-LONG-LONG :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-view-controller) options (objc-object-id completion-handler))))
+
+(defun ns::|viewControllerForUnwindSegueAction:fromViewController:withSender:| (thing _ from-view-controller with-sender)
+  (let ((message-lambda 
+         (make-message-lambda @(viewControllerForUnwindSegueAction:fromViewController:withSender:) (( :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id from-view-controller) (objc-object-id with-sender))))
+
+(defun ns::|segueForUnwindingToViewController:fromViewController:identifier:| (thing _ from-view-controller identifier)
+  (let ((message-lambda 
+         (make-message-lambda @(segueForUnwindingToViewController:fromViewController:identifier:) (( :POINTER :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id from-view-controller) (objc-object-id identifier))))
+
+(defun ns::|viewWillTransitionToSize:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(viewWillTransitionToSize:) (( ( :STRUCT ns::|CGSize|))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|dismissWindowController:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dismissWindowController:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|applicationExtensionSession| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(applicationExtensionSession) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
 
 
 
@@ -14852,19 +17694,11 @@
 
 
 
-(defun ns::|close| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(close) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 
 
 
 
-(defun ns::|update| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(update) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 
 
@@ -14889,10 +17723,6 @@
 
 
 
-(defun ns::|document| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(document) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 
 (defun ns::|subtitle| (thing)
@@ -15474,10 +18304,6 @@
          (make-message-lambda @(setTitlebarAppearsTransparent:) (( :CHAR)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
-(defun ns::|setContentViewController:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setContentViewController:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 (defun ns::|maxFullScreenContentSize| (thing)
   (let ((message-lambda 
@@ -15611,15 +18437,7 @@
          (make-message-lambda @(depthLimit) (()  :INT)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|appearanceParent| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(appearanceParent) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|setAppearanceParent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAppearanceParent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 
 
@@ -15676,10 +18494,6 @@
 
 
 
-(defun ns::|contentViewController| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(contentViewController) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|frameRectForContentRect:styleMask:| (thing _ style-mask)
   (let ((message-lambda 
@@ -15889,10 +18703,6 @@
          (make-message-lambda @(editTitleWithCompletionHandler:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|setDocumentEdited:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setDocumentEdited:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
 (defun ns::|isFloatingPanel| (thing)
   (if (= 0  (let ((message-lambda 
@@ -17396,10 +20206,6 @@
          (make-message-lambda @(colorUsingColorSpaceName:) (( :POINTER)  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|initWithPasteboardPropertyList:ofType:| (thing _ of-type)
-  (let ((message-lambda 
-         (make-message-lambda @(initWithPasteboardPropertyList:ofType:) (( :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id of-type))))
 
 (defun ns::|getRed:green:blue:alpha:| (thing _ green blue alpha)
   (let ((message-lambda 
@@ -17451,15 +20257,7 @@
          (make-message-lambda @(colorUsingColorSpaceName:device:) (( :POINTER :POINTER)  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id device))))
 
-(defun ns::|writableTypesForPasteboard:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(writableTypesForPasteboard:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|pasteboardPropertyListForType:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(pasteboardPropertyListForType:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 (defun ns::|isUniform| (thing)
   (if (= 0  (let ((message-lambda 
@@ -18075,10 +20873,6 @@
          (make-message-lambda @(isEqualToDate:) (( :POINTER)  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
 
-(defun ns::|initWithString:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(initWithString:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 (defun ns::|dateByAddingTimeInterval:| (thing _)
   (let ((message-lambda 
@@ -18478,6 +21272,210 @@
          (make-message-lambda @(autoResizeDrawable) (()  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing) ))) nil t))
 
+
+
+
+
+
+
+
+
+
+
+
+
+(defun ns::|setDefaultItemIdentifiers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDefaultItemIdentifiers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setTemplateItems:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTemplateItems:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setPrincipalItemIdentifier:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setPrincipalItemIdentifier:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setSuppressesLessFocusedBars:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSuppressesLessFocusedBars:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setSuppressesMoreFocusedBars:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSuppressesMoreFocusedBars:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+
+
+(defun ns::|items| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(items) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|escapeKeyReplacementItem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(escapeKeyReplacementItem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setDefaultItems:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDefaultItems:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setItemIdentifiers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setItemIdentifiers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setCustomizationDefaultItemIdentifiers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCustomizationDefaultItemIdentifiers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|configuration| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(configuration) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|customizationIdentifier| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(customizationIdentifier) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|itemIdentifiers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(itemIdentifiers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setCustomizationIdentifier:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCustomizationIdentifier:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setCustomizationAllowedItemIdentifiers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCustomizationAllowedItemIdentifiers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setSuppressedByMoreFocusedTouchBars:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSuppressedByMoreFocusedTouchBars:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|touchBarLayoutDirection| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(touchBarLayoutDirection) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|customizationDefaultItemIdentifiers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(customizationDefaultItemIdentifiers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|itemForIdentifier:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(itemForIdentifier:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|isSuppressedByMoreFocusedTouchBars| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isSuppressedByMoreFocusedTouchBars) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|isSuppressedByLessFocusedTouchBars| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(isSuppressedByLessFocusedTouchBars) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|suppressesLessFocusedBars| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(suppressesLessFocusedBars) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|suppressesMoreFocusedBars| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(suppressesMoreFocusedBars) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|principalItemIdentifier| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(principalItemIdentifier) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|customizationRequiredItemIdentifiers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(customizationRequiredItemIdentifiers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|animationDuration| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(animationDuration) (()  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setEscapeKeyReplacementItemIdentifier:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setEscapeKeyReplacementItemIdentifier:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|customizationAllowedItemIdentifiers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(customizationAllowedItemIdentifiers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|escapeKeyReplacementItemIdentifier| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(escapeKeyReplacementItemIdentifier) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|defaultItemIdentifiers| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(defaultItemIdentifiers) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|templateItems| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(templateItems) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|defaultItems| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(defaultItems) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|minWidthGivenVisualCenterX:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(minWidthGivenVisualCenterX:) (( :DOUBLE)  :DOUBLE)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|animationTimingFunction| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(animationTimingFunction) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setCustomizationRequiredItemIdentifiers:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setCustomizationRequiredItemIdentifiers:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setTouchBarLayoutDirection:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setTouchBarLayoutDirection:) (( :LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setSuppressedByLessFocusedTouchBars:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setSuppressedByLessFocusedTouchBars:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setEscapeKeyReplacementItem:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setEscapeKeyReplacementItem:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
 (defun ns::|NS_managesOpenGLDrawable| (thing)
   (if (= 0  (let ((message-lambda 
          (make-message-lambda @(NS_managesOpenGLDrawable) (()  :CHAR)))) 
@@ -18636,10 +21634,6 @@
 
 
 
-(defun ns::|size| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(size) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
 
 
 
@@ -20235,7 +23229,19 @@
   (let ((message-lambda 
          (make-message-lambda @(windowNumberAtPoint:belowWindowWithWindowNumber:) (( ( :STRUCT ns::|CGPoint|) :LONG-LONG)  :LONG-LONG)))) 
    (funcall message-lambda (objc-object-id thing)  _ below-window-with-window-number)))
+
+(defun ns::|separatorItem| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(separatorItem) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setMenuBarVisible:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMenuBarVisible:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 (export (list 
+          'ns::|setMenuBarVisible:|
+          'ns::|separatorItem|
           'ns::|windowNumberAtPoint:belowWindowWithWindowNumber:|
           'ns::|screens|
           'ns::|bundleWithPath:|
@@ -20538,7 +23544,6 @@
           'ns::|contents|
           'ns::|style|
           'ns::|hidden|
-          'ns::|size|
           'ns::|PKG_setMaterialLayer:|
           'ns::|PKG_setUpdateLayerKey:|
           'ns::|PKG_materialLayer|
@@ -20570,6 +23575,44 @@
           'ns::|NS_showPrefetchedContentsIfNecessaryInRect:|
           'ns::|NS_wantsToPrefetchTiles|
           'ns::|NS_managesOpenGLDrawable|
+          'ns::|setEscapeKeyReplacementItem:|
+          'ns::|setSuppressedByLessFocusedTouchBars:|
+          'ns::|setTouchBarLayoutDirection:|
+          'ns::|setCustomizationRequiredItemIdentifiers:|
+          'ns::|animationTimingFunction|
+          'ns::|minWidthGivenVisualCenterX:|
+          'ns::|defaultItems|
+          'ns::|templateItems|
+          'ns::|defaultItemIdentifiers|
+          'ns::|escapeKeyReplacementItemIdentifier|
+          'ns::|customizationAllowedItemIdentifiers|
+          'ns::|setEscapeKeyReplacementItemIdentifier:|
+          'ns::|animationDuration|
+          'ns::|customizationRequiredItemIdentifiers|
+          'ns::|principalItemIdentifier|
+          'ns::|suppressesMoreFocusedBars|
+          'ns::|suppressesLessFocusedBars|
+          'ns::|isSuppressedByLessFocusedTouchBars|
+          'ns::|isSuppressedByMoreFocusedTouchBars|
+          'ns::|itemForIdentifier:|
+          'ns::|customizationDefaultItemIdentifiers|
+          'ns::|touchBarLayoutDirection|
+          'ns::|setSuppressedByMoreFocusedTouchBars:|
+          'ns::|setCustomizationAllowedItemIdentifiers:|
+          'ns::|setCustomizationIdentifier:|
+          'ns::|itemIdentifiers|
+          'ns::|customizationIdentifier|
+          'ns::|configuration|
+          'ns::|setCustomizationDefaultItemIdentifiers:|
+          'ns::|setItemIdentifiers:|
+          'ns::|setDefaultItems:|
+          'ns::|escapeKeyReplacementItem|
+          'ns::|items|
+          'ns::|setSuppressesMoreFocusedBars:|
+          'ns::|setSuppressesLessFocusedBars:|
+          'ns::|setPrincipalItemIdentifier:|
+          'ns::|setTemplateItems:|
+          'ns::|setDefaultItemIdentifiers:|
           'ns::|autoResizeDrawable|
           'ns::|enableSetNeedsDisplay|
           'ns::|depthStencilPixelFormat|
@@ -20646,7 +23689,6 @@
           'ns::|laterDate:|
           'ns::|earlierDate:|
           'ns::|dateByAddingTimeInterval:|
-          'ns::|initWithString:|
           'ns::|isEqualToDate:|
           'ns::|initWithTimeIntervalSinceReferenceDate:|
           'ns::|timeIntervalSinceReferenceDate|
@@ -20756,8 +23798,6 @@
           'ns::|drawSwatchInRect:|
           'ns::|writeToPasteboard:|
           'ns::|isUniform|
-          'ns::|pasteboardPropertyListForType:|
-          'ns::|writableTypesForPasteboard:|
           'ns::|colorUsingColorSpaceName:device:|
           'ns::|whiteComponent|
           'ns::|patternImage|
@@ -20768,7 +23808,6 @@
           'ns::|blendedColorWithFraction:ofColor:|
           'ns::|colorSpaceName|
           'ns::|getRed:green:blue:alpha:|
-          'ns::|initWithPasteboardPropertyList:ofType:|
           'ns::|colorUsingColorSpaceName:|
           'ns::|getComponents:|
           'ns::|numberOfComponents|
@@ -21063,7 +24102,6 @@
           'ns::|GDBDumpCursorRects|
           'ns::|allowsCursorRectsWhenInactive|
           'ns::|isFloatingPanel|
-          'ns::|setDocumentEdited:|
           'ns::|editTitleWithCompletionHandler:|
           'ns::|isDocumentEdited|
           'ns::|setRepresentedFilename:|
@@ -21103,7 +24141,6 @@
           'ns::|minFrameSizeForMinContentSize:styleMask:|
           'ns::|contentRectForFrameRect:styleMask:|
           'ns::|frameRectForContentRect:styleMask:|
-          'ns::|contentViewController|
           'ns::|undo:|
           'ns::|redo:|
           'ns::|startRectForSheet:|
@@ -21114,8 +24151,6 @@
           'ns::|isMainWindow|
           'ns::|isExcludedFromWindowsMenu|
           'ns::|setResizeIncrements:|
-          'ns::|setAppearanceParent:|
-          'ns::|appearanceParent|
           'ns::|depthLimit|
           'ns::|setDepthLimit:|
           'ns::|cancelOperation:|
@@ -21138,7 +24173,6 @@
           'ns::|setStyleMask:|
           'ns::|setHasShadow:|
           'ns::|maxFullScreenContentSize|
-          'ns::|setContentViewController:|
           'ns::|setTitlebarAppearsTransparent:|
           'ns::|collectionBehavior|
           'ns::|toolbar|
@@ -21235,12 +24269,9 @@
           'ns::|setFrame:display:|
           'ns::|setSubtitle:|
           'ns::|subtitle|
-          'ns::|document|
           'ns::|level|
           'ns::|hasTitleBar|
           'ns::|parentWindow|
-          'ns::|update|
-          'ns::|close|
           'ns::|orderFrontSharingServicePicker:|
           'ns::|previewPanel:transitionImageForPreviewItem:contentRect:|
           'ns::|previewPanel:sourceFrameOnScreenForPreviewItem:|
@@ -22013,6 +25044,104 @@
           'ns::|setVerticalScrollElasticity:|
           'ns::|setHasVerticalScroller:|
           'ns::|setBorderType:|
+          'ns::|applicationExtensionSession|
+          'ns::|dismissWindowController:|
+          'ns::|viewWillTransitionToSize:|
+          'ns::|segueForUnwindingToViewController:fromViewController:identifier:|
+          'ns::|viewControllerForUnwindSegueAction:fromViewController:withSender:|
+          'ns::|transitionFromViewController:toViewController:options:completionHandler:|
+          'ns::|objectDidEndEditing:|
+          'ns::|objectDidBeginEditing:|
+          'ns::|viewDidDisappear|
+          'ns::|viewDidAppear|
+          'ns::|viewWillDisappear|
+          'ns::|viewWillAppear|
+          'ns::|endAppearanceTransition|
+          'ns::|beginAppearanceTransition:|
+          'ns::|presentedViewControllerDidChangePreferredContentSize:|
+          'ns::|childViewControllerDidChangePreferredContentSize:|
+          'ns::|preferredContentSizeDidChangeForViewController:|
+          'ns::|preferredContentSize|
+          'ns::|showChildViewController:|
+          'ns::|showInParentViewController|
+          'ns::|willMoveToParentViewController:|
+          'ns::|removeFromParentViewController|
+          'ns::|moveChildViewControllerAtIndex:toIndex:|
+          'ns::|insertChildViewController:atIndex:|
+          'ns::|removeChildViewControllerAtIndex:|
+          'ns::|canPerformUnwindSegueAction:fromViewController:withSender:|
+          'ns::|presentViewController:animator:|
+          'ns::|dismissViewController:|
+          'ns::|definesPresentationContext|
+          'ns::|presentedWindowControllers|
+          'ns::|viewDidLoad|
+          'ns::|viewWillLayout|
+          'ns::|updateViewConstraints|
+          'ns::|setConstrainServiceScreenFrameBlock:|
+          'ns::|constrainServiceScreenFrameBlock|
+          'ns::|presentedViewControllers|
+          'ns::|setChildViewControllers:|
+          'ns::|childViewControllers|
+          'ns::|isViewLoaded|
+          'ns::|didMoveToParentViewController:|
+          'ns::|addChildViewController:|
+          'ns::|presentWindowControllerAsSheet:|
+          'ns::|presentViewControllerAsSheet:|
+          'ns::|presentWindowControllerAsModalWindow:|
+          'ns::|presentViewControllerAsModalWindow:|
+          'ns::|nibBundle|
+          'ns::|nibName|
+          'ns::|commitEditingAndReturnError:|
+          'ns::|discardEditing|
+          'ns::|loadView|
+          'ns::|commitEditing|
+          'ns::|commitEditingWithDelegate:didCommitSelector:contextInfo:|
+          'ns::|viewDidLayout|
+          'ns::|setPreferredScreenOrigin:|
+          'ns::|setSourceItemView:|
+          'ns::|sourceItemView|
+          'ns::|extensionContext|
+          'ns::|maximumSize|
+          'ns::|preferredScreenOrigin|
+          'ns::|parentViewController|
+          'ns::|initWithNibName:bundle:|
+          'ns::|setPreferredContentSize:|
+          'ns::|preferredMinimumSize|
+          'ns::|preferredMaximumSize|
+          'ns::|beginRequestWithExtensionContext:|
+          'ns::|initWithWindowNibPath:owner:|
+          'ns::|windowWillLoad|
+          'ns::|windowTitleForDocumentDisplayName:|
+          'ns::|loadWindow|
+          'ns::|windowNibPath|
+          'ns::|windowFrameAutosaveName|
+          'ns::|setShouldCloseDocument:|
+          'ns::|setWindowFrameAutosaveName:|
+          'ns::|setShouldCascadeWindows:|
+          'ns::|shouldCascadeWindows|
+          'ns::|windowDidLoad|
+          'ns::|initWithWindowNibName:|
+          'ns::|shouldCloseDocument|
+          'ns::|setDocument:|
+          'ns::|initWithWindowNibName:owner:|
+          'ns::|windowNibName|
+          'ns::|setDocumentEdited:|
+          'ns::|synchronizeWindowTitleWithDocumentName|
+          'ns::|dismissController:|
+          'ns::|performSegueWithIdentifier:sender:|
+          'ns::|presentingViewController|
+          'ns::|presentViewController:asPopoverRelativeToRect:ofView:preferredEdge:behavior:|
+          'ns::|contentViewController|
+          'ns::|setStoryboard:|
+          'ns::|shouldPerformSegueWithIdentifier:sender:|
+          'ns::|prepareForSegue:sender:|
+          'ns::|initWithWindow:|
+          'ns::|setContentViewController:|
+          'ns::|isWindowLoaded|
+          'ns::|showWindow:|
+          'ns::|setWindow:|
+          'ns::|document|
+          'ns::|close|
           'ns::|accessibilityIsTabsAttributeSettable|
           'ns::|accessibilityTabsAttribute|
           'ns::|selectPreviousTabViewItem:|
@@ -22160,8 +25289,6 @@
           'ns::|setEntryType:|
           'ns::|entryType|
           'ns::|controlTint|
-          'ns::|mnemonicLocation|
-          'ns::|setMnemonicLocation:|
           'ns::|isEntryAcceptable:|
           'ns::|accessibilityStyleRangeForIndexAttributeForParameter:|
           'ns::|accessibilityAttributedStringForRangeAttributeForParameter:|
@@ -22186,51 +25313,6 @@
           'ns::|accessibilityIsSelectedTextAttributeSettable|
           'ns::|accessibilitySelectedTextAttribute|
           'ns::|accessibilityCurrentEditor|
-          'ns::|setAccessibilityOverridesAlwaysTakePrecedence:|
-          'ns::|accessibilityOverridesAlwaysTakePrecedence|
-          'ns::|setAccessibilityChartDescriptor:|
-          'ns::|accessibilityChartDescriptor|
-          'ns::|setAccessibilityContentSiblingBelow:|
-          'ns::|accessibilityContentSiblingBelow|
-          'ns::|setAccessibilityContentSiblingAbove:|
-          'ns::|accessibilityContentSiblingAbove|
-          'ns::|setNextContentSibling:|
-          'ns::|accessibilityNextContentSibling|
-          'ns::|setPreviousContentSibling:|
-          'ns::|accessibilityPreviousContentSibling|
-          'ns::|setAccessibilityFrameInParentSpace:|
-          'ns::|accessibilityFrameInParentSpace|
-          'ns::|setAccessibilityHeaderGroup:|
-          'ns::|accessibilityHeaderGroup|
-          'ns::|setAccessibilitySections:|
-          'ns::|accessibilitySections|
-          'ns::|setAccessibilityMimicNativeView:|
-          'ns::|isAccessibilityMimicNativeView|
-          'ns::|setAccessibilityFunctionRowTopLevelElements:|
-          'ns::|accessibilityFunctionRowTopLevelElements|
-          'ns::|setAccessibilityEnhancedUserInterface:|
-          'ns::|isAccessibilityEnhancedUserInterface|
-          'ns::|setAccessibilityEmbeddedImageDescription:|
-          'ns::|accessibilityEmbeddedImageDescription|
-          'ns::|setAccessibilityCustomChoosers:|
-          'ns::|accessibilityCustomChoosers|
-          'ns::|setAccessibilityPath:|
-          'ns::|accessibilityPath|
-          'ns::|setAccessibilityAttributedUserInputLabels:|
-          'ns::|accessibilityAttributedUserInputLabels|
-          'ns::|setAccessibilityCustomContent:|
-          'ns::|accessibilityCustomContent|
-          'ns::|setAccessibilityUserInputLabels:|
-          'ns::|accessibilityUserInputLabels|
-          'ns::|setAccessibilityContainerType:|
-          'ns::|accessibilityContainerType|
-          'ns::|setAccessibilityAutoInteractable:|
-          'ns::|isAccessibilityAutoInteractable|
-          'ns::|setAccessibilityAuditIssues:|
-          'ns::|accessibilityAuditIssues|
-          'ns::|accessibilityHeaderForRowIndex:|
-          'ns::|accessibilityHeaderForColumnIndex:|
-          'ns::|accessibilityResultsForSearchPredicate:|
           'ns::|setFieldEditorTextContainer:|
           'ns::|setTitleTextContainer:|
           'ns::|setStyleEffectConfiguration:|
@@ -22296,7 +25378,6 @@
           'ns::|setScrollable:|
           'ns::|nextState|
           'ns::|drawingRectForBounds:|
-          'ns::|mnemonic|
           'ns::|updateTrackingAreaWithFrame:inView:|
           'ns::|drawFocusRingMaskWithFrame:inView:|
           'ns::|setShowsFirstResponder:|
@@ -22313,7 +25394,6 @@
           'ns::|drawsBackground|
           'ns::|highlight:withFrame:inView:|
           'ns::|hitTestForEvent:inRect:ofView:|
-          'ns::|setTitleWithMnemonic:|
           'ns::|setSelectable:|
           'ns::|setEditable:|
           'ns::|drawWithFrame:inView:|
@@ -22323,6 +25403,1016 @@
           'ns::|accessibilityIsValueAttributeSettable|
           'ns::|accessibilityValueAttribute|
           'ns::|isEditable|
+          'ns::|accessibilityPostNotification:|
+          'ns::|setAllowsEditingTextAttributes:|
+          'ns::|setControlTint:|
+          'ns::|cellSizeForBounds:|
+          'ns::|setBordered:|
+          'ns::|isBordered|
+          'ns::|titleRectForBounds:|
+          'ns::|textAlignmentPolicy|
+          'ns::|interiorBackgroundStyle|
+          'ns::|accessibilityElementWithParent:|
+          'ns::|mouseExited:|
+          'ns::|mouseEntered:|
+          'ns::|setDrawsBackground:|
+          'ns::|setType:|
+          'ns::|removeTarget:action:forControlEvents:|
+          'ns::|addTarget:action:forControlEvents:|
+          'ns::|expansionFrameWithFrame:|
+          'ns::|drawCellInside:|
+          'ns::|calcSize|
+          'ns::|textViewDidChangeSelection:|
+          'ns::|selectWithFrame:editor:delegate:start:length:|
+          'ns::|editWithFrame:editor:delegate:event:|
+          'ns::|setSkipEditValidation:|
+          'ns::|skipEditValidation|
+          'ns::|setIgnoresMultiClick:|
+          'ns::|ignoresMultiClick|
+          'ns::|sizeThatFits:|
+          'ns::|selectedTag|
+          'ns::|cellIfExists|
+          'ns::|setAllowsLogicalLayoutDirection:|
+          'ns::|setFloatingPointFormat:left:right:|
+          'ns::|textView:willChangeSelectionFromCharacterRange:toCharacterRange:|
+          'ns::|accessibilityPostNotification:context:|
+          'ns::|keyUp:|
+          'ns::|allowsExpansionToolTips|
+          'ns::|allowsLogicalLayoutDirection|
+          'ns::|setAllowsExpansionToolTips:|
+          'ns::|touchesCancelledWithEvent:|
+          'ns::|touchesEndedWithEvent:|
+          'ns::|touchesMovedWithEvent:|
+          'ns::|touchesBeganWithEvent:|
+          'ns::|setNeedsDisplay|
+          'ns::|mouseDownFlags|
+          'ns::|setUsesSingleLineMode:|
+          'ns::|takeObjectValueFrom:|
+          'ns::|takeStringValueFrom:|
+          'ns::|takeDoubleValueFrom:|
+          'ns::|takeFloatValueFrom:|
+          'ns::|takeIntegerValueFrom:|
+          'ns::|takeIntValueFrom:|
+          'ns::|sendActionOn:|
+          'ns::|endEditing:|
+          'ns::|usesSingleLineMode|
+          'ns::|validateEditing|
+          'ns::|currentEditor|
+          'ns::|drawCell:|
+          'ns::|sendActionOnMask|
+          'ns::|setNextState|
+          'ns::|getPeriodicDelay:interval:|
+          'ns::|drawWithExpansionFrame:inView:|
+          'ns::|refusesFirstResponder|
+          'ns::|becomeFirstResponder|
+          'ns::|updateCellInside:|
+          'ns::|resignKeyWindow|
+          'ns::|selectCell:|
+          'ns::|setRefusesFirstResponder:|
+          'ns::|resignFirstResponder|
+          'ns::|keyDown:|
+          'ns::|selectedCell|
+          'ns::|updateCell:|
+          'ns::|abortEditing|
+          'ns::|setCell:|
+          'ns::|sendAction:to:|
+          'ns::|setFloatValue:|
+          'ns::|setIntegerValue:|
+          'ns::|setIntValue:|
+          'ns::|becomeKeyWindow|
+          'ns::|setAttributedStringValue:|
+          'ns::|attributedStringValue|
+          'ns::|performClick:|
+          'ns::|touchBarRestingMitigation|
+          'ns::|touchBarInsetMitigation|
+          'ns::|setTouchBarRestingMitigation:|
+          'ns::|setTouchBarInsetMitigation:|
+          'ns::|setDoubleValue:|
+          'ns::|cell|
+          'ns::|accessibilityIsEnabledAttributeSettable|
+          'ns::|accessibilityEnabledAttribute|
+          'ns::|accessibilitySizeOfChild:|
+          'ns::|accessibilityPositionOfChild:|
+          'ns::|accessibilitySetFocus:forChild:|
+          'ns::|accessibilityIsChildFocusable:|
+          'ns::|accessibilityHelpStringForChild:|
+          'ns::|acceptsFirstResponder|
+          'ns::|mouseDown:|
+          'ns::|isContinuous|
+          'ns::|setHighlighted:|
+          'ns::|setContinuous:|
+          'ns::|setControlSize:|
+          'ns::|controlSize|
+          'ns::|setLineBreakMode:|
+          'ns::|baseWritingDirection|
+          'ns::|lineBreakMode|
+          'ns::|setStringValue:|
+          'ns::|setObjectValue:|
+          'ns::|objectValue|
+          'ns::|setFormatter:|
+          'ns::|formatter|
+          'ns::|alignment|
+          'ns::|setAlignment:|
+          'ns::|setBaseWritingDirection:|
+          'ns::|removeConstraintWithIdentifier:|
+          'ns::|textLayerShouldEnableFontSmoothing:|
+          'ns::|declaredLayoutRules|
+          'ns::|recursiveConstraintIdentifierDescription|
+          'ns::|recursiveConstraintDescription|
+          'ns::|computedSafeAreaRect|
+          'ns::|computedSafeAreaInsets|
+          'ns::|safeAreaLayoutGuide|
+          'ns::|layoutMarginsGuide|
+          'ns::|measureMin:max:ideal:|
+          'ns::|solutionDidChangeInEngine:|
+          'ns::|engine:willBreakConstraint:dueToMutuallyExclusiveConstraints:|
+          'ns::|engine:markerForConstraintToBreakAmongConstraints:|
+          'ns::|nsli_swapContainerForOutgoingConstraint:toIncomingConstraint:|
+          'ns::|nsli_canHostIndependentVariableAnchor|
+          'ns::|nsli_layoutAnchorForAttribute:|
+          'ns::|nsli_engineToUserScalingCoefficients|
+          'ns::|nsli_addConstraint:mutuallyExclusiveConstraints:|
+          'ns::|exerciseAmbiguityInLayout|
+          'ns::|ns_containerWidgetType|
+          'ns::|ns_widgetType|
+          'ns::|reuseIdentifier|
+          'ns::|exitFullScreenModeWithOptions:|
+          'ns::|enterFullScreenMode:withOptions:|
+          'ns::|endTrailer|
+          'ns::|beginTrailer|
+          'ns::|endPageSetup|
+          'ns::|addToPageSetup|
+          'ns::|beginPageSetupRect:placement:|
+          'ns::|beginPage:label:bBox:fonts:|
+          'ns::|endSetup|
+          'ns::|beginSetup|
+          'ns::|endPrologue|
+          'ns::|endHeaderComments|
+          'ns::|beginPrologueBBox:creationDate:createdBy:fonts:forWhom:pages:title:|
+          'ns::|beginPageInRect:atPlacement:|
+          'ns::|writeEPSInsideRect:toPasteboard:|
+          'ns::|writePDFInsideRect:toPasteboard:|
+          'ns::|endPage|
+          'ns::|endDocument|
+          'ns::|beginDocument|
+          'ns::|drawPageBorderWithSize:|
+          'ns::|drawSheetBorderWithSize:|
+          'ns::|pageHeader|
+          'ns::|pageFooter|
+          'ns::|heightAdjustLimit|
+          'ns::|adjustPageWidthNew:left:right:limit:|
+          'ns::|widthAdjustLimit|
+          'ns::|nsis_orientationHintForVariable:|
+          'ns::|nsis_descriptionOfVariable:|
+          'ns::|nsis_valueOfVariableIsUserObservable:|
+          'ns::|nsis_shouldIntegralizeVariable:|
+          'ns::|nsli_isCollectingConstraintChangesForLaterCoordinatedFlush:|
+          'ns::|nsli_setPiercingToken:|
+          'ns::|nsli_piercingToken|
+          'ns::|nsli_isFlipped|
+          'ns::|nsli_autoresizingMask|
+          'ns::|nsli_descriptionIncludesPointer|
+          'ns::|nsli_resolvedValue:forSymbolicConstant:inConstraint:error:|
+          'ns::|nsli_layoutRect|
+          'ns::|constraintsAffectingLayoutForOrientation:|
+          'ns::|nsli_lowerAttribute:intoExpression:withCoefficient:container:|
+          'ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:|
+          'ns::|nsli_description|
+          'ns::|nsli_boundsHeightVariable|
+          'ns::|nsli_boundsWidthVariable|
+          'ns::|nsli_addConstraint:|
+          'ns::|nsli_itemDescribingLayoutDirectionForConstraint:toItem:|
+          'ns::|nsli_isRTL|
+          'ns::|nsli_constraintWithAnchor:relatedBy:toAnchor:withSystemSpacingMultipliedBy:|
+          'ns::|nsli_defaultResolvedValue:forSymbolicConstant:inConstraint:error:|
+          'ns::|nsli_convertSizeFromEngineSpace:|
+          'ns::|nsli_convertSizeToEngineSpace:|
+          'ns::|constraintsAffectingLayoutForOrientation:ofItem:|
+          'ns::|nsli_removeConstraint:|
+          'ns::|nsli_installedConstraints|
+          'ns::|nsli_layoutEngine|
+          'ns::|nsli_lowersExpressionRelativeToConstraintContainer|
+          'ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:onBehalfOfLayoutGuide:|
+          'ns::|removeLayoutGuide:|
+          'ns::|dragPromisedFilesOfTypes:fromRect:source:slideBack:event:|
+          'ns::|dragFile:fromRect:slideBack:event:|
+          'ns::|dataWithPDFInsideRect:|
+          'ns::|dataWithEPSInsideRect:|
+          'ns::|nsli_superitem|
+          'ns::|nsli_minYVariable|
+          'ns::|nsli_minXVariable|
+          'ns::|shouldSetFontSmoothingBackgroundColor|
+          'ns::|setFontSmoothingBackgroundColor:|
+          'ns::|fontSmoothingBackgroundColor|
+          'ns::|computed_allowRolloverInToolbarControls|
+          'ns::|computed_titlebarIsForcingDisplayOfDividers|
+          'ns::|computed_inSelectedTableRow|
+          'ns::|contentStyle|
+          'ns::|showDefinitionForAttributedString:atPoint:|
+          'ns::|activeDrawingRect|
+          'ns::|viewDidChangeBackingProperties:|
+          'ns::|updateLayerHandler|
+          'ns::|willSendMenuNeedsUpdate:withEvent:|
+          'ns::|postsBoundsChangedNotifications|
+          'ns::|shouldDrawColor|
+          'ns::|removeCursorRect:cursor:|
+          'ns::|translateRectsNeedingDisplayInRect:by:|
+          'ns::|scrollPoint:fromView:|
+          'ns::|isVerticalContentSizeConstraintActive|
+          'ns::|isHorizontalContentSizeConstraintActive|
+          'ns::|setUsesConstraintsInsteadOfAutoresizing:|
+          'ns::|usesConstraintsInsteadOfAutoresizing|
+          'ns::|displayRectIgnoringOpacity:|
+          'ns::|setGesturesEnabled:|
+          'ns::|gesturesEnabled|
+          'ns::|setWantsRestingTouches:|
+          'ns::|setAcceptsTouchEvents:|
+          'ns::|lockFocusIfCanDrawInContext:|
+          'ns::|releaseGState|
+          'ns::|gState|
+          'ns::|convertRectFromBase:|
+          'ns::|convertRectToBase:|
+          'ns::|convertSizeFromBase:|
+          'ns::|convertSizeToBase:|
+          'ns::|convertPointToBase:|
+          'ns::|layerUsesCoreImageFilters|
+          'ns::|setLayerUsesCoreImageFilters:|
+          'ns::|boundsRotation|
+          'ns::|boundsSize|
+          'ns::|setWantsExtendedDynamicRange:|
+          'ns::|wantsExtendedDynamicRange|
+          'ns::|frameSize|
+          'ns::|frameOrigin|
+          'ns::|frameCenterRotation|
+          'ns::|setFrameCenterRotation:|
+          'ns::|frameTransform|
+          'ns::|enableLayoutFlushing|
+          'ns::|disableLayoutFlushing|
+          'ns::|nsis_rawAlignmentRect|
+          'ns::|nsis_unroundedFrame|
+          'ns::|nsis_layoutRectFromHostingViewInEngine:|
+          'ns::|computed_effectiveSemanticContext|
+          'ns::|maskView|
+          'ns::|setMaskView:|
+          'ns::|effectiveAppearanceDidChange|
+          'ns::|setGestureRecognizers:|
+          'ns::|setWantsBestResolutionOpenGLSurface:|
+          'ns::|layoutGuides|
+          'ns::|cacheDisplayInRect:toBitmapImageRep:includeSubviews:|
+          'ns::|displayIfNeededInRectIgnoringOpacity:|
+          'ns::|displayIfNeededIgnoringOpacity|
+          'ns::|displayIfNeededInRect:|
+          'ns::|removeGestureRecognizer:|
+          'ns::|convertSizeFromLayer:|
+          'ns::|convertSizeToLayer:|
+          'ns::|convertPointFromLayer:|
+          'ns::|frameRotation|
+          'ns::|setFrameTransform:|
+          'ns::|boundsOrigin|
+          'ns::|setPreparedContentRect:|
+          'ns::|nsli_engineToUserScalingCoefficientsInEngine:|
+          'ns::|compareGeometry:|
+          'ns::|layerContentsPlacement|
+          'ns::|hideActiveFirstResponderIndication|
+          'ns::|removeAllGestureRecognizers|
+          'ns::|setCanDrawConcurrently:|
+          'ns::|setCanDrawSubviewsIntoLayer:|
+          'ns::|accessibilityPopUpMenuCreated:returningAccessibilityParent:|
+          'ns::|nsis_frameInEngine:forLayoutGuide:withRounding:|
+          'ns::|view:customToolTip:fadeOutAllowedForToolTipWithDisplayInfo:|
+          'ns::|view:customToolTip:frameForToolTipWithDisplayInfo:|
+          'ns::|view:customToolTip:drawInView:displayInfo:|
+          'ns::|rectPreservedDuringLiveResize|
+          'ns::|addLayoutGuide:|
+          'ns::|revealContext:rectsForItem:|
+          'ns::|knowsPagesFirst:last:|
+          'ns::|knowsPageRange:|
+          'ns::|adjustPageHeightNew:top:bottom:limit:|
+          'ns::|didAddSubview:|
+          'ns::|isRotatedFromBase|
+          'ns::|rectForSmartMagnificationAtPoint:inRect:|
+          'ns::|locationOfPrintRect:|
+          'ns::|isInFullScreenMode|
+          'ns::|wantsDefaultClipping|
+          'ns::|showDefinitionForAttributedString:range:options:baselineOriginProvider:|
+          'ns::|isInTouchBar|
+          'ns::|displayIgnoringOpacity|
+          'ns::|canSmoothFontsInLayer|
+          'ns::|accessibilityAuditPotentialChildren|
+          'ns::|visibleAccessibleOrLeafSubviews|
+          'ns::|drawOverlayRect:|
+          'ns::|showActiveFirstResponderIndication|
+          'ns::|needsToDrawRect:|
+          'ns::|overlayBounds|
+          'ns::|preparedContentRect|
+          'ns::|convertSizeFromBacking:|
+          'ns::|nsis_valueOfVariable:didChangeInEngine:|
+          'ns::|canDrawSubviewsIntoLayer|
+          'ns::|resizeSubviewsWithOldSize:|
+          'ns::|sortSubviewsUsingFunction:context:|
+          'ns::|convertPointToLayer:|
+          'ns::|accessibilityFocusRingMaskBounds|
+          'ns::|inputContext|
+          'ns::|removeToolTip:|
+          'ns::|isRotatedOrScaledFromBase|
+          'ns::|viewDidUnhide|
+          'ns::|viewDidHide|
+          'ns::|geometryInWindowDidChange|
+          'ns::|printJobTitle|
+          'ns::|rectForPage:|
+          'ns::|setVerticalContentSizeConstraintActive:|
+          'ns::|setHorizontalContentSizeConstraintActive:|
+          'ns::|prepareContentInRect:|
+          'ns::|convertPointFromBase:|
+          'ns::|setWantsExtendedDynamicRangeOpenGLSurface:|
+          'ns::|wantsExtendedDynamicRangeOpenGLSurface|
+          'ns::|addToolTipRect:owner:userData:|
+          'ns::|didResignActiveFirstResponder|
+          'ns::|didBecomeActiveFirstResponder|
+          'ns::|loggingDescription|
+          'ns::|needsUpdateConstraints|
+          'ns::|needsLayout|
+          'ns::|autoresizesSubviews|
+          'ns::|canDrawConcurrently|
+          'ns::|pressureConfiguration|
+          'ns::|setPressureConfiguration:|
+          'ns::|renewGState|
+          'ns::|wantsBestResolutionOpenGLSurface|
+          'ns::|ancestorSharedWithView:|
+          'ns::|alignmentLayoutRect|
+          'ns::|setUpdateLayerHandler:|
+          'ns::|hasAmbiguousLayout|
+          'ns::|resizeWithOldSuperviewSize:|
+          'ns::|needsDisplay|
+          'ns::|functionRow|
+          'ns::|actionForLayer:forKey:|
+          'ns::|drawLayer:inContext:|
+          'ns::|setLayerContentsPlacement:|
+          'ns::|nsis_frame|
+          'ns::|removeAllToolTips|
+          'ns::|isDrawingFindIndicator|
+          'ns::|allowedTouchTypes|
+          'ns::|wantsRestingTouches|
+          'ns::|recursiveDescription|
+          'ns::|trackEventsMatchingMask:timeout:mode:handler:|
+          'ns::|removeTrackingRect:|
+          'ns::|addTrackingRect:owner:userData:assumeInside:|
+          'ns::|concludeDragOperation:|
+          'ns::|prepareForDragOperation:|
+          'ns::|cursorUpdate:|
+          'ns::|discardCursorRects|
+          'ns::|firstBaselineAnchor|
+          'ns::|layoutRect|
+          'ns::|contentCompressionResistancePriorityForOrientation:|
+          'ns::|contentHuggingPriorityForOrientation:|
+          'ns::|clipsToBounds|
+          'ns::|setContentFilters:|
+          'ns::|contentFilters|
+          'ns::|setBackgroundFilters:|
+          'ns::|backgroundFilters|
+          'ns::|setShadow:|
+          'ns::|shadow|
+          'ns::|nsli_ancestorSharedWithItem:|
+          'ns::|compositingFilter|
+          'ns::|accessibilityPopUpMenuParent:|
+          'ns::|focusRingMaskBounds|
+          'ns::|displayRect:|
+          'ns::|shouldBeArchived|
+          'ns::|ignoreHitTest|
+          'ns::|acceptsTouchEvents|
+          'ns::|setNeedsUpdateConstraints:|
+          'ns::|replaceSubview:with:options:completionHandler:|
+          'ns::|setAutoresizesSubviews:|
+          'ns::|viewWillMoveToWindow:|
+          'ns::|viewDidChangeBackingProperties|
+          'ns::|lastBaselineAnchor|
+          'ns::|candidateListTouchBarItem|
+          'ns::|interpretKeyEvents:|
+          'ns::|convertRectFromLayer:|
+          'ns::|updateTrackingAreas|
+          'ns::|viewDidEndLiveResize|
+          'ns::|viewWillStartLiveResize|
+          'ns::|constraints|
+          'ns::|beginDraggingSessionWithItems:event:source:|
+          'ns::|viewWithTag:|
+          'ns::|enclosingMenuItem|
+          'ns::|autoscroll:|
+          'ns::|rotateByAngle:|
+          'ns::|setBoundsRotation:|
+          'ns::|setFrameRotation:|
+          'ns::|previousValidKeyView|
+          'ns::|adjustScroll:|
+          'ns::|scaleUnitSquareToSize:|
+          'ns::|translateOriginToPoint:|
+          'ns::|setBoundsSize:|
+          'ns::|viewWillMoveToSuperview:|
+          'ns::|allocateGState|
+          'ns::|constraintsDidChangeInEngine:|
+          'ns::|updateConstraintsForSubtreeIfNeeded|
+          'ns::|rightAnchor|
+          'ns::|setUpGState|
+          'ns::|deepestAccessibilityDescendants|
+          'ns::|accessibilityAuditContrast|
+          'ns::|accessibilityAuditLabel|
+          'ns::|accessibilityAuditHierarchy|
+          'ns::|accessibilitySectionsAttribute|
+          'ns::|accessibilityDrawFocusRing|
+          'ns::|accessibilityAuditParent|
+          'ns::|drawFocusRingMask|
+          'ns::|accessibilityWindowPointForShowMenu|
+          'ns::|opaqueAncestor|
+          'ns::|heartBeat:|
+          'ns::|canBecomeKeyView|
+          'ns::|setAllowsVibrancy:|
+          'ns::|convertSizeToBacking:|
+          'ns::|focusRingType|
+          'ns::|nextValidKeyView|
+          'ns::|trackingAreas|
+          'ns::|topAnchor|
+          'ns::|worksWhenModal|
+          'ns::|print:|
+          'ns::|accessibilityPopUpMenuClosed:accessibilityParent:|
+          'ns::|accessibilityPopUpMenuCreated:forSubview:returningAccessibilityParent:|
+          'ns::|prepareForMenu:withEvent:|
+          'ns::|prepareMenu:withEvent:|
+          'ns::|didCloseMenu:withEvent:|
+          'ns::|willOpenMenu:withEvent:|
+          'ns::|alphaValue|
+          'ns::|setClipsToBounds:|
+          'ns::|compositingOperation|
+          'ns::|setCompositingOperation:|
+          'ns::|constraintForIdentifier:|
+          'ns::|effectiveContentStyle|
+          'ns::|layerContentsRedrawPolicy|
+          'ns::|lastBaselineOffsetFromBottom|
+          'ns::|convertPointFromBacking:|
+          'ns::|noteFocusRingMaskChanged|
+          'ns::|performMnemonic:|
+          'ns::|touchBarHitTestInsets|
+          'ns::|baselineOffsetFromBottom|
+          'ns::|firstBaselineOffsetFromTop|
+          'ns::|sortSubviewsUsingBlock:|
+          'ns::|frameForAlignmentRect:|
+          'ns::|setContentStyle:|
+          'ns::|lockFocusIfCanDraw|
+          'ns::|invalidateConstraints|
+          'ns::|invalidateIntrinsicContentSizeForCell:|
+          'ns::|centerScanRect:|
+          'ns::|animationForKey:|
+          'ns::|setNextResponder:|
+          'ns::|translatesAutoresizingMaskIntoConstraints|
+          'ns::|headerView|
+          'ns::|setFocusRingType:|
+          'ns::|registeredDraggedTypes|
+          'ns::|setFlipped:|
+          'ns::|viewDidMoveToSuperview|
+          'ns::|postsFrameChangedNotifications|
+          'ns::|cacheDisplayInRect:toBitmapImageRep:|
+          'ns::|bitmapImageRepForCachingDisplayInRect:|
+          'ns::|removeFromSuperviewWithoutNeedingDisplay|
+          'ns::|menuForEvent:|
+          'ns::|scrollRect:by:|
+          'ns::|scrollWheel:|
+          'ns::|performDragOperation:|
+          'ns::|draggingExited:|
+          'ns::|draggingUpdated:|
+          'ns::|draggingEntered:|
+          'ns::|needsPanelToBecomeKey|
+          'ns::|acceptsFirstMouse:|
+          'ns::|unregisterDraggedTypes|
+          'ns::|registerForDraggedTypes:|
+          'ns::|dragImage:at:offset:event:pasteboard:source:slideBack:|
+          'ns::|enclosingScrollView|
+          'ns::|canDraw|
+          'ns::|getRectsExposedDuringLiveResize:count:|
+          'ns::|preservesContentDuringLiveResize|
+          'ns::|inLiveResize|
+          'ns::|convertPointToBacking:|
+          'ns::|getRectsBeingDrawn:count:|
+          'ns::|displayRectIgnoringOpacity:inContext:|
+          'ns::|scrollPoint:|
+          'ns::|setPostsBoundsChangedNotifications:|
+          'ns::|setPostsFrameChangedNotifications:|
+          'ns::|previousKeyView|
+          'ns::|nextKeyView|
+          'ns::|isDescendantOf:|
+          'ns::|setKeyboardFocusRingNeedsDisplayInRect:|
+          'ns::|setNeedsDisplayInRect:|
+          'ns::|scrollRectToVisible:|
+          'ns::|convertSize:toView:|
+          'ns::|mouse:inRect:|
+          'ns::|willRemoveSubview:|
+          'ns::|viewWillDraw|
+          'ns::|nsli_heightVariable|
+          'ns::|nsli_widthVariable|
+          'ns::|updateConstraints|
+          'ns::|replaceSubview:with:|
+          'ns::|preferredLayoutAttributesFittingAttributes:|
+          'ns::|displayIfNeeded|
+          'ns::|setLayerContentsRedrawPolicy:|
+          'ns::|wantsLayer|
+          'ns::|declaredLayoutConstraints|
+          'ns::|centerYAnchor|
+          'ns::|trailingAnchor|
+          'ns::|leftAnchor|
+          'ns::|setSubviews:|
+          'ns::|setFrameSize:|
+          'ns::|shouldDelayWindowOrderingForEvent:|
+          'ns::|convertRectToLayer:|
+          'ns::|designatedFocusRingView|
+          'ns::|unlockFocus|
+          'ns::|lockFocus|
+          'ns::|cornerRadius|
+          'ns::|animations|
+          'ns::|convertSize:fromView:|
+          'ns::|mouseDownCanMoveWindow|
+          'ns::|drawRect:|
+          'ns::|autoresizingMask|
+          'ns::|removeConstraints:|
+          'ns::|alignmentRectForFrame:|
+          'ns::|setFrameOrigin:|
+          'ns::|setNextKeyView:|
+          'ns::|setAutoresizingMask:|
+          'ns::|makeBackingLayer|
+          'ns::|setLayer:|
+          'ns::|setBounds:|
+          'ns::|addTrackingArea:|
+          'ns::|removeTrackingArea:|
+          'ns::|convertRect:fromView:|
+          'ns::|accessibilityVerticalUnitDescriptionAttribute|
+          'ns::|accessibilityHorizontalUnitDescriptionAttribute|
+          'ns::|accessibilityIsSizeAttributeSettable|
+          'ns::|accessibilitySizeAttribute|
+          'ns::|accessibilityIsPositionAttributeSettable|
+          'ns::|accessibilityPositionAttribute|
+          'ns::|accessibilityIsTopLevelUIElementAttributeSettable|
+          'ns::|accessibilityTopLevelUIElementAttribute|
+          'ns::|accessibilityIsWindowAttributeSettable|
+          'ns::|accessibilityWindowAttribute|
+          'ns::|accessibilityIsParentAttributeSettable|
+          'ns::|accessibilityParentAttribute|
+          'ns::|accessibilitySetFocusedAttribute:|
+          'ns::|accessibilityIsFocusedAttributeSettable|
+          'ns::|accessibilityFocusedAttribute|
+          'ns::|accessibilityIsHelpAttributeSettable|
+          'ns::|accessibilityHelpAttribute|
+          'ns::|display|
+          'ns::|setOpaque:|
+          'ns::|setAlphaValue:|
+          'ns::|layoutSubtreeIfNeeded|
+          'ns::|subviews|
+          'ns::|gestureRecognizerShouldBegin:|
+          'ns::|setAnimations:|
+          'ns::|setBoundsOrigin:|
+          'ns::|nextEventMatchingMask:|
+          'ns::|convertPoint:fromView:|
+          'ns::|hitTest:|
+          'ns::|alignmentRectInsets|
+          'ns::|setCornerRadius:|
+          'ns::|backgroundColor|
+          'ns::|animator|
+          'ns::|removeFromSuperview|
+          'ns::|viewDidMoveToWindow|
+          'ns::|gestureRecognizers|
+          'ns::|setAllowedTouchTypes:|
+          'ns::|leadingAnchor|
+          'ns::|setIgnoreHitTest:|
+          'ns::|addConstraints:|
+          'ns::|bottomAnchor|
+          'ns::|heightAnchor|
+          'ns::|centerXAnchor|
+          'ns::|addConstraint:|
+          'ns::|addSubview:positioned:relativeTo:|
+          'ns::|addSubview:|
+          'ns::|setShouldBeArchived:|
+          'ns::|setWantsLayer:|
+          'ns::|viewDidChangeEffectiveAppearance|
+          'ns::|intrinsicContentSize|
+          'ns::|setContentHuggingPriority:forOrientation:|
+          'ns::|setContentCompressionResistancePriority:forOrientation:|
+          'ns::|removeConstraint:|
+          'ns::|fittingSize|
+          'ns::|addGestureRecognizer:|
+          'ns::|setTranslatesAutoresizingMaskIntoConstraints:|
+          'ns::|widthAnchor|
+          'ns::|initWithFrame:|
+          'ns::|convertRect:toView:|
+          'ns::|superview|
+          'ns::|setNeedsLayout:|
+          'ns::|disableGeometryInWindowDidChangeNotification|
+          'ns::|enableGeometryInWindowDidChangeNotification|
+          'ns::|updateLayer|
+          'ns::|wantsUpdateLayer|
+          'ns::|isOpaque|
+          'ns::|allowsVibrancy|
+          'ns::|addCursorRect:cursor:|
+          'ns::|isFlipped|
+          'ns::|visibleRect|
+          'ns::|convertPoint:toView:|
+          'ns::|setFrame:|
+          'ns::|bounds|
+          'ns::|setCompositingFilter:|
+          'ns::|setBackgroundColor:|
+          'ns::|layer|
+          'ns::|invalidateIntrinsicContentSize|
+          'ns::|setNeedsDisplay:|
+          'ns::|resetCursorRects|
+          'ns::|layout|
+          'ns::|prepareForReuse|
+          'ns::|setGestureBehaviors:|
+          'ns::|gestureBehaviors|
+          'ns::|pressureConfigurations|
+          'ns::|initWithRect:options:pressureConfigurations:owner:userInfo:|
+          'ns::|owner|
+          'ns::|rect|
+          'ns::|mouseMoved:|
+          'ns::|initWithRect:options:owner:userInfo:|
+          'ns::|options|
+          'ns::|userInfo|
+          'ns::|removeObserver:name:object:|
+          'ns::|postNotificationName:object:userInfo:|
+          'ns::|addObserver:selector:name:object:|
+          'ns::|postNotification:|
+          'ns::|postNotificationName:object:|
+          'ns::|removeObserver:|
+          'ns::|addObserverForName:object:queue:usingBlock:|
+          'ns::|isEmpty|
+          'ns::|significantText|
+          'ns::|enumerateLinguisticTagsInRange:scheme:options:orthography:usingBlock:|
+          'ns::|linguisticTagsInRange:scheme:options:orthography:tokenRanges:|
+          'ns::|stringMarkingUpcaseTransitionsWithDelimiter2:|
+          'ns::|stringByReplacingPercentEscapesUsingEncoding:|
+          'ns::|stringByAddingPercentEscapesUsingEncoding:|
+          'ns::|stringByRemovingPercentEncoding|
+          'ns::|stringByAddingPercentEncodingWithAllowedCharacters:|
+          'ns::|stringByRemovingPercentEscapes|
+          'ns::|standardizedURLPath|
+          'ns::|stringByAddingPercentEscapes|
+          'ns::|maximumLengthOfBytesUsingEncoding:|
+          'ns::|propertyListFromStringsFileFormat|
+          'ns::|initWithData:usedEncoding:|
+          'ns::|getExternalRepresentation:extendedAttributes:forWritingToURLOrPath:usingEncoding:error:|
+          'ns::|displayableString|
+          'ns::|enumerateLinesUsingBlock:|
+          'ns::|paragraphRangeForRange:|
+          'ns::|lineRangeForRange:|
+          'ns::|stringByFoldingWithOptions:locale:|
+          'ns::|localizedCapitalizedString|
+          'ns::|localizedLowercaseString|
+          'ns::|localizedUppercaseString|
+          'ns::|localizedStandardRangeOfString:|
+          'ns::|localizedStandardContainsString:|
+          'ns::|localizedCaseInsensitiveContainsString:|
+          'ns::|localizedHasSuffix:|
+          'ns::|localizedHasPrefix:|
+          'ns::|commonPrefixWithString:options:|
+          'ns::|rangeOfComposedCharacterSequencesForRange:|
+          'ns::|localizedStandardCompare:|
+          'ns::|localizedCaseInsensitiveCompare:|
+          'ns::|localizedCompare:|
+          'ns::|rangeOfString:options:range:locale:|
+          'ns::|initWithContentsOfFile:usedEncoding:error:|
+          'ns::|initWithContentsOfURL:usedEncoding:error:|
+          'ns::|initWithContentsOfURL:encoding:error:|
+          'ns::|initWithValidatedFormat:validFormatSpecifiers:locale:arguments:error:|
+          'ns::|initWithCString:|
+          'ns::|matchesPattern:|
+          'ns::|matchesPattern:caseInsensitive:|
+          'ns::|loadDataWithTypeIdentifier:forItemProviderCompletionHandler:|
+          'ns::|writableTypeIdentifiersForItemProvider|
+          'ns::|stringByConvertingURLToPath|
+          'ns::|stringByConvertingPathToURL|
+          'ns::|completePathIntoString:caseSensitive:matchesIntoArray:filterTypes:|
+          'ns::|stringsByAppendingPaths:|
+          'ns::|stringByAbbreviatingWithTildeInPath|
+          'ns::|initWithFormat:locale:|
+          'ns::|initWithCStringNoCopy:length:freeWhenDone:|
+          'ns::|initWithCharactersNoCopy:length:deallocator:|
+          'ns::|initWithBytesNoCopy:length:encoding:deallocator:|
+          'ns::|initWithCString:length:|
+          'ns::|capitalizedStringWithLocale:|
+          'ns::|stringByResolvingSymlinksInPath|
+          'ns::|isAbsolutePath|
+          'ns::|initWithFormat:locale:arguments:|
+          'ns::|getCString:|
+          'ns::|getCString:maxLength:|
+          'ns::|getCString:maxLength:range:remainingRange:|
+          'ns::|quotedStringRepresentation|
+          'ns::|dataUsingEncoding:allowLossyConversion:|
+          'ns::|lossyCString|
+          'ns::|canBeConvertedToEncoding:|
+          'ns::|precomposedStringWithCompatibilityMapping|
+          'ns::|decomposedStringWithCompatibilityMapping|
+          'ns::|precomposedStringWithCanonicalMapping|
+          'ns::|decomposedStringWithCanonicalMapping|
+          'ns::|getBytes:maxLength:filledLength:encoding:allowLossyConversion:range:remainingRange:|
+          'ns::|initWithCharactersNoCopy:length:freeWhenDone:|
+          'ns::|variantFittingPresentationWidth:|
+          'ns::|compare:options:range:|
+          'ns::|scriptingContains:|
+          'ns::|scriptingEndsWith:|
+          'ns::|scriptingBeginsWith:|
+          'ns::|scriptingIsGreaterThan:|
+          'ns::|scriptingIsGreaterThanOrEqualTo:|
+          'ns::|scriptingIsLessThan:|
+          'ns::|scriptingIsLessThanOrEqualTo:|
+          'ns::|scriptingIsEqualTo:|
+          'ns::|writeToURL:atomically:encoding:error:|
+          'ns::|writeToURL:atomically:|
+          'ns::|writeToFile:atomically:encoding:error:|
+          'ns::|getCharacters:|
+          'ns::|componentsSeparatedByCharactersInSet:|
+          'ns::|initWithContentsOfFile:encoding:error:|
+          'ns::|stringByTrimmingCharactersInSet:|
+          'ns::|rangeOfCharacterFromSet:options:range:|
+          'ns::|uppercaseString|
+          'ns::|rangeOfComposedCharacterSequenceAtIndex:|
+          'ns::|writeToFile:atomically:|
+          'ns::|enumerateSubstringsInRange:options:usingBlock:|
+          'ns::|stringByReplacingOccurrencesOfString:withString:options:range:|
+          'ns::|initWithUTF8String:|
+          'ns::|stringByStandardizingPath|
+          'ns::|stringByPaddingToLength:withString:startingAtIndex:|
+          'ns::|capitalizedString|
+          'ns::|propertyList|
+          'ns::|compare:options:|
+          'ns::|initWithCString:encoding:|
+          'ns::|initWithBytesNoCopy:length:encoding:freeWhenDone:|
+          'ns::|rangeOfString:|
+          'ns::|stringByApplyingTransform:reverse:|
+          'ns::|initWithCharacters:length:|
+          'ns::|rangeOfCharacterFromSet:|
+          'ns::|rangeOfCharacterFromSet:options:|
+          'ns::|componentsSeparatedByString:|
+          'ns::|stringByExpandingTildeInPath|
+          'ns::|stringByReplacingCharactersInRange:withString:|
+          'ns::|pathComponents|
+          'ns::|stringByReplacingOccurrencesOfString:withString:|
+          'ns::|stringByAppendingString:|
+          'ns::|stringByAppendingPathExtension:|
+          'ns::|stringByAppendingFormat:|
+          'ns::|initWithData:encoding:|
+          'ns::|substringToIndex:|
+          'ns::|dataUsingEncoding:|
+          'ns::|rangeOfString:options:range:|
+          'ns::|substringFromIndex:|
+          'ns::|initWithFormat:|
+          'ns::|containsString:|
+          'ns::|rangeOfString:options:|
+          'ns::|stringByDeletingLastPathComponent|
+          'ns::|getFileSystemRepresentation:maxLength:|
+          'ns::|caseInsensitiveCompare:|
+          'ns::|lowercaseString|
+          'ns::|pathExtension|
+          'ns::|stringByDeletingPathExtension|
+          'ns::|lastPathComponent|
+          'ns::|stringByAppendingPathComponent:|
+          'ns::|formatConfiguration|
+          'ns::|fileSystemRepresentation|
+          'ns::|initWithString:|
+          'ns::|getParagraphStart:end:contentsEnd:forRange:|
+          'ns::|getLineStart:end:contentsEnd:forRange:|
+          'ns::|hasSuffix:|
+          'ns::|hasPrefix:|
+          'ns::|getCString:maxLength:encoding:|
+          'ns::|cStringLength|
+          'ns::|initWithContentsOfURL:|
+          'ns::|initWithContentsOfFile:|
+          'ns::|smallestEncoding|
+          'ns::|fastestEncoding|
+          'ns::|isEqualToString:|
+          'ns::|substringWithRange:|
+          'ns::|getCharacters:range:|
+          'ns::|characterAtIndex:|
+          'ns::|uppercaseStringWithLocale:|
+          'ns::|lowercaseStringWithLocale:|
+          'ns::|cStringUsingEncoding:|
+          'ns::|compare:options:range:locale:|
+          'ns::|cString|
+          'ns::|mutableCopyWithZone:|
+          'ns::|initWithFormat:arguments:|
+          'ns::|getBytes:maxLength:usedLength:encoding:options:range:remainingRange:|
+          'ns::|length|
+          'ns::|lengthOfBytesUsingEncoding:|
+          'ns::|UTF8String|
+          'ns::|traditionalChineseZhuyinCompare:|
+          'ns::|traditionalChinesePinyinCompare:|
+          'ns::|simplifiedChineseCompare:|
+          'ns::|stringByApplyingPinyinToneMarkToFirstSyllableWithToneNumber:|
+          'ns::|strokeStringFromNumberString|
+          'ns::|toneFromPinyinSyllableWithNumber|
+          'ns::|stringByStrippingDiacritics|
+          'ns::|zhuyinSyllableFromPinyinSyllable|
+          'ns::|pinyinStringFromPinyinWithToneNumber|
+          'ns::|componentsByLanguage:|
+          'ns::|firstCharacter|
+          'ns::|ls_updatedKey|
+          'ns::|ls_isRecursiveKey|
+          'ns::|ls_matchesForPluginQuery:|
+          'ns::|ls_cleanForPluginQuery|
+          'ns::|ls_matchesStringForPluginQuery:|
+          'ns::|ls_visuallyOrderCharactersReturningError:|
+          'ns::|editDistanceFrom:|
+          'ns::|containsSubstring:|
+          'ns::|isNaturallyRTL|
+          'ns::|looksLikeURL|
+          'ns::|looksLikeNumberInput|
+          'ns::|looksLikeEmailAddress|
+          'ns::|isTripledPunctuation|
+          'ns::|isNewlineOrReturn|
+          'ns::|isSpaceOrReturn|
+          'ns::|isPlainSpace|
+          'ns::|isLeftAssociative|
+          'ns::|endsSentence|
+          'ns::|stringByReplacingCharacter:withCharacter:|
+          'ns::|stringByReplacingCharactersInSet:withCharacter:|
+          'ns::|stringByTrimmingLastCharacter|
+          'ns::|stringByTrimmingCharactersInCFCharacterSet:|
+          'ns::|isDelete|
+          'ns::|isSpace|
+          'ns::|scaleableResourceMetadataFromFileName|
+          'ns::|imageMetadataFromFileName|
+          'ns::|stringByAppendingPathComponent:conformingToType:|
+          'ns::|stringByAppendingPathExtensionForType:|
+          'ns::|stringByStrippingLeadingAndTrailingWhitespaceAndQuotes|
+          'ns::|hasColorGlyphsInRange:attributes:|
+          'ns::|drawWithRect:options:attributes:|
+          'ns::|boundingRectWithSize:options:attributes:|
+          'ns::|drawWithRect:options:attributes:context:|
+          'ns::|drawAtPoint:withAttributes:|
+          'ns::|drawInRect:withAttributes:|
+          'ns::|boundingRectWithSize:options:attributes:context:|
+          'ns::|sizeWithAttributes:|
+          'ns::|NS_isSourceOver|
+          'ns::|rangeOfGraphicalSegmentAtIndex:|
+          'ns::|pasteboardPropertyListForType:|
+          'ns::|writableTypesForPasteboard:|
+          'ns::|stringWithoutAmpersand|
+          'ns::|initWithPasteboardPropertyList:ofType:|
+          'ns::|shouldMenuItemBeUpdatedDueToNotification|
+          'ns::|setActionBlock:|
+          'ns::|invokeActionBlock:|
+          'ns::|recognizerDidDismissAnimation:|
+          'ns::|recognizerDidCompleteAnimation:|
+          'ns::|recognizerDidCancelAnimation:|
+          'ns::|recognizerDidUpdateAnimation:|
+          'ns::|recognizerWillBeginAnimation:|
+          'ns::|setIndentationLevel:|
+          'ns::|setMixedStateImage:|
+          'ns::|setOffStateImage:|
+          'ns::|setOnStateImage:|
+          'ns::|mnemonicLocation|
+          'ns::|setMnemonicLocation:|
+          'ns::|setKeyEquivalentSharingMode:|
+          'ns::|allowsAutomaticKeyEquivalentMirroring|
+          'ns::|setAllowsAutomaticKeyEquivalentMirroring:|
+          'ns::|allowsAutomaticKeyEquivalentLocalization|
+          'ns::|setAllowsAutomaticKeyEquivalentLocalization:|
+          'ns::|setAllowsKeyEquivalentWhenHidden:|
+          'ns::|parentItem|
+          'ns::|keyEquivalentSharingMode|
+          'ns::|userKeyEquivalentModifierMask|
+          'ns::|scheduleKeyboardAwareShortcutUpdate|
+          'ns::|userKeyEquivalent|
+          'ns::|menuItemOrSubmenuNeedsShortcutLocalization|
+          'ns::|copyNormalizedTitle:|
+          'ns::|mixedStateImage|
+          'ns::|offStateImage|
+          'ns::|onStateImage|
+          'ns::|allowsKeyEquivalentWhenHidden|
+          'ns::|setDestructive:|
+          'ns::|isDestructive|
+          'ns::|mnemonic|
+          'ns::|backgroundStyle|
+          'ns::|setTitleWithMnemonic:|
+          'ns::|representedObject|
+          'ns::|hasSubmenu|
+          'ns::|setKeyEquivalent:|
+          'ns::|setControlView:|
+          'ns::|setAlternate:|
+          'ns::|setKeyEquivalentModifierMask:|
+          'ns::|isSeparatorItem|
+          'ns::|isAlternate|
+          'ns::|submenu|
+          'ns::|setToolTip:|
+          'ns::|toolTip|
+          'ns::|controlView|
+          'ns::|isHiddenOrHasHiddenAncestor|
+          'ns::|isHighlighted|
+          'ns::|tag|
+          'ns::|setView:|
+          'ns::|indentationLevel|
+          'ns::|attributedTitle|
+          'ns::|image|
+          'ns::|keyEquivalentModifierMask|
+          'ns::|keyEquivalent|
+          'ns::|view|
+          'ns::|setAction:|
+          'ns::|setSubmenu:|
+          'ns::|setRepresentedObject:|
+          'ns::|setTag:|
+          'ns::|setImage:|
+          'ns::|setAttributedTitle:|
+          'ns::|initWithTitle:action:keyEquivalent:|
+          'ns::|action|
+          'ns::|setState:|
+          'ns::|isEnabled|
+          'ns::|target|
+          'ns::|setTarget:|
+          'ns::|setEnabled:|
+          'ns::|state|
+          'ns::|setHidden:|
+          'ns::|cancelTrackingWithoutAnimation|
+          'ns::|highlightedItem|
+          'ns::|highlightItem:|
+          'ns::|setAllowsContextMenuPlugIns:|
+          'ns::|allowsContextMenuPlugIns|
+          'ns::|setMinimumWidth:|
+          'ns::|isTornOff|
+          'ns::|tearOffMenuRepresentation|
+          'ns::|setTearOffMenuRepresentation:|
+          'ns::|contextMenuRepresentation|
+          'ns::|setContextMenuRepresentation:|
+          'ns::|menuRepresentation|
+          'ns::|propertiesToUpdate|
+          'ns::|menuChangedMessagesEnabled|
+          'ns::|setMenuChangedMessagesEnabled:|
+          'ns::|itemWithTag:|
+          'ns::|setItemArray:|
+          'ns::|setSupermenu:|
+          'ns::|menuBarHeight|
+          'ns::|popUpMenuPositioningItem:atLocation:inView:appearance:|
+          'ns::|locationForSubmenu:|
+          'ns::|isAttached|
+          'ns::|attachedMenu|
+          'ns::|itemChanged:|
+          'ns::|recordKeyboardShortcutEvent:withKeyEquivalent:modifierMask:title:|
+          'ns::|setMenuRepresentation:|
+          'ns::|setSubmenu:forItem:|
+          'ns::|helpRequested:|
+          'ns::|setShowsStateColumn:|
+          'ns::|cancelTracking|
+          'ns::|popUpMenuPositioningItem:atLocation:inView:|
+          'ns::|indexOfItemWithTitle:|
+          'ns::|setAutoenablesItems:|
+          'ns::|indexOfItemWithTag:|
+          'ns::|indexOfItemWithRepresentedObject:|
+          'ns::|setAccessibilityOverridesAlwaysTakePrecedence:|
+          'ns::|accessibilityOverridesAlwaysTakePrecedence|
+          'ns::|setAccessibilityChartDescriptor:|
+          'ns::|accessibilityChartDescriptor|
+          'ns::|setAccessibilityContentSiblingBelow:|
+          'ns::|accessibilityContentSiblingBelow|
+          'ns::|setAccessibilityContentSiblingAbove:|
+          'ns::|accessibilityContentSiblingAbove|
+          'ns::|setNextContentSibling:|
+          'ns::|accessibilityNextContentSibling|
+          'ns::|setPreviousContentSibling:|
+          'ns::|accessibilityPreviousContentSibling|
+          'ns::|setAccessibilityFrameInParentSpace:|
+          'ns::|accessibilityFrameInParentSpace|
+          'ns::|setAccessibilityHeaderGroup:|
+          'ns::|accessibilityHeaderGroup|
+          'ns::|setAccessibilitySections:|
+          'ns::|accessibilitySections|
+          'ns::|setAccessibilityMimicNativeView:|
+          'ns::|isAccessibilityMimicNativeView|
+          'ns::|setAccessibilityFunctionRowTopLevelElements:|
+          'ns::|accessibilityFunctionRowTopLevelElements|
+          'ns::|setAccessibilityEnhancedUserInterface:|
+          'ns::|isAccessibilityEnhancedUserInterface|
+          'ns::|setAccessibilityEmbeddedImageDescription:|
+          'ns::|accessibilityEmbeddedImageDescription|
+          'ns::|setAccessibilityCustomChoosers:|
+          'ns::|accessibilityCustomChoosers|
+          'ns::|setAccessibilityPath:|
+          'ns::|accessibilityPath|
+          'ns::|setAccessibilityAttributedUserInputLabels:|
+          'ns::|accessibilityAttributedUserInputLabels|
+          'ns::|setAccessibilityCustomContent:|
+          'ns::|accessibilityCustomContent|
+          'ns::|setAccessibilityUserInputLabels:|
+          'ns::|accessibilityUserInputLabels|
+          'ns::|setAccessibilityContainerType:|
+          'ns::|accessibilityContainerType|
+          'ns::|setAccessibilityAutoInteractable:|
+          'ns::|isAccessibilityAutoInteractable|
+          'ns::|setAccessibilityAuditIssues:|
+          'ns::|accessibilityAuditIssues|
+          'ns::|accessibilityHeaderForRowIndex:|
+          'ns::|accessibilityHeaderForColumnIndex:|
+          'ns::|accessibilityResultsForSearchPredicate:|
+          'ns::|presentControllerAsModalWindow:|
+          'ns::|storyboard|
+          'ns::|setAppearanceParent:|
+          'ns::|appearanceParent|
+          'ns::|showsStateColumn|
+          'ns::|minimumWidth|
+          'ns::|addItemWithTitle:action:keyEquivalent:|
+          'ns::|indexOfItemWithSubmenu:|
+          'ns::|itemWithTitle:|
+          'ns::|autoenablesItems|
+          'ns::|insertItemWithTitle:action:keyEquivalent:atIndex:|
           'ns::|setAccessibilityCustomActions:|
           'ns::|setAccessibilityMinimized:|
           'ns::|isAccessibilityMinimized|
@@ -22571,21 +26661,13 @@
           'ns::|accessibilityLayoutPointForScreenPoint:|
           'ns::|accessibilityIdentifier|
           'ns::|isAccessibilityFocused|
-          'ns::|accessibilityPostNotification:|
-          'ns::|setAllowsEditingTextAttributes:|
-          'ns::|setControlTint:|
-          'ns::|cellSizeForBounds:|
-          'ns::|setBordered:|
-          'ns::|isBordered|
+          'ns::|performActionForItemAtIndex:|
+          'ns::|indexOfItemWithTarget:andAction:|
+          'ns::|sizeToFit|
+          'ns::|setFont:|
+          'ns::|font|
           'ns::|setAccessibilityLabel:|
-          'ns::|titleRectForBounds:|
-          'ns::|textAlignmentPolicy|
-          'ns::|interiorBackgroundStyle|
-          'ns::|setControlView:|
-          'ns::|accessibilityElementWithParent:|
           'ns::|accessibilityTitle|
-          'ns::|mouseExited:|
-          'ns::|mouseEntered:|
           'ns::|accessibilitySelectedCells|
           'ns::|setAccessibilitySelectedChildren:|
           'ns::|accessibilitySelectedChildren|
@@ -22593,671 +26675,36 @@
           'ns::|accessibilityRoleDescription|
           'ns::|accessibilityVisibleChildren|
           'ns::|accessibilityRowCount|
+          'ns::|performKeyEquivalent:|
+          'ns::|insertItem:atIndex:|
+          'ns::|indexOfItem:|
           'ns::|isAccessibilityElement|
-          'ns::|controlView|
           'ns::|accessibilityChildrenInNavigationOrder|
           'ns::|accessibilityCustomActions|
           'ns::|accessibilityIndex|
           'ns::|accessibilityLabel|
           'ns::|accessibilityRole|
           'ns::|accessibilityChildren|
+          'ns::|removeItemAtIndex:|
           'ns::|accessibilityIncrementButton|
           'ns::|accessibilityDecrementButton|
           'ns::|accessibilitySubrole|
-          'ns::|setDrawsBackground:|
+          'ns::|setUserInterfaceLayoutDirection:|
           'ns::|setAccessibilitySubrole:|
           'ns::|title|
-          'ns::|image|
-          'ns::|keyEquivalent|
+          'ns::|removeAllItems|
+          'ns::|removeItem:|
+          'ns::|numberOfItems|
+          'ns::|supermenu|
           'ns::|setTitle:|
-          'ns::|setImage:|
-          'ns::|setState:|
-          'ns::|setType:|
-          'ns::|state|
-          'ns::|removeTarget:action:forControlEvents:|
-          'ns::|addTarget:action:forControlEvents:|
-          'ns::|expansionFrameWithFrame:|
-          'ns::|drawCellInside:|
-          'ns::|calcSize|
-          'ns::|textViewDidChangeSelection:|
-          'ns::|selectWithFrame:editor:delegate:start:length:|
-          'ns::|editWithFrame:editor:delegate:event:|
-          'ns::|setSkipEditValidation:|
-          'ns::|skipEditValidation|
-          'ns::|setIgnoresMultiClick:|
-          'ns::|ignoresMultiClick|
-          'ns::|sizeThatFits:|
-          'ns::|selectedTag|
-          'ns::|cellIfExists|
-          'ns::|setAllowsLogicalLayoutDirection:|
-          'ns::|setFloatingPointFormat:left:right:|
-          'ns::|textView:willChangeSelectionFromCharacterRange:toCharacterRange:|
-          'ns::|accessibilityPostNotification:context:|
-          'ns::|keyUp:|
-          'ns::|allowsExpansionToolTips|
-          'ns::|allowsLogicalLayoutDirection|
-          'ns::|setAllowsExpansionToolTips:|
-          'ns::|touchesCancelledWithEvent:|
-          'ns::|touchesEndedWithEvent:|
-          'ns::|touchesMovedWithEvent:|
-          'ns::|touchesBeganWithEvent:|
-          'ns::|setNeedsDisplay|
-          'ns::|mouseDownFlags|
-          'ns::|setUsesSingleLineMode:|
-          'ns::|takeObjectValueFrom:|
-          'ns::|takeStringValueFrom:|
-          'ns::|takeDoubleValueFrom:|
-          'ns::|takeFloatValueFrom:|
-          'ns::|takeIntegerValueFrom:|
-          'ns::|takeIntValueFrom:|
-          'ns::|sendActionOn:|
-          'ns::|endEditing:|
-          'ns::|usesSingleLineMode|
-          'ns::|validateEditing|
-          'ns::|currentEditor|
-          'ns::|drawCell:|
-          'ns::|sendActionOnMask|
-          'ns::|setNextState|
-          'ns::|getPeriodicDelay:interval:|
-          'ns::|drawWithExpansionFrame:inView:|
-          'ns::|backgroundStyle|
-          'ns::|refusesFirstResponder|
-          'ns::|becomeFirstResponder|
-          'ns::|updateCellInside:|
-          'ns::|resignKeyWindow|
-          'ns::|selectCell:|
-          'ns::|setRefusesFirstResponder:|
-          'ns::|resignFirstResponder|
-          'ns::|keyDown:|
-          'ns::|selectedCell|
-          'ns::|updateCell:|
-          'ns::|abortEditing|
-          'ns::|setCell:|
-          'ns::|sendAction:to:|
-          'ns::|setFloatValue:|
-          'ns::|setIntegerValue:|
-          'ns::|setIntValue:|
-          'ns::|representedObject|
-          'ns::|becomeKeyWindow|
-          'ns::|setAttributedStringValue:|
-          'ns::|sizeToFit|
-          'ns::|attributedStringValue|
-          'ns::|performClick:|
-          'ns::|setFont:|
-          'ns::|font|
-          'ns::|touchBarRestingMitigation|
-          'ns::|touchBarInsetMitigation|
-          'ns::|setTouchBarRestingMitigation:|
-          'ns::|setTouchBarInsetMitigation:|
-          'ns::|setDoubleValue:|
-          'ns::|cell|
-          'ns::|accessibilityIsEnabledAttributeSettable|
-          'ns::|accessibilityEnabledAttribute|
-          'ns::|accessibilitySizeOfChild:|
-          'ns::|accessibilityPositionOfChild:|
-          'ns::|accessibilitySetFocus:forChild:|
-          'ns::|accessibilityIsChildFocusable:|
-          'ns::|accessibilityHelpStringForChild:|
-          'ns::|isHighlighted|
-          'ns::|acceptsFirstResponder|
-          'ns::|mouseDown:|
-          'ns::|isContinuous|
-          'ns::|setHighlighted:|
-          'ns::|setContinuous:|
-          'ns::|setControlSize:|
-          'ns::|controlSize|
-          'ns::|setLineBreakMode:|
-          'ns::|baseWritingDirection|
-          'ns::|lineBreakMode|
-          'ns::|setStringValue:|
-          'ns::|setObjectValue:|
-          'ns::|objectValue|
-          'ns::|setFormatter:|
-          'ns::|formatter|
-          'ns::|alignment|
-          'ns::|setAlignment:|
-          'ns::|setAction:|
-          'ns::|setBaseWritingDirection:|
-          'ns::|setRepresentedObject:|
-          'ns::|setTag:|
-          'ns::|action|
-          'ns::|isEnabled|
-          'ns::|target|
-          'ns::|setTarget:|
-          'ns::|setEnabled:|
-          'ns::|removeConstraintWithIdentifier:|
-          'ns::|textLayerShouldEnableFontSmoothing:|
-          'ns::|declaredLayoutRules|
-          'ns::|recursiveConstraintIdentifierDescription|
-          'ns::|recursiveConstraintDescription|
-          'ns::|computedSafeAreaRect|
-          'ns::|computedSafeAreaInsets|
-          'ns::|safeAreaLayoutGuide|
-          'ns::|layoutMarginsGuide|
-          'ns::|measureMin:max:ideal:|
-          'ns::|solutionDidChangeInEngine:|
-          'ns::|engine:willBreakConstraint:dueToMutuallyExclusiveConstraints:|
-          'ns::|engine:markerForConstraintToBreakAmongConstraints:|
-          'ns::|nsli_swapContainerForOutgoingConstraint:toIncomingConstraint:|
-          'ns::|nsli_canHostIndependentVariableAnchor|
-          'ns::|nsli_layoutAnchorForAttribute:|
-          'ns::|nsli_engineToUserScalingCoefficients|
-          'ns::|nsli_addConstraint:mutuallyExclusiveConstraints:|
-          'ns::|exerciseAmbiguityInLayout|
-          'ns::|ns_containerWidgetType|
-          'ns::|ns_widgetType|
-          'ns::|reuseIdentifier|
-          'ns::|exitFullScreenModeWithOptions:|
-          'ns::|enterFullScreenMode:withOptions:|
-          'ns::|endTrailer|
-          'ns::|beginTrailer|
-          'ns::|endPageSetup|
-          'ns::|addToPageSetup|
-          'ns::|beginPageSetupRect:placement:|
-          'ns::|beginPage:label:bBox:fonts:|
-          'ns::|endSetup|
-          'ns::|beginSetup|
-          'ns::|endPrologue|
-          'ns::|endHeaderComments|
-          'ns::|beginPrologueBBox:creationDate:createdBy:fonts:forWhom:pages:title:|
-          'ns::|beginPageInRect:atPlacement:|
-          'ns::|writeEPSInsideRect:toPasteboard:|
-          'ns::|writePDFInsideRect:toPasteboard:|
-          'ns::|endPage|
-          'ns::|endDocument|
-          'ns::|beginDocument|
-          'ns::|drawPageBorderWithSize:|
-          'ns::|drawSheetBorderWithSize:|
-          'ns::|pageHeader|
-          'ns::|pageFooter|
-          'ns::|heightAdjustLimit|
-          'ns::|adjustPageWidthNew:left:right:limit:|
-          'ns::|widthAdjustLimit|
-          'ns::|nsis_orientationHintForVariable:|
-          'ns::|nsis_descriptionOfVariable:|
-          'ns::|nsis_valueOfVariableIsUserObservable:|
-          'ns::|nsis_shouldIntegralizeVariable:|
-          'ns::|nsli_isCollectingConstraintChangesForLaterCoordinatedFlush:|
-          'ns::|nsli_setPiercingToken:|
-          'ns::|nsli_piercingToken|
-          'ns::|nsli_isFlipped|
-          'ns::|nsli_autoresizingMask|
-          'ns::|nsli_descriptionIncludesPointer|
-          'ns::|nsli_resolvedValue:forSymbolicConstant:inConstraint:error:|
-          'ns::|nsli_layoutRect|
-          'ns::|constraintsAffectingLayoutForOrientation:|
-          'ns::|nsli_lowerAttribute:intoExpression:withCoefficient:container:|
-          'ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:|
-          'ns::|nsli_description|
-          'ns::|nsli_boundsHeightVariable|
-          'ns::|nsli_boundsWidthVariable|
-          'ns::|nsli_addConstraint:|
-          'ns::|nsli_itemDescribingLayoutDirectionForConstraint:toItem:|
-          'ns::|nsli_isRTL|
-          'ns::|nsli_constraintWithAnchor:relatedBy:toAnchor:withSystemSpacingMultipliedBy:|
-          'ns::|nsli_defaultResolvedValue:forSymbolicConstant:inConstraint:error:|
-          'ns::|nsli_convertSizeFromEngineSpace:|
-          'ns::|nsli_convertSizeToEngineSpace:|
-          'ns::|constraintsAffectingLayoutForOrientation:ofItem:|
-          'ns::|nsli_removeConstraint:|
-          'ns::|nsli_installedConstraints|
-          'ns::|nsli_layoutEngine|
-          'ns::|nsli_lowersExpressionRelativeToConstraintContainer|
-          'ns::|nsli_lowerAttribute:intoExpression:withCoefficient:forConstraint:onBehalfOfLayoutGuide:|
-          'ns::|removeLayoutGuide:|
-          'ns::|dragPromisedFilesOfTypes:fromRect:source:slideBack:event:|
-          'ns::|dragFile:fromRect:slideBack:event:|
-          'ns::|dataWithPDFInsideRect:|
-          'ns::|dataWithEPSInsideRect:|
-          'ns::|nsli_superitem|
-          'ns::|nsli_minYVariable|
-          'ns::|nsli_minXVariable|
-          'ns::|shouldSetFontSmoothingBackgroundColor|
-          'ns::|setFontSmoothingBackgroundColor:|
-          'ns::|fontSmoothingBackgroundColor|
-          'ns::|computed_allowRolloverInToolbarControls|
-          'ns::|computed_titlebarIsForcingDisplayOfDividers|
-          'ns::|computed_inSelectedTableRow|
-          'ns::|contentStyle|
-          'ns::|showDefinitionForAttributedString:atPoint:|
-          'ns::|activeDrawingRect|
-          'ns::|viewDidChangeBackingProperties:|
-          'ns::|updateLayerHandler|
-          'ns::|willSendMenuNeedsUpdate:withEvent:|
-          'ns::|postsBoundsChangedNotifications|
-          'ns::|shouldDrawColor|
-          'ns::|removeCursorRect:cursor:|
-          'ns::|translateRectsNeedingDisplayInRect:by:|
-          'ns::|scrollPoint:fromView:|
-          'ns::|isVerticalContentSizeConstraintActive|
-          'ns::|isHorizontalContentSizeConstraintActive|
-          'ns::|setUsesConstraintsInsteadOfAutoresizing:|
-          'ns::|usesConstraintsInsteadOfAutoresizing|
-          'ns::|displayRectIgnoringOpacity:|
-          'ns::|setGesturesEnabled:|
-          'ns::|gesturesEnabled|
-          'ns::|setWantsRestingTouches:|
-          'ns::|setAcceptsTouchEvents:|
-          'ns::|lockFocusIfCanDrawInContext:|
-          'ns::|releaseGState|
-          'ns::|gState|
-          'ns::|convertRectFromBase:|
-          'ns::|convertRectToBase:|
-          'ns::|convertSizeFromBase:|
-          'ns::|convertSizeToBase:|
-          'ns::|convertPointToBase:|
-          'ns::|layerUsesCoreImageFilters|
-          'ns::|setLayerUsesCoreImageFilters:|
-          'ns::|boundsRotation|
-          'ns::|boundsSize|
-          'ns::|setWantsExtendedDynamicRange:|
-          'ns::|wantsExtendedDynamicRange|
-          'ns::|frameSize|
-          'ns::|frameOrigin|
-          'ns::|frameCenterRotation|
-          'ns::|setFrameCenterRotation:|
-          'ns::|frameTransform|
-          'ns::|enableLayoutFlushing|
-          'ns::|disableLayoutFlushing|
-          'ns::|nsis_rawAlignmentRect|
-          'ns::|nsis_unroundedFrame|
-          'ns::|nsis_layoutRectFromHostingViewInEngine:|
-          'ns::|computed_effectiveSemanticContext|
-          'ns::|maskView|
-          'ns::|setMaskView:|
-          'ns::|effectiveAppearanceDidChange|
-          'ns::|setGestureRecognizers:|
-          'ns::|setWantsBestResolutionOpenGLSurface:|
-          'ns::|layoutGuides|
-          'ns::|cacheDisplayInRect:toBitmapImageRep:includeSubviews:|
-          'ns::|displayIfNeededInRectIgnoringOpacity:|
-          'ns::|displayIfNeededIgnoringOpacity|
-          'ns::|displayIfNeededInRect:|
-          'ns::|removeGestureRecognizer:|
-          'ns::|convertSizeFromLayer:|
-          'ns::|convertSizeToLayer:|
-          'ns::|convertPointFromLayer:|
-          'ns::|frameRotation|
-          'ns::|setFrameTransform:|
-          'ns::|boundsOrigin|
-          'ns::|setPreparedContentRect:|
-          'ns::|nsli_engineToUserScalingCoefficientsInEngine:|
-          'ns::|compareGeometry:|
-          'ns::|layerContentsPlacement|
-          'ns::|hideActiveFirstResponderIndication|
-          'ns::|removeAllGestureRecognizers|
-          'ns::|setCanDrawConcurrently:|
-          'ns::|setCanDrawSubviewsIntoLayer:|
-          'ns::|accessibilityPopUpMenuCreated:returningAccessibilityParent:|
-          'ns::|nsis_frameInEngine:forLayoutGuide:withRounding:|
-          'ns::|view:customToolTip:fadeOutAllowedForToolTipWithDisplayInfo:|
-          'ns::|view:customToolTip:frameForToolTipWithDisplayInfo:|
-          'ns::|view:customToolTip:drawInView:displayInfo:|
-          'ns::|rectPreservedDuringLiveResize|
-          'ns::|addLayoutGuide:|
-          'ns::|revealContext:rectsForItem:|
-          'ns::|knowsPagesFirst:last:|
-          'ns::|knowsPageRange:|
-          'ns::|adjustPageHeightNew:top:bottom:limit:|
-          'ns::|didAddSubview:|
-          'ns::|isRotatedFromBase|
-          'ns::|rectForSmartMagnificationAtPoint:inRect:|
-          'ns::|locationOfPrintRect:|
-          'ns::|isInFullScreenMode|
-          'ns::|wantsDefaultClipping|
-          'ns::|showDefinitionForAttributedString:range:options:baselineOriginProvider:|
-          'ns::|isInTouchBar|
-          'ns::|displayIgnoringOpacity|
-          'ns::|canSmoothFontsInLayer|
-          'ns::|accessibilityAuditPotentialChildren|
-          'ns::|visibleAccessibleOrLeafSubviews|
-          'ns::|drawOverlayRect:|
-          'ns::|showActiveFirstResponderIndication|
-          'ns::|needsToDrawRect:|
-          'ns::|overlayBounds|
-          'ns::|preparedContentRect|
-          'ns::|convertSizeFromBacking:|
-          'ns::|nsis_valueOfVariable:didChangeInEngine:|
-          'ns::|canDrawSubviewsIntoLayer|
-          'ns::|resizeSubviewsWithOldSize:|
-          'ns::|sortSubviewsUsingFunction:context:|
-          'ns::|convertPointToLayer:|
-          'ns::|accessibilityFocusRingMaskBounds|
-          'ns::|inputContext|
-          'ns::|removeToolTip:|
-          'ns::|isRotatedOrScaledFromBase|
-          'ns::|viewDidUnhide|
-          'ns::|viewDidHide|
-          'ns::|geometryInWindowDidChange|
-          'ns::|printJobTitle|
-          'ns::|rectForPage:|
-          'ns::|setVerticalContentSizeConstraintActive:|
-          'ns::|setHorizontalContentSizeConstraintActive:|
-          'ns::|prepareContentInRect:|
-          'ns::|convertPointFromBase:|
-          'ns::|setWantsExtendedDynamicRangeOpenGLSurface:|
-          'ns::|wantsExtendedDynamicRangeOpenGLSurface|
-          'ns::|addToolTipRect:owner:userData:|
-          'ns::|didResignActiveFirstResponder|
-          'ns::|didBecomeActiveFirstResponder|
-          'ns::|loggingDescription|
-          'ns::|needsUpdateConstraints|
-          'ns::|needsLayout|
-          'ns::|autoresizesSubviews|
-          'ns::|canDrawConcurrently|
-          'ns::|pressureConfiguration|
-          'ns::|setPressureConfiguration:|
-          'ns::|renewGState|
-          'ns::|wantsBestResolutionOpenGLSurface|
-          'ns::|ancestorSharedWithView:|
-          'ns::|alignmentLayoutRect|
-          'ns::|setUpdateLayerHandler:|
-          'ns::|hasAmbiguousLayout|
-          'ns::|resizeWithOldSuperviewSize:|
-          'ns::|needsDisplay|
-          'ns::|functionRow|
-          'ns::|actionForLayer:forKey:|
-          'ns::|drawLayer:inContext:|
-          'ns::|setLayerContentsPlacement:|
-          'ns::|nsis_frame|
-          'ns::|removeAllToolTips|
-          'ns::|isDrawingFindIndicator|
-          'ns::|allowedTouchTypes|
-          'ns::|wantsRestingTouches|
-          'ns::|recursiveDescription|
-          'ns::|trackEventsMatchingMask:timeout:mode:handler:|
-          'ns::|removeTrackingRect:|
-          'ns::|addTrackingRect:owner:userData:assumeInside:|
-          'ns::|helpRequested:|
-          'ns::|concludeDragOperation:|
-          'ns::|prepareForDragOperation:|
-          'ns::|cursorUpdate:|
-          'ns::|discardCursorRects|
-          'ns::|firstBaselineAnchor|
-          'ns::|layoutRect|
-          'ns::|contentCompressionResistancePriorityForOrientation:|
-          'ns::|contentHuggingPriorityForOrientation:|
-          'ns::|clipsToBounds|
-          'ns::|setContentFilters:|
-          'ns::|contentFilters|
-          'ns::|setBackgroundFilters:|
-          'ns::|backgroundFilters|
-          'ns::|setShadow:|
-          'ns::|shadow|
-          'ns::|nsli_ancestorSharedWithItem:|
-          'ns::|compositingFilter|
-          'ns::|accessibilityPopUpMenuParent:|
-          'ns::|focusRingMaskBounds|
-          'ns::|displayRect:|
-          'ns::|shouldBeArchived|
-          'ns::|ignoreHitTest|
-          'ns::|acceptsTouchEvents|
-          'ns::|setNeedsUpdateConstraints:|
-          'ns::|replaceSubview:with:options:completionHandler:|
-          'ns::|setAutoresizesSubviews:|
-          'ns::|viewWillMoveToWindow:|
-          'ns::|viewDidChangeBackingProperties|
-          'ns::|lastBaselineAnchor|
-          'ns::|candidateListTouchBarItem|
-          'ns::|interpretKeyEvents:|
-          'ns::|convertRectFromLayer:|
-          'ns::|updateTrackingAreas|
-          'ns::|viewDidEndLiveResize|
-          'ns::|viewWillStartLiveResize|
-          'ns::|constraints|
-          'ns::|beginDraggingSessionWithItems:event:source:|
-          'ns::|viewWithTag:|
-          'ns::|enclosingMenuItem|
-          'ns::|autoscroll:|
-          'ns::|rotateByAngle:|
-          'ns::|setBoundsRotation:|
-          'ns::|setFrameRotation:|
-          'ns::|previousValidKeyView|
-          'ns::|adjustScroll:|
-          'ns::|scaleUnitSquareToSize:|
-          'ns::|translateOriginToPoint:|
-          'ns::|setBoundsSize:|
-          'ns::|viewWillMoveToSuperview:|
-          'ns::|allocateGState|
-          'ns::|constraintsDidChangeInEngine:|
-          'ns::|updateConstraintsForSubtreeIfNeeded|
-          'ns::|rightAnchor|
-          'ns::|setUpGState|
-          'ns::|deepestAccessibilityDescendants|
-          'ns::|accessibilityAuditContrast|
-          'ns::|accessibilityAuditLabel|
-          'ns::|accessibilityAuditHierarchy|
-          'ns::|accessibilitySectionsAttribute|
-          'ns::|accessibilityDrawFocusRing|
-          'ns::|accessibilityAuditParent|
-          'ns::|drawFocusRingMask|
-          'ns::|accessibilityWindowPointForShowMenu|
-          'ns::|opaqueAncestor|
-          'ns::|heartBeat:|
-          'ns::|canBecomeKeyView|
-          'ns::|setAllowsVibrancy:|
-          'ns::|convertSizeToBacking:|
-          'ns::|focusRingType|
-          'ns::|nextValidKeyView|
-          'ns::|trackingAreas|
-          'ns::|topAnchor|
-          'ns::|worksWhenModal|
-          'ns::|print:|
-          'ns::|accessibilityPopUpMenuClosed:accessibilityParent:|
-          'ns::|accessibilityPopUpMenuCreated:forSubview:returningAccessibilityParent:|
-          'ns::|prepareForMenu:withEvent:|
-          'ns::|prepareMenu:withEvent:|
-          'ns::|didCloseMenu:withEvent:|
-          'ns::|willOpenMenu:withEvent:|
-          'ns::|alphaValue|
-          'ns::|setClipsToBounds:|
-          'ns::|compositingOperation|
-          'ns::|setCompositingOperation:|
-          'ns::|constraintForIdentifier:|
-          'ns::|effectiveContentStyle|
-          'ns::|layerContentsRedrawPolicy|
-          'ns::|lastBaselineOffsetFromBottom|
-          'ns::|convertPointFromBacking:|
-          'ns::|noteFocusRingMaskChanged|
-          'ns::|performMnemonic:|
-          'ns::|touchBarHitTestInsets|
-          'ns::|baselineOffsetFromBottom|
-          'ns::|firstBaselineOffsetFromTop|
-          'ns::|sortSubviewsUsingBlock:|
-          'ns::|frameForAlignmentRect:|
-          'ns::|setContentStyle:|
-          'ns::|lockFocusIfCanDraw|
-          'ns::|invalidateConstraints|
-          'ns::|invalidateIntrinsicContentSizeForCell:|
-          'ns::|centerScanRect:|
-          'ns::|animationForKey:|
-          'ns::|setNextResponder:|
-          'ns::|translatesAutoresizingMaskIntoConstraints|
-          'ns::|headerView|
-          'ns::|setFocusRingType:|
-          'ns::|registeredDraggedTypes|
-          'ns::|setFlipped:|
-          'ns::|viewDidMoveToSuperview|
-          'ns::|postsFrameChangedNotifications|
-          'ns::|cacheDisplayInRect:toBitmapImageRep:|
-          'ns::|bitmapImageRepForCachingDisplayInRect:|
-          'ns::|removeFromSuperviewWithoutNeedingDisplay|
-          'ns::|menuForEvent:|
-          'ns::|scrollRect:by:|
-          'ns::|scrollWheel:|
-          'ns::|performDragOperation:|
-          'ns::|draggingExited:|
-          'ns::|draggingUpdated:|
-          'ns::|draggingEntered:|
-          'ns::|needsPanelToBecomeKey|
-          'ns::|acceptsFirstMouse:|
-          'ns::|unregisterDraggedTypes|
-          'ns::|registerForDraggedTypes:|
-          'ns::|dragImage:at:offset:event:pasteboard:source:slideBack:|
-          'ns::|enclosingScrollView|
-          'ns::|canDraw|
-          'ns::|getRectsExposedDuringLiveResize:count:|
-          'ns::|preservesContentDuringLiveResize|
-          'ns::|inLiveResize|
-          'ns::|convertPointToBacking:|
-          'ns::|getRectsBeingDrawn:count:|
-          'ns::|displayRectIgnoringOpacity:inContext:|
-          'ns::|scrollPoint:|
-          'ns::|setPostsBoundsChangedNotifications:|
-          'ns::|setPostsFrameChangedNotifications:|
-          'ns::|previousKeyView|
-          'ns::|nextKeyView|
-          'ns::|isDescendantOf:|
-          'ns::|setKeyboardFocusRingNeedsDisplayInRect:|
-          'ns::|setNeedsDisplayInRect:|
-          'ns::|scrollRectToVisible:|
-          'ns::|convertSize:toView:|
-          'ns::|mouse:inRect:|
-          'ns::|willRemoveSubview:|
-          'ns::|viewWillDraw|
-          'ns::|nsli_heightVariable|
-          'ns::|nsli_widthVariable|
-          'ns::|updateConstraints|
-          'ns::|replaceSubview:with:|
-          'ns::|preferredLayoutAttributesFittingAttributes:|
-          'ns::|displayIfNeeded|
-          'ns::|setLayerContentsRedrawPolicy:|
-          'ns::|wantsLayer|
-          'ns::|declaredLayoutConstraints|
-          'ns::|centerYAnchor|
-          'ns::|trailingAnchor|
-          'ns::|leftAnchor|
-          'ns::|setSubviews:|
-          'ns::|setFrameSize:|
-          'ns::|shouldDelayWindowOrderingForEvent:|
-          'ns::|convertRectToLayer:|
-          'ns::|designatedFocusRingView|
-          'ns::|unlockFocus|
-          'ns::|lockFocus|
-          'ns::|cornerRadius|
-          'ns::|animations|
-          'ns::|convertSize:fromView:|
-          'ns::|mouseDownCanMoveWindow|
-          'ns::|drawRect:|
-          'ns::|autoresizingMask|
-          'ns::|removeConstraints:|
-          'ns::|alignmentRectForFrame:|
-          'ns::|setFrameOrigin:|
-          'ns::|setNextKeyView:|
-          'ns::|setAutoresizingMask:|
-          'ns::|makeBackingLayer|
-          'ns::|setLayer:|
-          'ns::|setBounds:|
-          'ns::|addTrackingArea:|
-          'ns::|removeTrackingArea:|
-          'ns::|convertRect:fromView:|
-          'ns::|accessibilityVerticalUnitDescriptionAttribute|
-          'ns::|accessibilityHorizontalUnitDescriptionAttribute|
-          'ns::|accessibilityIsSizeAttributeSettable|
-          'ns::|accessibilitySizeAttribute|
-          'ns::|accessibilityIsPositionAttributeSettable|
-          'ns::|accessibilityPositionAttribute|
-          'ns::|accessibilityIsTopLevelUIElementAttributeSettable|
-          'ns::|accessibilityTopLevelUIElementAttribute|
-          'ns::|accessibilityIsWindowAttributeSettable|
-          'ns::|accessibilityWindowAttribute|
-          'ns::|accessibilityIsParentAttributeSettable|
-          'ns::|accessibilityParentAttribute|
-          'ns::|accessibilitySetFocusedAttribute:|
-          'ns::|accessibilityIsFocusedAttributeSettable|
-          'ns::|accessibilityFocusedAttribute|
-          'ns::|accessibilityIsHelpAttributeSettable|
-          'ns::|accessibilityHelpAttribute|
-          'ns::|display|
-          'ns::|setOpaque:|
-          'ns::|setAlphaValue:|
-          'ns::|layoutSubtreeIfNeeded|
-          'ns::|performKeyEquivalent:|
-          'ns::|setToolTip:|
-          'ns::|toolTip|
-          'ns::|isHiddenOrHasHiddenAncestor|
-          'ns::|subviews|
-          'ns::|tag|
-          'ns::|gestureRecognizerShouldBegin:|
-          'ns::|setAnimations:|
-          'ns::|setBoundsOrigin:|
-          'ns::|nextEventMatchingMask:|
-          'ns::|convertPoint:fromView:|
-          'ns::|hitTest:|
-          'ns::|setUserInterfaceLayoutDirection:|
-          'ns::|alignmentRectInsets|
-          'ns::|setCornerRadius:|
-          'ns::|backgroundColor|
-          'ns::|animator|
-          'ns::|removeFromSuperview|
-          'ns::|viewDidMoveToWindow|
-          'ns::|gestureRecognizers|
-          'ns::|setAllowedTouchTypes:|
-          'ns::|leadingAnchor|
-          'ns::|setIgnoreHitTest:|
-          'ns::|addConstraints:|
-          'ns::|bottomAnchor|
-          'ns::|heightAnchor|
-          'ns::|centerXAnchor|
-          'ns::|addConstraint:|
-          'ns::|addSubview:positioned:relativeTo:|
-          'ns::|addSubview:|
-          'ns::|setShouldBeArchived:|
-          'ns::|setWantsLayer:|
-          'ns::|viewDidChangeEffectiveAppearance|
-          'ns::|intrinsicContentSize|
-          'ns::|setContentHuggingPriority:forOrientation:|
-          'ns::|setContentCompressionResistancePriority:forOrientation:|
-          'ns::|removeConstraint:|
-          'ns::|fittingSize|
-          'ns::|addGestureRecognizer:|
-          'ns::|setTranslatesAutoresizingMaskIntoConstraints:|
-          'ns::|widthAnchor|
-          'ns::|initWithFrame:|
-          'ns::|convertRect:toView:|
-          'ns::|superview|
-          'ns::|setNeedsLayout:|
-          'ns::|disableGeometryInWindowDidChangeNotification|
-          'ns::|enableGeometryInWindowDidChangeNotification|
-          'ns::|updateLayer|
-          'ns::|wantsUpdateLayer|
-          'ns::|isOpaque|
-          'ns::|allowsVibrancy|
-          'ns::|addCursorRect:cursor:|
-          'ns::|isFlipped|
-          'ns::|visibleRect|
-          'ns::|convertPoint:toView:|
-          'ns::|setFrame:|
-          'ns::|bounds|
-          'ns::|setCompositingFilter:|
-          'ns::|setBackgroundColor:|
-          'ns::|layer|
-          'ns::|invalidateIntrinsicContentSize|
-          'ns::|setNeedsDisplay:|
-          'ns::|resetCursorRects|
-          'ns::|layout|
+          'ns::|addItem:|
+          'ns::|initWithTitle:|
           'ns::|setIdentifier:|
-          'ns::|prepareForReuse|
+          'ns::|update|
           'ns::|identifier|
-          'ns::|setHidden:|
-          'ns::|setGestureBehaviors:|
-          'ns::|gestureBehaviors|
-          'ns::|pressureConfigurations|
-          'ns::|initWithRect:options:pressureConfigurations:owner:userInfo:|
-          'ns::|owner|
-          'ns::|rect|
-          'ns::|mouseMoved:|
-          'ns::|initWithRect:options:owner:userInfo:|
-          'ns::|options|
-          'ns::|userInfo|
-          'ns::|removeObserver:name:object:|
-          'ns::|postNotificationName:object:userInfo:|
-          'ns::|addObserver:selector:name:object:|
-          'ns::|postNotification:|
-          'ns::|postNotificationName:object:|
-          'ns::|removeObserver:|
-          'ns::|addObserverForName:object:queue:usingBlock:|
-          'ns::|isEmpty|
+          'ns::|itemArray|
+          'ns::|itemAtIndex:|
+          'ns::|size|
           'ns::|displayLinkWithHandler:|
           'ns::|userSpaceScaleFactor|
           'ns::|auxiliaryTopRightArea|

@@ -16,6 +16,14 @@
    (TISCopyCurrentKeyboardLayoutInputSource)
    (TISGetInputSourceProperty)
    (LMGetKeyboardType)
+
+   (window-controller-class
+    :accessor objc-window-controller-class
+    :initform (make-window-controller-class))
+
+   (window-controller
+    :accessor display-window-controller
+    :initform nil)    
    
    (helper-class
     :accessor objc-helper-class

@@ -901,6 +901,16 @@
       (ns:|setAcceptsMouseMovedEvents:| window t)
       (ns:|setRestorable:| window nil)
 
+      #+NIL
+      (let ((window-controller (alloc (objc-window-controller-class (window-display window)))))
+
+	(setf (display-window-controller (window-display window)) window-controller)
+	;;(super-init-with-window window-controller window)
+
+	;;(ns:|setTouchBar:| window (alloc-init #@NSTouchBar))
+	;;(ns:|makeTouchBar| window-controller)
+	)
+
       t)))
 
 (defmethod initialize-window-devices ((window os-window-mixin) &rest args &key &allow-other-keys)
@@ -1038,7 +1048,7 @@
     (handle-event window event))
   (values))
 
-(trace release-monitor acquire-monitor release-cocoa-monitor acquire-cocoa-monitor)
+;;(trace release-monitor acquire-monitor release-cocoa-monitor acquire-cocoa-monitor)
 
 (deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
@@ -1120,12 +1130,42 @@
     (objc-runtime::class-add-method window-delegate-class @(windowDidChangeOcclusionState:)
 				    (cffi:callback window-delegate-window-did-change-occlusion-state-callback)
 				    "v@:@")
+    (objc_registerClassPair window-delegate-class)
     window-delegate-class))
+
+(deftraceable-callback window-make-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (let ((tb (alloc-init #@NSTouchBar)))
+    (ns:|setDelegate:| tb self)
+    tb))
+
+(deftraceable-callback window-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (alloc-init #@NSTouchBar))
+
+(deftraceable-callback window-touch-bar-make-item-for-identifier-callback :pointer ((self :pointer) (_cmd :pointer) (touch-bar :pointer) (identifier :pointer))
+		       (cffi:null-pointer))
+
+(deftraceable-callback content-view-responds-to-selector-callback :char ((self :pointer) (_cmd :pointer) (selector :pointer))
+  (print (objc-runtime::sel-get-name selector))
+  
+  (prog1 (print (super-responds-to-selector self selector))
+    (finish-output)))
+
+
+
+(deftraceable-callback content-view-resolve-class-method-callback :char ((self :pointer) (_cmd :pointer) (selector :pointer))
+  (print (objc-runtime::sel-get-name selector))
+  (finish-output)
+  (prog1 (print (super-resolve-class-method self selector))
+    (finish-output)))
+
+(deftraceable-callback content-view-key-paths-for-values-affecting-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (array-with-objects))
+
 
 (defun make-content-view-class (&optional (super #@NSView))
   (let ((content-view-class
 	 (objc-runtime::objc-allocate-class-pair
-	  super "CluiSContentView" 0)))
+	  super "CluiContentView" 0)))
 
     (objc-runtime::class-add-method content-view-class @(dealloc)
 				    (cffi:callback content-view-dealloc-callback)
@@ -1199,6 +1239,36 @@
     (objc-runtime::class-add-method content-view-class @(drawInMTKView:)
 				    (cffi:callback content-view-draw-in-mtkview-callback)
 				    "v@:@")
+
+
+    (objc-runtime::class-add-method content-view-class @(makeTouchBar)
+				    (cffi:callback window-make-touch-bar-callback)
+				    "@@:")
+
+    #+NIL
+    (objc-runtime::class-add-method content-view-class @(touchBar)
+				    (cffi:callback window-touch-bar-callback)
+				    "@@:")
+
+    (objc-runtime::class-add-method content-view-class @(touchBar:makeItemForIdentifier:)
+				    (cffi:callback window-touch-bar-make-item-for-identifier-callback)
+				    "@@:@@")
+
+    #+NIL
+    (objc-runtime::class-add-method content-view-class @(respondsToSelector:)
+				    (cffi:callback content-view-responds-to-selector-callback)
+				    "c@:@")
+    #+NIL
+    (objc-runtime::class-add-method content-view-class @(resolveClassMethod:)
+				    (cffi:callback content-view-resolve-class-method-callback)
+				    "c@:@")
+
+    (objc-runtime::class-add-method content-view-class @(keyPathsForValuesAffectingTouchBar)
+				    (cffi:callback content-view-key-paths-for-values-affecting-touch-bar-callback)
+				    "@@:")
+
+    (objc_registerClassPair content-view-class)
+    
     content-view-class))
 
 (deftraceable-callback window-can-become-key-window-callback :char ((self :pointer) (_cmd :pointer))
@@ -1207,7 +1277,9 @@
 
 (deftraceable-callback window-can-become-main-window-callback :char ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignore self _cmd))
-  *yes*)
+		       *yes*)
+
+
 
 (defun make-window-class ()
   (let ((window-class
@@ -1219,10 +1291,9 @@
     (objc-runtime::class-add-method window-class @(canBecomeMainWindow)
 				    (cffi:callback window-can-become-main-window-callback)
 				    "c@:")
-    #+NIL
-    (objc-runtime::class-add-method window-class @(observeValueForKeyPath:ofObject:change:context:)
-				    (cffi:callback observe-value-for-key-path-callback)
-				    "v@:@@@@")
+
+    (objc_registerClassPair window-class)
+    
     window-class))
 
 
@@ -1242,6 +1313,7 @@
        content-view-update-tracking-areas)
 
 (defun small-test ()
+  #+sbcl
   (sb-int:set-floating-point-modes :traps '())
   (print objc-runtime::ns-app)
   (with-autorelease-pool (pool)
@@ -1365,7 +1437,8 @@
 
 	    (ns:|setTitle:| window (ns:|miniwindowTitle| window)))))))
 
-	    
+
+
 
 
 	    

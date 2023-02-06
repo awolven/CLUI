@@ -34,7 +34,48 @@
     (objc-runtime::class-add-method helper-class @(observeValueForKeyPath:ofObject:change:context:)
 				    (cffi:callback observe-value-for-key-path-callback)
 				    "v@:@@@@")
+    (objc_registerClassPair helper-class)
     helper-class))
+
+(deftraceable-callback window-controller-make-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (let ((tb (alloc-init #@NSTouchBar)))
+    (ns:|setTouchBar:| self tb)
+    tb))
+
+(deftraceable-callback window-controller-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (alloc-init #@NSTouchBar))
+
+(deftraceable-callback window-controller-touch-bar-make-item-for-identifier-callback :pointer ((self :pointer) (_cmd :pointer) (touch-bar :pointer) (identifier :pointer))
+		      (cffi:null-pointer))
+
+(deftraceable-callback application-delegate-make-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (alloc-init #@NSTouchBar))
+
+(deftraceable-callback application-delegate-touch-bar-make-item-for-identifier-callback :pointer ((self :pointer) (_cmd :pointer) (touch-bar :pointer) (identifier :pointer))
+		      (cffi:null-pointer))
+
+(deftraceable-callback application-delegate-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
+  (alloc-init #@NSTouchBar))
+
+(defun make-window-controller-class ()
+  (let ((window-controller-class (objc-runtime::objc-allocate-class-pair #@NSWindowController "CluiWindowController" 0)))
+
+    (objc-runtime::class-add-method window-controller-class @(makeTouchBar)
+				    (cffi:callback window-controller-make-touch-bar-callback)
+				    "v@:")
+    
+    (objc-runtime::class-add-method window-controller-class @(touchBar)
+				    (cffi:callback window-controller-touch-bar-callback)
+				    "v@:")
+
+    (objc-runtime::class-add-method window-controller-class @(touchBar:makeItemForIdentifier:)
+				    (cffi:callback window-controller-touch-bar-make-item-for-identifier-callback)
+				    "v@:@@")
+    (objc_registerClassPair window-controller-class)
+    
+    window-controller-class))
+
+
 
 (deftraceable-callback application-delegate-application-should-terminate-callback :pointer
     ((self :pointer) (_cmd :pointer) (notification :pointer))
@@ -73,11 +114,22 @@
 (deftraceable-callback application-delegate-application-did-finish-launching-callback :void
     ((self :pointer) (_cmd :pointer) (notification :pointer))
   ;;  (declare (ignorable self _cmd))
-  (application-did-finish-launching notification)
+  (application-did-finish-launching self notification)
   (values))
 
-(defmethod application-did-finish-launching (notification)
+(defmethod application-did-finish-launching (self notification)
   (declare (ignorable notification))
+  (print 'activationpolicy)
+  ;; this line of code is what is causing ns::|run| to crash on TouchBar Observer:
+  ;;(NS:|setAutomaticCustomizeTouchBarMenuItemEnabled:| objc-runtime::ns-app nil)
+  ;;(ns:|setTouchBar:| objc-runtime::ns-app (alloc-init #@NSTouchBar))
+  (NS:|setAutomaticCustomizeTouchBarMenuItemEnabled:| objc-runtime::ns-app t)
+  ;;(ns:|showWindow:| (display-window-controller (default-display)) self)
+  ;;(ns:|setTouchBar:| w (alloc-init #@NSTouchBar))
+  (print (ns::|setActivationPolicy:| objc-runtime::ns-app NSApplicationActivationPolicyRegular))
+  ;;(ns:|setMenuBarVisible:| (ns:|mainMenu| objc-runtime::ns-app) t)
+  (finish-output)
+
   (values))
 
 
@@ -113,9 +165,24 @@
 				    (cffi:callback application-delegate-application-did-hide-callback)
 				    "v@:@")
     #+NIL
+    (objc-runtime::class-add-method application-delegate-class @(makeTouchBar)
+				    (cffi:callback application-delegate-make-touch-bar-callback)
+				    "v@:")
+    #+NIL
+    (objc-runtime::class-add-method application-delegate-class @(touchBar)
+				    (cffi:callback application-delegate-touch-bar-callback)
+				    "v@:")
+    #+NIL
+    (objc-runtime::class-add-method application-delegate-class @(touchBar:makeItemForIdentifier:)
+				    (cffi:callback application-delegate-touch-bar-make-item-for-identifier-callback)
+				    "v@:@@")
+    
+        #+NIL
     (objc-runtime::class-add-method application-delegate-class @(observeValueForKeyPath:ofObject:change:context:)
 				    (cffi:callback observe-value-for-key-path-callback)
 				    "v@:@@@@")
+
+    (objc_registerClassPair application-delegate-class)
     application-delegate-class))
 
 (defconstant MAXPATHLEN 1024)
@@ -162,69 +229,91 @@
 	    (setq app-name progname)
 	    (setq app-name "Clui Application"))))
 
-    (let ((bar [[#@NSMenu @(alloc)] @(init)]))
-      [objc-runtime::ns-app @(setMainMenu:) :pointer bar]
+    (let ((bar (alloc-init #@NSMenu)))
+      (ns:|setMainMenu:| objc-runtime::ns-app bar)
 
-      (let ((app-menu-item [bar @(addItemWithTitle:action:keyEquivalent:) :pointer [#@NSString @(string)]
-			   :pointer (cffi:null-pointer) :pointer [#@NSString @(string)]])
-	    (app-menu [[#@NSMenu @(alloc)] @(init)]))
+      
+      (let ((app-menu-item (ns:|addItemWithTitle:action:keyEquivalent:| bar (ns:|string| #@NSString)
+			       (cffi:null-pointer) (ns:|string| #@NSString)))
+	    (app-menu (alloc-init #@NSMenu)))
+	
+	(ns:|setSubmenu:| app-menu-item app-menu)
+	(ns:|addItemWithTitle:action:keyEquivalent:| app-menu
+	    (objc-runtime::make-nsstring (concatenate 'string "About " app-name))
+	    @(orderFrontStandardAboutPanel:) (objc-runtime::make-nsstring ""))
 
-	[app-menu-item @(setSubmenu:) :pointer app-menu]
-	[app-menu @(addItemWithTitle:action:keyEquivalent:)
-	 :pointer (objc-runtime::make-nsstring (concatenate 'string "About " app-name))
-	 :pointer @(orderFrontStandardAboutPanel:) :pointer (objc-runtime::make-nsstring "")]
-	 [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
+	(ns:|addItem:| app-menu (ns:|separatorItem| #@NSMenuItem))
 
-	 (let ((services-menu [[#@NSMenu @(alloc)] @(init)]))
-	  [objc-runtime::ns-app @(setServicesMenu:) :pointer services-menu]
-	  [app-menu @(addItemWithTitle:action:keyEquivalent:) :pointer (objc-runtime::make-nsstring "Services") :pointer (cffi:null-pointer)
-	  :pointer (objc-runtime::make-nsstring "")]
+	(let ((services-menu (alloc-init #@NSMenu)))
+	  (ns:|setServicesMenu:| objc-runtime::ns-app services-menu)
+	  (ns:|addItemWithTitle:action:keyEquivalent:| app-menu
+	      (objc-runtime::make-nsstring "Services") (cffi:null-pointer) (objc-runtime::make-nsstring ""))
 
-	  [services-menu @(release)]
+	  (ns:|release| services-menu)
+	  (ns:|addItem:| app-menu (ns:|separatorItem| #@NSMenuItem))
 
-	  [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
-	  [app-menu @(addItemWithTitle:action:keyEquivalent:)
-	  :pointer (objc-runtime::make-nsstring (concatenate 'string "Hide " app-name))
-	  :pointer @(hide:) :pointer (objc-runtime::make-nsstring "h")]
+	  (ns:|addItemWithTitle:action:keyEquivalent:| app-menu
+	      (objc-runtime::make-nsstring (concatenate 'string "Hide " app-name))
+	      @(hide:) (objc-runtime::make-nsstring "h"))
 
-	  [[app-menu @(addItemWithTitle:action:keyEquivalent:)
-	   :pointer (objc-runtime::make-nsstring "Hide Others")
-	   :pointer @(hideOtherApplications:) :pointer (objc-runtime::make-nsstring "h")]
-	   @(setKeyEquivalentModifierMask:) :long-long (logior NSEventModifierFlagOption NSEventModifierFlagCommand)]
+	  (ns:|setKeyEquivalentModifierMask:| 
+	      (ns:|addItemWithTitle:action:keyEquivalent:| app-menu
+		  (objc-runtime::make-nsstring "Hide Others")
+		  @(hideOtherApplications:) (objc-runtime::make-nsstring "h"))
+	      (logior NSEventModifierFlagOption NSEventModifierFlagCommand))
 
-	   [app-menu @(addItemWithTitle:action:keyEquivalent:)
-	  :pointer (objc-runtime::make-nsstring "Show All")
-	  :pointer @(unhideAllApplications:) :pointer (objc-runtime::make-nsstring "")]
-	  [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
-	  [app-menu @(addItemWithTitle:action:keyEquivalent:)
-	  :pointer (objc-runtime::make-nsstring (concatenate 'string "Quit " app-name))
-	  :pointer @(terminate:) :pointer (objc-runtime::make-nsstring "q")]
+	  (ns:|addItemWithTitle:action:keyEquivalent:| app-menu
+	      (objc-runtime::make-nsstring "Show All")
+	      @(unhideAllApplications:) (objc-runtime::make-nsstring ""))
+	  
+	  (ns:|addItem:| app-menu (ns:|separatorItem| #@NSMenuItem))
 
-	  (let ((window-menu-item [bar @(addItemWithTitle:action:keyEquivalent:) :pointer (objc-runtime::make-nsstring "")
-				  :pointer (cffi:null-pointer) :pointer (objc-runtime::make-nsstring "")])
-		(window-menu [[#@NSMenu @(alloc)] @(initWithTitle:) :pointer (objc-runtime::make-nsstring "Window")]))
-	    [objc-runtime::ns-app @(setWindowsMenu:) :pointer window-menu]
-	    [window-menu-item @(setSubmenu:) :pointer window-menu]
-	    [window-menu @(addItemWithTitle:action:keyEquivalent:)
-	    :pointer (objc-runtime::make-nsstring "Minimize")
-	    :pointer @(performMiniaturize:) :pointer (objc-runtime::make-nsstring "m")]
-	    [window-menu @(addItemWithTitle:action:keyEquivalent:)
-	    :pointer (objc-runtime::make-nsstring "Zoom")
-	    :pointer @(performZoom:) :pointer (objc-runtime::make-nsstring "")]
-	    [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
-	    [window-menu @(addItemWithTitle:action:keyEquivalent:)
-	    :pointer (objc-runtime::make-nsstring "Bring All To Front")
-	    :pointer @(arrangeInFront:) :pointer (objc-runtime::make-nsstring "")]
+	  (ns:|addItemWithTitle:action:keyEquivalent:| app-menu
+	      (objc-runtime::make-nsstring (concatenate 'string "Quit " app-name))
+	      @(terminate:) (objc-runtime::make-nsstring "q"))
 
-	    [app-menu @(addItem:) :pointer [#@NSMenuItem @(separatorItem)]]
-	    [[window-menu @(addItemWithTitle:action:keyEquivalent:)
-	     :pointer (objc-runtime::make-nsstring "Enter Full Screen")
-	     :pointer @(toggleFullScreen:) :pointer (objc-runtime::make-nsstring "f")]
-	     @(setKeyEquivalentModifierMask:) :int (logior NSEventModifierFlagControl NSEventModifierFlagCommand)]
+	  (ns:|addItemWithTitle:action:keyEquivalent:| bar
+	      (objc-runtime::make-nsstring "") (cffi:null-pointer) (objc-runtime::make-nsstring ""))
 
-	     [objc-runtime::ns-app @(performSelector:withObject:) :pointer @(setAppleMenu:) :pointer app-menu]
-	     [bar @(release)]
-	     (values)))))))
+	  (let ((window-menu-item (ns:|addItemWithTitle:action:keyEquivalent:| bar
+				      (objc-runtime::make-nsstring "") (cffi:null-pointer)
+				      (objc-runtime::make-nsstring "")))
+		(window-menu (ns:|initWithTitle:| (alloc #@NSMenu) (objc-runtime::make-nsstring "Window"))))
+
+	    (ns:|setWindowsMenu:| objc-runtime::ns-app window-menu)
+
+	    (ns:|setSubmenu:| window-menu-item window-menu)
+
+	    (ns:|addItemWithTitle:action:keyEquivalent:| window-menu
+		(objc-runtime::make-nsstring "Minimize")
+		@(performMiniaturize:)
+		(objc-runtime::make-nsstring "m"))
+
+	    (ns:|addItemWithTitle:action:keyEquivalent:| window-menu
+		(objc-runtime::make-nsstring "Zoom")
+		@(performZoom:) (objc-runtime::make-nsstring ""))
+
+	    (ns:|addItem:| window-menu (ns:|separatorItem| #@NSMenuItem))
+
+	    (ns:|addItemWithTitle:action:keyEquivalent:| window-menu
+		(objc-runtime::make-nsstring "Bring All To Front")
+		@(arrangeInFront:)
+		(objc-runtime::make-nsstring ""))
+
+	    (ns:|addItem:| window-menu (ns:|separatorItem| #@NSMenuItem))
+
+	    (ns:|setKeyEquivalentModifierMask:|
+		(ns:|addItemWithTitle:action:keyEquivalent:| window-menu
+		    (objc-runtime::make-nsstring "Enter Full Screen")
+		    @(toggleFullScreen:) (objc-runtime::make-nsstring "f"))
+		(logior NSEventModifierFlagControl NSEventModifierFlagCommand))
+
+	    (ns:|performSelector:withObject:| objc-runtime::ns-app
+		@(setAppleMenu:) window-menu)
+
+	    (ns:|release| bar)
+	    
+	    (values)))))))
 
 (deftraceable-callback closure-like-thingy-named-block-callback :pointer ((event :pointer))
   (closure-like-thingy-named-block event)
@@ -287,8 +376,7 @@
       (unless (initialize-tis app)
 	(return-from init-cocoa nil))
 
-      ;; this line of code is what is causing ns::|run| to crash on TouchBar Observer:
-      ;;(ns::|setActivationPolicy:| app NSApplicationActivationPolicyRegular)
+
 
       t)))
 

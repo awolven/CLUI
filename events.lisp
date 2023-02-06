@@ -76,7 +76,7 @@
 (defclass window-deiconify-event-mixin (window-resize-event-mixin)
   ())
 
-(defclass clui.v0:window-deiconify-event (window-deiconfiy-event-mixin)
+(defclass clui.v0:window-deiconify-event (window-deiconify-event-mixin)
   ())
 
 (defmethod handle-event ((window window-mixin) (event window-deiconify-event-mixin))

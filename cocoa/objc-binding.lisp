@@ -25,6 +25,34 @@
 				 ,@(mapcan #'list arg-types arg-syms)
 				 ,return-type)))))
 
+(defmacro make-super-message-lambda (selector ((&rest arg-types) return-type))
+  (let ((arg-syms (mapcar (lambda (_) _ (gensym))
+                          arg-types)))
+    (if (and (consp return-type)
+	     (or (and (eq (car return-type) :struct)
+		      (not (eq (cadr return-type) 'ns::|CGPoint|)))
+		 (eq (car return-type) :union)))
+	`(lambda ,(cons 'target arg-syms)
+	   (cffi:with-foreign-object (objc-super '(:struct objc_super))
+	     (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (objc-object-id target)
+		   (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (ns::|superclass| (ns::|class| (objc-object-id target))))
+	     (cffi:foreign-funcall "objc_msgSendSuper_stret"
+				   :pointer objc-super
+				   :pointer ,selector
+				   ,@(mapcan #'list arg-types arg-syms)
+				   ,return-type)))
+	`(lambda ,(cons 'target arg-syms)
+	   (cffi:with-foreign-object (objc-super '(:struct objc_super))
+	     (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (objc-object-id target)
+		   (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (ns::|superclass| (ns::|class| (objc-object-id target))))
+	     (cffi:foreign-funcall "objc_msgSendSuper"
+				   :pointer objc-super
+				   :pointer ,selector
+				   ,@(mapcan #'list arg-types arg-syms)
+				   ,return-type))))))
+
+
+
 (defun NS::|alloc| (class)
   (let ((message-lambda 
          (make-message-lambda @(alloc) (NIL :POINTER)))) 
@@ -488,12 +516,17 @@
 			       #@NSNumber
 			       #@NSApplication #@NSRunningApplication #@NSThread #@NSEvent #@NSUserDefaults
 			       #@NSScreen
+			       #@NSMenu
+			       #@NSMenuItem
+			       #@NSString
 			       #@NSNotificationCenter
 			       #@NSTrackingArea
 			       ;;#@NSWorkspace #@NSWorkspaceOpenConfiguration #@NSAppKitVersion
 			       ;;@NSUserActivity #@NSUserActivityRestoring
 			       ;;#@NSSharingService #@NSSharingServicePicker #@NSPreviewRepresentableActivityItem
 			       #@NSView #@NSControl #@NSCell #@NSActionCell #@NSSplitView #@NSStackView #@NSTabView
+			       #@NSWindowController
+			       #@NSViewController
 			       #@NSScrollView #@NSScroller #@NSClipView #@NSRulerView #@NSRulerMarker
 			       #@NSTextView ;; #@NSTextViewDelegate
 			       #@NSWindow
@@ -502,6 +535,7 @@
 			       #@NSGraphicsContext #@NSBezierPath
 			       #@NSDate
 			       #@MTKView
+			       #@NSTouchBar
 			       #@CALayer
 			       #@CAMetalLayer)
 			 "~/clui/cocoa/ns-bindings.lisp"
@@ -528,6 +562,9 @@
 			       (class_getClassMethod #@NSBundle @(bundleWithPath:))
 			       (class_getClassMethod #@NSScreen @(screens))
 			       (class_getClassMethod #@NSWindow @(windowNumberAtPoint:belowWindowWithWindowNumber:))
-								       
+
+			       (class_getClassMethod #@NSMenuItem @(separatorItem))
+			       (class_getClassMethod #@NSMenu @(setMenuBarVisible:))
+			       ;;(class_getClassMethod #@NSWindow @(setTouchBar:))
 			       )
 			 :with-internals? with-internals?))

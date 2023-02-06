@@ -90,14 +90,36 @@
 	':unsigned-long-long 0
 	':POINTER (objc-object-id handler)))
 
+
+
 (defun super-init-with-frame (self frame)
-  (let ((selector (new-msg-send-super @(initWithFrame:)
-				      (((:struct ns::|CGRect|)) :pointer))))
+  (let ((selector (make-super-message-lambda
+		   @(initWithFrame:)
+		   (((:struct ns::|CGRect|)) :pointer))))
     (funcall selector self frame)))
 
+(defun super-responds-to-selector (self sel)
+  (let ((selector (make-super-message-lambda
+		   @(respondsToSelector:)
+		   (((:pointer)) :char))))
+    (funcall selector self sel)))
+
+(defun super-resolve-class-method (self sel)
+  (let ((selector (make-super-message-lambda
+		   @(resolveClassMethod:)
+		   (((:pointer)) :char))))
+    (funcall selector self sel)))
+
 (defun super-update-tracking-areas (self)
-  (let ((selector (new-msg-send-super @(updateTrackingAreas) (nil :void))))
+  (let ((selector (make-super-message-lambda
+		   @(updateTrackingAreas) (nil :void))))
     (funcall selector self)))
+
+(defun super-init-with-window (self window)
+  (let ((selector (make-super-message-lambda @(initWithWindow:) ((:pointer) :pointer))))
+    (funcall selector (objc-object-id self) (objc-object-id window))))
+	    
+				      
 
 (defun NSRectFill (rect)
   (cffi:foreign-funcall "NSRectFill" (:struct ns::|CGRect|) rect :void))

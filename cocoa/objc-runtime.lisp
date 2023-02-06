@@ -31,7 +31,9 @@
 (cffi:defcfun (object_setInstanceVariable "object_setInstanceVariable") :pointer (object :pointer) (name :string) (value :pointer))
 (cffi:defcfun (object_getClass "object_getClass") :pointer (object :pointer))
 (cffi:defcfun (objc_msgSendSuper "objc_msgSendSuper") :pointer (obj :pointer) (selector :pointer) &rest)
+(cffi:defcfun (objc_msgSendSuper "objc_msgSendSuper_stret") :pointer (obj :pointer) (selector :pointer) &rest)
 (cffi:defcfun (class_getProperty "class_getProperty") :pointer (class :pointer) (name :string))
+(cffi:defcfun (objc_registerClassPair "objc_registerClassPair") :void (class :pointer))
 
 (cffi:defcstruct objc_super
   (reciever :pointer)
@@ -58,6 +60,12 @@
 	  (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (class_getSuperclass (object_getClass (objc-object-id thing))))
     (eval `(objc_msgSendSuper ,objc-super ,selector ,@args))))
 
+(defun super-msg-send-stret (thing selector &rest args)
+  (cffi:with-foreign-object (objc-super '(:struct objc_super))
+    (setf (cffi:foreign-slot-value objc-super '(:struct objc_super) 'reciever) (objc-object-id thing)
+	  (cffi:foreign-slot-value objc-super '(:struct objc_super) 'super_class) (class_getSuperclass (object_getClass (objc-object-id thing))))
+    (eval `(objc_msgSendSuper_stret ,objc-super ,selector ,@args))))
+
 (defmacro new-msg-send-super (selector ((&rest arg-types) return-type))
   (let ((arg-syms (mapcar (lambda (_) _ (gensym))
                           arg-types)))
@@ -70,6 +78,8 @@
                              :pointer ,selector
                              ,@(mapcan #'list arg-types arg-syms)
                              ,return-type)))))
+
+
 
 #+sbcl
 (defmethod objc-object-id ((thing sb-sys:system-area-pointer))

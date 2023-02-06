@@ -10,6 +10,8 @@
 (cffi:defcstruct ns::|__CFDictionary|) ;;fixme
 (cffi:defcstruct ns::|__CFBundle|) ;;fixme
 (cffi:defcstruct NS::|__CFNotificationCenter|) ;; fixme
+(cffi:defcstruct NS::|__CFStringTokenizer|)
+(cffi:defcstruct NS::|__CFCharacterSet|)
 
 (cffi:defcfun ("CFBundleGetMainBundle" CFBundleGetMainBundle) :pointer)
 
