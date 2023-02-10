@@ -17,6 +17,9 @@
 	   monitor-mixin
 	   window-mixin
 	   cursor-mixin
+
+	   desktop-with-vulkan
+	   desktop-with-opengl
 	   
 	   vulkan-window-mixin
 	   opengl-window-mixin))

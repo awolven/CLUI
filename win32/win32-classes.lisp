@@ -108,6 +108,9 @@
    (last-cursor-pos-y)
    (high-surrogate)))
 
+(defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)
+  (apply #'create-win32-window instance initargs))
+
 (defclass win32:vulkan-window-mixin (win32:window-mixin)
   ())
 

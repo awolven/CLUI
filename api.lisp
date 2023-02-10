@@ -100,72 +100,11 @@
 (defgeneric request-window-attention (window))
 
 
-(defun get-os-window-fullscreen (window)
-  #+darwin(get-cocoa-window-fullscreen window)
-  #+windows(and (window-monitor window) t)
-  #+linux(get-linux-window-fullscreen window))
+
 
 (defun get-primary-monitor (&optional (display (default-display)))
   (car (display-monitors display)))
 
-(defun set-os-window-fullscreen (window value)
-  #+darwin(set-cocoa-window-fullscreen window value)
-  #+windows(setf (window-monitor window) (when value (get-primary-monitor)))
-  #+linux(set-linux-window-fullscreen window value))
-
-(defun get-os-window-closable (window)
-  #+darwin(get-cocoa-window-closable window)
-  #+windows(get-win32-window-closable window)
-  #+linux(get-linux-window-closable window))
-
-(defun set-os-window-closable (window value)
-  #+darwin(set-cocoa-window-closable window value)
-  #+windows(set-win32-window-closable window value)
-  #+linux(set-linux-window-closable window value))
-
-(defun get-os-window-title (window)
-  #+darwin(get-cocoa-window-title window)
-  #+windows(get-win32-window-title window)
-  #+linux(get-linux-window-title window))
-
-(defun set-os-window-title (window value)
-  #+darwin(set-cocoa-window-title window value)
-  #+windows(set-win32-window-title window value)
-  #+linux(set-linux-window-title window value))
-
-(defun get-os-window-titled (window)
-  #+darwin(get-cocoa-window-titled window)
-  #+windows(get-win32-window-titled window)
-  #+linux(get-linux-window-titled window))
-
-(defun set-os-window-titled (window value)
-  #+darwin(set-cocoa-window-titled window value)
-  #+windows(set-win32-window-titled window value)
-  #+linux(set-linux-window-titled window value))
-
-(defun get-os-window-pos (window)
-  #+darwin(get-cocoa-window-pos window)
-  #+windows(get-win32-window-pos window)
-  #+x11(get-x11-window-pos window)
-  #+wayland(get-wayland-window-pos window))
-
-(defun set-os-window-pos (window x y)
-  #+darwin(set-cocoa-window-pos window x y)
-  #+windows(set-win32-window-pos window x y)
-  #+x11(set-x11-window-pos window x y)
-  #+wayland(set-wayland-window-pos window x y))
-
-(defun get-os-window-size (window)
-  #+darwin(get-cocoa-window-size window)
-  #+windows(get-win32-window-size window)
-  #+x11(get-x11-window-size window)
-  #+wayland(get-wayland-window-size window))
-
-(defun set-os-window-size (window width height)
-  #+darwin(set-cocoa-window-size window width height)
-  #+windows(set-win32-window-size window width height)
-  #+x11(set-x11-window-size window width height)
-  #+wayland(set-wayland-window-size window width height))
 
 (defun set-os-window-monitor (window monitor &key xpos ypos width height (refresh-rate :dont-care))
   (declare (type os-window-mixin window))
@@ -188,438 +127,990 @@
   #+windows(set-win32-window-monitor window monitor xpos ypos width height refresh-rate)
   #+linux(set-linux-window-monitor window monitor xpos ypos width height refresh-rate))
 
-(defun get-os-window-cursor-pos (window)
-  #+darwin
-  (get-cocoa-window-cursor-pos window)
-  #+windows
-  (get-win32-window-cursor-pos window)
-  #+x11
-  (get-x11-window-cursor-pos window)
-  #+wayland
-  (get-wayland-window-cursor-pos window))
 
-(defun set-os-window-cursor-pos (window x y)
-  #+darwin
-  (set-cocoa-window-cursor-pos window x y)
-  #+windows
-  (set-win32-window-cursor-pos window x y)
-  #+linux
-  (get-linux-window-cursor-pos window x y))
 
-(defun get-os-window-maximized (window)
-  #+darwin(get-cocoa-window-maximized window)
-  #+windows(get-win32-window-maximized window)
-  #+linux(get-linux-window-maximized window))
-
-(defun set-os-window-maximized (window value)
-  #+darwin(set-cocoa-window-maximized window value)
-  #+windows(set-win32-window-maximized window value)
-  #+linux(set-linux-window-maximized window value))
-
-(defun maximize-os-window (window)
-  #+darwin(maximize-cocoa-window window)
-  #+windows(maximize-win32-window window)
-  #+linux(maximize-linux-window window))
-
-(defun restore-os-window (window)
-  #+darwin(restore-cocoa-window window)
-  #+windows(restore-win32-window window)
-  #+linux(restore-linux-window window))
-
-(defun show-os-window (window)
-  #+darwin(show-cocoa-window window)
-  #+windows(show-win32-window window)
-  #+x11(show-x11-window window)
-  #+wayland(show-wayland-window window))
-
-(defun hide-os-window (window)
-  #+darwin(hide-cocoa-window window)
-  #+windows(hide-win32-window window)
-  #+linux(hide-linux-window window))
-
-(defun get-os-window-shown (window)
-  #+darwin(get-cocoa-window-shown window)
-  #+windows(get-win32-window-shown window)
-  #+linux(get-linux-window-shown window))
-
-(defun set-os-window-shown (window value)
-  #+darwin(set-cocoa-window-shown window value)
-  #+windows(set-win32-window-shown window value)
-  #+linux(set-linux-window-shown window value))
-
-(defun get-os-window-hidden (window)
-  #+darwin(get-cocoa-window-hidden window)
-  #+windows(get-win32-window-hidden window)
-  #+linux(get-linux-window-hidden window))
-
-(defun set-os-window-hidden (window value)
-  #+darwin(set-cocoa-window-hidden window value)
-  #+windows(set-win32-window-hidden window value)
-  #+linux(set-linux-window-hidden window value))
-
-(defun get-os-window-focused (window)
-  #+darwin(get-cocoa-window-focused window)
-  #+windows(get-win32-window-focused window)
-  #+linux(get-linux-window-focused window))
-
-(defun set-os-window-focused (window value)
-  #+darwin(set-cocoa-window-focused window value)
-  #+windows(set-win32-window-focused window value)
-  #+linux(set-linux-window-focused window value))
-
-(defun focus-os-window (window)
-  #+darwin(focus-cocoa-window window)
-  #+windows(focus-win32-window window)
-  #+linux(focus-linux-window window))
-
-(defun unfocus-os-window (window)
-  #+darwin(unfocus-cocoa-window window)
-  #+windows(unfocus-win32-window window)
-  #+linux(unfocus-linux-window window))
-
-(defun get-os-window-iconifiable (window)
-  #+darwin(get-cocoa-window-iconifiable window)
-  #+windows(get-win32-window-iconifiable window)
-  #+linux(get-linux-window-iconifiable window))
-
-(defun set-os-window-iconifiable (window value)
-  #+darwin(set-cocoa-window-iconifiable window value)
-  #+windows(set-win32-window-iconifiable window value)
-  #+linux(set-linux-window-iconifiable window value))
-
-(defun get-os-window-iconified (window)
-  #+darwin(get-cocoa-window-iconified window)
-  #+windows(get-win32-window-iconified window)
-  #+linux(get-linux-window-iconified window))
-
-(defun set-os-window-iconified (window value)
-  #+darwin(set-cocoa-window-iconified window value)
-  #+windows(set-win32-window-iconified window value)
-  #+linux(set-linux-window-iconified window value))
-
-(defun iconify-os-window (window)
-  #+darwin(iconify-cocoa-window window)
-  #+windows(iconify-win32-window window)
-  #+linux(iconify-linux-window window))
-
-(defun deiconify-os-window (window)
-  #+darwin(deiconify-cocoa-window window)
-  #+windows(deiconify-win32-window window)
-  #+linux(deiconify-linux-window window))
-
-(defun get-os-window-visible (window)
-  #+darwin(get-cocoa-window-visible window)
-  #+windows(get-win32-window-visible window)
-  #+linux(get-linux-window-visible window))
-
-(defun set-os-window-visible (window value)
-  #+darwin(set-cocoa-window-visible window value)
-  #+windows(set-win32-window-visible window value)
-  #+linux(set-linux-window-visible window value))
-
-(defun make-os-window-visible (window)
-  #+darwin(make-cocoa-window-visible window)
-  #+windows(make-win32-window-visible window)
-  #+linux(make-linux-window-visible window))
-
-(defun make-os-window-invisible (window)
-  #+darwin(make-cocoa-window-invisible window)
-  #+windows(make-win32-window-invisible window)
-  #+linux(make-linux-window-invisible window))
-
-(defun get-os-window-hovered (window)
-  #+darwin(get-cocoa-window-hovered window)
-  #+windows(get-win32-window-hovered window)
-  #+linux(get-linux-window-hovered window))
-
-(defun get-os-window-resizable (window)
-  #+darwin(get-cocoa-window-resizable window)
-  #+windows(get-win32-window-resizable window)
-  #+linux(get-linux-window-resizable window))
-
-(defun set-os-window-resizable (window value)
-  #+darwin(set-cocoa-window-resizable window value)
-  #+windows(set-win32-window-resizable window value)
-  #+linux(set-linux-window-resizable window value))
-
-(defun make-os-window-resizable (window)
-  #+darwin(make-cocoa-window-resizable window)
-  #+windows(make-win32-window-resizable window)
-  #+linux(make-linux-window-resizable window))
-
-(defun make-os-window-non-resizable (window)
-  #+darwin(make-cocoa-window-non-resizable window)
-  #+windows(make-win32-window-non-resizable window)
-  #+linux(make-linux-window-non-resizable window))
-
-(defun get-os-window-decorated (window)
-  #+darwin(get-cocoa-window-decorated window)
-  #+windows(get-win32-window-decorated window)
-  #+linux(get-linux-window-decorated window))
-
-(defun set-os-window-decorated (window value)
-  #+darwin(set-cocoa-window-decorated window value)
-  #+windows(set-win32-window-decorated window value)
-  #+linux(set-linux-window-decorated window value))
-
-(defun get-os-window-floating (window)
-  #+darwin(get-cocoa-window-floating window)
-  #+windows(get-win32-window-floating window)
-  #+linux(get-linux-window-floating window))
-
-(defun set-os-window-floating (window value)
-  #+darwin(set-cocoa-window-floating window value)
-  #+windows(set-win32-window-floating window value)
-  #+linux(set-linux-window-floating window value))
-
-(defun get-os-window-opaque (window)
-  #+darwin(get-cocoa-window-opaque window)
-  #+windows(get-win32-window-opaque window)
-  #+linux(get-linux-window-opaque window))
-
-(defun set-os-window-opaque (window value)
-  #+darwin(set-cocoa-window-opaque window value)
-  #+windows(set-win32-window-opaque window value)
-  #+linux(set-linux-window-opaque window value))
-
-(defun get-os-window-opacity (window)
-  #+darwin(get-cocoa-window-opacity window)
-  #+windows(get-win32-window-opacity window)
-  #+linux(get-linux-window-opacity window))
-
-(defun set-os-window-opacity (window alpha)
-  #+darwin(set-cocoa-window-opacity window alpha)
-  #+windows(set-win32-window-opacity window alpha)
-  #+linux(set-linux-window-opacity window alpha))
-
-(defun set-os-window-size-limits (window min-width min-height max-width max-height)
-  #+darwin(set-cocoa-window-size-limits window min-width min-height max-width max-height)
-  #+windows(set-win32-window-size-limits window min-width min-height max-width max-height)
-  #+linux(set-linux-window-size-limits window min-width min-height max-width max-height))
-
-(defun get-os-window-aspect-ratio (window)
-  #+darwin(get-cocoa-window-aspect-ratio window)
-  #+windows(get-win32-window-aspect-ratio window)
-  #+linux(get-win32-window-aspect-ratio window))
-
-(defun get-os-window-framebuffer-size (window)
-  #+darwin(get-cocoa-window-framebuffer-size window)
-  #+windows(get-win32-window-framebuffer-size window)
-  #+linux(get-linux-window-framebuffer-size window))
-
-(defun get-os-window-frame-size (window)
-  #+darwin(get-cocoa-window-frame-size window)
-  #+windows(get-win32-window-frame-size window)
-  #+linux(get-linux-window-frame-size window))
-
-(defun get-os-window-content-scale (window)
-  #+darwin(get-cocoa-window-content-scale window)
-  #+windows(get-win32-window-content-scale window)
-  #+linux(get-linux-window-content-scale window))
-
-(defun request-os-window-attention (window)
-  #+darwin(request-cocoa-window-attention window)
-  #+windows(request-win32-window-attention window)
-  #+linux(request-linux-window-attention window))
-
-(defun get-default-screen-workarea ()
+#+win32
+(defmethod get-default-screen-workarea ((display win32:desktop-mixin))
   #+windows(get-win32-desktop-workarea))
 
-(defmethod window-fullscreen? ((window os-window-mixin))
-  (get-os-window-fullscreen window))
+#+win32
+(defmethod window-fullscreen? ((window win32:window-mixin))
+  (get-win32-window-fullscreen window))
 
-(defmethod (setf window-fullscreen?) (value (window os-window-mixin))
-  (set-os-window-fullscreen window value))
+#+cocoa
+(defmethod window-fullscreen? ((window cocoa:window-mixin))
+  (get-cocoa-window-fullscreen window))
 
-(defmethod (setf window-monitor) ((monitor monitor-mixin) (window os-window-mixin))
+#+x11
+(defmethod window-fullscreen? ((window x11:window-mixin))
+  (get-x11-window-fullscreen window))
+
+#+wayland
+(defmethod window-fullscreen? ((window wayland:window-mixin))
+  (get-x11-window-fullscreen window))
+
+#+win32
+(defmethod (setf window-fullscreen?) (value (window win32:window-mixin))
+  (set-win32-window-fullscreen window value))
+
+#+cocoa
+(defmethod (setf window-fullscreen?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-fullscreen window value))
+
+#+x11
+(defmethod (setf window-fullscreen?) (value (window x11:window-mixin))
+  (set-x11-window-fullscreen window value))
+
+#+wayland
+(defmethod (setf window-fullscreen?) (value (window wayland:window-mixin))
+  (set-wayland-window-fullscreen window value))
+
+(defmethod (setf window-monitor) ((monitor monitor-mixin) (window window-mixin))
   (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea)
     (let ((refresh-rate 60))
-      (set-os-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
+      (set-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
       monitor)))
 
-(defmethod window-closable? ((window os-window-mixin))
-  (get-os-window-closable window))
+#+win32
+(defmethod window-closable? ((window win32:window-mixin))
+  (get-win32-window-closable window))
 
-(defmethod (setf window-closable?) (value (window os-window-mixin))
-  (set-os-window-closable window value))
+#+cocoa
+(defmethod window-closable? ((window cocoa:window-mixin))
+  (get-cocoa-window-closable window))
 
-(defmethod window-title ((window os-window-mixin))
-  (get-os-window-title window))
+#+x11
+(defmethod window-closable? ((window x11:window-mixin))
+  (get-x11-window-closable window))
 
-(defmethod (setf window-title) ((value string) (window os-window-mixin))
-  (set-os-window-title window value))
+#+wayland
+(defmethod window-closable? ((window wayland:window-mixin))
+  (get-wayland-window-closable window))
 
-(defmethod window-titled? ((window os-window-mixin))
-  (get-os-window-titled window))
+#+win32
+(defmethod (setf window-closable?) (value (window win32:window-mixin))
+  (set-win32-window-closable window value))
 
-(defmethod (setf window-titled?) (value (window os-window-mixin))
-  (set-os-window-titled window value))
+#+cocoa
+(defmethod (setf window-closable?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-closable window value))
 
-(defmethod window-position ((window os-window-mixin))
-  (get-os-window-pos window))
+#+x11
+(defmethod (setf window-closable?) (value (window x11:window-mixin))
+  (set-x11-window-closable window value))
 
-(defmethod set-window-position ((window os-window-mixin) x y)
-  (set-os-window-pos window x y))
+#+wayland
+(defmethod (setf window-closable?) (value (window wayland:window-mixin))
+  (set-wayland-window-closable window value))
 
-(defmethod window-size ((window os-window-mixin))
-  (get-os-window-size window))
+#+win32
+(defmethod window-title ((window win32:window-mixin))
+  (get-win32-window-title window))
 
-(defmethod set-window-size ((window os-window-mixin) width height)
-  (set-os-window-size window width height))
+#+cocoa
+(defmethod window-title ((window cocoa:window-mixin))
+  (get-cocoa-window-title window))
 
-(defmethod set-window-monitor ((window os-window-mixin) monitor &key xpos ypos width height refresh-rate)
-  (set-os-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+#+x11
+(defmethod window-title ((window x11:window-mixin))
+  (get-x11-window-title window))
 
-(defmethod window-cursor-position ((window os-window-mixin))
-  (get-os-window-cursor-pos window))
+#+wayland
+(defmethod window-title ((window wayland:window-mixin))
+  (get-wayland-window-title window))
 
-(defmethod set-window-cursor-position ((window os-window-mixin) x y)
-  (set-os-window-cursor-pos window x y))
+#+win32
+(defmethod (setf window-title) ((value string) (window win32:window-mixin))
+  (set-win32-window-title window value))
 
-(defmethod window-maximized? ((window os-window-mixin))
-  (get-os-window-maximized window))
+#+cocoa
+(defmethod (setf window-title) ((value string) (window cocoa:window-mixin))
+  (set-cocoa-window-title window value))
 
-(defmethod (setf window-maximized?) (value (window os-window-mixin))
-  (set-os-window-maximized window value))
+#+x11
+(defmethod (setf window-title) ((value string) (window x11:window-mixin))
+  (set-x11-window-title window value))
 
-(defmethod maximize-window ((window os-window-mixin))
-  (maximize-os-window window))
+#+wayland
+(defmethod (setf window-title) ((value string) (window wayland:window-mixin))
+  (set-wayland-window-title window value))
 
-(defmethod restore-window ((window os-window-mixin))
-  (restore-os-window window))
+#+win32
+(defmethod window-titled? ((window win32:window-mixin))
+  (get-win32-window-titled window))
 
-(defmethod show-window ((window os-window-mixin))
-  (show-os-window window))
+#+cocoa
+(defmethod window-titled? ((window cocoa:window-mixin))
+  (get-cocoa-window-titled window))
 
-(defmethod hide-window ((window os-window-mixin))
-  (hide-os-window window))
+#+x11
+(defmethod window-titled? ((window x11:window-mixin))
+  (get-x11-window-titled window))
 
-(defmethod window-shown? ((window os-window-mixin))
-  (get-os-window-shown window))
+#+wayland
+(defmethod window-titled? ((window wayland:window-mixin))
+  (get-wayland-window-titled window))
 
-(defmethod (setf window-shown?) (value (window os-window-mixin))
-  (set-os-window-shown window value))
+#+win32
+(defmethod (setf window-titled?) (value (window win32:window-mixin))
+  (set-win32-window-titled window value))
 
-(defmethod window-hidden? ((window os-window-mixin))
-  (get-os-window-hidden window))
+#+cocoa
+(defmethod (setf window-titled?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-titled window value))
 
-(defmethod (setf window-hidden?) (value (window os-window-mixin))
-  (set-os-window-hidden window value))
+#+x11
+(defmethod (setf window-titled?) (value (window x11:window-mixin))
+  (set-x11-window-titled window value))
 
-(defmethod window-focused? ((window os-window-mixin))
-  (get-os-window-focused window))
+#+wayland
+(defmethod (setf window-titled?) (value (window wayland:window-mixin))
+  (set-wayland-window-titled window value))
 
-(defmethod (setf window-focused?) (value (window os-window-mixin))
-  (set-os-window-focused window value))
+#+win32
+(defmethod window-position ((window win32:window-mixin))
+  (get-win32-window-pos window))
 
-(defmethod focus-window ((window os-window-mixin))
-  (focus-os-window window))
+#+cocoa
+(defmethod window-position ((window cocoa:window-mixin))
+  (get-cocoa-window-pos window))
 
-(defmethod unfocus-window ((window os-window-mixin))
-  (unfocus-os-window window))
+#+x11
+(defmethod window-position ((window x11:window-mixin))
+  (get-x11-window-pos window))
 
-(defmethod window-iconifiable? ((window os-window-mixin))
-  (get-os-window-iconifiable window))
+#+wayland
+(defmethod window-position ((window wayland:window-mixin))
+  (get-wayland-window-pos window))
 
-(defmethod (setf window-iconifiable?) (value (window os-window-mixin))
-  (set-os-window-iconifiable window value))
+#+win32
+(defmethod set-window-position ((window win32:window-mixin) x y)
+  (set-win32-window-pos window x y))
 
-(defmethod window-iconified? ((window os-window-mixin))
-  (get-os-window-iconified window))
+#+cocoa
+(defmethod set-window-position ((window cocoa:window-mixin) x y)
+  (set-cocoa-window-pos window x y))
 
-(defmethod (setf window-iconified?) (value (window os-window-mixin))
-  (set-os-window-iconified window value))
+#+x11
+(defmethod set-window-position ((window x11:window-mixin) x y)
+  (set-x11-window-pos window x y))
 
-(defmethod iconify-window ((window os-window-mixin))
-  (iconify-os-window window))
+#+wayland
+(defmethod set-window-position ((window wayland:window-mixin) x y)
+  (set-wayland-window-pos window x y))
 
-(defmethod deiconify-window ((window os-window-mixin))
-  (deiconify-os-window window))
+#+win32
+(defmethod window-size ((window win32:window-mixin))
+  (get-win32-window-size window))
 
-(defmethod window-visible? ((window os-window-mixin))
-  (get-os-window-visible window))
+#+cocoa
+(defmethod window-size ((window cocoa:window-mixin))
+  (get-cocoa-window-size window))
 
-(defmethod (setf window-visible?) (value (window os-window-mixin))
-  (set-os-window-visible window value))
+#+x11
+(defmethod window-size ((window x11:window-mixin))
+  (get-x11-window-size window))
 
-(defmethod make-window-visible ((window os-window-mixin))
-  (make-os-window-visible window))
+#+wayland
+(defmethod window-size ((window wayland:window-mixin))
+  (get-wayland-window-size window))
 
-(defmethod make-window-invisible ((window os-window-mixin))
-  (make-os-window-invisible window))
+#+win32
+(defmethod set-window-size ((window win32:window-mixin) width height)
+  (set-win32-window-size window width height))
 
-(defmethod window-hovered? ((window os-window-mixin))
-  (get-os-window-hovered window))
+#+cocoa
+(defmethod set-window-size ((window cocoa:window-mixin) width height)
+  (set-cocoa-window-size window width height))
 
-(defmethod window-resizable? ((window os-window-mixin))
-  (get-os-window-resizable window))
+#+x11
+(defmethod set-window-size ((window x11:window-mixin) width height)
+  (set-x11-window-size window width height))
 
-(defmethod (setf window-resizable?) (value (window os-window-mixin))
-  (set-os-window-resizable window value))
+#+wayland
+(defmethod set-window-size ((window wayland:window-mixin) width height)
+  (set-wayland-window-size window width height))
 
-(defmethod make-window-resizable ((window os-window-mixin))
-  (make-os-window-resizable window))
+#+win32
+(defmethod set-window-monitor ((window win32:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-win32-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
-(defmethod make-window-non-resizable ((window os-window-mixin))
-  (make-os-window-resizable window))
+#+cocoa
+(defmethod set-window-monitor ((window cocoa:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-cocoa-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
-(defmethod window-decorated? ((window os-window-mixin))
-  (get-os-window-decorated window))
+#+x11
+(defmethod set-window-monitor ((window x11:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-x11-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
-(defmethod (setf window-decorated?) (value (window os-window-mixin))
-  (set-os-window-decorated window value))
+#+wayland
+(defmethod set-window-monitor ((window wayland:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-wayland-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
-(defmethod window-floating? ((window os-window-mixin))
-  (get-os-window-floating window))
+#+win32
+(defmethod window-cursor-position ((window win32:window-mixin))
+  (get-win32-window-cursor-pos window))
 
-(defmethod (setf window-floating?) (value (window os-window-mixin))
-  (set-os-window-floating window value))
+#+cocoa
+(defmethod window-cursor-position ((window cocoa:window-mixin))
+  (get-cocoa-window-cursor-pos window))
 
-(defmethod window-opaque? ((window os-window-mixin))
-  (get-os-window-opaque window))
+#+x11
+(defmethod window-cursor-position ((window x11:window-mixin))
+  (get-x11-window-cursor-pos window))
 
-(defmethod (setf window-opaque?) (value (window os-window-mixin))
-  (set-os-window-opaque window value))
+#+wayland
+(defmethod window-cursor-position ((window wayland:window-mixin))
+  (get-x11-window-cursor-pos window))
 
-(defmethod window-opacity ((window os-window-mixin))
-  (get-os-window-opacity window))
+#+win32
+(defmethod set-window-cursor-position ((window win32:window-mixin) x y)
+  (set-win32-window-cursor-pos window x y))
 
-(defmethod (setf window-opacity) ((alpha real) (window os-window-mixin))
-  (set-os-window-opacity window alpha))
+#+cocoa
+(defmethod set-window-cursor-position ((window cocoa:window-mixin) x y)
+  (set-cocoa-window-cursor-pos window x y))
 
-(defmethod set-window-size-limits ((window os-window-mixin)
+#+x11
+(defmethod set-window-cursor-position ((window x11:window-mixin) x y)
+  (set-x11-window-cursor-pos window x y))
+
+#+wayland
+(defmethod set-window-cursor-position ((window wayland:window-mixin) x y)
+  (set-wayland-window-cursor-pos window x y))
+
+#+win32
+(defmethod window-maximized? ((window win32:window-mixin))
+  (get-win32-window-maximized window))
+
+#+cocoa
+(defmethod window-maximized? ((window cocoa:window-mixin))
+  (get-cocoa-window-maximized window))
+
+#+x11
+(defmethod window-maximized? ((window x11:window-mixin))
+  (get-x11-window-maximized window))
+
+#+wayland
+(defmethod window-maximized? ((window wayland:window-mixin))
+  (get-wayland-window-maximized window))
+
+#+win32
+(defmethod (setf window-maximized?) (value (window win32:window-mixin))
+  (set-win32-window-maximized window value))
+
+#+cocoa
+(defmethod (setf window-maximized?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-maximized window value))
+
+#+x11
+(defmethod (setf window-maximized?) (value (window x11:window-mixin))
+  (set-x11-window-maximized window value))
+
+#+wayland
+(defmethod (setf window-maximized?) (value (window wayland:window-mixin))
+  (set-wayland-window-maximized window value))
+
+#+win32
+(defmethod maximize-window ((window win32:window-mixin))
+  (maximize-win32-window window))
+
+#+cocoa
+(defmethod maximize-window ((window cocoa:window-mixin))
+  (maximize-cocoa-window window))
+
+#+x11
+(defmethod maximize-window ((window x11:window-mixin))
+  (maximize-x11-window window))
+
+#+wayland
+(defmethod maximize-window ((window wayland:window-mixin))
+  (maximize-wayland-window window))
+
+#+win32
+(defmethod restore-window ((window win32:window-mixin))
+  (restore-win32-window window))
+
+#+cocoa
+(defmethod restore-window ((window cocoa:window-mixin))
+  (restore-cocoa-window window))
+
+#+x11
+(defmethod restore-window ((window x11:window-mixin))
+  (restore-x11-window window))
+
+#+wayland
+(defmethod restore-window ((window wayland:window-mixin))
+  (restore-wayland-window window))
+
+#+win32
+(defmethod show-window ((window win32:window-mixin))
+  (show-win32-window window))
+
+#+cocoa
+(defmethod show-window ((window cocoa:window-mixin))
+  (show-cocoa-window window))
+
+#+x11
+(defmethod show-window ((window x11:window-mixin))
+  (show-x11-window window))
+
+#+wayland
+(defmethod show-window ((window wayland:window-mixin))
+  (show-wayland-window window))
+
+#+win32
+(defmethod hide-window ((window win32:window-mixin))
+  (hide-win32-window window))
+
+#+cocoa
+(defmethod hide-window ((window cocoa:window-mixin))
+  (hide-cocoa-window window))
+
+#+x11
+(defmethod hide-window ((window x11:window-mixin))
+  (hide-x11-window window))
+
+#+wayland
+(defmethod hide-window ((window wayland:window-mixin))
+  (hide-wayland-window window))
+
+#+win32
+(defmethod window-shown? ((window win32:window-mixin))
+  (get-win32-window-shown window))
+
+#+cocoa
+(defmethod window-shown? ((window cocoa:window-mixin))
+  (get-cocoa-window-shown window))
+
+#+x11
+(defmethod window-shown? ((window x11:window-mixin))
+  (get-x11-window-shown window))
+
+#+wayland
+(defmethod window-shown? ((window wayland:window-mixin))
+  (get-wayland-window-shown window))
+
+#+win32
+(defmethod (setf window-shown?) (value (window win32:window-mixin))
+  (set-win32-window-shown window value))
+
+#+cocoa
+(defmethod (setf window-shown?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-shown window value))
+
+#+x11
+(defmethod (setf window-shown?) (value (window x11:window-mixin))
+  (set-x11-window-shown window value))
+
+#+wayland
+(defmethod (setf window-shown?) (value (window wayland:window-mixin))
+  (set-wayland-window-shown window value))
+
+#+win32
+(defmethod window-hidden? ((window win32:window-mixin))
+  (get-win32-window-hidden window))
+
+#+cocoa
+(defmethod window-hidden? ((window cocoa:window-mixin))
+  (get-cocoa-window-hidden window))
+
+#+x11
+(defmethod window-hidden? ((window x11:window-mixin))
+  (get-x11-window-hidden window))
+
+#+wayland
+(defmethod window-hidden? ((window win32:window-mixin))
+  (get-win32-window-hidden window))
+
+#+win32
+(defmethod (setf window-hidden?) (value (window win32:window-mixin))
+  (set-win32-window-hidden window value))
+
+#+cocoa
+(defmethod (setf window-hidden?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-hidden window value))
+
+#+x11
+(defmethod (setf window-hidden?) (value (window x11:window-mixin))
+  (set-x11-window-hidden window value))
+
+#+wayland
+(defmethod (setf window-hidden?) (value (window wayland:window-mixin))
+  (set-wayland-window-hidden window value))
+
+#+win32
+(defmethod window-focused? ((window win32:window-mixin))
+  (get-win32-window-focused window))
+
+#+cocoa
+(defmethod window-focused? ((window cocoa:window-mixin))
+  (get-cocoa-window-focused window))
+
+#+x11
+(defmethod window-focused? ((window x11:window-mixin))
+  (get-x11-window-focused window))
+
+#+wayland
+(defmethod window-focused? ((window wayland:window-mixin))
+  (get-wayland-window-focused window))
+
+#+win32
+(defmethod (setf window-focused?) (value (window win32:window-mixin))
+  (set-win32-window-focused window value))
+
+#+cocoa
+(defmethod (setf window-focused?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-focused window value))
+
+#+x11
+(defmethod (setf window-focused?) (value (window x11:window-mixin))
+  (set-x11-window-focused window value))
+
+#+wayland
+(defmethod (setf window-focused?) (value (window wayland:window-mixin))
+  (set-wayland-window-focused window value))
+
+#+win32
+(defmethod focus-window ((window win32:window-mixin))
+  (focus-win32-window window))
+
+#+cocoa
+(defmethod focus-window ((window cocoa:window-mixin))
+  (focus-cocoa-window window))
+
+#+x11
+(defmethod focus-window ((window x11:window-mixin))
+  (focus-x11-window window))
+
+#+wayland
+(defmethod focus-window ((window wayland:window-mixin))
+  (focus-wayland-window window))
+
+#+win32
+(defmethod defocus-window ((window win32:window-mixin))
+  (defocus-win32-window window))
+
+#+cocoa
+(defmethod defocus-window ((window cocoa:window-mixin))
+  (defocus-cocoa-window window))
+
+#+x11
+(defmethod defocus-window ((window x11:window-mixin))
+  (defocus-x11-window window))
+
+#+wayland
+(defmethod defocus-window ((window wayland:window-mixin))
+  (defocus-wayland-window window))
+
+#+win32
+(defmethod window-iconifiable? ((window win32:window-mixin))
+  (get-win32-window-iconifiable window))
+
+#+cocoa
+(defmethod window-iconifiable? ((window cocoa:window-mixin))
+  (get-cocoa-window-iconifiable window))
+
+#+x11
+(defmethod window-iconifiable? ((window x11:window-mixin))
+  (get-x11-window-iconifiable window))
+
+#+wayland
+(defmethod window-iconifiable? ((window wayland:window-mixin))
+  (get-wayland-window-iconifiable window))
+
+#+win32
+(defmethod (setf window-iconifiable?) (value (window win32:window-mixin))
+  (set-win32-window-iconifiable window value))
+
+#+cocoa
+(defmethod (setf window-iconifiable?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-iconifiable window value))
+
+#+x11
+(defmethod (setf window-iconifiable?) (value (window x11:window-mixin))
+  (set-x11-window-iconifiable window value))
+
+#+wayland
+(defmethod (setf window-iconifiable?) (value (window wayland:window-mixin))
+  (set-wayland-window-iconifiable window value))
+
+#+win32
+(defmethod window-iconified? ((window win32:window-mixin))
+  (get-win32-window-iconified window))
+
+#+cocoa
+(defmethod window-iconified? ((window cocoa:window-mixin))
+  (get-cocoa-window-iconified window))
+
+#+x11
+(defmethod window-iconified? ((window x11:window-mixin))
+  (get-x11-window-iconified window))
+
+#+wayland
+(defmethod window-iconified? ((window wayland:window-mixin))
+  (get-wayland-window-iconified window))
+
+#+win32
+(defmethod (setf window-iconified?) (value (window win32:window-mixin))
+  (set-win32-window-iconified window value))
+
+#+cocoa
+(defmethod (setf window-iconified?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-iconified window value))
+
+#+x11
+(defmethod (setf window-iconified?) (value (window x11:window-mixin))
+  (set-x11-window-iconified window value))
+
+#+wayland
+(defmethod (setf window-iconified?) (value (window wayland:window-mixin))
+  (set-wayland-window-iconified window value))
+
+#+win32
+(defmethod iconify-window ((window win32:window-mixin))
+  (iconify-win32-window window))
+
+#+cocoa
+(defmethod iconify-window ((window cocoa:window-mixin))
+  (iconify-cocoa-window window))
+
+#+x11
+(defmethod iconify-window ((window x11:window-mixin))
+  (iconify-x11-window window))
+
+#+wayland
+(defmethod iconify-window ((window wayland:window-mixin))
+  (iconify-wayland-window window))
+
+#+win32
+(defmethod deiconify-window ((window win32:window-mixin))
+  (deiconify-win32-window window))
+
+#+cocoa
+(defmethod deiconify-window ((window cocoa:window-mixin))
+  (deiconify-cocoa-window window))
+
+#+x11
+(defmethod deiconify-window ((window x11:window-mixin))
+  (deiconify-x11-window window))
+
+#+wayland
+(defmethod deiconify-window ((window wayland:window-mixin))
+  (deiconify-wayland-window window))
+
+#+win32
+(defmethod window-visible? ((window win32:window-mixin))
+  (get-win32-window-visible window))
+
+#+cocoa
+(defmethod window-visible? ((window cocoa:window-mixin))
+  (get-cocoa-window-visible window))
+
+#+x11
+(defmethod window-visible? ((window x11:window-mixin))
+  (get-x11-window-visible window))
+
+#+wayland
+(defmethod window-visible? ((window wayland:window-mixin))
+  (get-wayland-window-visible window))
+
+#+win32
+(defmethod (setf window-visible?) (value (window win32:window-mixin))
+  (set-win32-window-visible window value))
+
+#+cocoa
+(defmethod (setf window-visible?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-visible window value))
+
+#+x11
+(defmethod (setf window-visible?) (value (window x11:window-mixin))
+  (set-x11-window-visible window value))
+
+#+wayland
+(defmethod (setf window-visible?) (value (window wayland:window-mixin))
+  (set-wayland-window-visible window value))
+
+#+win32
+(defmethod make-window-visible ((window win32:window-mixin))
+  (make-win32-window-visible window))
+
+#+cocoa
+(defmethod make-window-visible ((window cocoa:window-mixin))
+  (make-cocoa-window-visible window))
+
+#+x11
+(defmethod make-window-visible ((window x11:window-mixin))
+  (make-x11-window-visible window))
+
+#+wayland
+(defmethod make-window-visible ((window wayland:window-mixin))
+  (make-wayland-window-visible window))
+
+#+win32
+(defmethod make-window-invisible ((window win32:window-mixin))
+  (make-win32-window-invisible window))
+
+#+cocoa
+(defmethod make-window-invisible ((window cocoa:window-mixin))
+  (make-cocoa-window-invisible window))
+
+#+x11
+(defmethod make-window-invisible ((window x11:window-mixin))
+  (make-x11-window-invisible window))
+
+#+wayland
+(defmethod make-window-invisible ((window wayland:window-mixin))
+  (make-wayland-window-invisible window))
+
+#+win32
+(defmethod window-hovered? ((window win32:window-mixin))
+  (get-win32-window-hovered window))
+
+#+cocoa
+(defmethod window-hovered? ((window cocoa:window-mixin))
+  (get-cocoa-window-hovered window))
+
+#+x11
+(defmethod window-hovered? ((window x11:window-mixin))
+  (get-x11-window-hovered window))
+
+#+wayland
+(defmethod window-hovered? ((window wayland:window-mixin))
+  (get-wayland-window-hovered window))
+
+#+win32
+(defmethod window-resizable? ((window win32:window-mixin))
+  (get-win32-window-resizable window))
+
+#+cocoa
+(defmethod window-resizable? ((window cocoa:window-mixin))
+  (get-cocoa-window-resizable window))
+
+#+x11
+(defmethod window-resizable? ((window x11:window-mixin))
+  (get-x11-window-resizable window))
+
+#+wayland
+(defmethod window-resizable? ((window wayland:window-mixin))
+  (get-wayland-window-resizable window))
+
+#+win32
+(defmethod (setf window-resizable?) (value (window win32:window-mixin))
+  (set-win32-window-resizable window value))
+
+#+cocoa
+(defmethod (setf window-resizable?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-resizable window value))
+
+#+x11
+(defmethod (setf window-resizable?) (value (window x11:window-mixin))
+  (set-x11-window-resizable window value))
+
+#+wayland
+(defmethod (setf window-resizable?) (value (window wayland:window-mixin))
+  (set-wayland-window-resizable window value))
+
+#+win32
+(defmethod make-window-resizable ((window win32:window-mixin))
+  (make-win32-window-resizable window))
+
+#+cocoa
+(defmethod make-window-resizable ((window cocoa:window-mixin))
+  (make-cocoa-window-resizable window))
+
+#+x11
+(defmethod make-window-resizable ((window x11:window-mixin))
+  (make-x11-window-resizable window))
+
+#+wayland
+(defmethod make-window-resizable ((window wayland:window-mixin))
+  (make-wayland-window-resizable window))
+
+#+win32
+(defmethod make-window-non-resizable ((window win32:window-mixin))
+  (make-win32-window-resizable window))
+
+#+cocoa
+(defmethod make-window-non-resizable ((window cocoa:window-mixin))
+  (make-cocoa-window-resizable window))
+
+#+x11
+(defmethod make-window-non-resizable ((window x11:window-mixin))
+  (make-x11-window-resizable window))
+
+#+wayland
+(defmethod make-window-non-resizable ((window wayland:window-mixin))
+  (make-wayland-window-resizable window))
+
+#+win32
+(defmethod window-decorated? ((window win32:window-mixin))
+  (get-win32-window-decorated window))
+
+#+cocoa
+(defmethod window-decorated? ((window cocoa:window-mixin))
+  (get-cocoa-window-decorated window))
+
+#+x11
+(defmethod window-decorated? ((window x11:window-mixin))
+  (get-x11-window-decorated window))
+
+#+wayland
+(defmethod window-decorated? ((window wayland:window-mixin))
+  (get-wayland-window-decorated window))
+
+#+win32
+(defmethod (setf window-decorated?) (value (window win32:window-mixin))
+  (set-win32-window-decorated window value))
+
+#+cocoa
+(defmethod (setf window-decorated?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-decorated window value))
+
+#+x11
+(defmethod (setf window-decorated?) (value (window x11:window-mixin))
+  (set-x11-window-decorated window value))
+
+#+wayland
+(defmethod (setf window-decorated?) (value (window wayland:window-mixin))
+  (set-wayland-window-decorated window value))
+
+#+win32
+(defmethod window-floating? ((window win32:window-mixin))
+  (get-win32-window-floating window))
+
+#+cocoa
+(defmethod window-floating? ((window cocoa:window-mixin))
+  (get-cocoa-window-floating window))
+
+#+x11
+(defmethod window-floating? ((window x11:window-mixin))
+  (get-x11-window-floating window))
+
+#+wayland
+(defmethod window-floating? ((window wayland:window-mixin))
+  (get-wayland-window-floating window))
+
+#+win32
+(defmethod (setf window-floating?) (value (window win32:window-mixin))
+  (set-win32-window-floating window value))
+
+#+cocoa
+(defmethod (setf window-floating?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-floating window value))
+
+#+x11
+(defmethod (setf window-floating?) (value (window x11:window-mixin))
+  (set-x11-window-floating window value))
+
+#+wayland
+(defmethod (setf window-floating?) (value (window wayland:window-mixin))
+  (set-wayland-window-floating window value))
+
+#+win32
+(defmethod window-opaque? ((window win32:window-mixin))
+  (get-win32-window-opaque window))
+
+#+cocoa
+(defmethod window-opaque? ((window cocoa:window-mixin))
+  (get-cocoa-window-opaque window))
+
+#+x11
+(defmethod window-opaque? ((window x11:window-mixin))
+  (get-x11-window-opaque window))
+
+#+wayland
+(defmethod window-opaque? ((window wayland:window-mixin))
+  (get-wayland-window-opaque window))
+
+#+win32
+(defmethod (setf window-opaque?) (value (window win32:window-mixin))
+  (set-win32-window-opaque window value))
+
+#+cocoa
+(defmethod (setf window-opaque?) (value (window cocoa:window-mixin))
+  (set-cocoa-window-opaque window value))
+
+#+x11
+(defmethod (setf window-opaque?) (value (window x11:window-mixin))
+  (set-x11-window-opaque window value))
+
+#+wayland
+(defmethod (setf window-opaque?) (value (window wayland:window-mixin))
+  (set-wayland-window-opaque window value))
+
+#+win32
+(defmethod window-opacity ((window win32:window-mixin))
+  (get-win32-window-opacity window))
+
+#+cocoa
+(defmethod window-opacity ((window cocoa:window-mixin))
+  (get-cocoa-window-opacity window))
+
+#+x11
+(defmethod window-opacity ((window x11:window-mixin))
+  (get-x11-window-opacity window))
+
+#+wayland
+(defmethod window-opacity ((window wayland:window-mixin))
+  (get-wayland-window-opacity window))
+
+#+win32
+(defmethod (setf window-opacity) ((alpha real) (window win32:window-mixin))
+  (set-win32-window-opacity window alpha))
+
+#+cocoa
+(defmethod (setf window-opacity) ((alpha real) (window cocoa:window-mixin))
+  (set-cocoa-window-opacity window alpha))
+
+#+x11
+(defmethod (setf window-opacity) ((alpha real) (window x11:window-mixin))
+  (set-x11-window-opacity window alpha))
+
+#+wayland
+(defmethod (setf window-opacity) ((alpha real) (window wayland:window-mixin))
+  (set-wayland-window-opacity window alpha))
+
+#+win32
+(defmethod set-window-size-limits ((window win32:window-mixin)
 				   min-width
 				   min-height
 				   max-width
 				   max-height)
-  (set-os-window-size-limits window min-width min-height max-width max-height))
+  (set-win32-window-size-limits window min-width min-height max-width max-height))
 
-(defmethod window-aspect-ratio ((window os-window-mixin))
-  (get-os-window-aspect-ratio window))
+#+cocoa
+(defmethod set-window-size-limits ((window cocoa:window-mixin)
+				   min-width
+				   min-height
+				   max-width
+				   max-height)
+  (set-cocoa-window-size-limits window min-width min-height max-width max-height))
 
-(defmethod window-framebuffer-size ((window os-window-mixin))
-  (get-os-window-framebuffer-size window))
+#+x11
+(defmethod set-window-size-limits ((window x11:window-mixin)
+				   min-width
+				   min-height
+				   max-width
+				   max-height)
+  (set-x11-window-size-limits window min-width min-height max-width max-height))
 
-(defmethod window-frame-size ((window os-window-mixin))
-  (get-os-window-frame-size window))
+#+wayland
+(defmethod set-window-size-limits ((window wayland:window-mixin)
+				   min-width
+				   min-height
+				   max-width
+				   max-height)
+  (set-wayland-window-size-limits window min-width min-height max-width max-height))
 
-(defmethod window-content-scale ((window os-window-mixin))
-  (get-os-window-content-scale window))
+#+win32
+(defmethod window-aspect-ratio ((window win32:window-mixin))
+  (get-win32-window-aspect-ratio window))
 
-(defmethod request-window-attention ((window os-window-mixin))
-  (request-os-window-attention window))
+#+cocoa
+(defmethod window-aspect-ratio ((window cocoa:window-mixin))
+  (get-cocoa-window-aspect-ratio window))
+
+#+x11
+(defmethod window-aspect-ratio ((window x11:window-mixin))
+  (get-x11-window-aspect-ratio window))
+
+#+wayland
+(defmethod window-aspect-ratio ((window wayland:window-mixin))
+  (get-wayland-window-aspect-ratio window))
+
+#+win32
+(defmethod window-framebuffer-size ((window win32:window-mixin))
+  (get-win32-window-framebuffer-size window))
+
+#+cocoa
+(defmethod window-framebuffer-size ((window cocoa:window-mixin))
+  (get-cocoa-window-framebuffer-size window))
+
+#+x11
+(defmethod window-framebuffer-size ((window x11:window-mixin))
+  (get-x11-framebuffer-size window))
+
+#+wayland
+(defmethod window-framebuffer-size ((window wayland:window-mixin))
+  (get-wayland-framebuffer-size window))
+
+#+win32
+(defmethod window-frame-size ((window win32:window-mixin))
+  (get-win32-window-frame-size window))
+
+#+cocoa
+(defmethod window-frame-size ((window cocoa:window-mixin))
+  (get-cocoa-window-frame-size window))
+
+#+x11
+(defmethod window-frame-size ((window x11:window-mixin))
+  (get-x11-window-frame-size window))
+
+#+wayland
+(defmethod window-frame-size ((window wayland:window-mixin))
+  (get-wayland-window-frame-size window))
+
+#+win32
+(defmethod window-content-scale ((window win32:window-mixin))
+  (get-win32-window-content-scale window))
+
+#+cocoa
+(defmethod window-content-scale ((window cocoa:window-mixin))
+  (get-cocoa-window-content-scale window))
+
+#+x11
+(defmethod window-content-scale ((window x11:window-mixin))
+  (get-x11-window-content-scale window))
+
+#+wayland
+(defmethod window-content-scale ((window wayland:window-mixin))
+  (get-wayland-window-content-scale window))
+
+#+win32
+(defmethod request-window-attention ((window win32:window-mixin))
+  (request-win32-window-attention window))
+
+#+cocoa
+(defmethod request-window-attention ((window cocoa:window-mixin))
+  (request-cocoa-window-attention window))
+
+#+x11
+(defmethod request-window-attention ((window x11:window-mixin))
+  (request-x11-window-attention window))
 
 (defun center-cursor-in-content-area (window)
   (multiple-value-bind (width height) (window-size window)
     (set-window-cursor-position window (/ width 2) (/ height 2))))
 
-(defun wait-application-events (app)
-  #+darwin(wait-cocoa-events app)
-  #+windows(wait-win32-events app)
-  #+linux(wait-linux-events app))
+#+win32
+(defmethod wait-events ((display win32:desktop-mixin) &optional (timeout nil))
+  (wait-win32-events display timeout))
 
-(defun poll-application-events (app)
-  #+darwin(poll-cocoa-events app)
-  #+windows(poll-win32-events app)
-  #+linux(poll-linux-events app))
+#+cocoa
+(defmethod wait-events ((display cocoa:desktop-mixin) &optional (timeout nil))
+  (wait-cocoa-events display timeout))
 
+#+x11
+(defmethod wait-events ((display x11:server-mixin) &optional (timeout nil))
+  (wait-x11-events display timeout))
+
+#+wayland
+(defmethod wait-events ((display wayland:desktop-mixin) &optional (timeout nil)
+  (wait-wayland-events display) timeout))
+
+#+win32
+(defmethod poll-events ((display win32:destop-mixin))
+  (poll-win32-events display))
+
+#+cocoa
+(defmethod poll-events ((display cocoa:destop-mixin))
+  (poll-cocoa-events display))
+
+#+x11
+(defmethod poll-events ((display x11:server-mixin))
+  (poll-x11-events display))
+
+#+wayland
+(defmethod poll-events ((display x11:desktop-mixin))
+  (poll-wayland-events display))

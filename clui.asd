@@ -1,3 +1,9 @@
+
+#+windows(pushnew :win32 cl:*features*)
+#+darwin(pushnew :cocoa cl:*features*)
+#+unix(pushnew :x11 cl:*features*)
+#+(and notyet wayland)(pushnew :wayland cl:*features*)
+
 (defsystem clui
   :serial t
   :depends-on
@@ -5,7 +11,9 @@
   :components
   (#-darwin
    (:file "noffi-patches")
-))
+   ))
+
+
 
 #+darwin
 (defsystem clui/cocoa
@@ -90,13 +98,52 @@
 
 #+linux
 (defsystem clui/linux
-  :depends-on (:noffi)
   :serial t
   :components
-  ((:file "nffi-patches")
+  ((:file "../noffi/src/patch-ccl")
+   (:file "../noffi/other/clex/src/clex")
+   (:file "../noffi/other/lalr/lalr")
+   (:file "../noffi/src/file")
+   (:file "../noffi/src/compiler-warn")
+   (:file "../noffi/src/package")
+   (:file "../noffi/src/forward")
+   (:file "../noffi/src/lispdep")
+   (:file "../noffi/src/util")
+   (:file "../noffi/src/string-table")
+   (:file "../noffi/src/abi")
+   (:file "../noffi/src/define-grammar")
+   (:file "../noffi/src/lexer")
+   (:file "../noffi/src/cpp")
+   (:file "../noffi/src/parsing")
+   (:file "../noffi/src/grammar")
+   (:file "../noffi/src/syntax")
+   (:file "../noffi/src/adt")
+   (:file "../noffi/src/comp")
+   (:file "../noffi/src/runtime")
+   (:file "../noffi/src/abi-amd64-sysv")
+
+   (:file "../noffi/src/config")
+   
+   (:file "noffi-patches")
+
+   (:file "x11/x11")
+   
    (:file "package")
+   
+   (:file "protocols")
+   (:file "app")
    (:file "classes")
-   (:file "x11/x11-impl")
+   (:file "events")
+   (:file "posix/posix")
+   (:file "x11/x11-package")
+   (:file "wayland/wayland-package")
+   (:file "x11/x11-classes")
+   (:file "x11/x11-display")
+   (:file "x11/x11-init")
+   (:file "x11/x11-window")
+   (:file "wayland/wayland-classes")
    (:file "wayland/wayland-impl")
+   (:file "compute-concrete-class")
+   (:file "monitor")
    (:file "abstract-os")
    (:file "api")))

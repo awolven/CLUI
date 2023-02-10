@@ -15,9 +15,9 @@
     (if displays
 	(first displays)
 	(apply #'make-instance 'display
-	       #+windows #+windows :win32 t
-	       #+darwin #+darwin :cocoa t
-	       #+(or linux freebsd openbsd) #+(or linux freebsd openbsd) :x11 t
+	       #+win32 #+win32 :win32 t
+	       #+cocoa #+cocoa :cocoa t
+	       #+x11 #+x11 :x11 t
 	       (append
 		(when (find-package :%vk)
 		  (list :vulkan t))
@@ -135,6 +135,24 @@
   (green-bits)
   (blue-bits)
   (refresh-rate))
+
+(defclass image-mixin ()
+  ((width :initarg :width
+	  :accessor image-width
+	  :type real)
+   (height :initarg :height
+	   :accessor image-height
+	   :type real)
+   (pixels :initarg :pixels
+	   :accessor image-pixels)))
+
+(defclass basic-image (image-mixin)
+  ())
+
+(defmethod make-image (width height pixels)
+  (make-instance 'basic-image :width width :height height :pixels pixels)) 
+  
+    
 
 (defclass window-mixin (rect-mixin)
   ((display :initarg :display :reader window-display)

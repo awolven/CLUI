@@ -16,7 +16,7 @@
 	   #+linux (cond (wayland (cond (vulkan (find-class 'wayland:desktop-with-vulkan))
 					(opengl (find-class 'wayland:desktop-with-opengl))
 					(t (find-class 'wayland:desktop))))
-			 (t (find-class 'xll::local-server))))))
+			 (t (find-class 'x11::local-server))))))
 
 (defmethod compute-concrete-class ((protocol display-dependent)
 				   &rest initargs &key (display (default-display))  &allow-other-keys)

@@ -115,5 +115,6 @@
 		#:ptr-value
 		#:cval-value
 		#:ptr-offset
+		#:c-aref
 
 		#:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun))

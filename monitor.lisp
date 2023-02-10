@@ -6,10 +6,7 @@
   (when (monitor-modes monitor)
     (return-from %refresh-video-modes t))
 
-  (setq modes
-	#+darwin(get-cocoa-video-modes monitor)
-	#+windows(get-win32-monitor-video-modes monitor)
-	#+linux(get-linux-monitor-video-modes monitor))
+  (setq modes (get-monitor-video-modes monitor))
 
   (unless modes
     (return-from %refresh-video-modes nil))
@@ -142,30 +139,59 @@
 
 ;; public API
 
-(defun get-monitors (app)
-  (application-monitors app))
+(defun get-primary-monitor (display)
+  (car (display-monitors display)))
 
-(defun get-primary-monitor (app)
-  (car (application-monitors app)))
+#+win32
+(defmethod get-monitor-pos ((monitor win32:monitor-mixin))
+  (get-win32-monitor-pos monitor))
 
-(defun get-monitor-pos (monitor)
-  #+darwin(get-cocoa-monitor-pos monitor)
-  #+windows(get-win32-monitor-pos monitor)
-  #+linux(get-linux-monitor-pos monitor))
+#+cocoa
+(defmethod get-monitor-pos ((monitor cocoa:monitor-mixin))
+  (get-cocoa-monitor-pos monitor))
 
-(defun get-monitor-workarea (monitor)
-  #+darwin(get-cocoa-monitor-workarea monitor)
-  #+windows(get-win32-monitor-workarea monitor)
-  #+linux(get-linux-monitor-workarea monitor))
+#+x11
+(defmethod get-monitor-pos ((monitor x11:monitor-mixin))
+  (get-x11-monitor-pos monitor))
+
+#+wayland
+(defmethod get-monitor-pos ((monitor wayland:monitor-mixin))
+  (get-wayland-monitor-pos monitor))
+
+#+win32
+(defmethod get-monitor-workarea ((monitor win32:monitor-mixin))
+  (get-win32-monitor-workarea monitor))
+
+#+cocoa
+(defmethod get-monitor-workarea ((monitor cocoa:monitor-mixin))
+  (get-cocoa-monitor-workarea monitor))
+
+#+x11
+(defmethod get-monitor-workarea ((monitor x11:monitor-mixin))
+  (get-x11-monitor-workarea monitor))
+
+#+wayland
+(defmethod get-monitor-workarea ((monitor wayland:monitor-mixin))
+  (get-wayland-monitor-workarea monitor))
 
 (defun get-monitor-physical-size (monitor)
   (values (monitor-width-mm monitor)
 	  (monitor-height-mm monitor)))
+#+win32
+(defmethod get-monitor-content-scale ((monitor win32:monitor-mixin))
+  (get-win32-monitor-content-scale monitor))
 
-(defun get-monitor-content-scale (monitor)
-  #+darwin(get-cocoa-monitor-content-scale monitor)
-  #+windows(get-win32-monitor-content-scale monitor)
-  #+linux(get-linux-monitor-content-scale monitor))
+#+cocoa
+(defmethod get-monitor-content-scale ((monitor cocoa:monitor-mixin))
+  (get-cocoa-monitor-content-scale monitor))
+
+#+x11
+(defmethod get-monitor-content-scale ((monitor x11:monitor-mixin))
+  (get-x11-monitor-content-scale monitor))
+
+#+wayland
+(defmethod get-monitor-content-scale ((monitor wayland:monitor-mixin))
+  (get-wayland-monitor-content-scale monitor))
 
 (defun get-video-modes (monitor)
   
@@ -207,13 +233,23 @@
       (set-gamma-ramp monitor ramp)
       (values))))
 
-(defun get-gamma-ramp (monitor)
-  #+darwin(get-cocoa-gamma-ramp monitor)
-  #+windows(get-win32-gamma-ramp monitor)
-  #+linux(get-linux-gama-ramp monitor))
+#+win32
+(defmethod get-gamma-ramp ((monitor win32:monitor-mixin))
+  (get-win32-gamma-ramp monitor))
 
-(defun set-gamma-ramp (monitor ramp)
-  (assert monitor)
+#+cocoa
+(defmethod get-gamma-ramp ((monitor cocoa:monitor-mixin))
+  (get-cocoa-gamma-ramp monitor))
+
+#+x11
+(defmethod get-gamma-ramp ((monitor x11:monitor-mixin))
+  (get-x11-gamma-ramp monitor))
+
+#+wayland
+(defmethod get-gamma-ramp ((monitor wayland:monitor-mixin))
+  (get-wayland-gamma-ramp monitor))
+
+(defmethod set-gamma-ramp :around ((monitor monitor-mixin) ramp)
   (assert ramp)
   (assert (gamma-ramp-red ramp))
   (assert (gamma-ramp-green ramp))
@@ -223,7 +259,21 @@
 
   (unless (monitor-original-ramp monitor)
     (unless (get-gamma-ramp monitor)))
-  
-  #+darwin(set-cocoa-gamma-ramp monitor ramp)
-  #+windows(set-win32-gamma-ramp monitor ramp)
-  #+linux(set-linux-gamma-ramp monitor ramp))
+
+  (call-next-method))
+
+#+win32
+(defmethod set-gamma-ramp ((monitor win32:monitor-mixin) ramp)
+  (set-win32-gamma-ramp monitor ramp))
+
+#+cocoa
+(defmethod set-gamma-ramp ((monitor cocoa:monitor-mixin) ramp)
+  (set-cocoa-gamma-ramp monitor ramp))
+
+#+x11
+(defmethod set-gamma-ramp ((monitor x11:monitor-mixin) ramp)
+  (set-x11-gamma-ramp monitor ramp))
+
+#+wayland
+(defmethod set-gamma-ramp ((monitor wayland:monitor-mixin) ramp)
+  (set-wayland-gamma-ramp monitor ramp))

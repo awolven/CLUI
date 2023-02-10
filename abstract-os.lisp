@@ -63,23 +63,53 @@
   (values))
 
 
-(defun poll-monitors (display)
-  #+darwin(poll-cocoa-monitors display)
-  #+windows(poll-win32-monitors display)
-  #+linux(poll-linux-monitors display))
+#+win32
+(defmethod poll-monitors ((display win32:desktop-mixin))
+  (poll-win32-monitors display))
 
-  
+#+cocoa
+(defmethod poll-monitors ((display cocoa:desktop-mixin))
+  (poll-cocoa-monitors display))
 
+#+x11
+(defmethod poll-monitors ((display x11:server-mixin))
+  #+notyet(poll-x11-monitors display))
 
-(defun acquire-monitor (window monitor)
-  #+darwin(acquire-cocoa-monitor window monitor)
-  #+windows(acquire-win32-monitor window monitor)
-  #+linux(acquire-linux-monitor window monitor))
+#+wayland
+(defmethod poll-monitors ((display wayland:desktop-mixin))
+  (poll-wayland-monitors display))  
 
-(defun release-monitor (window monitor)
-  #+darwin(release-cocoa-monitor window monitor)
-  #+windows(release-win32-monitor window monitor)
-  #+linux(release-linux-monitor window monitor))
+#+win32
+(defmethod acquire-monitor ((window win32:window-mixin) (monitor win32:monitor-mixin))
+  (acquire-win32-monitor window monitor))
+
+#+cocoa
+(defmethod acquire-monitor ((window cocoa:window-mixin) (monitor cocoa:monitor-mixin))
+  (acquire-cocoa-monitor window monitor))
+
+#+x11
+(defmethod acquire-monitor ((window x11:window-mixin) (monitor x11:monitor-mixin))
+  (acquire-x11-monitor window monitor))
+
+#+wayland
+(defmethod acquire-monitor ((window wayland:window-mixin) (monitor wayland:monitor-mixin))
+  (acquire-wayland-monitor window monitor))
+
+#+win32
+(defmethod release-monitor ((window win32:window-mixin) (monitor win32:monitor-mixin))
+  (release-win32-monitor window monitor))
+
+#+cocoa
+(defmethod release-monitor ((window cocoa:window-mixin) (monitor cocoa:monitor-mixin))
+  (release-cocoa-monitor window monitor))
+
+#+x11
+(defmethod release-monitor ((window x11:window-mixin) (monitor x11:monitor-mixin))
+  (release-x11-monitor window monitor))
+
+#+wayland
+(defmethod release-monitor ((window wayland:window-mixin) (monitor wayland:monitor-mixin))
+  (release-wayland-monitor window monitor))
 
 (defun capture-cursor (window)
   #+windows(capture-win32-cursor window))
