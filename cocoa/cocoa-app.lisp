@@ -376,8 +376,6 @@
       (unless (initialize-tis app)
 	(return-from init-cocoa nil))
 
-
-
       t)))
 
 (defun update-unicode-data (app kPropertyUnicodeKeyLayoutData)

@@ -77,8 +77,6 @@
 	   #:homemade-window-mixin
 	   #:homemade-view-mixin
 
-	   #:platform
-	   #:platform-mixin
 	   #:vulkan-support-mixin
 	   #:opengl-support-mixin
 	   #:display
@@ -93,6 +91,7 @@
 	   #:os-window-mixin
 	   #:cursor
 	   #:cursor-mixin
+	   #:handle-mixin
 
 
 	   )
@@ -116,5 +115,9 @@
 		#:cval-value
 		#:ptr-offset
 		#:c-aref
+		#:c->-addr
+		#:clet&
+		#:cons-ptr
+		#:ptr-nullptr-p
 
 		#:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun))

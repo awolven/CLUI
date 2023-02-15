@@ -70,16 +70,40 @@
   ((window-list-head
     :accessor display-window-list-head
     :initform nil)
+
+   (screens :initform nil
+	    :accessor display-screens)
    
    (monitors
     :accessor display-monitors
-    :initform ())))
+    :initform ())
+
+   (left-shift-down? :initform nil
+		     :accessor left-shift-down?)
+
+   (right-shift-down? :initform nil
+		      :accessor right-shift-down?)
+
+   (left-ctrl-down? :initform nil
+		    :accessor left-ctrl-down?)
+
+   (right-ctrl-down? :initform nil
+		     :accessor right-ctrl-down?)))
+
+(defun default-screen (display)
+  (first (display-screens display)))
+
+(defun (setf default-screen) (screen display)
+  (progn
+    (push screen (display-screens display))
+    screen))
 
 (defclass screen-mixin ()
   ())
 
 (defclass handle-mixin ()
-  ((handle :accessor h)))
+  ((handle :initarg :h :accessor h)
+   (display :initarg :display :accessor screen-display)))
 
 (defmethod initialize-instance ((instance display-mixin)
 				&rest initargs
@@ -88,14 +112,25 @@
 					
   (declare (ignore initargs))
   (call-next-method)
-  (poll-monitors instance)
   (push instance (get-displays))  
   instance)
 
+(defmethod initialize-instance :after ((instance display-mixin)
+				       &rest initargs
+				       &key
+				       &allow-other-keys)
+  (declare (ignore initargs))
+  (poll-monitors instance)
+  (values))
+
+
 (defstruct gamma-ramp
-  (red (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0))
-  (green (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0))
-  (blue (make-array 8 :element-type '(unsigned-byte 16) :adjustable t :fill-pointer 0)))
+  (red)
+  (green)
+  (blue))
+
+(defun gamma-ramp-size (gamma-ramp)
+  (length (gamma-ramp-red gamma-ramp)))
 
 (defclass monitor-mixin ()
   ((name :initarg :name :reader monitor-name)
@@ -156,6 +191,7 @@
 
 (defclass window-mixin (rect-mixin)
   ((display :initarg :display :reader window-display)
+   (parent :initarg :parent :accessor window-parent)
    (next :type (or null window-mixin) :accessor window-next)
    (maximized? :type boolean :initform nil :accessor currently-maximized?)
    (resizable? :type boolean :initform nil :accessor currently-resizable?)

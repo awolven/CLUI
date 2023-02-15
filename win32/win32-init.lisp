@@ -19,7 +19,7 @@
 
 (defun create-key-tables ())
 
-(defun win32-init (display-platform)
+(defun win32-init (display)
   ;;(load-win32-libraries)
   ;;(create-key-tables)
   ;;(update-win32-key-names)

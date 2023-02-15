@@ -284,13 +284,13 @@
 
 	(CFRelease modes)))))
 
-(defun get-cocoa-video-mode (monitor)
+(defun get-cocoa-monitor-video-mode (monitor)
   (let ((native (CGDisplayCopyDisplayMode (monitor-display-id monitor))))
     (unwind-protect
 	 (vidmode-from-cocoa-display-mode native (monitor-fallback-refresh-rate monitor))
       (CGDisplayModeRelease native))))
 
-(defun restore-cocoa-video-mode (monitor)
+(defun restore-cocoa-monitor-video-mode (monitor)
   (let ((previous (monitor-previous-video-mode monitor)))
     (when previous
       (let ((token (cocoa-begin-fade-reservation)))
@@ -300,7 +300,7 @@
 	(setf (monitor-previous-video-mode monitor) nil)))
     (values)))
 
-(defun get-cocoa-gamma-ramp (monitor)
+(defun get-cocoa-monitor-gamma-ramp (monitor)
   (with-autorelease-pool (pool)
     (let ((size (CGDisplayGammaTableCapacity (monitor-display-id monitor)))
 	  (ramp (make-gamma-ramp)))
@@ -334,7 +334,7 @@
 
 
 
-(defun set-cocoa-gamma-ramp (monitor ramp)
+(defun set-cocoa-monitor-gamma-ramp (monitor ramp)
   (with-autorelease-pool (pool)
     (let ((size (fill-pointer (gamma-ramp-red ramp))))
       (cffi:with-foreign-object (p-values :float (* size 3))

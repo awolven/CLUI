@@ -7,10 +7,10 @@
 				   &allow-other-keys)
   (declare (ignorable wayland initargs))
   (cond (x11 (find-class 'x11:local-server))
-	(t #+windows (cond (vulkan (find-class 'win32:desktop-with-vulkan))
+	(t #+win32 (cond (vulkan (find-class 'win32:desktop-with-vulkan))
 			   (opengl (find-class 'win32:desktop-with-opengl))
 			   (t (find-class 'win32:desktop)))
-	   #+darwin (cond ((or vulkan metal) (find-class 'cocoa:desktop-with-metal))
+	   #+cocoa (cond ((or vulkan metal) (find-class 'cocoa:desktop-with-metal))
 			  (opengl (find-class 'cocoa:desktop-with-opengl))
 			  (t (find-class 'cocoa:desktop)))
 	   #+linux (cond (wayland (cond (vulkan (find-class 'wayland:desktop-with-vulkan))
@@ -22,7 +22,7 @@
 				   &rest initargs &key (display (default-display))  &allow-other-keys)
   (apply #'compute-concrete-class-with-display protocol display initargs))
 
-#+windows
+#+win32
 (defmethod compute-concrete-class-with-display ((protocol monitor) (display win32:desktop-mixin)
 						&rest initargs
 						&key
@@ -30,7 +30,7 @@
   (declare (ignore initargs))
   (find-class 'win32:monitor))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-class-with-display ((protocol monitor) (display cocoa:desktop-mixin)
 						&rest initargs
 						&key
@@ -38,7 +38,23 @@
   (declare (ignore initargs))
   (find-class 'cocoa:monitor))
 
+#+x11
+(defmethod compute-concrete-class-with-display ((protocol screen) (display x11:server-mixin)
+						&rest initargs
+						&key
+						&allow-other-keys)
+  (declare (ignore initargs))
+  (find-class 'x11:screen))
 
+#+x11
+(defmethod compute-concrete-class-with-display ((protocol cursor) (display x11:server-mixin)
+						&rest initargs
+						&key
+						&allow-other-keys)
+  (declare (ignore initargs))
+  (find-class 'x11:cursor))
+
+#+x11
 (defmethod compute-concrete-class-with-display ((protocol monitor) (display x11:server-mixin)
 						&rest initargs
 						&key
@@ -46,7 +62,7 @@
   (declare (ignore initargs))
   (find-class 'x11:monitor))
 
-#+linux
+#+wayland
 (defmethod compute-concrete-class-with-display ((protocol monitor) (display wayland:desktop-mixin)
 						&rest initargs
 						&key
@@ -57,31 +73,31 @@
 (defmethod compute-concrete-class-with-display ((protocol window) display &rest initargs &key &allow-other-keys)
   (apply #'compute-concrete-window-class display (getf initargs :parent) initargs))
 
-#+windows
+#+win32
 (defmethod get-a-win32-window-class (display errorp &rest initargs &key &allow-other-keys)
   (declare (ignore display initargs))
   (find-class 'win32:window errorp))
 
-#+windows
+#+win32
 (defmethod get-a-win32-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'win32:vulkan-window errorp)
       (find-class 'win32:window errorp)))
 
-#+windows
+#+win32
 (defmethod get-a-win32-window-class ((display clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'win32:wgl-window errorp)
       (find-class 'win32:window errorp)))
 
-#+darwin
+#+cocoa
 (defmethod get-a-cocoa-window-class (display errorp &rest initargs &key &allow-other-keys)
   (declare (ignore display initargs))
   (find-class 'cocoa:window errorp))
 
-#+darwin
+#+cocoa
 (defmethod get-a-cocoa-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
@@ -89,45 +105,45 @@
 	  (find-class 'cocoa:metal-window errorp))
       (find-class 'cocoa:window errorp)))
 
-#+darwin
+#+cocoa
 (defmethod get-a-cocoa-window-class ((display clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'cocoa:nsgl-window errorp)
       (find-class 'cocoa:window errorp)))
 
-#+linux
+#+wayland
 (defmethod get-a-wayland-window-class (display errorp &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   (find-class 'wayland:window errorp))
 
-#+linux
+#+wayland
 (defmethod get-a-wayland-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'wayland:vulkan-window errorp)
       (find-class 'wayland:window errorp)))
 
-#+linux
+#+wayland
 (defmethod get-a-wayland-window-class ((display clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'wayland:opengl-window errorp)
       (find-class 'wayland:window errorp)))
 
-#+unix
+#+x11
 (defmethod get-an-x11-window-class (display errorp &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   (find-class 'x11:window errorp))
 
-#+unix
+#+x11
 (defmethod get-an-x11-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
       (find-class 'x11:vulkan-window errorp)
       (find-class 'x11:window errorp)))
 
-#+unix
+#+x11
 (defmethod get-an-x11-window-class ((desktop clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
@@ -138,36 +154,36 @@
 ;; then it is a top level window, which is an os-window on all platorms
 ;; the only question is, do we need a vulkan or opengl window, check for :animable on initargs
 
-#+windows
+#+win32
 (defmethod compute-concrete-window-class (desktop (parent win32:screen-mixin) &rest initargs)
   (apply #'get-a-win32-window-class desktop t initargs))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-window-class (desktop (parent cocoa:screen-mixin) &rest initargs)
   (apply #'get-a-cocoa-window-class desktop t initargs))
 
-#+linux
+#+wayland
 (defmethod compute-concrete-window-class (desktop (parent wayland:screen-mixin) &rest initargs)
   (declare (ignore desktop))
   (apply #'get-a-wayland-window-class desktop t initargs))
 
-#+unix
+#+x11
 (defmethod compute-concrete-window-class (display (parent x11:screen-mixin) &rest initargs)
   (apply #'get-an-x11-window-class display t initargs))
 
-#+windows
+#+win32
 (defmethod compute-concrete-window-class ((desktop win32:desktop-mixin) (parent null) &rest initargs)
   (apply #'get-a-win32-window-class desktop t initargs))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-window-class ((desktop cocoa:desktop-mixin) (parent null) &rest initargs)
   (apply #'get-a-cocoa-window-class desktop t initargs))
 
-#+linux
+#+wayland
 (defmethod compute-concrete-window-class ((desktop wayland:desktop-mixin) (parent null) &rest initargs)
   (apply #'get-a-wayland-window-class desktop t initargs))
 
-#+unix
+#+x11
 (defmethod compute-concrete-window-class ((display x11:server-mixin) (parent null) &rest initargs)
   ;; todo: maybe do somthing different in case of remote-server instead of local-server
   (apply #'get-an-x11-window-class display t initargs))
@@ -222,41 +238,41 @@
 ;; for mixing wayland and x11, obviously only works if display (desktop) is wayland
 ;; for gtk, child and parent probably must be gtk, on any platform, and afaik is not animable
 
-#+windows
+#+win32
 (defmethod compute-concrete-window-class (display (parent win32:window-mixin) &rest initargs)
   (declare (ignorable display))
   (apply #'get-a-win32-window-class display t initargs))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-window-class (display (parent cocoa:window-mixin) &rest initargs)
   (declare (ignorable display initargs))
   (find-class 'cocoa:view))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-window-class (display (parent cocoa:vulkan-window-mixin) &rest initargs)
   (declare (ignorable display initargs))
   (find-class 'cocoa:vulkan-view))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-window-class (display (parent cocoa:metal-window-mixin) &rest initargs)
   (declare (ignorable display initargs))
   (find-class 'cocoa:metal-view))
 
-#+darwin
+#+cocoa
 (defmethod compute-concrete-window-class (display (parent cocoa:nsgl-window-mixin) &rest initargs)
   (declare (ignorable display initargs))
   (find-class 'cocoa:nsgl-view))
 
-#+unix
+#+x11
 (defmethod compute-concrete-window-class ((display x11:server-mixin) (parent x11:window-mixin) &rest initargs)
   (apply #'get-an-x11-window-class t initargs))
 
-#+linux
+#+(and x11 wayland)
 (defmethod compute-concrete-window-class ((display wayland:desktop-mixin) (parent x11:window-mixin) &rest initargs)
   (or (apply #'get-an-x11-window-class display nil initargs)
       (apply #'get-a-wayland-window-class display t initargs)))
 
-#+linux
+#+(and x11 wayland)
 (defmethod compute-concrete-window-class (display (parent wayland:window-mixin) &rest initargs)
   (declare (ignorable display))
   (or (apply #'get-a-wayland-window-class display nil initargs)

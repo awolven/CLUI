@@ -73,7 +73,7 @@
 
 #+x11
 (defmethod poll-monitors ((display x11:server-mixin))
-  #+notyet(poll-x11-monitors display))
+  (poll-x11-monitors display))
 
 #+wayland
 (defmethod poll-monitors ((display wayland:desktop-mixin))

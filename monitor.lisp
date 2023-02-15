@@ -37,10 +37,10 @@
 	 ((not window))
 	 
        (when (eq (window-monitor window) monitor)
-	 (multiple-value-bind (width height) (get-os-window-size window)
+	 (multiple-value-bind (width height) (window-size window)
 	   (set-window-monitor window nil :xpos 0 :ypos 0 :width width :height height :refresh-rate :blah)
-	   (multiple-value-bind (xoff yoff) (get-os-window-frame-size window)
-	     (set-os-window-pos window xoff yoff)))))
+	   (multiple-value-bind (xoff yoff) (window-frame-size window)
+	     (set-window-position window xoff yoff)))))
 
      (setf (display-monitors display)
 	   (remove monitor (display-monitors display)))))
@@ -62,6 +62,9 @@
 	(color-diff 0)
 	(least-color-diff most-positive-fixnum)
 	(closest nil))
+
+    (unless (%refresh-video-modes monitor)
+      (return-from choose-video-mode nil))
 
     (loop for current in (monitor-modes monitor)
        unless (eq (video-mode-red-bits desired-video-mode) :dont-care)
@@ -193,18 +196,25 @@
 (defmethod get-monitor-content-scale ((monitor wayland:monitor-mixin))
   (get-wayland-monitor-content-scale monitor))
 
-(defun get-video-modes (monitor)
-  
-  (unless (%refresh-video-modes monitor)
-    (return-from get-video-modes nil))
-  
-  (monitor-modes monitor))
+#+win32
+(defmethod get-monitor-video-modes ((monitor win32:monitor-mixin))
+  (get-win32-monitor-video-modes monitor))
+
+#+cocoa
+(defmethod get-monitor-video-modes ((monitor cocoa:monitor-mixin))
+  (get-cocoa-monitor-video-modes monitor))
+
+#+x11
+(defmethod get-monitor-video-modes ((monitor x11:monitor-mixin))
+  (get-x11-monitor-video-modes monitor))
+
+#+wayland
+(defmethod get-monitor-video-modes ((monitor wayland:monitor-mixin))
+  (get-wayland-monitor-video-modes monitor))
 
 (defun set-gamma (monitor gamma)
-  (assert monitor)
-
   (setq gamma (coerce gamma 'single-float))
-
+  
   (when (<= gamma 0.0f0)
     (error "Invalid gamma value ~A" gamma))
 
@@ -212,42 +222,47 @@
     (unless original
       (return-from set-gamma (values)))
 
-    (let ((original-size (fill-pointer (gamma-ramp-red original)))
-	  (ramp (make-gamma-ramp))
+    (let ((original-size (length (gamma-ramp-red original)))
 	  (values ()))
 
       (loop for i from 0 below original-size
-	 with value
-	 do (setq value (/ i (1- original-size)))
-	   (setq value (+ (* (expt value (/ gamma)) 65536.0f0) 0.5f0))
-	   (setq value (min value 65535.0f0))
-	   (push value values)
-	 finally (setq values (nreverse values)))
+	    with value
+	    do (setq value (/ i (1- original-size)))
+	       (setq value (+ (* (expt value (/ gamma)) 65536.0f0) 0.5f0))
+	       (setq value (floor (min value 65535.0f0)))
+	       (push value values)
+	    finally (setq values (nreverse values)))
 
-      (setf (gamma-ramp-red ramp) (make-array original-size :adjustable t :fill-pointer original-size
-					      :initial-contents values))
-      (setf (gamma-ramp-green ramp) (make-array original-size :adjustable t :fill-pointer original-size
-						:initial-contents values))
-      (setf (gamma-ramp-blue ramp) (make-array original-size :adjustable t :fill-pointer original-size
-					       :initial-contents values))
-      (set-gamma-ramp monitor ramp)
+      (set-gamma-ramp
+       monitor
+       (make-gamma-ramp
+	:red (make-array original-size
+			 :element-type '(unsigned-byte 16)
+			 :initial-contents values)
+	:green (make-array original-size
+			   :element-type '(unsigned-byte 16)
+			  :initial-contents values)
+	:blue (make-array original-size
+			  :element-type '(unsigned-byte 16)
+			  :initial-contents values)))
+
       (values))))
 
 #+win32
 (defmethod get-gamma-ramp ((monitor win32:monitor-mixin))
-  (get-win32-gamma-ramp monitor))
+  (get-win32-monitor-gamma-ramp monitor))
 
 #+cocoa
 (defmethod get-gamma-ramp ((monitor cocoa:monitor-mixin))
-  (get-cocoa-gamma-ramp monitor))
+  (get-cocoa-monitor-gamma-ramp monitor))
 
 #+x11
 (defmethod get-gamma-ramp ((monitor x11:monitor-mixin))
-  (get-x11-gamma-ramp monitor))
+  (get-x11-monitor-gamma-ramp monitor))
 
 #+wayland
 (defmethod get-gamma-ramp ((monitor wayland:monitor-mixin))
-  (get-wayland-gamma-ramp monitor))
+  (get-wayland-monitor-gamma-ramp monitor))
 
 (defmethod set-gamma-ramp :around ((monitor monitor-mixin) ramp)
   (assert ramp)
@@ -264,16 +279,16 @@
 
 #+win32
 (defmethod set-gamma-ramp ((monitor win32:monitor-mixin) ramp)
-  (set-win32-gamma-ramp monitor ramp))
+  (set-win32-monitor-gamma-ramp monitor ramp))
 
 #+cocoa
 (defmethod set-gamma-ramp ((monitor cocoa:monitor-mixin) ramp)
-  (set-cocoa-gamma-ramp monitor ramp))
+  (set-cocoa-monitor-gamma-ramp monitor ramp))
 
 #+x11
 (defmethod set-gamma-ramp ((monitor x11:monitor-mixin) ramp)
-  (set-x11-gamma-ramp monitor ramp))
+  (set-x11-monitor-gamma-ramp monitor ramp))
 
 #+wayland
 (defmethod set-gamma-ramp ((monitor wayland:monitor-mixin) ramp)
-  (set-wayland-gamma-ramp monitor ramp))
+  (set-wayland-monitor-gamma-ramp monitor ramp))

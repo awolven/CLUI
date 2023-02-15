@@ -1,43 +1,175 @@
 (in-package :clui)
 
-(defclass x11:server-mixin (clui:display-mixin)
-  ((xdisplay :accessor display-xdisplay)
+(defclass x11-state ()
+  ((initialized? :initform nil
+		 :accessor x11-initialized?)
    
-   (display-name :initarg :display-name
+   (randr-available? :initform nil
+		     :accessor randr-available?)
+
+   (randr-event-base :initform nil
+		     :accessor randr-event-base)
+
+   (randr-error-base :initform nil
+		     :accessor randr-error-base)
+
+   (randr-major :initform nil
+		:accessor randr-major)
+
+   (randr-minor :initform nil
+		:accessor randr-minor)
+
+   (randr-gamma-broken? :initform nil
+			:accessor randr-gamma-broken?)
+
+   (randr-monitor-broken? :initform nil
+			  :accessor randr-monitor-broken?)
+
+   (xinerama-major :initform nil
+		   :accessor xinerama-major)
+
+   (xinerama-minor :initform nil
+		   :accessor xinerama-minor)
+
+   (xinerama-available? :initform nil
+			:accessor xinerama-available?)
+
+   (XdndVersion :initform nil
+		:accessor xdnd-version)
+
+   (xi-available? :initform nil
+		  :accessor xi-available?)
+
+   (xi-major-opcode :initform nil
+		    :accessor xi-major-opcode)
+
+   (xkb-available? :initform nil
+		   :accessor xkb-available?)
+
+   (xkb-event-base :initform nil
+		   :accessor xkb-event-base)
+
+   (xkb-group :initform nil
+	      :accessor xkb-group)))
+
+(defclass window-manager ()
+  ((NET_SUPPORTED :initform nil)
+   (NET_SUPPORTING_WM_CHECK :initform nil)
+   (WM_PROTOCOLS :initform nil)
+   (WM_STATE :initform nil)
+   (WM_DELETE_WINDOW :initform nil)
+   (NET_WM_NAME :initform nil)
+   (NET_WM_ICON_NAME :initform nil)
+   (NET_WM_ICON :initform nil)
+   (NET_WM_PID :initform nil)
+   (NET_WM_PING :initform nil)
+   (NET_WM_WINDOW_TYPE :initform nil)
+   (NET_WM_WINDOW_TYPE_NORMAL :initform nil)
+   (NET_WM_STATE :initform nil)
+   (NET_WM_STATE_ABOVE :initform nil)
+   (NET_WM_STATE_FULLSCREEN :initform nil)
+   (NET_WM_STATE_MAXIMIZED_VERT :initform nil)
+   (NET_WM_STATE_MAXIMIZED_HORZ :initform nil)
+   (NET_WM_STATE_DEMANDS_ATTENTION :initform nil)
+   (NET_WM_BYPASS_COMPOSITOR :initform nil)
+   (NET_WM_FULLSCREEN_MONITORS :initform nil)
+   (NET_WM_WINDOW_OPACITY :initform nil)
+   (NET_WM_CM_Sx :initform nil)
+   (NET_WORKAREA :initform nil)
+   (NET_CURRENT_DESKTOP :initform nil)
+   (NET_ACTIVE_WINDOW :initform nil)
+   (NET_FRAME_EXTENTS :initform nil)
+   (NET_REQUEST_FRAME_EXTENTS :initform nil)
+   (MOTIF_WM_HINTS :initform nil)))
+
+(defclass Xdnd ()
+  ((version :initform 5)
+   (XdndAware)
+   (XdndEnter)
+   (XdndPosition)
+   (XdndStatus)
+   (XdndActionCopy)
+   (XdndDrop)
+   (XdndFinished)
+   (XdndSelection)
+   (XdndTypeList)
+   (text/uri-list)))
+
+(defclass clipboard ()
+  ((TARGETS)
+   (MULTIPLE)
+   (INCR)
+   (CLIPBOARD)
+   (PRIMARY)
+   (CLIPBOARD_MANAGER)
+   (SAVE_TARGETS)
+   (NULL)
+   (UTF8_STRING)
+   (COMPOUND_STRING)
+   (ATOM_PAIR)
+   (CLUI_SELECTION)))
+
+(defclass x11:server-mixin (clui:display-mixin clui:handle-mixin)
+  ((display-name :initarg :display-name
 		 :accessor display-name
 		 :initform nil)
    
-   (screen-id :accessor default-screen-id)
-   
-   (root-window-handle :accessor default-root-window-handle)
+   (error-handler :initform nil
+		  :accessor display-error-handler)
+
+   (error-code :initform nil
+	       :accessor display-error-code)
 
    (helper-window-handle :accessor helper-window-handle)
-   (hidden-cursor-handle :accessor hidden-cursor-handle)
-   
-   (xcursor-handle :accessor xcursor-handle
-		   :initform nil)
+   (hidden-cursor :accessor hidden-cursor)
    
    (context :accessor unique-context)
    
-   (content-scale :accessor content-scale)
+   (content-scale :accessor display-content-scale)
    
    (input-method :initform nil
 		 :accessor display-input-method)
 
-   (randr-available? :initform nil
-		     :accessor display-randr-available?)
+   (clipboard-string :initform ""
+		     :accessor clipboard-string)
 
-   (randr-monitor-broken? :initform nil
-			  :accessor display-randr-monitor-broken?)
+   (primary-selection-string :initform ""
+			     :accessor primary-selection-string)
 
-   (xinerama-available? :initform nil
-			:accessor xinerama-available?)
-   
-   (ip-addr)
-   (display-id)
-   
    (empty-event-pipes :initform nil
-		      :accessor empty-event-pipes)))
+		      :accessor empty-event-pipes)
+
+   (x11-state :initform (make-instance 'x11-state)
+	      :accessor display-x11-state)
+
+   (window-manager :initform (make-instance 'window-manager)
+		   :accessor display-window-manager)
+
+   (Xdnd :initform (make-instance 'Xdnd)
+	 :accessor display-drag-and-drop)
+
+   (clipboard :initform (make-instance 'clipboard)
+	      :accessor display-clipboard)
+
+   (disabled-cursor-window :initform nil
+			   :accessor disabled-cursor-window)))
+
+   
+
+(defun default-screen-id (display)
+  (screen-id (default-screen display)))
+
+(defun default-root-window-handle (display)
+  (h (default-screen display)))
+
+(defun hidden-cursor-handle (display)
+  (h (hidden-cursor display)))
+
+(defmethod initialize-instance ((instance x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (declare (ignorable initargs))
+  (call-next-method)
+  (init-and-connect-x11 instance)
+  instance)
 
 (defclass x11:local-server-mixin (x11:server-mixin)
   ())
@@ -51,27 +183,56 @@
 (defclass x11:remote-server (x11:remote-server-mixin)
   ())
 
-(defclass x11:screen-mixin (clui:screen-mixin)
-  ((screen-id)))
+(defclass x11:screen-mixin (clui:screen-mixin clui:handle-mixin)
+  ((screen-id :initarg :screen-id :accessor screen-id)))
 
 (defclass x11:window-mixin (clui:os-window-mixin)
-  ())
+  ((handle :accessor h)
+   
+   (input-context :initform nil
+		  :accessor window-input-context)
 
-(defclass x11:cursor-mixin (clui:cursor-mixin)
+   (colormap :initform nil
+	     :accessor window-colormap)
+
+   (transparent? :initform nil
+		 :accessor currently-transparent?)
+
+   (raw-mouse-motion? :initform nil
+		      :accessor current-raw-mouse-motion?)
+
+   (virtual-cursor-xpos :initform nil
+			:accessor virtual-cursor-xpos)
+
+   (virtual-cursor-ypos :initform nil
+			:accessor virtual-cursor-ypos)))
+   
+  
+
+(defvar *window-handle->window-table* (make-hash-table :test #'eq))
+
+(defclass x11:cursor-mixin (clui:cursor-mixin clui:handle-mixin)
   ())
 
 (defclass x11:monitor-mixin (clui:monitor-mixin)
-  ((index :initarg :x11-index
+  ((display :initarg :display
+	    :initform nil
+	    :reader monitor-display)
+   
+   (index :initarg :x11-index
 	  :initform nil
 	  :accessor monitor-x11-index)
    
    (output :initarg :x11-output
-	   :initform nil
+	   :initform -1
 	   :reader monitor-x11-output)
 
    (crtc :initarg :x11-crtc
-	 :initform nil
-	 :reader monitor-x11-xrtc)))
+	 :initform -1
+	 :reader monitor-x11-crtc)
+
+   (old-mode :initform nil
+	     :accessor monitor-old-video-mode)))
 
 (defclass x11:screen (x11:screen-mixin)
   ())
