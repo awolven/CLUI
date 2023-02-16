@@ -4,6 +4,7 @@
 			     &key (width 640) (height 480) (title "clui")
 			     (display (default-display))
 			       (share nil)
+			       (maximized? nil)
 			       (resizable? t)
 			       (decorated? t)
 			       (auto-iconify? t)
@@ -27,11 +28,13 @@
 
 
 
-    (setf ;;(currently-maximized? window) maximized?
-     (currently-resizable? window) resizable?
-	  (currently-decorated? window) decorated?
+    (setf (last-maximized? window) maximized?
+	  (last-resizable? window) resizable?
+	  (last-decorated? window) decorated?
+	  (last-floating? window) floating?
+	  
 	  (auto-iconify? window) auto-iconify?
-	  (currently-floating? window) floating?
+	  
 	  (focus-on-show? window) focus-on-show?
 	  (mouse-passthrough? window) mouse-passthrough?)
     
@@ -121,7 +124,7 @@
   #+windows(release-win32-cursor app))
 
 (defun enable-cursor (window)
-  (when (window-raw-mouse-motion? window)
+  (when (last-raw-mouse-motion? window)
     (enable-raw-mouse-motion window))
   (setf (disabled-cursor-window (window-display window)) nil)
   (release-cursor (window-display window))
@@ -139,7 +142,7 @@
     (update-cursor-image window)
     (center-cursor-in-content-area window)
     (capture-cursor window)
-    (when (window-raw-mouse-motion? window)
+    (when (last-raw-mouse-motion? window)
       (enable-raw-mouse-motion window))
     (values)))
 

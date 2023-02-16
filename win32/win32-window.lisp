@@ -482,10 +482,10 @@
 	(setq style (logior style #_WS_POPUP))
 	(progn
 	  (setq style (logior style #_WS_SYSMENU #_WS_MINIMIZEBOX))
-	  (if (currently-decorated? win32-window)
+	  (if (last-decorated? win32-window)
 	      (progn
 		(setq style (logior style #_WS_CAPTION))
-		(when (currently-resizable? win32-window)
+		(when (last-resizable? win32-window)
 		  (setq style (logior style #_WS_MAXIMIZEBOX #_WS_THICKFRAME))))
 	      (setq style (logior style #_WS_POPUP)))))
     style))
@@ -494,7 +494,7 @@
 (defun get-window-ex-style (window)
   (let ((style #_WS_EX_APPWINDOW))
 
-    (when (or (window-monitor window) (currently-floating? window))
+    (when (or (window-monitor window) (last-floating? window))
       (setq style (logior style #_WS_POPUP)))
 
     style))
@@ -761,7 +761,7 @@ int decorated;
 		    (go break))
 
 		   ((#.#_WM_NCACTIVATE #.#_WM_NCPAINT) ;; 133 and 134
-		    (unless (currently-decorated? window)
+		    (unless (last-decorated? window)
 		      (return #_TRUE))
 		    (go break))
 
@@ -809,17 +809,17 @@ int decorated;
 			  (height (#_HIWORD lParam))
 			  (iconified? (= wParam #_SIZE_MINIMIZED))
 			  (maximized? (or (= wParam #_SIZE_MAXIMIZED)
-					  (and (currently-maximized? window)
+					  (and (last-maximized? window)
 					       (/= wParam #_SIZE_RESTORED)))))
 
 		      (when (eq (captured-cursor-window (window-display window)) window)
 			(capture-win32-cursor window))
 
-		      (unless (eq (currently-iconified? window) iconified?)
+		      (unless (eq (last-iconified? window) iconified?)
 			(let ((event (make-instance 'window-iconify-event)))
 			  (handle-event window event)))
 
-		      (unless (eq (currently-maximized? window) maximized?)
+		      (unless (eq (last-maximized? window) maximized?)
 			(let ((event (make-instance (if maximized?
 							'window-maximize-event
 							'window-restore-event))))
@@ -833,15 +833,15 @@ int decorated;
 			  (handle-event window event)))
 
 		      (when (and (window-monitor window)
-				 (not (eq (currently-iconified? window) iconified?)))
+				 (not (eq (last-iconified? window) iconified?)))
 			(if iconified?
 			    (release-win32-monitor window (window-monitor window))
 			    (progn
 			      (acquire-win32-monitor window (window-monitor window))
 			      (fit-to-monitor window))))
 
-		      (setf (currently-iconified? window) iconified?)
-		      (setf (currently-maximized? window) maximized?)
+		      (setf (last-iconified? window) iconified?)
+		      (setf (last-maximized? window) maximized?)
 
 		      (terpri)
 		      (princ 'success)
@@ -904,7 +904,7 @@ int decorated;
 			      (setf (#_.x p-pt-max-track-size) (+ (window-min-width window) (#_.right &frame) (- (#_.left &frame)))
 				    (#_.y p-pt-max-track-size) (+ (window-min-height window) (#_.bottom &frame) (- (#_.top &frame)))))
 
-			    (unless (currently-decorated? window)
+			    (unless (last-decorated? window)
 			      (clet ((mi #_<MONITORINFO>))
 				(let ((&mi (c-addr-of mi))
 				      (size (c-sizeof-type '#_<MONITORINFO>))
@@ -1148,18 +1148,18 @@ int decorated;
 
 
 
-(defmethod create-native-window (window &rest args
-				 &key (xpos nil) (ypos nil)
-				   (width 640) (height 480)
-				   (title "CLUI")
-				   (decorated? t)
-				   (maximized? nil)
-				   (resizable? t)
-				   (floating? nil)
-				   (transparent? nil)
-				   (scale-to-monitor? t)
-				   (key-menu nil)
-				 &allow-other-keys)
+(defmethod %create-native-win32-window (window &rest args
+					&key (xpos nil) (ypos nil)
+					  (width 640) (height 480)
+					  (title "CLUI")
+					  (decorated? t)
+					  (maximized? nil)
+					  (resizable? t)
+					  (floating? nil)
+					  (transparent? nil)
+					  (scale-to-monitor? t)
+					  (key-menu nil)
+					&allow-other-keys)
 
   (declare (ignorable args transparent? resizable? floating? key-menu))
   
@@ -1177,62 +1177,62 @@ int decorated;
 	(flet ((maybe-register-class ()
 		 (unless main-window-class
 		   (let ((p-icon-nm (lpcwstr "CLUI-ICON")))
-		       (let* ((size (load-time-value (c-sizeof-type '#_<WNDCLASSEXW>))))
-			 (clet ((wc #_<WNDCLASSEXW>))
-			   (let ((&wc (c-addr-of wc)))
+		     (let* ((size (load-time-value (c-sizeof-type '#_<WNDCLASSEXW>))))
+		       (clet ((wc #_<WNDCLASSEXW>))
+			 (let ((&wc (c-addr-of wc)))
 
-			     (setf (#_.cbSize &wc) size)
-			     (setf (#_.style &wc) (logior #_CS_HREDRAW #_CS_VREDRAW #_CS_OWNDC))
-			     (setf (#_.lpfnWndProc &wc) window-proc-callback)
-			     (setf (#_.cbClsExtra &wc) 0)
-			     (setf (#_.cbWndExtra &wc) 0)
-			     (setf (#_.hInstance &wc)  nil #+NIL(#_GetModuleHandleW nil))
-			     (setf (#_.hCursor &wc) (#_LoadCursorW nil #_IDC_ARROW))
-			     (setf (#_.hbrBackground &wc) nil)
-			     (setf (#_.lpszMenuName &wc) nil)
-			     (setf (#_.lpszClassName &wc) p-cls-nm)
-			     (setf (#_.hIconSm &wc) nil)
+			   (setf (#_.cbSize &wc) size)
+			   (setf (#_.style &wc) (logior #_CS_HREDRAW #_CS_VREDRAW #_CS_OWNDC))
+			   (setf (#_.lpfnWndProc &wc) window-proc-callback)
+			   (setf (#_.cbClsExtra &wc) 0)
+			   (setf (#_.cbWndExtra &wc) 0)
+			   (setf (#_.hInstance &wc)  nil #+NIL(#_GetModuleHandleW nil))
+			   (setf (#_.hCursor &wc) (#_LoadCursorW nil #_IDC_ARROW))
+			   (setf (#_.hbrBackground &wc) nil)
+			   (setf (#_.lpszMenuName &wc) nil)
+			   (setf (#_.lpszClassName &wc) p-cls-nm)
+			   (setf (#_.hIconSm &wc) nil)
 
-			     ;;(print 'bb)
-			     ;;(print (#_GetLastError))
+			   ;;(print 'bb)
+			   ;;(print (#_GetLastError))
 
-			     (setf (#_.hIcon &wc) (#_LoadImageW
-						   (#_GetModuleHandleW nil)
-						   p-icon-nm
-						   #_IMAGE_ICON
-						   0 0
-						   (logior #_LR_DEFAULTSIZE #_LR_SHARED)))
-			     #+NIL
-			     (print (#_.hIcon &wc))
+			   (setf (#_.hIcon &wc) (#_LoadImageW
+						 (#_GetModuleHandleW nil)
+						 p-icon-nm
+						 #_IMAGE_ICON
+						 0 0
+						 (logior #_LR_DEFAULTSIZE #_LR_SHARED)))
+			   #+NIL
+			   (print (#_.hIcon &wc))
 			     
-			     (unless (#_.hIcon &wc)
-			       (setf (#_.hIcon &wc) (#_LoadImageW
-						     nil
-						     #_IDI_APPLICATION
-						     #_IMAGE_ICON
-						     0 0 (logior #_LR_DEFAULTSIZE #_LR_SHARED))))
+			   (unless (#_.hIcon &wc)
+			     (setf (#_.hIcon &wc) (#_LoadImageW
+						   nil
+						   #_IDI_APPLICATION
+						   #_IMAGE_ICON
+						   0 0 (logior #_LR_DEFAULTSIZE #_LR_SHARED))))
 
-			     #+NIL
-			     (unless main-window-class
-			       (when(#_GetClassInfoExW (#_GetModuleHandleW nil) p-cls-nm &wc)
-				 (warn "class already exists, resetting...")
-				 (unless (#_UnregisterClassW p-cls-nm (#_GetModuleHandleW nil))
-				   (warn "unable to unregister class."))))
+			   #+NIL
+			   (unless main-window-class
+			     (when(#_GetClassInfoExW (#_GetModuleHandleW nil) p-cls-nm &wc)
+			       (warn "class already exists, resetting...")
+			       (unless (#_UnregisterClassW p-cls-nm (#_GetModuleHandleW nil))
+				 (warn "unable to unregister class."))))
 
-			     ;;(print 'aa)
-			     ;;(print (#_GetLastError))
+			   ;;(print 'aa)
+			   ;;(print (#_GetLastError))
 
 
-			     (let ((result (#_RegisterClassExW &wc)))
-			       (print result)
-			       (if (= 0 result)
-				   (let ((error (#_GetLastError)))
-				     (error "Win32: Failed to register window class, error ~A." error))
-				   (setf main-window-class result)))
-			     #+NIL
-			     (print 'a)
-			     #+NIL
-			     (print (#_GetLastError))))))))
+			   (let ((result (#_RegisterClassExW &wc)))
+			     (print result)
+			     (if (= 0 result)
+				 (let ((error (#_GetLastError)))
+				   (error "Win32: Failed to register window class, error ~A." error))
+				 (setf main-window-class result)))
+			   #+NIL
+			   (print 'a)
+			   #+NIL
+			   (print (#_GetLastError))))))))
 	   
 	       (create-window ()
 
@@ -1259,7 +1259,7 @@ int decorated;
 			       (#_.right  &rect) (round width)
 			       (#_.bottom &rect) (round height))
 
-			 (setf (currently-maximized? window) maximized?)
+			 (setf (last-maximized? window) maximized?)
 		       
 			 (when maximized?
 			   (setq style (logior style #_WS_MAXIMIZE)))
@@ -1566,7 +1566,7 @@ int decorated;
 	       (rcMonitor (c-slot-ptr &mi '#_<MONITORINFO> '#_rcMonitor '#_<RECT*>))
 	       (flags (logior #_SWP_SHOWWINDOW #_SWP_NOACTIVATE #_SWP_NOCOPYBITS)))
 	  
-	  (when (currently-decorated? window)
+	  (when (last-decorated? window)
 	    (let ((style (#_GetWindowLongW (h window) #_GWL_STYLE)))
 	      (setq style (logand style (lognot #_WS_OVERLAPPEDWINDOW)))
 	      (setq style (logior style (get-window-style window)))
@@ -1594,14 +1594,14 @@ int decorated;
 	    (let ((style (#_GetWindowLongW (h window) #_GWL_STYLE))
 		  (flags (logior #_SWP_NOACTIVATE #_SWP_NOCOPYBITS)))
 	    
-	      (when (currently-decorated? window)
+	      (when (last-decorated? window)
 		(let ((style (logand style (lognot #_WS_POPUP))))
 		  (setq style (logior style (get-window-style window)))
 		  (#_SetWindowLongW (h window) #_GWL_STYLE style)
 		
 		  (setq flags (logior flags #_SWP_FRAMECHANGED))))
 	    
-	      (if (currently-floating? window)
+	      (if (last-floating? window)
 		  (setq after #_HWND_TOPMOST)
 		  (setq after #_HWND_NOTOPMOST))
 
@@ -1674,13 +1674,13 @@ int decorated;
   
 
 
-(defun create-win32-window (window &rest args
-			    &key (visible? t)
-			      (focused? t)
-			      (mouse-passthrough? nil)
-			    &allow-other-keys)
+(defun create-native-win32-window (window &rest args
+				   &key (visible? t)
+				     (focused? t)
+				     (mouse-passthrough? nil)
+				   &allow-other-keys)
   (declare (type os-window-mixin window))
-  (if (apply #'create-native-window window args)
+  (if (apply #'%create-native-win32-window window args)
       (progn
 	(when mouse-passthrough?
 	  (set-win32-window-mouse-passthrough window t))

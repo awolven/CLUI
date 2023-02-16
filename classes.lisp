@@ -77,18 +77,19 @@
    (monitors
     :accessor display-monitors
     :initform ())
+   
+   (clipboard-string :accessor clipboard-string
+		     :initform "")
 
-   (left-shift-down? :initform nil
-		     :accessor left-shift-down?)
+   (restore-cursor-pos-x :initform nil
+			 :accessor restore-cursor-pos-x)
 
-   (right-shift-down? :initform nil
-		      :accessor right-shift-down?)
+   (restore-cursor-pos-y :initform nil
+			 :accessor restore-cursor-pos-y)
 
-   (left-ctrl-down? :initform nil
-		    :accessor left-ctrl-down?)
-
-   (right-ctrl-down? :initform nil
-		     :accessor right-ctrl-down?)))
+   (disabled-cursor-window
+    :accessor disabled-cursor-window
+    :initform nil)))
 
 (defun default-screen (display)
   (first (display-screens display)))
@@ -99,11 +100,10 @@
     screen))
 
 (defclass screen-mixin ()
-  ())
+  ((display :initarg :display :accessor screen-display)))
 
 (defclass handle-mixin ()
-  ((handle :initarg :h :accessor h)
-   (display :initarg :display :accessor screen-display)))
+  ((handle :initarg :h :accessor h)))
 
 (defmethod initialize-instance ((instance display-mixin)
 				&rest initargs
@@ -193,16 +193,10 @@
   ((display :initarg :display :reader window-display)
    (parent :initarg :parent :accessor window-parent)
    (next :type (or null window-mixin) :accessor window-next)
-   (maximized? :type boolean :initform nil :accessor currently-maximized?)
-   (resizable? :type boolean :initform nil :accessor currently-resizable?)
-   (decorated? :type boolean :initform nil :accessor currently-decorated?)
-   (iconified? :type boolean :initform nil :accessor currently-iconified?)
    (auto-iconify? :type boolean :initform nil :accessor auto-iconify?)
-   (floating? :type boolean :initform nil :accessor currently-floating?)
    (focus-on-show? :type boolean :initform t :accessor focus-on-show?)
    (mouse-passthrough? :type boolean :accessor mouse-passthrough?)
    (should-close? :type boolean :initform nil :accessor should-close?)
-   (raw-mouse-motion? :type boolean :initform nil :accessor window-raw-mouse-motion?)
    (video-mode :accessor window-video-mode :initform (make-video-mode))
    (monitor :initform nil :reader window-monitor :writer (setf %window-monitor))
    (cursor)
@@ -218,13 +212,27 @@
    (cursor-mode :initform :normal :accessor window-cursor-mode)
    (mouse-buttons)
    (keys)
-   (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
-   (virtual-cursor-pos-y :accessor virtual-cursor-pos-y))
+   )
   (:default-initargs :display (default-display)))
 		  
 
 (defclass os-window-mixin (window-mixin)
-  ())
+  ((%xpos :type (or null real) :initform nil :accessor last-xpos)
+   (%ypos :type (or null real) :initform nil :accessor last-ypos)
+   (%width :type (or null real) :initform nil :accessor last-width)
+   (%height :type (or null real) :initform nil :accessor last-height)
+   (%maximized? :type boolean :initform nil :accessor last-maximized?)
+   (%resizable? :type boolean :initform nil :accessor last-resizable?)
+   (%decorated? :type boolean :initform nil :accessor last-decorated?)
+   (%iconified? :type boolean :initform nil :accessor last-iconified?)
+   (%floating? :type boolean :initform nil :accessor last-floating?)
+   (%transparent? :type boolean :initform nil :accessor last-transparent?)
+   (%raw-mouse-motion? :type boolean :initform nil :accessor last-raw-mouse-motion?)
+
+   (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
+   (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)))
+
+   
 
 (defclass homemade-window-mixin (window-mixin)
   ())

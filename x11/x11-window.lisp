@@ -27,7 +27,7 @@
 		      (lognot (logior #_PMinSize #_PMaxSize #_PAspect))))
 
 	(unless (window-monitor window)
-	  (if (currently-resizable? window)
+	  (if (last-resizable? window)
 
 	      (progn
 		(unless (or (eq (window-min-width window) :dont-care)
@@ -173,6 +173,14 @@
 				  (logior (#_.your_event_mask &attribs) (cval-value filter)))))))))
       (values))))
 
+(defun create-native-x11-window (window
+				 &rest initargs
+				 &key (visible? t)
+				 &allow-other-keys)
+  (apply #'%create-native-x11-window window initargs)
+  (when visible? (show-x11-window window))
+  window)
+
 (defun %create-native-x11-window (window
 				  &rest initargs
 				  &key (display (window-display window))
@@ -206,7 +214,7 @@
 						      visual
 						      #_AllocNone))
 
-    (setf (currently-transparent? window) (%x11-visual-transparent? xdisplay visual))
+    (setf (last-transparent? window) (%x11-visual-transparent? xdisplay visual))
 
     (clet ((wa #_<XSetWindowAttributes>))
       (let ((&wa (c-addr-of wa)))
@@ -273,7 +281,7 @@
 			     NET_WM_STATE_MAXIMIZED_HORZ)
 		    (setf (c-aref states (incf count)) NET_WM_STATE_MAXIMIZED_VERT
 			  (c-aref states (incf count)) NET_WM_STATE_MAXIMIZED_HORZ)
-		    (setf (currently-maximized? window) t)))
+		    (setf (last-maximized? window) t)))
 
 		(unless (minusp count)
 		  (#_XChangeProperty xdisplay (h window)
@@ -389,7 +397,7 @@
 (defun set-x11-window-title (window title)
   (let* ((display (window-display window))
 	 (window-manager (display-window-manager display))
-	 (clipboard (display-clipboard display)))
+	 (clipboard (display-clipboard-manager display)))
     
     (when (and title (stringp title) (not (string= title "")))
       #+NIL
@@ -486,7 +494,7 @@
 
       (progn
 
-	(unless (currently-resizable? window)
+	(unless (last-resizable? window)
 	  (update-normal-hints window width height))
 
 	(#_XResizeWindow (h (window-display window)) (h window) (round width) (round height))))
@@ -525,4 +533,4 @@
 
 (defun %x11-visual-transparent? (xdisplay visual)
   (let ((pf (#_XRenderFindVisualFormat xdisplay visual)))
-    (and pf (#_.alphaMask (c->-addr pf '#_direct)))))
+    (and pf (not (zerop (#_.alphaMask (c->-addr pf '#_direct)))))))

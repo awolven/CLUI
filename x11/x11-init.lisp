@@ -266,7 +266,7 @@
 		   CLIPBOARD_MANAGER
 		   SAVE_TARGETS)
 
-	  (display-clipboard display)
+	  (display-clipboard-manager display)
 
 	(setf NULL (#_XInternAtom xdisplay "NULL" #_False)
 	      UTF8_STRING (#_XInternAtom xdisplay "UTF8_STRING" #_False)

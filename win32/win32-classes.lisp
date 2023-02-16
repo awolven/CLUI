@@ -12,33 +12,17 @@
     :accessor main-window-class
     :initform nil)
 
-   (restore-cursor-pos-x
-    :accessor restore-cursor-pos-x
-    :initform nil)
-   
-   (restore-cursor-pos-y
-    :accessor restore-cursor-pos-y
-    :initform nil)
-   
    (acquired-monitor-count
     :accessor acquired-monitor-count
-    :initform nil)
-   
-   (keycodes)
-   (scancodes)
-   (keynames)
-
-   (disabled-cursor-window
-    :accessor disabled-cursor-window
     :initform nil)
    
    (captured-cursor-window
     :accessor captured-cursor-window
     :initform nil)
    
-   (clipboard-string
-    :accessor clipboard-string
-    :initform "")
+   (keycodes)
+   (scancodes)
+   (keynames)
    
    (raw-input)
    
@@ -94,18 +78,16 @@
   ())
 
 (defclass win32:window-mixin (clui:os-window-mixin handle-mixin)
-  ((big-icon)
+  ((%cursor-pos-x :initform nil :accessor last-cursor-pos-x)
+   (%cursor-pos-y :initform nil :accessor last-cursor-pos-y)
+   (big-icon)
    (small-icon)
    (cursor-tracked? :type boolean :initform nil :accessor cursor-tracked?)
    (frame-action? :type boolean :initform nil :accessor frame-action?)
-   (iconified? :type boolean :initform nil :accessor currently-iconified?)
-   (maximized? :type boolean :initform nil :accessor currently-minimized?)
    (transparent? :type boolean :initform nil :accessor transparent?)
    (scale-to-monitor? :type boolean :initform nil :accessor scale-to-monitor?)
    (key-menu? :type boolean :initform nil :accessor key-menu?)
    (cursor :initform nil :accessor window-cursor)
-   (last-cursor-pos-x)
-   (last-cursor-pos-y)
    (high-surrogate)))
 
 (defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)

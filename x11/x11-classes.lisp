@@ -95,7 +95,7 @@
    (XdndTypeList)
    (text/uri-list)))
 
-(defclass clipboard ()
+(defclass clipboard-manager ()
   ((TARGETS)
    (MULTIPLE)
    (INCR)
@@ -130,9 +130,6 @@
    (input-method :initform nil
 		 :accessor display-input-method)
 
-   (clipboard-string :initform ""
-		     :accessor clipboard-string)
-
    (primary-selection-string :initform ""
 			     :accessor primary-selection-string)
 
@@ -148,11 +145,8 @@
    (Xdnd :initform (make-instance 'Xdnd)
 	 :accessor display-drag-and-drop)
 
-   (clipboard :initform (make-instance 'clipboard)
-	      :accessor display-clipboard)
-
-   (disabled-cursor-window :initform nil
-			   :accessor disabled-cursor-window)))
+   (clipboard-manager :initform (make-instance 'clipboard-manager)
+		      :accessor display-clipboard-manager)))
 
    
 
@@ -186,28 +180,25 @@
 (defclass x11:screen-mixin (clui:screen-mixin clui:handle-mixin)
   ((screen-id :initarg :screen-id :accessor screen-id)))
 
-(defclass x11:window-mixin (clui:os-window-mixin)
-  ((handle :accessor h)
+(defclass x11:window-mixin (clui:os-window-mixin clui:handle-mixin)
+  ((%cursor-pos-x :initform nil :accessor last-cursor-pos-x)
+   (%cursor-pos-y :initform nil :accessor last-cursor-pos-y)
+
+   (cursor-pos-warp-x :initform nil
+		      :accessor cursor-pos-warp-x)
+
+   (cursor-pos-warp-y :initform nil
+		      :accessor cursor-pos-warp-y)
    
    (input-context :initform nil
 		  :accessor window-input-context)
 
    (colormap :initform nil
-	     :accessor window-colormap)
+	     :accessor window-colormap)))
 
-   (transparent? :initform nil
-		 :accessor currently-transparent?)
-
-   (raw-mouse-motion? :initform nil
-		      :accessor current-raw-mouse-motion?)
-
-   (virtual-cursor-xpos :initform nil
-			:accessor virtual-cursor-xpos)
-
-   (virtual-cursor-ypos :initform nil
-			:accessor virtual-cursor-ypos)))
-   
-  
+(defmethod initialize-instance :after ((instance x11:window-mixin) &rest initargs &key &allow-other-keys)
+  (apply #'create-native-x11-window instance initargs)
+  (values))  
 
 (defvar *window-handle->window-table* (make-hash-table :test #'eq))
 

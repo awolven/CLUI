@@ -304,7 +304,7 @@
 
 	  (let ((window (disabled-cursor-window display)))
 
-	    (when (and window (current-raw-mouse-motion? window)
+	    (when (and window (last-raw-mouse-motion? window)
 		       (= (#_.extension (c->-addr event '#_xcookie)) (xi-major-opcode x11-state))
 		       (#_XGetEventData (h display) (#_.xcookie event))
 		       (= (#_.evtype (c->-addr event '#_xcookie)) #_XI_RawMotion)) ;; whew.
@@ -554,8 +554,8 @@
 	     (let ((x (#_.x (c->-addr event '#_xmotion)))
 		   (y (#_.y (c->-addr event '#_xmotion))))
 
-	       (when (or (/= x (warp-cursor-pos-x window))
-			 (/= y (warp-cursor-pos-y window)))
+	       (when (or (/= x (cursor-pos-warp-x window))
+			 (/= y (cursor-pos-warp-y window)))
 		 ;; the cursor was moved by something other than CLUI
 		 (if (eq (window-cursor-mode window) :disabled)
 		     
@@ -565,7 +565,7 @@
 		       (unless (eq (disabled-cursor-window display) window)
 			 (return))
 		       
-		       (when (raw-mouse-motion window)
+		       (when (last-raw-mouse-motion? window)
 			 (return))
 
 		       (handle-event window 'pointer-motion-event
@@ -583,8 +583,8 @@
 
 	     (let ((&xconfigure (c->-addr event '#_xconfigure)))
 	       
-	       (when (or (=/ (#_.width &xconfigure) (window-width window))
-			 (=/ (#_.height &xconfigure) (window-height window)))
+	       (when (or (=/ (#_.width &xconfigure) (last-width window))
+			 (=/ (#_.height &xconfigure) (last-height window)))
 
 		 (handle-event window (make-instance 'window-resize-event
 						     :width (#_.width &xconfigure)
@@ -613,8 +613,8 @@
 		   (when (= (display-error-code display) #_BadWindow)
 		     (return))
 
-		   (when (or (/= (window-last-xpos window) (cval-value xpos))
-			     (/= (window-last-ypos window) (cval-value ypos)))
+		   (when (or (/= (last-xpos window) (cval-value xpos))
+			     (/= (last-ypos window) (cval-value ypos)))
 		     
 		     (handle-event window (make-instance 'window-position-event
 							 :x (cval-value xpos)

@@ -782,18 +782,18 @@
 
 
 
-(defun create-native-window (window &rest args
-			     &key (xpos nil) (ypos nil)
-			       (width 640) (height 480)
-			       (title "clui")
-			       (decorated? t)
-			       (maximized? nil) 
-			       (resizable? t)
-			       (floating? nil)
-			       (transparent? nil)
-			       (frame-name "clui")
-			       (retina? t)
-			       &allow-other-keys)
+(defun %create-native-cocoa-window (window &rest args
+				    &key (xpos nil) (ypos nil)
+				      (width 640) (height 480)
+				      (title "clui")
+				      (decorated? t)
+				      (maximized? nil) 
+				      (resizable? t)
+				      (floating? nil)
+				      (transparent? nil)
+				      (frame-name "clui")
+				      (retina? t)
+				    &allow-other-keys)
 
   #+sbcl
   (sb-int:set-floating-point-modes :traps '())
@@ -812,8 +812,8 @@
 	    (setq content-rect (make-nsrect 0 0 (or width 640) (or height 480)))
 
 	    (setq content-rect (make-nsrect xpos
-					     (cocoa-transform-y (1- (+ ypos (or height 480.0d0))))
-					     (or width 640) (or height 480)))))
+					    (cocoa-transform-y (1- (+ ypos (or height 480.0d0))))
+					    (or width 640) (or height 480)))))
 
     (let ((style-mask NSWindowStyleMaskMiniaturizable))
 
@@ -830,14 +830,14 @@
 
       (setf (objc-object-id window)
 	    (NS:|initWithContentRect:styleMask:backing:defer:|
-		 (alloc (objc-window-class (window-display window)))
-		 content-rect
-		 #+NIL(logior NSWindowStyleMaskTitled
+		(alloc (objc-window-class (window-display window)))
+		content-rect
+		#+NIL(logior NSWindowStyleMaskTitled
 			     NSWindowStyleMaskClosable
 			     NSWindowStyleMaskMiniaturizable
 			     NSWindowStyleMaskResizable)
-		 style-mask
-		 NSBackingStoreBuffered nil))
+		style-mask
+		NSBackingStoreBuffered nil))
 
       (when (cffi:null-pointer-p (objc-object-id window))
 	(error "Cocoa: Failed to create window."))
@@ -919,19 +919,19 @@
 	(ns:|graphicsContextWithWindow:| #@NSGraphicsContext window))
   (values))
 
-(defun create-cocoa-window (window &rest initargs
-			    &key (visible? t)
-			      (focused? t)
-			      (auto-iconify? t)
-			      (focus-on-show? t)
-			      (center-cursor? t)
-			      (mouse-passthrough? nil)
-			      &allow-other-keys)
+(defun create-native-cocoa-window (window &rest initargs
+				   &key (visible? t)
+				     (focused? t)
+				     (auto-iconify? t)
+				     (focus-on-show? t)
+				     (center-cursor? t)
+				     (mouse-passthrough? nil)
+				   &allow-other-keys)
   (declare (ignorable auto-iconify? focus-on-show?))
   
   (with-autorelease-pool (pool)
   
-    (apply #'create-native-window window initargs)
+    (apply #'%create-native-cocoa-window window initargs)
 
     (when mouse-passthrough?
       #+NOTYET

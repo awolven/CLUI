@@ -51,17 +51,6 @@
 
    (delegate :accessor application-delegate)
 
-   (restore-cursor-position-x)
-   (restore-cursor-position-y)
-
-   (disabled-cursor-window
-    :accessor disabled-cursor-window
-    :initform nil)
-
-   (clipboard-string
-    :accessor clipboard-string
-    :initform "")
-
    (cursor-hidden?)
 
    (cascade-point :initform (make-nspoint 0 0) :accessor cascade-point)
@@ -123,7 +112,6 @@
   ((delegate :accessor window-delegate)
    (view :accessor window-content-view)
    (context :accessor window-graphics-context)
-   (maximized? :initform nil :accessor maximized?)
    (occluded? :initform nil :accessor occluded?)
    (retina? :initform nil :accessor window-retina?)
    (cursor-warp-delta-x :accessor cursor-warp-delta-x)
@@ -145,7 +133,7 @@
 
 
 (defmethod initialize-instance :after ((instance cocoa:window-mixin) &rest initargs &key &allow-other-keys)
-  (apply #'create-cocoa-window instance initargs))
+  (apply #'create-native-cocoa-window instance initargs))
 
 (defmethod initialize-instance :after ((instance window-delegate) &rest initargs
 				       &key (owner (warn ":owner not passed to make-instance of window-delegate"))
