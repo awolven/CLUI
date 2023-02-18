@@ -7,6 +7,8 @@
   #+x11(get-x11-required-instance-extensions)
   #+wayland(get-wayland-required-instance-extensions))
 
+(defgeneric destroy-window (window))  
+
 (defgeneric window-fullscreen? (window))
 (defgeneric (setf window-fullscreen?) (value window))
 
@@ -127,6 +129,21 @@
   #+windows(set-win32-window-monitor window monitor xpos ypos width height refresh-rate)
   #+linux(set-linux-window-monitor window monitor xpos ypos width height refresh-rate))
 
+#+win32
+(defmethod destroy-window ((window win32:window))
+  (destroy-win32-window window))
+
+#+cocoa
+(defmethod destroy-window ((window cocoa:window))
+  (destroy-cocoa-window window))
+
+#+x11
+(defmethod destroy-window ((window x11:window))
+  (destroy-x11-window window))
+
+#+wayland
+(defmethod destroy-window ((window wayland:window))
+  (destroy-wayland-window window))
 
 
 #+win32

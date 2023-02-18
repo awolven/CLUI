@@ -3,7 +3,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (noffi-syntax t))
 
-(defvar *xim->display* (make-hash-table :test #'eq))
+(defvar *xim->display* (make-hash-table :test #'equalp))
 (defvar *xdisplay->display* (make-hash-table :test #'eq))
 
 (defun display-for-xim (xim)
@@ -36,7 +36,8 @@
   (setf (display-error-handler display) nil)
   (values))
 
-(defun wait-for-x11-event (display timeout)
+(defun wait-for-x11-event (display &optional (timeout nil))
+  (unless timeout (setq timeout most-positive-double-float))
   (setq timeout (coerce timeout 'double-float))
   (clet ((fd #_<struct pollfd>))
     (let ((&fd (c-addr-of fd))
@@ -49,30 +50,30 @@
 	      do (return nil)
 	    finally (return t)))))
 
-(defun wait-for-any-event (display timeout)
+(defun wait-for-any-event (display &optional (timeout nil))
+  (unless timeout (setq timeout most-positive-double-float))
   (setq timeout (coerce timeout 'double-float))
   (let ((count 2))
     (clet ((fds #_<struct pollfd[3]>))
-      (let ((&fds (c-addr-of fds))
-	    (xdisplay (h display)))
-	(setf (#_.fd (c-aref &fds 0)) (#_ConnectionNumber xdisplay)
-	      (#_.event (c-aref &fds 0)) #_POLLIN)
-	(setf (#_.fd (c-aref &fds 1)) (aref (empty-event-pipes display) 0)
-	      (#_.event (c-aref &fds 1)) #_POLLIN)
+      (let ((xdisplay (h display)))
+	(setf (#_.fd (noffi::c+ fds 0)) (#_ConnectionNumber xdisplay)
+	      (#_.events (noffi::c+ fds 0)) #_POLLIN)
+	(setf (#_.fd (noffi::c+ fds 1)) (c-aref (empty-event-pipes display) 0)
+	      (#_.events (noffi::c+ fds 1)) #_POLLIN)
 
 	#+linux
 	(when (typep display 'x11:local-server-mixin)
 	  #+NIL
 	  (when (joysticks-initialized? *linux*)
-	    (setf (#_.fd (c-aref &fds count)) (linux-joysticks-inotify *linux*)
+	    (setf (#_.fd (noffi::c+ &fds count)) (linux-joysticks-inotify *linux*)
 		  (#_.event (c-aref &fds count)) #_POLLIN)
 	    (incf count)))
 
 	(loop while (zerop (#_XPending xdisplay))
-	      unless (poll-posix &fds count timeout)
+	      unless (poll-posix fds count timeout)
 		do (return nil)
 	      do (loop for i from 1 below count
-		       when (logtest (#_.revents (c-aref &fds i)) #_POLLIN)
+		       when (logtest (#_.revents (noffi::c+ fds i)) #_POLLIN)
 			 do (return-from wait-for-any-event t))
 	      finally (return t))))))
 
@@ -121,7 +122,7 @@
     (break "22")
     (when display
       (break "33")
-      (remhash (cval-value im) *xim->display*)
+      (remhash (ccl::%ptr-to-int (ptr-value im)) *xim->display*)
       (setf (display-input-method display) nil))
     (values)))
 
@@ -148,18 +149,16 @@
 	(setf (display-input-method display) nil)))
 
     (when (display-input-method display)
-      (setf (gethash (cval-value (display-input-method display)) *xim->display*) display)
-      (clet ((callback #_<XIMCallback>))
-	(let ((&callback (c-addr-of callback)))
-	  (setf (#_.callback &callback) input-method-destroy-callback
-		(#_.client_data &callback) nil)
-	  (let (#+NIL(one (ccl::make-cstring )))
-	    (#_XSetIMValues (display-input-method display)
-			    #_XNDestroyCallback &callback 0))
+      (setf (gethash (ccl::%ptr-to-int (ptr-value (display-input-method display))) *xim->display*) display)
+      (clet& ((&callback #_<XIMCallback>))
+	(setf (#_.callback &callback) input-method-destroy-callback
+	      (#_.client_data &callback) nil)
+	(#_XSetIMValues (display-input-method display)
+			#_XNDestroyCallback &callback nil)
 
-	  (do ((window (display-window-list-head display) (window-next window)))
-	      ((null window))
-	    (create-x11-input-context window)))))
+	(do ((window (display-window-list-head display) (window-next window)))
+	    ((null window))
+	  (create-x11-input-context window))))
     (values)))
 
 (defun x11-selection-event? (display event pointer)
@@ -215,22 +214,22 @@
       (clet ((styles #_<XIMStyles*> #_NULL))
 	(let ((&styles (c-addr-of styles)))
 
-	  (let (#+NIL(one (ccl::make-cstring #_XNQueryInputStyle)))
-	    (when (#_XGetIMValues (display-input-method display)
-				  #_XNQueryInputStyle &styles 0)
-	      (return nil)))
+	  (when (#_XGetIMValues (display-input-method display)
+				#_XNQueryInputStyle &styles nil)
+	    (return nil))
 
 	  (loop for i from 0 below (#_.count_styles styles)
 		when (= (cval-value (c-aref (#_.supported_styles styles) i))
 			(logior #_XIMPreeditNothing
-			 #_XIMStatusNothing))
+				#_XIMStatusNothing))
 		  do (setq found? t)
 		     (return))
 	  
 	  (#_XFree styles)
 	  (return found?))))))
 	  
-
+(defun release-x11-cursor (display)
+  (#_XUngrabPointer (h display) #_CurrentTime))
 
 (defun create-x11-cursor (display image xhot yhot)
   (let ((native (#_XcursorImageCreate (image-width image) (image-height image))))
@@ -256,36 +255,181 @@
 			    :h (#_XcursorImageLoadCursor (h display) native))
 	(#_XcursorImageDestroy native)))))
 
-(defun translate-state (state)
+(defun translate-x11-state (state)
   (let ((mods 0))
 
     (when (logtest state #_ShiftMask)
       (setq mods (logior mods +shift-modifier+)))
     (when (logtest state #_ControlMask)
-      (setq mods (logior mods +right-ctrl-modifier+ +left-ctrl-modifier+)))
+      (setq mods (logior mods +ctrl-modifier+)))
     (when (logtest state #_Mod1Mask)
-      (setq mods (logior mods +right-alt-modifier+ +left-alt-modifier+)))
+      (setq mods (logior mods +alt-modifier+)))
     (when (logtest state #_Mod4Mask)
       (setq mods (logior mods +super-modifier+)))
+    (when (logtest state #_LockMask)
+      (setq mods (logior mods +caps-lock-modifier+)))
+    (when (logtest state #_Mod2Mask)
+      (setq mods (logior mods +num-lock-modifier+)))
 
     mods))
+
+(defun %write-target-to-property (display request)
+  (block write-target
+    (with-slots (UTF8_STRING
+		 NULL)
+	display
+      (with-slots (PRIMARY
+		   TARGETS
+		   MULTIPLE
+		   ATOM_PAIR
+		   SAVE_TARGETS)
+	  (display-clipboard-manager display)
+	(let ((selection-string)
+	      (format-count 2))
+	  (clet ((formats #_<Atom[2]>))
+	    (setf (c-aref formats 0) UTF8_STRING
+		  (c-aref formats 1) #_XA_STRING)
+
+	    (if (= (#_.selection request) PRIMARY)
+		(setq selection-string (primary-selection-string display))
+		(setq selection-string (clipboard-string display)))
+
+	    (when (= (#_.property request) #_None)
+	      (return-from write-target #_None))
+
+	    (when (= (#_.target request) TARGETS)
+	      (clet ((targets #_<Atom[4]>))
+		(setf (c-aref targets 0) TARGETS
+		      (c-aref targets 1) MULTIPLE
+		      (c-aref targets 2) UTF8_STRING
+		      (c-aref targets 3) #_XA_STRING)
+
+		(#_XChangeProperty (h display)
+				   (#_.requestor request)
+				   (#_.property request)
+				   #_XA_ATOM
+				   32
+				   #_PropModeReplace
+				   targets
+				   4)
+
+		(return-from write-target (#_.property request))))
+
+	    (when (= (#_.target request) MULTIPLE)
+	      (clet ((targets #_<Atom*>))
+		(let ((count (%get-x11-window-property (h display)
+						       (#_.requestor request)
+						       (#_.property request)
+						       ATOM_PAIR
+						       (c-addr-of targets))))
+
+		  (loop for i from 0 below count by 2
+			with found? = nil
+			do (loop for j from 0 below format-count
+				 when (= (cval-value (c-aref targets i)) (cval-value (c-aref formats j)))
+				   do (setq found? t)
+				      (return))
+			   
+			   (if found?
+			       (#_XChangeProperty (h display)
+						  (#_.requestor request)
+						  (c-aref targets (1+ i))
+						  (c-aref targets i)
+						  8
+						  #_PropModeReplace
+						  selection-string
+						  (#_strlen selection-string))
+			       (setf (c-aref targets (1+ i)) #_None)))
+
+		  (#_XChangeProperty (h display)
+				     (#_.requestor request)
+				     (#_.property request)
+				     ATOM_PAIR
+				     32
+				     #_PropModeReplace
+				     targets
+				     count)
+
+		  (return-from write-target (#_.property request)))))
+
+	    (when (= (#_.target request) SAVE_TARGETS)
+
+	      (#_XChangeProperty (h display)
+				 (#_.requestor request)
+				 (#_.property request)
+				 NULL
+				 32
+				 #_PropModeReplace
+				 nil
+				 0)
+
+	      (return-from write-target (#_.property request)))
+
+	    ;; conversion to a data target was requested
+	    (loop for i from 0 below format-count
+		  when (= (cval-value (#_.target request)) (cval-value (c-aref formats i)))
+		    do (#_XChangeProperty  (h display)
+					   (#_.requestor request)
+					   (#_.property request)
+					   (#_.target request)
+					   8
+					   #_PropModeReplace
+					   selection-string
+					   (#_strlen selection-string))
+		       (return-from write-target (#_.property request)))
+
+	    #_None))))))
   
+(defun %handle-selection-request (display event)
+  (let ((request (#_.xselectionrequest event)))
 
+    (clet& ((&reply #_<XEvent>))
+      (setf (#_.type &reply) #_SelectionNotify)
+
+      (let ((&xselection (c->-addr &reply '#_xselection)))
+
+	(setf (#_.property &xselection) (%write-target-to-property display request)
+	      (#_.display &xselection) (#_.display request)
+	      (#_.requestor &xselection) (#_.requestor request)
+	      (#_.selection &xselection) (#_.selection request)
+	      (#_.target &xselection) (#_.target request)
+	      (#_.time &xselection) (#_.time request))
+
+	(#_XSendEvent (h display) (#_.requestor request) #_False 0 &reply)))))
+
+(defparameter *utf8-offsets*
+  (make-array 6 :initial-contents (list #x00000000 #x00003080 #x000e2080
+					#x03c82080 #xfa082080 #x82082080)))
+
+(defun decode-utf8-char (s)
+  (setq s (ccl::%inc-ptr (ptr-value s) (ptr-offset s)))
+  (let ((codepoint 0)
+	(count 0))
+
+    (loop do (setq codepoint (+ (ash codepoint 6) (ccl::%get-unsigned-byte s 0)))
+	     (ccl::%incf-ptr s 1)
+	     (incf count)
+	  while (= (logand (ccl::%get-unsigned-byte s 0) #xc0) #x80))
+
+    (assert (<= count 6))
+
+    (code-char (- codepoint (aref *utf8-offsets* (1- count))))))
+	 
 (defun process-event (display event)
-
   (block nil
+
     (let ((x11-state (display-x11-state display))
-	  (keycode)
+	  (x11-keycode)
 	  (filtered nil)
-	  (event-type (cval-value (#_.type event))))
+	  (event-type (#_.type event)))
       
       (when (or (= event-type #_KeyPress) (= event-type #_KeyRelease))
-	(setq keycode (#_.keycode (c->-addr event '#_xkey))))
+	(setq x11-keycode (#_.keycode (c->-addr event '#_xkey))))
 
       (setq filtered (#_XFilterEvent event #_None))
       
       (when (randr-available? x11-state)
-	(when (= event-type (+ (randr-event-base x11-state) #_RRNotify))
+	(when (= event-type (+ (cval-value (randr-event-base x11-state)) #_RRNotify))
 	  (#_XRRUpdateConfiguration event)
 	  (poll-x11-monitors display)
 	  (return)))
@@ -314,8 +458,8 @@
 		(unless (zerop (#_.mask_len (c->-addr re '#_valuators)))
 
 		  (let ((values (#_.raw_values re))
-			(xpos (virtual-cursor-xpos window))
-			(ypos (virtual-cursor-ypos window)))
+			(xpos (virtual-cursor-pos-x window))
+			(ypos (virtual-cursor-pos-y window)))
 
 		    (unless (zerop (#_XIMaskIsSet (#_.mask (c->-addr re '#_valuators)) 0))
 		      (setq xpos (+ xpos (c-aref values 0)))
@@ -325,199 +469,228 @@
 		      (setq ypos (+ ypos (c-aref values 0)))
 
 		      (handle-event window (make-instance 'pointer-motion-event
+							  :window window
 							  :x xpos
 							  :y ypos)))))))))
 
 	(return))
 
+      (print 'event-type)
+      (print event-type)
+      (finish-output)
+      
       (when (= event-type #_SelectionRequest)
 
-	(handle-selection-request display event)
+	(%handle-selection-request display event)
 	(return))
 
       (clet ((xw #_<Window>))
-	(when (zerop (#_XFindContext (h display)
-				     (#_.window (c->-addr event '#_any))
-				     (unique-context display)
-				     (c-addr-of xw)))
+	(unless (zerop (#_XFindContext (h display)
+				       (#_.window (c->-addr event '#_xany))
+				       (unique-context display)
+				       (c-addr-of xw)))
 	  (return))
-	
-	(let ((window (display-for-xdisplay (cval-value xw))))
+
+	(let ((window (window-from-window-handle (cval-value xw))))
 
 	  (case event-type
-
-	    (#.#_ReparentNotify (setf (window-parent window) (#_.parent (c->-addr event '#_xreparent)))
+	    
+	    (#.#_ReparentNotify
+	     (let ((new-parent (window-from-window-handle (#_.parent (c->-addr event '#_xreparent)))))
+	       (when new-parent
+		 (setf (window-parent window) new-parent)))
 	     (return))
 
 	    (#.#_KeyPress
-	     (let ((key (translate-key keycode))
-		   (mods (translate-state (#_.state (c->-addr event '#_xkey))))
-		   (plain (not (logtest mods (logior +ctrl-modifier+ +alt-modifier+)))))
+	     (let* ((key (translate-key display x11-keycode))
+		    (&xkey (c->-addr event '#_xkey))
+		    (mods (translate-x11-state (#_.state &xkey))))
 
 	       (if (window-input-context window)
 
 		   (progn
-		     (let ((diff (- (#_time (c->-addr event '#_xkey)) (aref (key-press-times window) keycode))))
+		     (let ((diff (- (#_time &xkey) (aref (key-press-times window) x11-keycode))))
 		   
-		       (when (or (= diff (#_time (c->-addr event '#_xkey))) (and (> diff 0) (< diff #.(ash 1 31))))
+		       (when (or (= diff (#_time &xkey)) (and (> diff 0) (< diff #.(ash 1 31))))
 			 
-			 (unless (zerop keycode)
+			 (unless (zerop x11-keycode)
 			   (handle-event window (make-instance 'key-press-event
-							       :key-name key 
-							       :mods mods)))))
+							       :window window
+							       :modifier-state mods
+							       :key-name key)))
+			 
+			 (setf (aref (key-press-times window) x11-keycode) (#_.time &xkey))))
 
-		     (unless filtered
+		     (when (zerop filtered)
 		     
 		       (let ((count)
 			     (chars))
 		     
 			 (clet ((status #_<Status>)
 				(buffer #_<char[100]>))
+			   (#_memset buffer 0 100)
 		       
 			   (setq chars buffer)
-		       
-			   (setq count (#_Xutf8LookupString (window-input-context window)
-							    (#_.key event)
-							    buffer 99
-							    nil &status))
+			   
+			   (setq count (#_XLookupString #+NIL(window-input-context window)
+							&xkey
+							buffer 99
+							nil (c-addr-of status)))
 
 			   (when (= (cval-value status) #_XBufferOverflow)
 			     (setq chars (#_malloc (1+ count)))
 			     (setq count  (#_Xutf8LookupString (window-input-context window)
-							       (#_.key event)
+							       &xkey
 							       chars count
-							       nil &status)))
-			   (when (or (= (cval-value status) #_XLookupChars)
+							       nil (c-addr-of status))))
+			   
+			   (when (or (= (cval-value status) 0 #+NIL #_XLookupChars)
 				     (= (cval-value status) #_XLookupBoth))
 
 			     (let ((c chars))
 			       (setf (c-aref chars count) 0)
-			       (loop while (< (- c chars) count)
-				     do (handle-event window 'character-event
-						      :character (decode-utf-8 c)
-						      :mods mods
-						      :plain plain))))
+			       ;;(loop while (< (- (ptr-value c) chars) count)
+			       (handle-event window (make-instance 'character-event
+								   :window window
+								   :key-name key
+								   :modifier-state mods
+								   :character
+								   (decode-utf8-char c)))))
 
-			   (unless (eq (cval-value chars) (cval-value buffer))
+			   (unless (equalp chars buffer)
 			     (#_free chars))))))
-
+		   
 		   (clet ((keysym #_<KeySym>))
 		     (#_XLookupString (#_.xkey event) nil 0 (c-addr-of keysym) nil)
 		     
 		     (handle-event window (make-instance 'key-press-event
+							 :window window
 							 :key-name key
-							 :mods mods))
+							 :modifier-state mods))
 
-		     (let ((codepoint (key-sym-to-unicode keysym)))
-		       (unless (eq codepoint :invalid)
+		     (let ((char (xkb-keysym-to-unicode keysym)))
+		       (when char
 			 (handle-event window (make-instance 'character-event
-							     :character codepoint
-							     :mods mods
-							     :plain plain))))))
+							     :window window
+							     :character char
+							     :modifier-state mods))))))
 
 	       (return)))
 
 	    (#.#_KeyRelease
-	     (let ((key (translate-key keycode))
-		   (mods (translate-state (#_state (c->-addr event '#_xkey)))))
+	     (let ((key (translate-key display x11-keycode))
+		   (mods (translate-x11-state (#_.state (c->-addr event '#_xkey)))))
 
-	       (unless (xkb-detectable? display)
+	       (unless (xkb-detectable? x11-state)
 
-		 (when (#_XEventsQueued xdisplay #_QueuedAfterReading)
+		 (when (#_XEventsQueued (h display) #_QueuedAfterReading)
 
 		   (clet& ((&next #_<XEvent>))
+		     (let ((&xkey (c->-addr &next '#_xkey)))
 			  
-		     (#_XEventPeek xdisplay &next)
+		       (#_XEventPeek (h display) &next)
 
-		     (when (and (= (#_.type &next) #_KeyPress)
-				(= (#_window (c->-addr &next '#_xkey))
-				   (#_window (c->-addr event '#_xkey)))
-				(= (#_.keycode (c->-addr &next '#_xkey)) keycode))
+		       (when (and (= (#_.type &next) #_KeyPress)
+				  (= (#_.window &xkey)
+				     (#_.window (c->-addr event '#_xkey)))
+				  (= (#_.keycode &xkey) x11-keycode))
 
-		       (when (< (#_time (c->-addr &next '#_xkey)) 20)
+			 (when (< (#_time &xkey) 20)
 
-			 ;; server generated repeat event
-			 (return)))))))
+			   ;; server generated repeat event
+			   (return)))))))
 
-	     (handle-event window (make-instance 'key-release-event
-						 :key key
-						 :keycode keycode
-						 :mods mods))
-	     (return))
+	       (handle-event window (make-instance 'key-release-event
+						   :window window
+						   :key-name key
+						   :modifier-state mods))
+	       (return)))
 
 	    (#.#_ButtonPress
 
-	     (let ((mods (translate-state (#_state (c->-addr event '#_xbutton))))
-		   (button (#_button (c->-addr event '#_xbutton))))
+	     (let ((mods (translate-x11-state (#_.state (c->-addr event '#_xbutton))))
+		   (button (#_.button (c->-addr event '#_xbutton))))
 
 	       (cond ((= button #_Button1)
 		      (handle-event window (make-instance 'pointer-button-press-event
+							  :window window
 							  :button +pointer-left-button+
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button2)
 		      (handle-event window (make-instance 'pointer-button-press-event
+							  :window window
 							  :button +pointer-middle-button+
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button3)
 		      (handle-event window (make-instance 'pointer-button-press-event
+							  :window window
 							  :button +pointer-right-button+
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button4)
 		      (handle-event window (make-instance 'pointer-wheel-event
+							  :window window
 							  :delta-y 1.0
 							  :delta-x 0.0
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button5)
 		      (handle-event window (make-instance 'pointer-wheel-event
+							  :window window
 							  :delta-y -1.0
 							  :delta-x 0.0
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button6)
 		      (handle-event window (make-instance 'pointer-wheel-event
+							  :window window
 							  :delta-x 1.0
 							  :delta-y 0.0
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button7)
 		      (handle-event window (make-instance 'pointer-wheel-event
+							  :window window
 							  :delta-x -1.0
 							  :delta-y 0.0
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     (t (handle-event window (make-instance 'pointer-button-press-event
+							    :window window
 							    :button (- button #_Button1 #_Button4)
-							    :mods mods))))
+							    :modifier-state mods))))
 
 	       (return)))
 
 	    (#.#_ButtonRelease
 
-	     (let ((mods (translate-state (#_state (c->-addr event '#_xbutton))))
-		   (button (#_button (c->-addr event '#_xbutton))))
+	     (let ((mods (translate-x11-state (#_.state (c->-addr event '#_xbutton))))
+		   (button (#_.button (c->-addr event '#_xbutton))))
 
 	       (cond ((= button #_Button1)
 		      (handle-event window (make-instance 'pointer-button-release-event
+							  :window window
 							  :button +pointer-left-button+
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button2)
 		      (handle-event window (make-instance 'pointer-button-release-event
+							  :window window
 							  :button +pointer-middle-button+
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     ((= button #_Button3)
 		      (handle-event window (make-instance 'pointer-button-release-event
+							  :window window
 							  :button +pointer-right-button+
-							  :mods mods)))
+							  :modifier-state mods)))
 
 		     (t (handle-event window (make-instance 'pointer-button-release-event
+							    :window window
 							    :button (- button #_Button1 #_Button4)
-							    :mods mods))))
+							    :modifier-state mods))))
 
 	       (return)))
 
@@ -529,9 +702,11 @@
 		 (update-cursor-image window))
 
 	       (handle-event window (make-instance 'pointer-enter-event
+						   :window window
 						   :x x
 						   :y y))
 	       (handle-event window (make-instance 'pointer-motion-event
+						   :window window
 						   :x x
 						   :y y))
 
@@ -543,8 +718,9 @@
 	    (#.#_LeaveNotify
 	     (let ((x (#_.x (c->-addr event '#_xcrossing)))
 		   (y (#_.y (c->-addr event '#_xcrossing))))
-	       
+
 	       (handle-event window (make-instance 'pointer-exit-event
+						   :window window
 						   :x x
 						   :y y))
 	       (return)))
@@ -554,8 +730,8 @@
 	     (let ((x (#_.x (c->-addr event '#_xmotion)))
 		   (y (#_.y (c->-addr event '#_xmotion))))
 
-	       (when (or (/= x (cursor-pos-warp-x window))
-			 (/= y (cursor-pos-warp-y window)))
+	       (when (or (/= x (cursor-warp-pos-x window))
+			 (/= y (cursor-warp-pos-y window)))
 		 ;; the cursor was moved by something other than CLUI
 		 (if (eq (window-cursor-mode window) :disabled)
 		     
@@ -568,12 +744,14 @@
 		       (when (last-raw-mouse-motion? window)
 			 (return))
 
-		       (handle-event window 'pointer-motion-event
-				     :x (+ (virtual-cursor-pos-x window) dx)
-				     :y (+ (virtual-cursor-pos-y window) dy)))
+		       (handle-event window (make-instance 'pointer-motion-event
+							   :window window
+							   :x (+ (virtual-cursor-pos-x window) dx)
+							   :y (+ (virtual-cursor-pos-y window) dy))))
 
-		     (handle-event window 'pointer-motion-event
-				   :x x :y y)))
+		     (handle-event window (make-instance 'pointer-motion-event
+							 :window window
+							 :x x :y y))))
 
 	       (setf (last-cursor-pos-x window) x)
 	       (setf (last-cursor-pos-y window) y)
@@ -583,27 +761,28 @@
 
 	     (let ((&xconfigure (c->-addr event '#_xconfigure)))
 	       
-	       (when (or (=/ (#_.width &xconfigure) (last-width window))
-			 (=/ (#_.height &xconfigure) (last-height window)))
+	       (when (or (/= (#_.width &xconfigure) (last-width window))
+			 (/= (#_.height &xconfigure) (last-height window)))
 
 		 (handle-event window (make-instance 'window-resize-event
-						     :width (#_.width &xconfigure)
-						     :height (#_.height &xconfigure)))
+						     :window window
+						     :new-width (#_.width &xconfigure)
+						     :new-height (#_.height &xconfigure)))
 
-		 (setf (window-width window) (#_.width &xconfigure)
-		       (window-height window) (#_.height &xconfigure)))
+		 (setf (last-width window) (#_.width &xconfigure)
+		       (last-height window) (#_.height &xconfigure)))
 
 	       (clet ((xpos #_<int> (#_.x &xconfigure))
 		      (ypos #_<int> (#_.y &xconfigure)))
 
 		 (when (and (zerop (#_.send_event (c->-addr event '#_xany)))
-			    (not (= (h (window-parent window)) (default-root-window-handle display))))
+			    (not (eq (window-parent window) (window-root window))))
 
 		   (%grab-x11-error-handler display)
 
 		   (clet& ((&dummy #_<Window>))
 
-		     (#_XTranslateCoordinates xdisplay (h (window-parent window))
+		     (#_XTranslateCoordinates (h display) (h (window-parent window))
 					      xpos ypos
 					      (c-addr-of xpos) (c-addr-of ypos)
 					      &dummy))
@@ -613,61 +792,74 @@
 		   (when (= (display-error-code display) #_BadWindow)
 		     (return))
 
-		   (when (or (/= (last-xpos window) (cval-value xpos))
-			     (/= (last-ypos window) (cval-value ypos)))
+		   (when (or (/= (last-pos-x window) (cval-value xpos))
+			     (/= (last-pos-y window) (cval-value ypos)))
 		     
-		     (handle-event window (make-instance 'window-position-event
-							 :x (cval-value xpos)
-							 :y (cval-value ypos)))
+		     (handle-event window (make-instance 'window-move-event
+							 :window window
+							 :new-x (cval-value xpos)
+							 :new-y (cval-value ypos)))
 
-		     (setf (window-last-xpos window) (cval-value xpos)
-			   (window-last-ypos window) (cval-value ypos)))
+		     (setf (last-pos-x window) (cval-value xpos)
+			   (last-pos-y window) (cval-value ypos)))
 
 		   (return)))))
 
 	    (#.#_ClientMessage
 
-	     (when filtered
+	     (unless (zerop filtered)
 	       (return))
 
-	     (when (= (#_.message_type (c->-addr event '#_xclient)) #_None)
-	       (return))
+	     (let ((&xclient (c->-addr event '#_xclient)))
+	       
+	       (when (= (#_.message_type &xclient) #_None)
+		 (return))
 
-	     (with-slots (WM_PROTOCOLS
-			  WM_DELETE_WINDOW
-			  NET_WM_PING)
-		 (display-window-manager display)
+	       (with-slots (WM_PROTOCOLS
+			    WM_DELETE_WINDOW
+			    NET_WM_PING)
+		 
+		   (display-window-manager display)
+
+		 (with-slots (XdndEnter
+			      XdndDrop
+			      XdndPosition)
+
+		     (display-drag-and-drop display)
 	     
-	       (cond ((= (#_.message_type (c->-addr event '#_xclient)) WM_PROTOCOLS)
-		      (let ((protocol (c-aref (c->-addr (c->-addr (c->-addr event '#_xclient) '#_data) '#_l) 0)))
+		   (cond ((= (#_.message_type &xclient) WM_PROTOCOLS)
+			  (let ((protocol (cval-value (c-aref (#_.l (c->-addr &xclient '#_data)) 0))))
 
-			(cond ((= protocol #_None) (return))
+			    (cond ((= protocol #_None) (return))
 			      
-			      ((= protocol WM_DELETE_WINDOW)
-			       (handle-event window (make-instance 'window-close-event)))
+				  ((= protocol WM_DELETE_WINDOW)
+				   (handle-event window (make-instance 'window-close-event
+								       :window window)))
 			      
-			      ((= protocol NET_WM_PING)
+				  ((= protocol NET_WM_PING)
 
-			       (let ((reply event))
-				 (setf (#_.window (c->-addr reply '#_xclient)) (h (window-root window)))
+				   (let ((reply event))
+				     (setf (#_.window (c->-addr reply '#_xclient)) (h (window-parent window)))
 
-				 (#_XSendEvent xdisplay (h (window-root window))
-					       #_False
-					       (logior #_SubstructureNotifyMask #_SubstructureRedirectMask)
-					       reply))))))
+				     (#_XSendEvent (h display) (h (window-parent window))
+						   #_False
+						   (logior #_SubstructureNotifyMask #_SubstructureRedirectMask)
+						   reply))))))
 
-		     ((= (#_.message_type (c->-addr event '#_xclient)) XdndEnter))
+			 ((= (#_.message_type &xclient) XdndEnter))
 
-		     ((= (#_.message_type (c->-addr event '#_xclient)) XdndDrop))
+			 ((= (#_.message_type &xclient) XdndDrop))
 
-		     ((= (#_.message_type (c->-addr event '#_xclient)) XdndPosition)))))
+			 ((= (#_.message_type &xclient) XdndPosition)))))))
 
 	    (#.#_SelectionNotify
 
-	     (if (= (#_.property (c->-addr event '#_xselection)) XdndSelection)
-		 'foo
-		 'bar)
-	     (return))
+	     (with-slots (XdndSelection)
+		 (display-drag-and-drop display)
+	       (if (= (#_.property (c->-addr event '#_xselection)) XdndSelection)
+		   'foo
+		   'bar)
+	       (return)))
 
 	    (#.#_FocusIn
 	     (when (or (= (#_.mode (c->-addr event '#_xfocus)) #_NotifyGrab)
@@ -675,13 +867,14 @@
 	       ;; Ignore focus events from popup indicator windows, window menu, key chords and window dragging
 	       (return))
 
-	     (cond ((eq (window-cursor-mode window) :disabled) (disable-x11-cursor window))
-		   ((eq (window-cursor-mode window) :captured) (capture-x11-cursor window)))
+	     (cond ((eq (window-cursor-mode window) :disabled) (disable-cursor window))
+		   ((eq (window-cursor-mode window) :captured) (capture-cursor window)))
 
 	     (when (window-input-context window)
 	       (#_XSetICFocus (window-input-context window)))
 
-	     (handle-event window (make-instance 'window-focus-event))
+	     (handle-event window (make-instance 'window-focus-event
+						 :window window))
 	     (return))
 
 	    (#.#_FocusOut
@@ -690,71 +883,131 @@
 	       ;; Ignore focus events from popup indicator windows, window menu, key chords and window dragging
 	       (return))
 
-	     (cond ((eq (window-cursor-mode window) :disabled) (enable-x11-cursor window))
-		   ((eq (window-cursor-mode window) :captured) (release-x11-cursor window)))
+	     (cond ((eq (window-cursor-mode window) :disabled) (enable-cursor window))
+		   ((eq (window-cursor-mode window) :captured) (release-cursor window)))
 
 	     (when (window-input-context window)
 	       (#_XUnsetICFocus (window-input-context window)))
 
-	     (when (and (window-monitor window) (window-auto-iconify? window))
-	       (iconify-x11-window window))
+	     (when (and (window-monitor window) (auto-iconify? window))
+	       (setf (window-iconified? window) t))
 
-	     (handle-event window (make-instance 'window-defocus-event))
+	     (handle-event window (make-instance 'window-defocus-event
+						 :window window))
 	     (return))	     
 
 	    (#.#_Expose
-	     (handle-event window (make-instance 'window-repaint-event)))
+	     (handle-event window (make-instance 'window-repaint-event
+						 :window window)))
 
 	    (#.#_PropertyNotify
 	     
 	     (when (= (#_.state (c->-addr event '#_xproperty)) #_PropertyNewValue)
 	       (return))
 
-	     (cond ((= (#_.atom (c->-addr event '#_xproperty)) WM_STATE)
-		    (let ((state (get-x11-window-state window)))
-		      (unless (or (eq state :iconic) (eq state :normal))
-			(return)))
+	     (with-slots (WM_STATE NET_WM_STATE)
+		 (display-window-manager display)
+
+	       (cond ((= (#_.atom (c->-addr event '#_xproperty)) WM_STATE)
+		      (let ((state (get-x11-window-iconified window)))
+			
+			(unless (or (eq state :iconic) (eq state :normal))
+			  (return))
 		    
-		    (let ((iconified? (eq state :iconic)))
+			(let ((iconified? state))
 		      
-		      (if (window-monitor window)
+			  (if (window-monitor window)
 			  
+			      (if iconified?
+				  (release-monitor window (window-monitor window))
+				  (acquire-monitor window (window-monitor window))))
+
+			  (setf (last-iconified? window) iconified?)
+
 			  (if iconified?
-			      (release-x11-monitor window (window-monitor window))
-			      (acquire-x11-monitor window)))
+			      (handle-event window (make-instance 'window-iconify-event
+								  :window window
+								  :new-width 0
+								  :new-height 0))
+			      (handle-event window (make-instance 'window-restore-event))))))
+		   
+		     ((= (#_.atom (c->-addr event '#_xproperty)) NET_WM_STATE)
 
-		      (setf (last-iconified window) iconified?)
+		      (let ((maximized? (window-maximized? window)))
 
-		      (if iconified?
-			  (handle-event window (make-instance 'window-iconify-event))
-			  (handle-event window (make-instance 'window-restore-event)))))
-		   ((= (#_.atom (c->-addr event '#_xproperty)) NET_WM_STATE)
+			(when (not (eq (last-maximized? window) maximized?))
 
-		    (let ((maximized? (get-x11-window-maximized window)))
+			  (setf (window-maximized? window) maximized?)
 
-		      (when (not (eq (last-maximized? window) maximized?))
-
-			(set-x11-window-maximized window maximized?)
-
-			(if maximized?
-			    (handle-event window (make-instance 'window-maximize-event))
-			    (handle-event window (make-instance 'window-restore-event)))))))
-	     (return))	       
+			  (if maximized?
+			      (handle-event window (make-instance 'window-maximize-event
+								  :window window))
+			      (handle-event window (make-instance 'window-restore-event
+								  :window window))))))))
+	     (return))
 
 	    (#.#_DestroyNotify
-	     (return))))))))				   
-		       
-			 
-	     
+	     (return))))))))
 
+(defun poll-x11-events (display)
 
-		     
-		     
-	     
+  (let ((xdisplay (h display)))
 
-	    
-	      
-	  
-      
+    (drain-empty-events display)
 
-    
+    (#_XPending xdisplay)
+
+    (loop until (zerop (#_QLength xdisplay))
+	  do (clet ((event #_<XEvent>))
+
+	       (#_XNextEvent xdisplay (c-addr-of event))
+	       (process-event display (c-addr-of event))))
+
+    (let ((window (disabled-cursor-window display)))
+
+      (when window
+
+	(multiple-value-bind (width height)
+	    (get-x11-window-size window)
+
+	  (when (or (/= (last-cursor-pos-x window) (/ width 2))
+		    (/= (last-cursor-pos-y window) (/ height 2)))
+
+	    (set-x11-cursor-pos window (/ width 2) (/ height 2))))))
+
+    (#_XFlush xdisplay)
+    (values)))
+
+(defun set-x11-cursor-pos (window x y)
+  (setf (cursor-warp-pos-x window) x
+	(cursor-warp-pos-y window) y)
+
+  (let ((xdisplay (h (window-display window))))
+    (#_XWarpPointer xdisplay (h window) 0 0 0 0 (round x) (round y))
+    (#_XFlush xdisplay)
+    (values)))
+
+(defun get-x11-cursor-pos (window)
+  (clet ((root #_<Window>)
+	 (child #_<Window>)
+	 (root-x #_<int>)
+	 (root-y #_<int>)
+	 (child-x #_<int>)
+	 (child-y #_<int>)
+	 (mask #_<unsigned int>))
+
+    (#_XQueryPointer (h (window-display window)) (h window)
+		     (c-addr-of root) (c-addr-of child)
+		     (c-addr-of root-x) (c-addr-of root-y)
+		     (c-addr-of child-x) (c-addr-of child-y)
+		     (c-addr-of mask))
+
+    (values (cval-value child-x) (cval-value child-y))))
+
+(defun wait-x11-events (display &optional (timeout nil))
+  (wait-for-any-event display timeout)
+  (poll-x11-events display))
+
+(defun run (&optional (display (default-display)))
+  (loop 
+	(wait-x11-events display)))

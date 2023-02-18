@@ -5,7 +5,8 @@
   (noffi::noffi-syntax t))
 
 
-(defun poll-posix (fds count timeout)  ;; timeout is in seconds
+(defun poll-posix (fds count &optional (timeout nil))  ;; timeout is in seconds
+  (unless timeout (setq timeout most-positive-double-float))
   (setq timeout (coerce timeout 'double-float))
   (loop
     do (if timeout

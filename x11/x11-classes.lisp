@@ -46,8 +46,23 @@
    (xkb-available? :initform nil
 		   :accessor xkb-available?)
 
+   (xkb-major-opcode :initform nil
+		    :accessor xkb-major-opcode)
+
    (xkb-event-base :initform nil
 		   :accessor xkb-event-base)
+
+   (xkb-error-base :initform nil
+		   :accessor xkb-error-base)
+
+   (xkb-major :initform nil
+	      :accessor xkb-major)
+
+   (xkb-minor :initform nil
+	      :accessor xkb-minor)
+
+   (xkb-detectable? :initform nil
+		    :accessor xkb-detectable?)
 
    (xkb-group :initform nil
 	      :accessor xkb-group)))
@@ -103,11 +118,8 @@
    (PRIMARY)
    (CLIPBOARD_MANAGER)
    (SAVE_TARGETS)
-   (NULL)
-   (UTF8_STRING)
-   (COMPOUND_STRING)
    (ATOM_PAIR)
-   (CLUI_SELECTION)))
+   (COMPOUND_STRING)))
 
 (defclass x11:server-mixin (clui:display-mixin clui:handle-mixin)
   ((display-name :initarg :display-name
@@ -146,9 +158,11 @@
 	 :accessor display-drag-and-drop)
 
    (clipboard-manager :initform (make-instance 'clipboard-manager)
-		      :accessor display-clipboard-manager)))
+		      :accessor display-clipboard-manager)
 
-   
+   (UTF8_STRING :initform nil)
+   (NULL :initform nil)
+   (CLUI_SELECTION :initform nil)))   
 
 (defun default-screen-id (display)
   (screen-id (default-screen display)))
@@ -184,17 +198,20 @@
   ((%cursor-pos-x :initform nil :accessor last-cursor-pos-x)
    (%cursor-pos-y :initform nil :accessor last-cursor-pos-y)
 
-   (cursor-pos-warp-x :initform nil
-		      :accessor cursor-pos-warp-x)
+   (cursor-warp-pos-x :initform nil
+		      :accessor cursor-warp-pos-x)
 
-   (cursor-pos-warp-y :initform nil
-		      :accessor cursor-pos-warp-y)
+   (cursor-warp-pos-y :initform nil
+		      :accessor cursor-warp-pos-y)
    
    (input-context :initform nil
 		  :accessor window-input-context)
 
    (colormap :initform nil
-	     :accessor window-colormap)))
+	     :accessor window-colormap)
+
+   (key-press-times :initform (make-array 256 :initial-element 0)
+		    :reader key-press-times)))
 
 (defmethod initialize-instance :after ((instance x11:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-native-x11-window instance initargs)

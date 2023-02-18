@@ -89,7 +89,21 @@
 
    (disabled-cursor-window
     :accessor disabled-cursor-window
-    :initform nil)))
+    :initform nil)
+
+   (keycodes :initform (make-array 512 :initial-element nil)
+	     :reader display-keycodes)
+
+   (scancodes :initform (make-array 256 :initial-element nil)
+	      :reader display-scancodes)
+
+   (keynames :initform (let ((array (make-array 256)))
+			 (loop for i from 0 below 256
+			       do (setf (aref array i)
+					(make-array 5 :initial-element nil))
+			       finally (return array)))
+	     :reader display-keynames)))
+			
 
 (defun default-screen (display)
   (first (display-screens display)))
@@ -100,7 +114,12 @@
     screen))
 
 (defclass screen-mixin ()
-  ((display :initarg :display :accessor screen-display)))
+  ((display :initarg :display
+	    :reader screen-display
+	    :reader window-display)))
+
+(defmethod window-root ((screen screen-mixin))
+  screen)
 
 (defclass handle-mixin ()
   ((handle :initarg :h :accessor h)))
@@ -192,6 +211,7 @@
 (defclass window-mixin (rect-mixin)
   ((display :initarg :display :reader window-display)
    (parent :initarg :parent :accessor window-parent)
+   (root :initarg :root :accessor window-root)
    (next :type (or null window-mixin) :accessor window-next)
    (auto-iconify? :type boolean :initform nil :accessor auto-iconify?)
    (focus-on-show? :type boolean :initform t :accessor focus-on-show?)
@@ -214,11 +234,12 @@
    (keys)
    )
   (:default-initargs :display (default-display)))
+   
 		  
 
 (defclass os-window-mixin (window-mixin)
-  ((%xpos :type (or null real) :initform nil :accessor last-xpos)
-   (%ypos :type (or null real) :initform nil :accessor last-ypos)
+  ((%x :type (or null real) :initform nil :accessor last-pos-x)
+   (%y :type (or null real) :initform nil :accessor last-pos-y)
    (%width :type (or null real) :initform nil :accessor last-width)
    (%height :type (or null real) :initform nil :accessor last-height)
    (%maximized? :type boolean :initform nil :accessor last-maximized?)
@@ -281,8 +302,8 @@
 		      focus-on-show? center-cursor? mouse-passthrough?
 		      monitor share frame-name key-menu clear-color
 		      retina?))
-  (apply #'initialize-os-window window initargs)
   (call-next-method)
+  (apply #'initialize-os-window window initargs)
   window)
 
 (defclass constant-refresh-os-window-mixin ()

@@ -376,6 +376,8 @@
       (unless (initialize-tis app)
 	(return-from init-cocoa nil))
 
+      (setf (default-screen app) (make-instance 'screen :display app))
+
       t)))
 
 (defun update-unicode-data (app kPropertyUnicodeKeyLayoutData)

@@ -33,6 +33,8 @@
 	((windows-vista-or-greater?)
 	 (#_SepProcessDPIAware)))
 
+  (setf (default-screen display) (make-instance 'screen :display display))
+
   t)
 
   

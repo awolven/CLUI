@@ -180,7 +180,7 @@
 			   :h root
 			   :display display
 			   :screen-id screen-id))
-      
+
       (setf (unique-context display) (#_XUniqueContext))
       
       (setf (display-content-scale display) (get-x11-display-content-scale display))
@@ -223,6 +223,9 @@
 	    (setf (randr-monitor-broken? x11-state) t))
 
 	  (#_XRRFreeScreenResources sr)))
+
+      (when (and (randr-available? x11-state) (not (randr-monitor-broken? x11-state)))
+	(#_XRRSelectInput xdisplay root #_RROutputChangeNotifyMask))
 		
 		      
       #+CCL (ccl:open-shared-library xcursor-lib)
@@ -235,49 +238,80 @@
 	       (&minor (c-addr-of minor)))
 	  (unless (zerop (#_XineramaQueryExtension xdisplay &major &minor))
 	    (setf (xinerama-major x11-state) (cval-value major)
-		  (xinerama-minor x11-state) (cval-value minor)))))
+		  (xinerama-minor x11-state) (cval-value minor))
+	    (unless (zerop (#_XineramaIsActive xdisplay))
+	      (setf (xinerama-available? x11-state) t)))))
     
       #+CCL (ccl:open-shared-library x11-xcb-lib)
       
       #+CCL (ccl:open-shared-library xrender-lib)
       
       #+CCL (ccl:open-shared-library xext-lib)
-      
-      (create-helper-x11-window display)
-      (create-hidden-x11-cursor display)
 
-      (unless (zerop (#_XSupportsLocale))
-	(#_XSetLocaleModifiers "")
+      (clet ((major-opcode #_<int>)
+	     (event-base #_<int>)
+	     (error-base #_<int>)
+	     (major #_<int> 1)
+	     (minor #_<int> 0))
+	(unless (zerop (#_XkbQueryExtension xdisplay
+					    (c-addr-of major-opcode)
+					    (c-addr-of event-base)
+					    (c-addr-of error-base)
+					    (c-addr-of major)
+					    (c-addr-of minor)))
+	  (setf (xkb-available? x11-state) t
+		(xkb-major-opcode x11-state) (cval-value major-opcode)
+		(xkb-event-base x11-state) (cval-value event-base)
+		(xkb-error-base x11-state) (cval-value error-base)
+		(xkb-major x11-state) (cval-value major)
+		(xkb-minor x11-state) (cval-value minor))
 
-	(#_XRegisterIMInstantiateCallback xdisplay
-					  nil nil nil
-					  input-method-instantiate-callback
-					  nil))
+	  (clet ((supported #_<Bool>))
+
+	    (unless (zerop (#_XkbSetDetectableAutoRepeat xdisplay #_True (c-addr-of supported)))
+	      (unless (zerop (cval-value supported))
+		(setf (xkb-detectable? x11-state) t))))
+
+	  (clet ((state #_<XkbStateRec>))
+
+	    (unless (zerop (#_XkbGetState xdisplay #_XkbUseCoreKbd (c-addr-of state)))
+	      (setf (xkb-group x11-state) (c-cast '#_<unsigned int> (#_.group state))))
+
+	    (#_XkbSelectEventDetails xdisplay #_XkbUseCoreKbd #_XkbStateNotify
+				     #_XkbGroupStateMask #_XkbGroupStateMask))))
+
+	    
+
+      (create-x11-key-tables display)
 
       (with-slots (NULL
 		   UTF8_STRING
 		   ATOM_PAIR
-		   CLUI_SELECTION
-		   TARGETS
+		   CLUI_SELECTION)
+	  display
+	
+      	(setf NULL (#_XInternAtom xdisplay "NULL" #_False)
+	      UTF8_STRING (#_XInternAtom xdisplay "UTF8_STRING" #_False)
+	      CLUI_SELECTION (#_XInternAtom xdisplay "CLUI_SELECTION" #_False)))
+
+      (with-slots (TARGETS
 		   MULTIPLE
 		   PRIMARY
 		   INCR
 		   CLIPBOARD
 		   CLIPBOARD_MANAGER
+		   ATOM_PAIR
 		   SAVE_TARGETS)
 
 	  (display-clipboard-manager display)
 
-	(setf NULL (#_XInternAtom xdisplay "NULL" #_False)
-	      UTF8_STRING (#_XInternAtom xdisplay "UTF8_STRING" #_False)
-	      ATOM_PAIR (#_XInternAtom xdisplay "ATOM_PAIR" #_False)
-	      CLUI_SELECTION (#_XInternAtom xdisplay "CLUI_SELECTION" #_False)
-	      TARGETS (#_XInternAtom xdisplay "TARGETS" #_False)
+	(setf TARGETS (#_XInternAtom xdisplay "TARGETS" #_False)
 	      MULTIPLE (#_XInternAtom xdisplay "MULTIPLE" #_False)
 	      PRIMARY (#_XInternAtom xdisplay "PRIMARY" #_False)
 	      INCR (#_XInternAtom xdisplay "INCR" #_False)
 	      CLIPBOARD (#_XInternAtom xdisplay "CLIPBOARD" #_False)
 	      CLIPBOARD_MANAGER (#_XInternAtom xdisplay "CLIPBOARD_MANAGER" #_False)
+	      ATOM_PAIR (#_XInternAtom xdisplay "ATOM_PAIR" #_False)
 	      SAVE_TARGETS (#_XInternAtom xdisplay "SAVE_TARGETS" #_False)))
 
       (with-slots (XdndAware
@@ -336,6 +370,17 @@
 	      NET_WM_CM_Sx (#_XInternAtom xdisplay (format nil "_NET_WM_CM_S~A" screen-id) #_False)))
 		
       (%detect-EWMH display)
+
+      (create-helper-x11-window display)
+      (create-hidden-x11-cursor display)
+
+      (unless (zerop (#_XSupportsLocale))
+	(#_XSetLocaleModifiers "")
+
+	(#_XRegisterIMInstantiateCallback xdisplay
+					  nil nil nil
+					  input-method-instantiate-callback
+					  nil))
 					
 
       (setf (x11-initialized? x11-state) t))))

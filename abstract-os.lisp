@@ -1,5 +1,12 @@
 (in-package :clui)
 
+(defun translate-key (display scancode)
+  (when (or (< scancode 0) (> scancode 255))
+    (return-from translate-key nil))
+  (aref (display-keycodes display) scancode))
+
+
+
 (defun initialize-os-window (window &rest args
 			     &key (width 640) (height 480) (title "clui")
 			     (display (default-display))
@@ -120,31 +127,57 @@
 (defun update-cursor-image (window)
   #+windows(update-win32-cursor-image window))
 
-(defun release-cursor (app)
-  #+windows(release-win32-cursor app))
+#+win32
+(defmethod release-cursor ((display win32:desktop-mixin))
+  (release-win32-cursor display))
+
+#+cocoa
+(defmethod release-cursor ((display cocoa:desktop-mixin))
+  (release-cocoa-cursor display))
+
+#+x11
+(defmethod release-cursor ((display x11:server-mixin))
+  (release-x11-cursor display))
+
+#+x11
+(defmethod enable-raw-mouse-motion ((window x11:window-mixin))
+  (enable-x11-raw-mouse-motion window))
+  
 
 (defun enable-cursor (window)
   (when (last-raw-mouse-motion? window)
     (enable-raw-mouse-motion window))
-  (setf (disabled-cursor-window (window-display window)) nil)
-  (release-cursor (window-display window))
-  (set-os-window-cursor-pos window
-			    (restore-cursor-pos-x (window-display window))
-			    (restore-cursor-pos-y (window-display window)))
-  (update-cursor-image window)
-  (values))
+
+  (let ((display (window-display window)))
+    
+    (setf (disabled-cursor-window display) nil)
+    
+    (release-cursor display)
+    
+    (set-window-cursor-position window
+				(restore-cursor-pos-x display)
+				(restore-cursor-pos-y display))
+    (update-cursor-image window)
+    (values)))
 
 (defun disable-cursor (window)
-  (setf (disabled-cursor-window (window-display window)) window)
-  (multiple-value-bind (x y) (get-os-window-cursor-pos window)
-    (setf (restore-cursor-pos-x (window-display window)) x
-	  (restore-cursor-pos-y (window-display window)) y)
-    (update-cursor-image window)
-    (center-cursor-in-content-area window)
-    (capture-cursor window)
-    (when (last-raw-mouse-motion? window)
-      (enable-raw-mouse-motion window))
-    (values)))
+  (when (last-raw-mouse-motion? window)
+    (enable-raw-mouse-motion window))
+
+  (let ((display (window-display window)))
+  
+    (setf (disabled-cursor-window display) window)
+  
+    (multiple-value-bind (x y) (window-cursor-position window)
+    
+      (setf (restore-cursor-pos-x display) x
+	    (restore-cursor-pos-y display) y)
+    
+      (update-cursor-image window)
+      (center-cursor-in-content-area window)
+      (capture-cursor window)
+    
+      (values))))
 
 (defun maybe-acquire-monitor (window)
   (let ((monitor (window-monitor window)))

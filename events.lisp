@@ -21,7 +21,10 @@
 ;; window-event
 
 (defclass window-event-mixin (event-mixin)
-  ((region :initarg :region
+  ((window :initarg :window
+	   :accessor event-window)
+   
+   (region :initarg :region
 	   :initform nil
 	   :accessor window-event-region)
    
@@ -68,9 +71,8 @@
 (defclass clui.v0:window-iconify-event (window-iconify-event-mixin)
   ())
 
-(defmethod handle-event ((window window-mixin) (event window-iconify-event-mixin))
+(defmethod handle-event :before ((window window-mixin) (event window-iconify-event-mixin))
   (maybe-release-monitor window)
-  (call-next-method)
   (values))
 
 (defclass window-deiconify-event-mixin (window-resize-event-mixin)
@@ -79,9 +81,8 @@
 (defclass clui.v0:window-deiconify-event (window-deiconify-event-mixin)
   ())
 
-(defmethod handle-event ((window window-mixin) (event window-deiconify-event-mixin))
+(defmethod handle-event :before ((window window-mixin) (event window-deiconify-event-mixin))
   (maybe-acquire-monitor window)
-  (call-next-method)
   (values))
 
 (defclass window-maximize-event-mixin (window-resize-event-mixin)
@@ -148,6 +149,15 @@
 
 (defclass window-close-event-mixin (window-manager-event-mixin)
   ())
+
+(defmethod handle-event :before ((window os-window-mixin) (event window-close-event-mixin))
+  (setf (should-close? window) t)
+  (values))
+
+(defmethod handle-event :after ((window os-window-mixin) (event window-close-event-mixin))
+  (when (should-close? window)
+    (destroy-window window))
+  (values))
 
 (defclass clui.v0:window-close-event (window-close-event-mixin)
   ())
@@ -270,15 +280,13 @@
 (defclass clui.v0:pointer-exit-event (pointer-exit-event-mixin)
   ())
 
-(defconstant +left-shift-modifier+ (ash 1 0))
-(defconstant +right-shift-modifier+ (ash 1 1))
-(defconstant +left-ctlr-modifier+ (ash 1 2))
-(defconstant +right-ctrl-modifier+ (ash 1 3))
-(defconstant +left-alt-modifier+ (ash 1 4))
-(defconstant +right-alt-modifier+ (ash 1 4))
-(defconstant +left-meta-modifier+ (ash 1 5))
-(defconstant +right-meta-modifier+ (ash 1 5))
-(defconstant +super-modifier+ (ash 1 6))
+(defconstant +shift-modifier+ (ash 1 0))
+(defconstant +ctrl-modifier+ (ash 1 1))
+(defconstant +alt-modifier+ (ash 1 2))
+(defconstant +meta-modifier+ (ash 1 3))
+(defconstant +super-modifier+ (ash 1 4))
+(defconstant +caps-lock-modifier+ (ash 1 5))
+(defconstant +num-lock-modifier+ (ash 1 6))
 (defconstant +hyper-modifier+ (ash 1 7))
 
 (defclass keyboard-event-mixin (input-event-mixin)
@@ -292,7 +300,19 @@
 (defclass key-press-event-mixin (keyboard-event-mixin)
   ())
 
+(defclass clui.v0:key-press-event (key-press-event-mixin)
+  ())
+
 (defclass key-release-event-mixin (keyboard-event-mixin)
+  ())
+
+(defclass clui.v0:key-release-event (key-release-event-mixin)
+  ())
+
+(defclass character-event-mixin (keyboard-event-mixin)
+  ())
+
+(defclass clui.v0:character-event (character-event-mixin)
   ())
 
 (defclass joystick-event-mixin (input-event-mixin)

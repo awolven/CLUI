@@ -139,6 +139,7 @@
    (:file "wayland/wayland-package")
    (:file "x11/x11-classes")
    (:file "x11/x11-display")
+   (:file "x11/x11-keyboard")
    (:file "x11/x11-init")
    (:file "x11/x11-window")
    (:file "x11/x11-monitor")

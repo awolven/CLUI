@@ -5,10 +5,10 @@
   (noffi-syntax t))
 
 ;;#_{extern XIC XCreateIC (XIM,
+;;			 char *, long,
 ;;			 char *, unsigned long,
 ;;			 char *, unsigned long,
 ;;			 char *, void *,
-;;			 char *, long,
 ;;			 void *);
 ;;}
 
@@ -84,7 +84,7 @@
 }
 )
 
-(defun get-x11-window-state (window)
+(defun get-x11-window-iconified (window)
   (let ((result #_WithdrawnState)
 	(display (window-display window)))
 
@@ -148,18 +148,18 @@
       (setf (#_.callback &callback) input-context-destroy-callback)
       (setf (#_.client_data &callback) (cons-ptr (ccl::%int-to-ptr window-handle)
 						 0 '#_<XPointer>))
-      (when (display-input-method display)
-	(setf (window-input-context window)
-	      (#_XCreateIC (display-input-method display)
-			   #_XNClientWindow
-			   window-handle
-			   #_XNFocusWindow
-			   window-handle
-			   #_XNDestroyCallback
-			   &callback
-			   #_XNInputStyle
-			   (logior #_XIMPreeditNothing #_XIMStatusNothing)
-			   nil)))
+
+      (setf (window-input-context window)
+	    (#_XCreateIC (display-input-method display)
+			 #_XNInputStyle
+			 (logior #_XIMPreeditNothing #_XIMStatusNothing)
+			 #_XNClientWindow
+			 window-handle
+			 #_XNFocusWindow
+			 window-handle
+			 #_XNDestroyCallback
+			 &callback
+			 nil))
 
       (let ((ic (window-input-context window)))
 	(when ic
@@ -167,10 +167,9 @@
 	    (#_XGetWindowAttributes xdisplay window-handle &attribs)
 	    
 	    (clet ((filter #_<unsigned long>))
-	      (let (#+NIL(one (ccl::make-cstring #_XNFilterEvents)))
-		(unless (#_XGetICValues ic #_XNFilterEvents (c-addr-of filter) nil)
-		  (#_XSelectInput xdisplay window-handle
-				  (logior (#_.your_event_mask &attribs) (cval-value filter)))))))))
+	      (when (null (#_XGetICValues ic #_XNFilterEvents (c-addr-of filter) nil))
+		(#_XSelectInput xdisplay window-handle
+				(logior (#_.your_event_mask &attribs) (cval-value filter))))))))
       (values))))
 
 (defun create-native-x11-window (window
@@ -183,31 +182,34 @@
 
 (defun %create-native-x11-window (window
 				  &rest initargs
-				  &key (display (window-display window))
-				    (visual (#_DefaultVisual (h display) (default-screen-id display)))
+				  &key
+				    display
+				    parent
+				    root
+				    (visual (#_DefaultVisual (h display) (screen-id root)))
 				    (title "CLUI")
 				    (xpos nil)
 				    (ypos nil)
 				    (width 640)
 				    (height 480)
-				    (depth (#_DefaultDepth (h display) (default-screen-id display)))
+				    (depth (#_DefaultDepth (h display) (screen-id root)))
 				    (decorated? t)
 				    (resizable? t)
 				    (floating? nil)
 				    (maximized? nil)
 				    instance-name
 				    class-name
-				    (parent (default-screen display))
-				    (scale-to-monitor? t))
+				    (scale-to-monitor? t)
+				  &allow-other-keys)
 
   (declare (ignore initargs))
 
   (let ((xdisplay (h display))
-	(root (default-root-window-handle display)))	 
+	(root (h root)))
 
-  (when scale-to-monitor?
-    (setq width (* width (display-content-scale display))
-	  height (* height (display-content-scale display))))
+    (when scale-to-monitor?
+      (setq width (* width (display-content-scale display))
+	    height (* height (display-content-scale display))))
 
     (setf (window-colormap window) (#_XCreateColormap xdisplay
 						      root
@@ -231,7 +233,7 @@
 
 	(unwind-protect
 	     (setf (h window) (#_XCreateWindow xdisplay
-					       (or (and parent (h parent)) root)
+					       (or (and parent (h parent)) (h root))
 					       (or (and xpos (round xpos)) 0)
 					       (or (and ypos (round ypos)) 0)
 					       (or (and width (round width)) 640)
@@ -248,9 +250,12 @@
 	(when (null (h window))
 	  (error "X11: Failed to create window."))
 
-	(#_XSaveContext xdisplay (h window)
-			(unique-context display)
-			xdisplay)
+	(setf (gethash (h window) *window-handle->window-table*) window)
+
+	(let ((xwindow (cons-ptr (ccl::%int-to-ptr (h window)) 0 '#_<XPointer>)))
+	  (#_XSaveContext xdisplay (h window)
+			  (unique-context display)
+			  xwindow))
 
 	(unless decorated?
 	  (set-x11-window-decorated window nil))
@@ -370,19 +375,25 @@
 				 XdndAware #_XA_ATOM 32
 				 #_PropModeReplace (c-addr-of version) 1)))
 
-	  (create-x11-input-context window)
+	  (when (display-input-method display)
+	    (create-x11-input-context window))
 
 
 	  (set-x11-window-title window title)
 
 
 	  (multiple-value-bind (xpos ypos) (get-x11-window-pos window)
-	    (setf (x window) xpos
-		  (y window) ypos))
+	    (setf (last-pos-x window) xpos
+		  (last-pos-y window) ypos))
 
 	  (multiple-value-bind (width height) (get-x11-window-size window)
-	    (setf (width window) width
-		  (height window) height))
+	    (setf (last-width window) width
+		  (last-height window) height))
+
+	  (multiple-value-bind (x y) (get-x11-cursor-pos window)
+	    (setf (cursor-warp-pos-x window) x
+		  (cursor-warp-pos-y window) y))
+	  
 	  t)))))
 
 (defun show-x11-window (window)
@@ -396,12 +407,10 @@
 
 (defun set-x11-window-title (window title)
   (let* ((display (window-display window))
-	 (window-manager (display-window-manager display))
-	 (clipboard (display-clipboard-manager display)))
+	 (window-manager (display-window-manager display)))
     
     (when (and title (stringp title) (not (string= title "")))
-      #+NIL
-      (#_Xutf8SetWMProperties (h (window-display window))
+      (#_Xutf8SetWMProperties (h display)
 			      (h window)
 			      title title
 			      nil 0
@@ -413,7 +422,7 @@
 	  window-manager
 
 	(with-slots (UTF8_STRING)
-	    clipboard
+	    display
 
 	  (#_XChangeProperty (h display)
 			     (h window)
@@ -534,3 +543,63 @@
 (defun %x11-visual-transparent? (xdisplay visual)
   (let ((pf (#_XRenderFindVisualFormat xdisplay visual)))
     (and pf (not (zerop (#_.alphaMask (c->-addr pf '#_direct)))))))
+
+(defun enable-x11-raw-mouse-motion (window)
+      #+NIL
+
+  (clet ((em #_<XIEventMask>))
+    (let ((size (#_XIMaskLen #_XI_RawMotion))
+	  (mask (#_malloc size)))
+    (unwind-protect
+	 (let ((&em (c-addr-of em)))
+	   (#_memset &mask 0 size)
+	   (setf (#_.deviceid &em) #_XIAllMasterDevices)
+	   (setf (#_.mask_len &em) size)
+	   (setf (#_.mask &em) mask)
+	   (#_XISetMask mask #_XI_RawMotion)
+	   
+	   (#_XISelectEvents (h (window-display window)) (default-root-window-handle (window-display window))
+			     &em 1)
+	   (values))
+      (#_free mask)))))
+
+
+(defun destroy-x11-window (window)
+  (let ((display (window-display window)))
+    
+    (when (disabled-cursor-window display)
+      (enable-cursor window))
+
+    (when (window-monitor window)
+      (release-monitor window))
+
+    (when (window-input-context window)
+      (#_XDestroyIC (window-input-context window))
+      (setf (window-input-context window) nil))
+
+    (when (h window)
+      (#_XDeleteContext (h display) (h window) (unique-context display))
+      (#_XUnmapWindow (h display) (h window))
+      (#_XDestroyWindow (h display) (h window))
+      (remhash (h window) *window-handle->window-table*)
+      (setf (h window) nil))
+
+    (if (eq window (display-window-list-head display))
+	  
+	(setf (display-window-list-head display) (window-next window))
+	  
+	(do ((candidate (display-window-list-head display) (window-next candidate)))
+	    ((null candidate))
+
+	  (when (eq (window-next candidate) window)
+	    (setf (window-next candidate) (window-next window))
+	    (return))))
+
+    (#_XFlush (h display))))
+
+      
+	
+      
+      
+
+    

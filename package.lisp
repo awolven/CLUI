@@ -29,7 +29,10 @@
 	   #:pointer-wheel-event
 	   #:pointer-motion-event
 	   #:pointer-enter-event
-	   #:pointer-exit-event))
+	   #:pointer-exit-event
+	   #:key-press-event
+	   #:key-release-event
+	   #:character-event))
 	   
 
 (defpackage :clui

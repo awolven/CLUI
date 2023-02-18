@@ -14,7 +14,7 @@
 (defgeneric compute-concrete-class (protocol &rest args))
 
 (defmethod make-instance ((class protocol-class) &rest initargs)
-  (apply #'make-instance (apply #'compute-concrete-class (allocate-instance class) initargs) initargs))
+  (apply #'make-instance (apply #'compute-make-instance-arguments (allocate-instance class) initargs)))
 
 (defclass display-dependent ()
   ())
@@ -39,7 +39,7 @@
   ()
   (:metaclass protocol-class))
 
-(defclass screen (window)
+(defclass screen (display-dependent)
   ()
   (:metaclass protocol-class))
 
