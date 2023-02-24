@@ -1,24 +1,77 @@
 (in-package :clui)
 
 (defmethod compute-make-instance-arguments ((protocol display)
-					    &rest initargs &key (x11 nil) (wayland nil)
-							     #+darwin (metal nil)
-							     (vulkan nil) (opengl nil)
+					    &rest initargs &key
+							     (cocoa nil)
+							     (metal nil)
+							     (opengl nil)
+							     (vulkan nil)
+							     (wayland nil)
+							     (win32 nil)
+							     (x11 nil)
 					    &allow-other-keys)
-  (declare (ignorable wayland))
-  (list*
-   (cond (x11 (find-class 'x11:local-server))
-	 (t #+win32 (cond (vulkan (find-class 'win32:desktop-with-vulkan))
-			  (opengl (find-class 'win32:desktop-with-opengl))
-			  (t (find-class 'win32:desktop)))
-	    #+cocoa (cond ((or vulkan metal) (find-class 'cocoa:desktop-with-metal))
-			  (opengl (find-class 'cocoa:desktop-with-opengl))
-			  (t (find-class 'cocoa:desktop)))
-	    #+linux (cond (wayland (cond (vulkan (find-class 'wayland:desktop-with-vulkan))
-					 (opengl (find-class 'wayland:desktop-with-opengl))
-					 (t (find-class 'wayland:desktop))))
-			  (t (find-class 'x11::local-server)))))
-   initargs))
+
+  (apply #'compute-make-display-instance-arguments protocol
+	 cocoa
+	 metal
+	 opengl
+	 vulkan
+	 wayland
+	 win32
+	 x11
+	 initargs))
+
+#+win32
+(defmethod compute-make-display-instance-arguments ((protocol display)
+						    (cocoa null)
+						    (metal null)
+						    (opengl null)
+						    (vulkan null)
+						    (wayland null)
+						    (win32 t)
+						    (x11 null)
+						    &rest initargs
+						    &key &allow-other-keys)
+  (list* (find-class 'win32:desktop) initargs))
+
+#+cocoa
+(defmethod compute-make-display-instance-arugments (protocol
+						    (cocoa t)
+						    (metal null)
+						    (opengl null)
+						    (vulkan null)
+						    (wayland null)
+						    (win32 null)
+						    (x11 null)
+						    &rest initargs)
+  (list* (find-class 'cocoa:desktop) initargs))
+
+#+x11
+(defmethod compute-make-display-instance-arugments (protocol
+						    (cocoa t)
+						    (metal null)
+						    (opengl null)
+						    (vulkan null)
+						    (wayland null)
+						    (win32 null)
+						    (x11 null)
+						    &rest initargs)
+
+  (list* (find-class 'x11:local-server) initargs))
+
+#+wayland
+(defmethod compute-make-display-instance-arugments (protocol
+						    (cocoa t)
+						    (metal null)
+						    (opengl null)
+						    (vulkan null)
+						    (wayland null)
+						    (win32 null)
+						    (x11 null)
+						    &rest initargs)
+
+  (list* (find-class 'wayland:desktop) initargs))
+  
 
 (defmethod compute-make-instance-arguments ((protocol display-dependent)
 					    &rest initargs &key (display (default-display))  &allow-other-keys)
@@ -44,6 +97,13 @@
 							 &key
 							 &allow-other-keys)
   (list* (find-class 'win32:monitor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol screen) (display win32:desktop-mixin)
+							 &rest initargs
+							 &key
+							 &allow-other-keys)
+  (list* (find-class 'win32:screen) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol monitor) (display cocoa:desktop-mixin)
@@ -88,18 +148,11 @@
   (declare (ignore display initargs))
   (find-class 'win32:window errorp))
 
-#+win32
-(defmethod get-a-win32-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
-  (declare (ignore initargs))
-  (if animable
-      (find-class 'win32:vulkan-window errorp)
-      (find-class 'win32:window errorp)))
-
-#+win32
+#+nil
 (defmethod get-a-win32-window-class ((display clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
   (declare (ignore initargs))
   (if animable
-      (find-class 'win32:wgl-window errorp)
+      (find-class 'win32:wgl-enabled-window errorp)
       (find-class 'win32:window errorp)))
 
 #+cocoa

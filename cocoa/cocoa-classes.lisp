@@ -177,3 +177,12 @@
 
 (defclass cocoa:nsgl-window (opengl-window-mixin cocoa:nsgl-window-mixin)
   ())
+
+
+#+vulkan
+(defclass cocoa:desktop-with-vulkan-mixin (vk::vulkan-enabled-display-mixin cocoa:desktop-mixin)
+  ())
+
+#+vulkan
+(defclass cocoa:vulkan-enabled-window-mixin (vk::vulkan-window-mixin cocoa:window-mixin)
+  ())

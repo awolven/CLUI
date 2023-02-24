@@ -1,10 +1,6 @@
 (in-package :noffi)
 
-(eval-when (:compile-toplevel)
-  (noffi-syntax t)
-  (defparameter *last-good-token* nil))
+(noffi-syntax t)
 
 
-(eval-when (:compile-toplevel)
-  #_{#include "dependencies.i"}
-  )
+#_{#include "dependencies_mingw64.i"}

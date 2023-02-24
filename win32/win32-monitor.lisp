@@ -20,7 +20,7 @@
 			0
 			'#_<WCHAR[CCHDEVICENAME]>))
 	   (size (c-sizeof-type '#_<MONITORINFOEXW>))
-	   (&mc (noffi::cons-ptr (ccl::%int-to-ptr (cval-value data)) 0 '#_<monitor_cons>)))
+	   (&mc (noffi::cons-ptr (ccl::%int-to-ptr data) 0 '#_<monitor_cons>)))
       (#_memset &mi size 0)
       (setf (#_.cbSize (c-cast '#_<MONITORINFO*> &mi)) size)
       (setf (#_.handle &mc) (noffi::%cons-ptr (ccl::%int-to-ptr 0) 0 '#_<HMONITOR>))

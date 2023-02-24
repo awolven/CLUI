@@ -1,12 +1,5 @@
 (in-package :clui)
 
-#+vulkan
-(defun get-required-instance-extensions ()
-  #+darwin(get-cocoa-required-instance-extensions)
-  #+win32(get-win32-required-instance-extensions)
-  #+x11(get-x11-required-instance-extensions)
-  #+wayland(get-wayland-required-instance-extensions))
-
 (defgeneric destroy-window (window))  
 
 (defgeneric window-fullscreen? (window))
@@ -108,7 +101,8 @@
   (car (display-monitors display)))
 
 
-(defun set-os-window-monitor (window monitor &key xpos ypos width height (refresh-rate :dont-care))
+#+NIL
+(defun set-window-monitor (window monitor &key xpos ypos width height (refresh-rate :dont-care))
   (declare (type os-window-mixin window))
   
   (when (or (minusp width) (minusp height))
@@ -183,7 +177,7 @@
   (set-wayland-window-fullscreen window value))
 
 (defmethod (setf window-monitor) ((monitor monitor-mixin) (window window-mixin))
-  (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea)
+  (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea (monitor-display monitor))
     (let ((refresh-rate 60))
       (set-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
       monitor)))
@@ -350,7 +344,7 @@
 
 #+win32
 (defmethod set-window-monitor ((window win32:window-mixin) monitor &key xpos ypos width height refresh-rate)
-  (set-win32-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+  (set-win32-window-monitor window monitor xpos ypos width height refresh-rate))
 
 #+cocoa
 (defmethod set-window-monitor ((window cocoa:window-mixin) monitor &key xpos ypos width height refresh-rate)
@@ -412,7 +406,7 @@
 (defmethod window-maximized? ((window wayland:window-mixin))
   (get-wayland-window-maximized window))
 
-#+win32
+#+win32nil
 (defmethod (setf window-maximized?) (value (window win32:window-mixin))
   (set-win32-window-maximized window value))
 
@@ -1102,7 +1096,7 @@
 
 #+win32
 (defmethod wait-events ((display win32:desktop-mixin) &optional (timeout nil))
-  (wait-win32-events display timeout))
+  (wait-win32-events display))
 
 #+cocoa
 (defmethod wait-events ((display cocoa:desktop-mixin) &optional (timeout nil))
@@ -1117,11 +1111,11 @@
   (wait-wayland-events display) timeout))
 
 #+win32
-(defmethod poll-events ((display win32:destop-mixin))
+(defmethod poll-events ((display win32:desktop-mixin))
   (poll-win32-events display))
 
 #+cocoa
-(defmethod poll-events ((display cocoa:destop-mixin))
+(defmethod poll-events ((display cocoa:desktop-mixin))
   (poll-cocoa-events display))
 
 #+x11

@@ -5,8 +5,9 @@
     :accessor win32-instance
     :initform (#_GetModuleHandle nil))
 
-   (helper-window-handle)
-   (helper-window-class)
+   (helper-window-class
+    :initform nil
+    :accessor helper-window-class)
    
    (main-window-class
     :accessor main-window-class
@@ -20,35 +21,15 @@
     :accessor captured-cursor-window
     :initform nil)
    
-   (keycodes)
-   (scancodes)
-   (keynames)
-   
    (raw-input)
    
    (mouse-trail-size
     :accessor mouse-trail-size
     :initform 0)
    
-   (device-notification-handle)))
-
-
-
-(defclass win32:desktop-with-vulkan-mixin (clui:vulkan-support-mixin win32:desktop-mixin)
-  ())
-
-(defclass win32:desktop-with-opengl-mixin (clui:opengl-support-mixin win32:desktop-mixin)
-  ())
-
-(defclass win32:desktop-with-vulkan (win32:desktop-with-vulkan-mixin)
-  ())
-
-(defclass win32:desktop-with-opengl (win32:desktop-with-opengl-mixin)
-  ())
-
-
-
-
+   (device-notification-handle
+    :initform nil
+    :accessor device-notification-handle)))
 
 (defclass win32:screen-mixin (clui:screen-mixin)
   ())
@@ -91,14 +72,7 @@
    (high-surrogate)))
 
 (defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)
-  (apply #'create-win32-window instance initargs))
-
-(defclass win32:vulkan-window-mixin (win32:window-mixin)
-  ())
-
-(defclass win32:wgl-window-mixin (win32:window-mixin)
-  ())
-
+  (apply #'create-native-win32-window instance initargs))
 
 
 (defclass win32:desktop (win32:desktop-mixin)
@@ -114,10 +88,4 @@
   ())
 
 (defclass win32:monitor (win32:monitor-mixin)
-  ())
-
-(defclass win32:vulkan-window (win32:vulkan-window-mixin)
-  ())
-
-(defclass win32:wgl-window (win32:wgl-window-mixin)
   ())

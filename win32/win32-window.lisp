@@ -27,12 +27,6 @@
 (defun noffi-ptr->ccl-ptr (ptr)
   (ccl::%inc-ptr (ptr-value ptr) (ptr-offset ptr)))
 
-(defun c-slot-ptr (struct-ptr struct-type slot-name new-ptr-type)
-  (noffi::cons-ptr
-   (ccl::%inc-ptr 
-    (noffi-ptr->ccl-ptr struct-ptr)
-    (/ (noffi::record-type-member-offset struct-type slot-name nil) 8))
-   0 new-ptr-type))
 
 (defconstant +WM_COPYGLOBALDATA+ #x0049)
 
@@ -128,8 +122,8 @@
   (clet ((clip-rect #_<RECT>))
     (let ((&clip-rect (c-addr-of clip-rect)))
       (#_GetClientRect (h window) &clip-rect)
-      (let ((left (c-slot-ptr &clip-rect '#_<RECT> '#_left '#_<POINT*>))
-	    (right (c-slot-ptr &clip-rect '#_<RECT> '#_right '#_<POINT*>)))
+      (let ((left (c->-addr &clip-rect '#_left))
+	    (right (c->-addr &clip-rect '#_right)))
 	(#_ClientToScreen (h window) left)
 	(#_ClientToScreen (h window) right))
       (#_ClipCursor &clip-rect)
@@ -459,8 +453,10 @@
       (#_RemovePropW (h window) string))
     (#_DestroyWindow (h window))
     (setf (h window) nil))
+  #+NOTYETFIXME
   (when (big-icon window)
     (#_DestroyIcon (big-icon window)))
+  #+NOYETFIXME
   (when (small-icon window)
     (#_DestroyIcon (small-icon window)))
   (values))
@@ -541,8 +537,9 @@
 (defun windows-10-build-or-later? (build)
   (clet ((osvi #_<OSVERSIONINFOEXW>))
     (let ((posvi (c-addr-of osvi)))
-      (let ((pszCSDVersion (c-slot-ptr posvi '#_<OSVERSIONINFOEXW> '#_szCSDVersion '#_<WCHAR[128]>)))
-	(setf (noffi::c-aref pszCSDVersion 0) 0)
+      (let ((pszCSDVersion (c->-addr posvi '#_szCSDVersion)))
+	;;(clet ((foo #_<WCHAR*>))
+	  ;;(setf (noffi::c-aref pszCSDVersion 0) foo))
 
 	(setf (#_.dwOSVersionInfoSize posvi) (c-sizeof-type '#_<OSVERSIONINFOEXW>)
 	      (#_.dwMajorVersion posvi) 10
@@ -567,8 +564,9 @@
 (defun windows-11-build-or-later? (build)
   (clet ((osvi #_<OSVERSIONINFOEXW>))
     (let ((posvi (c-addr-of osvi)))
-      (let ((pszCSDVersion (c-slot-ptr posvi '#_<OSVERSIONINFOEXW> '#_szCSDVersion '#_<WCHAR[128]>)))
-	(setf (noffi::c-aref pszCSDVersion 0) 0)
+      (let ((pszCSDVersion (c->-addr posvi '#_szCSDVersion)))
+	;;(clet ((foo #_<WCHAR*> #_NULL))
+	  ;;(setf (noffi::c-aref pszCSDVersion 0) foo))
 
 	(setf (#_.dwOSVersionInfoSize posvi) (c-sizeof-type '#_<OSVERSIONINFOEXW>)
 	      (#_.dwMajorVersion posvi) 11
@@ -660,7 +658,7 @@ int decorated;
 (defun default-paint-win32-window (window)
   (clet ((ps #_<PAINTSTRUCT>))
     (let* ((&ps (c-addr-of ps))
-	   (rc-paint (c-slot-ptr &ps '#_<PAINTSTRUCT> '#_rcPaint '#_<RECT*>))
+	   (rc-paint (c->-addr &ps '#_rcPaint))
 	   (hdc (#_BeginPaint (h window) &ps)))
 
       (#_FillRect hdc rc-paint (noffi::cons-ptr (ccl::%int-to-ptr (1+ #_COLOR_WINDOW)) 0 '#_<HBRUSH>))
@@ -688,27 +686,12 @@ int decorated;
   ;;(format t "~&window-proc running")
 
   (block nil
-
-    ;;(print hWnd)
-    ;;(print uMsg)
-    ;;(print (#_GetLastError))
-    ;;(finish-output)
-
-    #+NIL
-    (cond ((= (cval-value uMsg) #_WM_DESTROY)
-	   (#_PostQuitMessage 0)
-	   (return 0))
-	  #+NIL((= (cval-value uMsg) #_WM_PAINT)
-	   ;;(default-paint-win32-window hWnd)
-	   (return 0))
-	  (t (return (#_DefWindowProc hWnd uMsg wParam lParam))))
-
     
-    (when (= (cval-value uMsg) #_WM_NCCREATE) ;; 129
+    (when (= uMsg #_WM_NCCREATE) ;; 129
 	
       (when (windows-10-version-1607-or-greater?)
 	  
-	(let* ((cs (c-cast '#_<CREATESTRUCTW*> lParam))
+	(let* ((cs (cons-ptr (ccl::%int-to-ptr lParam) 0 '#_<CREATESTRUCTW*>))
 	       (wndconfig (c-cast '#_<wndconfig*> (#_.lpCreateParams cs)))
 	       (id (#_.id wndconfig))
 	       (scale-to-monitor (#_.scaletomonitor wndconfig)))
@@ -726,412 +709,411 @@ int decorated;
 
       (when (= id 0)
 	(warn "failed to get window id for msg: ~S" uMsg)
-	(return 1 #+NIL(#_DefWindowProcW hWnd uMsg wParam lParam)))
+	(return (#_DefWindowProcW hWnd uMsg wParam lParam)))
 	
+      
       (setq window (gethash id *id->window-table*))
-
-
+      
       (tagbody
-	   
-	 (when window
-	   (let ((uMsg (cval-value uMsg))
-		 (lParam (cval-value lParam))
-		 (wParam (cval-value wParam)))
+	 (locally (declare (type os-window-mixin window))
 
-	     (locally (declare (type os-window-mixin window))
+	   (with-slots (frame-action? cursor-mode high-surrogate
+			monitor auto-iconify? key-menu)
+	       window
 
-	       (with-slots (frame-action? cursor-mode high-surrogate
-			    monitor auto-iconify? key-menu)
-		   window
+	     (case uMsg
 
-		 (case uMsg
+	       (#.#_WM_NCCALCSIZE (go break)) ;; 131
 
-		   (#.#_WM_NCCALCSIZE (go break)) ;; 131
+	       (#.#_WM_CREATE
+		(setf (gethash
+		       (sap-int (ccl::%inc-ptr (ptr-value hWnd) (ptr-offset hWnd)))
+		       *window-handle->window-table*)
+		      window)
+		(go break)) ; 1
 
-		   (#.#_WM_CREATE (go break)) ; 1
+	       (#.#_WM_SHOWWINDOW (go break)) ;; 24
 
-		   (#.#_WM_SHOWWINDOW (go break)) ;; 24
+	       (#.#_WM_WINDOWPOSCHANGING ;; 70
+		(go break))
 
-		   (#.#_WM_WINDOWPOSCHANGING ;; 70
-		    (go break))
+	       (#.#_WM_ACTIVATEAPP (go break)) ;; 28
 
-		   (#.#_WM_ACTIVATEAPP (go break)) ;; 28
+	       (#.#_WM_NCHITTEST ;; 132
+		(go break))
 
-		   (#.#_WM_NCHITTEST ;; 132
-		    (go break))
+	       ((#.#_WM_NCACTIVATE #.#_WM_NCPAINT) ;; 133 and 134
+		(unless (last-decorated? window)
+		  (return #_TRUE))
+		(go break))
 
-		   ((#.#_WM_NCACTIVATE #.#_WM_NCPAINT) ;; 133 and 134
-		    (unless (last-decorated? window)
-		      (return #_TRUE))
-		    (go break))
+	       (#.#_WM_GETICON (go break)) ;; 127
 
-		   (#.#_WM_GETICON (go break)) ;; 127
+	       (#.#_WM_ACTIVATE ;; 6
+		(go break))
 
-		   (#.#_WM_ACTIVATE ;; 6
-		    (go break))
+	       (#.#_WM_PAINT ;; 15
 
-		   (#.#_WM_PAINT ;; 15
+		(handle-event window (make-instance 'window-repaint-event))
 
-		    (handle-event window (make-instance 'window-repaint-event))
+		(default-paint-win32-window window)
 
-		    (default-paint-win32-window window)
+		(return 0)
 
-		    (return 0)
+		#+NIL
+		(go break))
 
-		    #+NIL
-		    (go break))
+	       (#.#_WM_IME_SETCONTEXT (go break)) ;; 641
 
-		   (#.#_WM_IME_SETCONTEXT (go break)) ;; 641
+	       (#.#_WM_IME_NOTIFY (go break)) ;; 642
 
-		   (#.#_WM_IME_NOTIFY (go break)) ;; 642
+	       (#.#_WM_SETFOCUS ;; 7
 
-		   (#.#_WM_SETFOCUS ;; 7
+		(handle-event window (make-instance 'window-focus-event))
 
-		    (handle-event window (make-instance 'window-focus-event))
+		(when frame-action?
+		  (go break))
 
-		    (when frame-action?
-		      (go break))
+		(if (eq cursor-mode :disabled)
+		    (disable-cursor window)
+		    (when (eq cursor-mode :captured)
+		      (capture-win32-cursor window)))
 
-		    (if (eq cursor-mode :disabled)
-			(disable-cursor window)
-			(when (eq cursor-mode :captured)
-			  (capture-win32-cursor window)))
+		(return 0))
 
-		    (return 0))
+	       (#.#_WM_ERASEBKGND (return #_TRUE)) ;; 20
 
-		   (#.#_WM_ERASEBKGND (return #_TRUE)) ;; 20
+	       (#.#_WM_WINDOWPOSCHANGED (go break)) ;; 71
 
-		   (#.#_WM_WINDOWPOSCHANGED (go break)) ;; 71
+	       (#.#_WM_SIZE ;; 5
 
-		   (#.#_WM_SIZE ;; 5
+		(let ((width (#_LOWORD lParam))
+		      (height (#_HIWORD lParam))
+		      (iconified? (= wParam #_SIZE_MINIMIZED))
+		      (maximized? (or (= wParam #_SIZE_MAXIMIZED)
+				      (and (last-maximized? window)
+					   (/= wParam #_SIZE_RESTORED)))))
 
-		    (let ((width (#_LOWORD lParam))
-			  (height (#_HIWORD lParam))
-			  (iconified? (= wParam #_SIZE_MINIMIZED))
-			  (maximized? (or (= wParam #_SIZE_MAXIMIZED)
-					  (and (last-maximized? window)
-					       (/= wParam #_SIZE_RESTORED)))))
+		  (when (eq (captured-cursor-window (window-display window)) window)
+		    (capture-win32-cursor window))
 
-		      (when (eq (captured-cursor-window (window-display window)) window)
-			(capture-win32-cursor window))
+		  (unless (eq (last-iconified? window) iconified?)
+		    (let ((event (make-instance 'window-iconify-event)))
+		      (handle-event window event)))
 
-		      (unless (eq (last-iconified? window) iconified?)
-			(let ((event (make-instance 'window-iconify-event)))
-			  (handle-event window event)))
+		  (unless (eq (last-maximized? window) maximized?)
+		    (let ((event (make-instance (if maximized?
+						    'window-maximize-event
+						    'window-restore-event))))
+		      (handle-event window event)))
 
-		      (unless (eq (last-maximized? window) maximized?)
-			(let ((event (make-instance (if maximized?
-							'window-maximize-event
-							'window-restore-event))))
-			  (handle-event window event)))
+		  (when (or (/= width (round (width window)))
+			    (/= height (round (height window))))
+		    (setf (width window) width
+			  (height window) height)
+		    (let ((event (make-instance 'window-resize-event)))
+		      (handle-event window event)))
 
-		      (when (or (/= width (round (width window)))
-				(/= height (round (height window))))
-			(setf (width window) width
-			      (height window) height)
-			(let ((event (make-instance 'window-resize-event)))
-			  (handle-event window event)))
+		  (when (and (window-monitor window)
+			     (not (eq (last-iconified? window) iconified?)))
+		    (if iconified?
+			(release-win32-monitor window (window-monitor window))
+			(progn
+			  (acquire-win32-monitor window (window-monitor window))
+			  (fit-to-monitor window))))
 
-		      (when (and (window-monitor window)
-				 (not (eq (last-iconified? window) iconified?)))
-			(if iconified?
-			    (release-win32-monitor window (window-monitor window))
-			    (progn
-			      (acquire-win32-monitor window (window-monitor window))
-			      (fit-to-monitor window))))
+		  (setf (last-iconified? window) iconified?)
+		  (setf (last-maximized? window) maximized?)
 
-		      (setf (last-iconified? window) iconified?)
-		      (setf (last-maximized? window) maximized?)
+		  (terpri)
+		  (princ 'success)
+		  (finish-output)
 
-		      (terpri)
-		      (princ 'success)
-		      (finish-output)
+		  (return 0)))
 
-		      (return 0)))
+	       (#.#_WM_MOVE ;; 3
 
-		   (#.#_WM_MOVE ;; 3
+		(when (eq (captured-cursor-window (window-display window)) window)
+		  (capture-win32-cursor window))
 
-		    (when (eq (captured-cursor-window (window-display window)) window)
-		      (capture-win32-cursor window))
+		(let ((event (make-instance 'window-move-event
+					    :new-x (#_GET_X_LPARAM lParam)
+					    :new-y (#_GET_Y_LPARAM lParam))))
 
-		    (let ((event (make-instance 'window-move-event
-						:new-x (#_GET_X_LPARAM lParam)
-						:new-y (#_GET_Y_LPARAM lParam))))
+		  (handle-event window event)
 
-		      (handle-event window event)
+		  (return 0)
 
-		      (return 0)
+		  #+NIL
+		  (go break)))
 
-		      #+NIL
-		      (go break)))
+	       (#.#_WM_GETMINMAXINFO ;; 36
 
-		   (#.#_WM_GETMINMAXINFO ;; 36
+		(when (window-monitor window)
+		  (go break))
 
-		    (when (window-monitor window)
-		      (go break))
+		(clet ((frame #_<RECT>))
+		  (let ((&frame (c-addr-of frame)))
+		    (setf (#_.left &frame) 0
+			  (#_.top &frame) 0
+			  (#_.right &frame) 0
+			  (#_.bottom &frame) 0)
+		    (let ((mmi (noffi::cons-ptr (ccl:%int-to-ptr lParam) 0 '#_<MINMAXINFO*>))
+			  (style (get-window-style window))
+			  (ex-style (get-window-ex-style window)))
 
-		    (clet ((frame #_<RECT>))
-		      (let ((&frame (c-addr-of frame)))
-			(setf (#_.left &frame) 0
-			      (#_.top &frame) 0
-			      (#_.right &frame) 0
-			      (#_.bottom &frame) 0)
-			(let ((mmi (noffi::cons-ptr (ccl:%int-to-ptr lParam) 0 '#_<MINMAXINFO*>))
-			      (style (get-window-style window))
-			      (ex-style (get-window-ex-style window)))
-
-			  (if (windows-10-version-1607-or-greater?)
+		      (if (windows-10-version-1607-or-greater?)
 			      
-			      (#_AdjustWindowRectExForDpi &frame style #_FALSE ex-style
-							  (#_GetDpiForWindow (h window)))
+			  (#_AdjustWindowRectExForDpi &frame style #_FALSE ex-style
+						      (#_GetDpiForWindow (h window)))
 			      
-			      (#_AdjustWindowRectEx &frame style #_FALSE ex-style))
+			  (#_AdjustWindowRectEx &frame style #_FALSE ex-style))
 
-			  (let ((p-pt-min-track-size (c-slot-ptr mmi '#_<MINMAXINFO> '#_ptMinTrackSize '#_<POINT*>))
-				(p-pt-max-track-size (c-slot-ptr mmi '#_<MINMAXINFO> '#_ptMaxTrackSize '#_<POINT*>))
-				(p-pt-max-position (c-slot-ptr mmi '#_<MINMAXINFO> '#_ptMaxPosition '#_<POINT*>))
-				(p-pt-max-size (c-slot-ptr mmi '#_<MINMAXINFO> '#_ptMaxSize '#_<POINT*>)))
+		      (let ((p-pt-min-track-size (c->-addr mmi '#_ptMinTrackSize))
+			    (p-pt-max-track-size (c->-addr mmi '#_ptMaxTrackSize))
+			    (p-pt-max-position (c->-addr mmi '#_ptMaxPosition))
+			    (p-pt-max-size (c->-addr mmi '#_ptMaxSize)))
 			  
-			    (unless (or (eq (window-min-width window) :dont-care)
-					(eq (window-min-height window) :dont-care))
+			(unless (or (eq (window-min-width window) :dont-care)
+				    (eq (window-min-height window) :dont-care))
 			      
-			      (setf (#_.x p-pt-min-track-size) (+ (window-min-width window) (#_.right &frame) (- (#_.left &frame)))
-				    (#_.y p-pt-min-track-size) (+ (window-min-height window) (#_.bottom &frame) (- (#_.top &frame)))))
+			  (setf (#_.x p-pt-min-track-size) (+ (window-min-width window) (#_.right &frame) (- (#_.left &frame)))
+				(#_.y p-pt-min-track-size) (+ (window-min-height window) (#_.bottom &frame) (- (#_.top &frame)))))
 
-			    (unless (or (eq (window-max-width window) :dont-care)
-					(eq (window-max-height window) :dont-care))
+			(unless (or (eq (window-max-width window) :dont-care)
+				    (eq (window-max-height window) :dont-care))
 			      
-			      (setf (#_.x p-pt-max-track-size) (+ (window-min-width window) (#_.right &frame) (- (#_.left &frame)))
-				    (#_.y p-pt-max-track-size) (+ (window-min-height window) (#_.bottom &frame) (- (#_.top &frame)))))
+			  (setf (#_.x p-pt-max-track-size) (+ (window-min-width window) (#_.right &frame) (- (#_.left &frame)))
+				(#_.y p-pt-max-track-size) (+ (window-min-height window) (#_.bottom &frame) (- (#_.top &frame)))))
 
-			    (unless (last-decorated? window)
-			      (clet ((mi #_<MONITORINFO>))
-				(let ((&mi (c-addr-of mi))
-				      (size (c-sizeof-type '#_<MONITORINFO>))
-				      (mh (#_MonitorFromWindow (h window) #_MONITOR_DEFAULTTONEAREST)))
-				  (#_memset &mi size 0)
+			(unless (last-decorated? window)
+			  (clet ((mi #_<MONITORINFO>))
+			    (let ((&mi (c-addr-of mi))
+				  (size (c-sizeof-type '#_<MONITORINFO>))
+				  (mh (#_MonitorFromWindow (h window) #_MONITOR_DEFAULTTONEAREST)))
+			      (#_memset &mi size 0)
 
-				  (setf (#_.cbSize &mi) size)
+			      (setf (#_.cbSize &mi) size)
 
-				  (#_GetMonitorInfo mh &mi)
+			      (#_GetMonitorInfo mh &mi)
 
-				  (let ((p-rc-work (c-slot-ptr &mi '#_<MONITORINFO> '#_rcWork '#_<RECT*>))
-					(p-rc-monitor (c-slot-ptr &mi '#_<MONITORINFO> '#_rcMonitor '#_<RECT*>)))
+			      (let ((p-rc-work (c->-addr &mi '#_rcWork))
+				    (p-rc-monitor (c->-addr &mi '#_rcMonitor)))
 
-				    (setf (#_.x p-pt-max-position) (- (#_.left p-rc-work) (#_.left p-rc-monitor)))
-				    (setf (#_.y p-pt-max-position) (- (#_.top p-rc-work) (#_.top p-rc-monitor)))
-				    (setf (#_.x p-pt-max-size) (- (#_.right p-rc-work) (#_.left p-rc-work)))
-				    (setf (#_.y p-pt-max-size) (- (#_.bottom p-rc-work) (#_.top p-rc-work)))))))
+				(setf (#_.x p-pt-max-position) (- (#_.left p-rc-work) (#_.left p-rc-monitor)))
+				(setf (#_.y p-pt-max-position) (- (#_.top p-rc-work) (#_.top p-rc-monitor)))
+				(setf (#_.x p-pt-max-size) (- (#_.right p-rc-work) (#_.left p-rc-work)))
+				(setf (#_.y p-pt-max-size) (- (#_.bottom p-rc-work) (#_.top p-rc-work)))))))
 
-			    ))))
-		    (return 0)
+			))))
+		(return 0)
 
-		    #+NIL
-		    (go break))
+		#+NIL
+		(go break))
 
-		   (#.#_WM_MOUSEACTIVATE ;; 33
-		    (when (= (#_HIWORD lParam) #_WM_LBUTTONDOWN)
-		      (when (/= (#_LOWORD lParam) #_HTCLIENT)
-			(setf frame-action? t)))
-		    (go break))
+	       (#.#_WM_MOUSEACTIVATE ;; 33
+		(when (= (#_HIWORD lParam) #_WM_LBUTTONDOWN)
+		  (when (/= (#_LOWORD lParam) #_HTCLIENT)
+		    (setf frame-action? t)))
+		(go break))
 
-		   (#.#_WM_DWMNCRENDERINGCHANGED (go break)) ;; 799 ;; what am i?
+	       (#.#_WM_DWMNCRENDERINGCHANGED (go break)) ;; 799 ;; what am i?
 
-		   (#.#_WM_CAPTURECHANGED ;; 533
+	       (#.#_WM_CAPTURECHANGED ;; 533
 		    
-		    (when (and (= lParam 0) frame-action?)
-		      (if (eq (window-cursor-mode window) :disabled)
-			  (disable-cursor window)
-			  (when (eq (window-cursor-mode window) :captured)
-			    (capture-win32-cursor window)))
-		      (setf frame-action? nil))
+		(when (and (= lParam 0) frame-action?)
+		  (if (eq (window-cursor-mode window) :disabled)
+		      (disable-cursor window)
+		      (when (eq (window-cursor-mode window) :captured)
+			(capture-win32-cursor window)))
+		  (setf frame-action? nil))
 		    
-		    (go break))
+		(go break))
 
-		   (#.#_WM_SIZING ;; 532
+	       (#.#_WM_SIZING ;; 532
 
-		    (when (or (eq (window-aspect-numer window) :dont-care)
-			      (eq (window-aspect-denom window) :dont-care))
-		      (go break))
+		(when (or (eq (window-aspect-numer window) :dont-care)
+			  (eq (window-aspect-denom window) :dont-care))
+		  (go break))
 
-		    (apply-aspect-ratio window wparam lparam)
+		(apply-aspect-ratio window wparam lparam)
 
-		    (return 1))
+		(return 1))
 
-		   (#.#_WM_KILLFOCUS ;; 8
+	       (#.#_WM_KILLFOCUS ;; 8
 
-		    (if (eq cursor-mode :disabled)
-			(enable-cursor window)
-			(when (eq cursor-mode :captured)
-			  (release-win32-cursor window)))
+		(if (eq cursor-mode :disabled)
+		    (enable-cursor window)
+		    (when (eq cursor-mode :captured)
+		      (release-win32-cursor window)))
 
-		    (when (and monitor auto-iconify?)
-		      (iconify-win32-window window))
+		(when (and monitor auto-iconify?)
+		  (iconify-win32-window window))
 
-		    (handle-event window (make-instance 'window-defocus-event))
-		    (return 0))
+		(handle-event window (make-instance 'window-defocus-event))
+		(return 0))
 
-		   (#.#_WM_SYSCOMMAND ;; 274
-		    #+NOTYET
-		    (case (logand wParam #xfff0)
+	       (#.#_WM_SYSCOMMAND ;; 274
+		#+NOTYET
+		(case (logand wParam #xfff0)
 		    
-		      ((#.#_SC_SCREENSAVE #.#_SC_MONITORPOWER)
+		  ((#.#_SC_SCREENSAVE #.#_SC_MONITORPOWER)
 
-		       (if monitor
-			   (return 0)
-			   (go break)))
-
-		      (#.#_SC_KEYMENU
-		       (unless key-menu
-			 (return 0))
+		   (if monitor
+		       (return 0)
 		       (go break)))
-		    (go break))
+
+		  (#.#_SC_KEYMENU
+		   (unless key-menu
+		     (return 0))
+		   (go break)))
+		(go break))
 
 
-		   (#.#_WM_CLOSE ;; 16
-		    (go break)
-		    (handle-event (window-display window) (make-instance 'window-close-event
-									 :window window))
-		    (return 0))
+	       (#.#_WM_CLOSE ;; 16
 
-		   (#.#_WM_INPUTLANGCHANGE ;; 81
-		    #+NOTYET
-		    (win32-update-key-names (window-display window))
-		    (go break))
+		(handle-event window (make-instance 'window-close-event
+						    :window window))
+		(return 0))
 
-		   ((#.#_WM_CHAR #.#_WM_SYSCHAR) ;; 258 and 262
-		    (go break)
-		    #+NOTYET
-		    (if (and (>= wParam #xd800) (<= wParam #xdbff))
-			(setf high-surrogate wParam)
-			(let ((codepoint 0))
-			  (if (and (>= wParam #xdc00) (<= wParam #xdfff))
-			      (when high-surrogate
-				(incf codepoint (ash (- high-surrogate #xd800) 10))
-				(incf codepoint (- wParam #xdc00))
-				(incf codepoint #x10000))
-			      (setq codepoint wParam))
-			  (setq high-surrogate 0)
-			  (let ((event (make-instance 'keyboard-event
-						      :character (code-char codepoint)
-						      :mods (get-key-mods (window-display window))
-						      :syschar? (= uMsg #_WM_SYSCHAR))))
-			    (handle-event window event))))
-		    (when (and (= uMsg #_WM_SYSCHAR) key-menu)
-		      (go break))
-		    (return 0))
+	       (#.#_WM_INPUTLANGCHANGE ;; 81
+		#+NOTYET
+		(win32-update-key-names (window-display window))
+		(go break))
 
-		   (#.#_WM_UNICHAR ;; 265
-		    (go break)
-		    (when (= wParam #_UNICODE_NOCHAR)
-		      (return 1))
+	       ((#.#_WM_CHAR #.#_WM_SYSCHAR) ;; 258 and 262
+		(go break)
+		#+NOTYET
+		(if (and (>= wParam #xd800) (<= wParam #xdbff))
+		    (setf high-surrogate wParam)
+		    (let ((codepoint 0))
+		      (if (and (>= wParam #xdc00) (<= wParam #xdfff))
+			  (when high-surrogate
+			    (incf codepoint (ash (- high-surrogate #xd800) 10))
+			    (incf codepoint (- wParam #xdc00))
+			    (incf codepoint #x10000))
+			  (setq codepoint wParam))
+		      (setq high-surrogate 0)
+		      (let ((event (make-instance 'keyboard-event
+						  :character (code-char codepoint)
+						  :mods (get-key-mods (window-display window))
+						  :syschar? (= uMsg #_WM_SYSCHAR))))
+			(handle-event window event))))
+		(when (and (= uMsg #_WM_SYSCHAR) key-menu)
+		  (go break))
+		(return 0))
 
-		    #+NIL
-		    (let ((event (make-instance 'keyboard-event
-						      :character (code-char wparam)
-						      :mods (get-key-mods (window-display window))
-						      :syschar? nil)))
-			    (handle-event window event))
-		    (return 0))
+	       (#.#_WM_UNICHAR ;; 265
+		(go break)
+		(when (= wParam #_UNICODE_NOCHAR)
+		  (return 1))
 
-		   ((#.#_WM_KEYDOWN #.#_WM_SYSKEYDOWN #.#_WM_KEYUP #.#_WM_SYSKEYUP) ;; 256, 260, 257, 261
-		    #+NOTYET
-		    (let ((key)
-			  (scancode)
-			  (action (if (= 0 (logand (#_HIWORD lParam) +kf-up+)) :press :release))
-			  (mods (get-key-mods (window-display window))))
+		#+NIL
+		(let ((event (make-instance 'keyboard-event
+					    :character (code-char wparam)
+					    :mods (get-key-mods (window-display window))
+					    :syschar? nil)))
+		  (handle-event window event))
+		(return 0))
 
-		      (setq scancode (logand (#_HIWORD lParam) (logior +kf-extended+ #xff)))
+	       ((#.#_WM_KEYDOWN #.#_WM_SYSKEYDOWN #.#_WM_KEYUP #.#_WM_SYSKEYUP) ;; 256, 260, 257, 261
+		#+NOTYET
+		(let ((key)
+		      (scancode)
+		      (action (if (= 0 (logand (#_HIWORD lParam) +kf-up+)) :press :release))
+		      (mods (get-key-mods (window-display window))))
 
-		      (when (= 0 scancode)
-			(setq scancode (#_MapVirtualKeyW wParam +map-vk-to-vsc+)))
+		  (setq scancode (logand (#_HIWORD lParam) (logior +kf-extended+ #xff)))
 
-		      (when (= scancode #x54)
-			(setq scancode #x137))
+		  (when (= 0 scancode)
+		    (setq scancode (#_MapVirtualKeyW wParam +map-vk-to-vsc+)))
 
-		      (when (= scancode #x146)
-			(setq scancode #x45))
+		  (when (= scancode #x54)
+		    (setq scancode #x137))
 
-		      (when (= scancode #x136)
-			(setq scancode #x36))
+		  (when (= scancode #x146)
+		    (setq scancode #x45))
 
-		      (if (= wParam #_VK_CONTROL)
-			  (if (logand (#_HIWORD lParam) +kf-extended+)
-			      (setq key +key-right-control+)
-			      (clet ((next #_<MSG>))
-				(setq time (#_GetMessageTime))
-				(when (#_PeekMessageW (c-addr-of next) nil 0 0 #_PM_NOREMOVE)
-				  (case (#_.message (c-addr-of next))
-				    ((#_WM_KEYDOWN #_WM_SYSKEYDOWN #_WM_KEYUP #_WMSYSKEYUP)
-				     (when
-					 (and (= (#_.wParam (c-addr-of next)) #_VK_MENU)
-					      (and (not (zerop
-							 (logand (HIWORD (#_.lParam (c-addr-of next)))
-								 +kf-extended+)))
-						   (= (#_.time (c-addr-of next)) time)))
-				       (go break)))))
-				(setq key +key-left-control+)))
-			  (when (= wParam #_VK_PROCESSKEY)
-			    (go break)))
+		  (when (= scancode #x136)
+		    (setq scancode #x36))
 
-		      (if (and (= action +release+) (= wParam #_VK_SHIFT))
+		  (if (= wParam #_VK_CONTROL)
+		      (if (logand (#_HIWORD lParam) +kf-extended+)
+			  (setq key +key-right-control+)
+			  (clet ((next #_<MSG>))
+			    (setq time (#_GetMessageTime))
+			    (when (#_PeekMessageW (c-addr-of next) nil 0 0 #_PM_NOREMOVE)
+			      (case (#_.message (c-addr-of next))
+				((#_WM_KEYDOWN #_WM_SYSKEYDOWN #_WM_KEYUP #_WMSYSKEYUP)
+				 (when
+				     (and (= (#_.wParam (c-addr-of next)) #_VK_MENU)
+					  (and (not (zerop
+						     (logand (HIWORD (#_.lParam (c-addr-of next)))
+							     +kf-extended+)))
+					       (= (#_.time (c-addr-of next)) time)))
+				   (go break)))))
+			    (setq key +key-left-control+)))
+		      (when (= wParam #_VK_PROCESSKEY)
+			(go break)))
+
+		  (if (and (= action +release+) (= wParam #_VK_SHIFT))
+		      (progn
+			(input-key window +key-left-shift+ scancode action mods)
+			(input-key window +key-right-shift+ scancode action mods))
+		      (if (= wParam #_VK_SNAPSHOT)
 			  (progn
-			    (input-key window +key-left-shift+ scancode action mods)
-			    (input-key window +key-right-shift+ scancode action mods))
-			  (if (= wParam #_VK_SNAPSHOT)
-			      (progn
-				(input-key window key scancode +press+ mods)
-				(input-key window key scancode +release+ mods))
-			      (input-key window key scancode action mods))))
-		    (go break))
+			    (input-key window key scancode +press+ mods)
+			    (input-key window key scancode +release+ mods))
+			  (input-key window key scancode action mods))))
+		(go break))
 
-		   ((#.#_WM_LBUTTONDOWN
-		     #.#_WM_RBUTTONDOWN #.#_WM_MBUTTONDOWN #.#_WM_XBUTTONDOWN
-		     #.#_WM_LBUTTONUP #.#_WM_RBUTTONUP
-		     #.#_WM_MBUTTONUP #.#_WM_XBUTTONUP)
+	       ((#.#_WM_LBUTTONDOWN
+		 #.#_WM_RBUTTONDOWN #.#_WM_MBUTTONDOWN #.#_WM_XBUTTONDOWN
+		 #.#_WM_LBUTTONUP #.#_WM_RBUTTONUP
+		 #.#_WM_MBUTTONUP #.#_WM_XBUTTONUP)
 
-		    (setf (window-monitor window) (get-primary-monitor))
-		    (go break))
+		    
+		(go break))
 
-		   (#.#_WM_MOUSEMOVE ;; 512
-		    (let* ((x (#_GET_X_LPARAM lParam))
-			   (y (#_GET_Y_LPARAM lParam))
-			   (event (make-instance 'pointer-motion-event
-						 :x x
-						 :y y)))
-		      (handle-event window event))
-		    (return 0))
+	       (#.#_WM_MOUSEMOVE ;; 512
+		(let* ((x (#_GET_X_LPARAM lParam))
+		       (y (#_GET_Y_LPARAM lParam))
+		       (event (make-instance 'pointer-motion-event
+					     :x x
+					     :y y)))
+		  (handle-event window event))
+		(return 0))
 
-		   (#.#_WM_NCMOUSEMOVE ;; 160
-		    (go break))
+	       (#.#_WM_NCMOUSEMOVE ;; 160
+		(go break))
 
-		   (#.#_WM_INPUT )
+	       (#.#_WM_INPUT )
 
-		   (#.#_WM_MOUSELEAVE ;; 675
-		    )
+	       (#.#_WM_MOUSELEAVE ;; 675
+		)
 
-		   (#.#_WM_NCMOUSELEAVE ;; 674
-		    )
+	       (#.#_WM_NCMOUSELEAVE ;; 674
+		)
 
-		   (#.#_WM_MOUSEWHEEL )
+	       (#.#_WM_MOUSEWHEEL )
 
-		   (#.#_WM_MOUSEHWHEEL )
+	       (#.#_WM_MOUSEHWHEEL )
 
-		   ((#.#_WM_ENTERSIZEMOVE #.#_WM_ENTERMENULOOP))
+	       ((#.#_WM_ENTERSIZEMOVE #.#_WM_ENTERMENULOOP))
 
-		   ((#.#_WM_EXITSIZEMOVE #.#_WM_EXITMENULOOP))
+	       ((#.#_WM_EXITSIZEMOVE #.#_WM_EXITMENULOOP))
 
-		   ((#.#_WM_DWMCOMPOSITIONCHANGED #.#_WM_DWMCOLORIZATIONCOLORCHANGED))
+	       ((#.#_WM_DWMCOMPOSITIONCHANGED #.#_WM_DWMCOLORIZATIONCOLORCHANGED))
 
-		   (#.#_WM_GETDPISCALEDSIZE )
+	       (#.#_WM_GETDPISCALEDSIZE )
 
-		   (#.#_WM_DPICHANGED )
+	       (#.#_WM_DPICHANGED )
 
-		   (#.#_WM_SETCURSOR ;; 32
-		    (go break))
+	       (#.#_WM_SETCURSOR ;; 32
+		(go break))
 
-		   (#.#_WM_DROPFILES )
-		   )))))
+	       (#.#_WM_DROPFILES )
+	       )))
 	   
        break    
 	 (finish-output))
@@ -1169,296 +1151,295 @@ int decorated;
 	 (frame-y)
 	 (frame-width)
 	 (frame-height))
-    
-    (let ((main-window-class)
-	  (p-cls-nm (lpcwstr "CLUI")))
-      (with-slots (handle monitor) window 
-	
-	(flet ((maybe-register-class ()
-		 (unless main-window-class
-		   (let ((p-icon-nm (lpcwstr "CLUI-ICON")))
-		     (let* ((size (load-time-value (c-sizeof-type '#_<WNDCLASSEXW>))))
-		       (clet ((wc #_<WNDCLASSEXW>))
-			 (let ((&wc (c-addr-of wc)))
 
-			   (setf (#_.cbSize &wc) size)
-			   (setf (#_.style &wc) (logior #_CS_HREDRAW #_CS_VREDRAW #_CS_OWNDC))
-			   (setf (#_.lpfnWndProc &wc) window-proc-callback)
-			   (setf (#_.cbClsExtra &wc) 0)
-			   (setf (#_.cbWndExtra &wc) 0)
-			   (setf (#_.hInstance &wc)  nil #+NIL(#_GetModuleHandleW nil))
-			   (setf (#_.hCursor &wc) (#_LoadCursorW nil #_IDC_ARROW))
-			   (setf (#_.hbrBackground &wc) nil)
-			   (setf (#_.lpszMenuName &wc) nil)
-			   (setf (#_.lpszClassName &wc) p-cls-nm)
-			   (setf (#_.hIconSm &wc) nil)
 
-			   ;;(print 'bb)
-			   ;;(print (#_GetLastError))
+    (with-slots (main-window-class) (window-display window)
+      (let ((p-cls-nm (lpcwstr "CLUI")))
+	(with-slots (handle monitor) window 
+	  
+	  (flet ((maybe-register-class ()
+		   (unless main-window-class
+		     (let ((p-icon-nm (lpcwstr "CLUI-ICON")))
+		       (let* ((size (load-time-value (c-sizeof-type '#_<WNDCLASSEXW>))))
+			 (clet ((wc #_<WNDCLASSEXW>))
+			   (let ((&wc (c-addr-of wc)))
 
-			   (setf (#_.hIcon &wc) (#_LoadImageW
-						 (#_GetModuleHandleW nil)
-						 p-icon-nm
-						 #_IMAGE_ICON
-						 0 0
-						 (logior #_LR_DEFAULTSIZE #_LR_SHARED)))
-			   #+NIL
-			   (print (#_.hIcon &wc))
-			     
-			   (unless (#_.hIcon &wc)
+			     (setf (#_.cbSize &wc) size)
+			     (setf (#_.style &wc) (logior #_CS_HREDRAW #_CS_VREDRAW #_CS_OWNDC))
+			     (setf (#_.lpfnWndProc &wc) window-proc-callback)
+			     (setf (#_.cbClsExtra &wc) 0)
+			     (setf (#_.cbWndExtra &wc) 0)
+			     (setf (#_.hInstance &wc) (#_GetModuleHandleW nil))
+			     (setf (#_.hCursor &wc) (#_LoadCursorW nil #_IDC_ARROW))
+			     (setf (#_.hbrBackground &wc) nil)
+			     (setf (#_.lpszMenuName &wc) nil)
+			     (setf (#_.lpszClassName &wc) p-cls-nm)
+			     (setf (#_.hIconSm &wc) nil)
+
+			     ;;(print 'bb)
+			     ;;(print (#_GetLastError))
+
 			     (setf (#_.hIcon &wc) (#_LoadImageW
-						   nil
-						   #_IDI_APPLICATION
+						   (#_GetModuleHandleW nil)
+						   p-icon-nm
 						   #_IMAGE_ICON
-						   0 0 (logior #_LR_DEFAULTSIZE #_LR_SHARED))))
+						   0 0
+						   (logior #_LR_DEFAULTSIZE #_LR_SHARED)))
+			     #+NIL
+			     (print (#_.hIcon &wc))
+			     
+			     (unless (#_.hIcon &wc)
+			       (setf (#_.hIcon &wc) (#_LoadImageW
+						     nil
+						     #_IDI_APPLICATION
+						     #_IMAGE_ICON
+						     0 0 (logior #_LR_DEFAULTSIZE #_LR_SHARED))))
 
-			   #+NIL
-			   (unless main-window-class
-			     (when(#_GetClassInfoExW (#_GetModuleHandleW nil) p-cls-nm &wc)
-			       (warn "class already exists, resetting...")
-			       (unless (#_UnregisterClassW p-cls-nm (#_GetModuleHandleW nil))
-				 (warn "unable to unregister class."))))
+			     #+NIL
+			     (unless main-window-class
+			       (when(#_GetClassInfoExW (#_GetModuleHandleW nil) p-cls-nm &wc)
+				 (warn "class already exists, resetting...")
+				 (unless (#_UnregisterClassW p-cls-nm (#_GetModuleHandleW nil))
+				   (warn "unable to unregister class."))))
 
-			   ;;(print 'aa)
-			   ;;(print (#_GetLastError))
+			     ;;(print 'aa)
+			     ;;(print (#_GetLastError))
 
 
-			   (let ((result (#_RegisterClassExW &wc)))
-			     (print result)
-			     (if (= 0 result)
-				 (let ((error (#_GetLastError)))
-				   (error "Win32: Failed to register window class, error ~A." error))
-				 (setf main-window-class result)))
-			   #+NIL
-			   (print 'a)
-			   #+NIL
-			   (print (#_GetLastError))))))))
+			     (let ((result (#_RegisterClassExW &wc)))
+			       (print result)
+			       (if (= 0 result)
+				   (let ((error (#_GetLastError)))
+				     (error "Win32: Failed to register window class, error ~A." error))
+				   (setf main-window-class result)))
+			     #+NIL
+			     (print 'a)
+			     #+NIL
+			     (print (#_GetLastError))))))))
 	   
-	       (create-window ()
-
-		 (if monitor
+		 (create-window ()
+			      
+		   (if monitor
 		     
-		     (clet ((mi #_<MONITORINFO>))
-		       (let ((pmi (c-addr-of mi)))
-			 (setf (#_.cbSize pmi) (load-time-value (c-sizeof-type '#_<MONITORINFO>)))
+		       (clet ((mi #_<MONITORINFO>))
+			 (let ((pmi (c-addr-of mi)))
+			   (setf (#_.cbSize pmi) (load-time-value (c-sizeof-type '#_<MONITORINFO>)))
 	      
-			 (#_GetMonitorInfoW (slot-value monitor 'handle) pmi)
+			   (#_GetMonitorInfoW (slot-value monitor 'handle) pmi)
 		       
-			 (let ((prcMonitor (c-slot-ptr pmi '#_<MONITORINFO> '#_rcMonitor '#_<RECT*>)))
+			   (let ((prcMonitor (c->-addr pmi '#_rcMonitor)))
 			 
-			   (setq frame-x (#_.left prcMonitor))
-			   (setq frame-y (#_.top prcMonitor))
-			   (setq frame-width (- (#_.right prcMonitor) (#_.left prcMonitor)))
-			   (setq frame-height (- (#_.bottom prcMonitor) (#_.top prcMonitor))))))
+			     (setq frame-x (#_.left prcMonitor))
+			     (setq frame-y (#_.top prcMonitor))
+			     (setq frame-width (- (#_.right prcMonitor) (#_.left prcMonitor)))
+			     (setq frame-height (- (#_.bottom prcMonitor) (#_.top prcMonitor))))))
 
-		     (clet ((rect #_<RECT>))
-		       (let ((&rect (c-addr-of rect)))
+		       (clet ((rect #_<RECT>))
+			 (let ((&rect (c-addr-of rect)))
 
-			 (setf (#_.left   &rect) 0
-			       (#_.top    &rect) 0
-			       (#_.right  &rect) (round width)
-			       (#_.bottom &rect) (round height))
+			   (setf (#_.left   &rect) 0
+				 (#_.top    &rect) 0
+				 (#_.right  &rect) (round width)
+				 (#_.bottom &rect) (round height))
 
-			 (setf (last-maximized? window) maximized?)
+			   (setf (last-maximized? window) maximized?)
 		       
-			 (when maximized?
-			   (setq style (logior style #_WS_MAXIMIZE)))
+			   (when maximized?
+			     (setq style (logior style #_WS_MAXIMIZE)))
 
-			 (setf (x window) (#_.left &rect)
-			       (y window) (#_.top &rect))
+			   (setf (x window) (#_.left &rect)
+				 (y window) (#_.top &rect))
 			 
-			 (setf (width window) (- (#_.right &rect) (#_.left &rect))
-			       (height window) (- (#_.bottom &rect) (#_.top &rect)))
+			   (setf (width window) (- (#_.right &rect) (#_.left &rect))
+				 (height window) (- (#_.bottom &rect) (#_.top &rect)))
 			 
-			 (#_AdjustWindowRectEx &rect style #_FALSE ex-style)
+			   (#_AdjustWindowRectEx &rect style #_FALSE ex-style)
 
-			 (let ((left (#_.left &rect))
-			       (top (#_.top &rect))
-			       (right (#_.right &rect))
-			       (bottom (#_.bottom &rect)))
+			   (let ((left (#_.left &rect))
+				 (top (#_.top &rect))
+				 (right (#_.right &rect))
+				 (bottom (#_.bottom &rect)))
 
-			   (if (and (null xpos) (null ypos))
+			     (if (and (null xpos) (null ypos))
 		  
-			       (progn 
-				 (setq frame-x #_CW_USEDEFAULT)
-				 (setq frame-y #_CW_USEDEFAULT))
+				 (progn 
+				   (setq frame-x #_CW_USEDEFAULT)
+				   (setq frame-y #_CW_USEDEFAULT))
 		  
-			       (progn
-				 (setq frame-x (+ xpos left))
-				 (setq frame-y (+ ypos top))))
+				 (progn
+				   (setq frame-x (+ xpos left))
+				   (setq frame-y (+ ypos top))))
 
-			   (setq frame-width (- right left))
-			   (setq frame-height (- bottom top))))))
+			     (setq frame-width (- right left))
+			     (setq frame-height (- bottom top))))))
 
-		 (let ((id (gen-window-id)))
+		   (let ((id (gen-window-id)))
 
-		   (let ((wide-title (lpcwstr title)))
-		     (clet ((wc #_<wndconfig>))
-		       (let ((&wc (c-addr-of wc)))
-			 (setf (#_.id &wc) id
-			       (#_.maximized &wc) (if maximized? 1 0)
-			       (#_.scaletomonitor &wc) (if scale-to-monitor? 1 0)
-			       (#_.decorated &wc) (if decorated? 1 0))
+		     (let ((wide-title (lpcwstr title)))
+		       (clet ((wc #_<wndconfig>))
+			 (let ((&wc (c-addr-of wc)))
+			   (setf (#_.id &wc) id
+				 (#_.maximized &wc) (if maximized? 1 0)
+				 (#_.scaletomonitor &wc) (if scale-to-monitor? 1 0)
+				 (#_.decorated &wc) (if decorated? 1 0))
 
 		     
-			 (print frame-x)
-			 (print frame-y)
-			 (print frame-width)
-			 (print frame-height)
-			 (print main-window-class)
+			   (print frame-x)
+			   (print frame-y)
+			   (print frame-width)
+			   (print frame-height)
+			   (print main-window-class)
 
-			 (print 'b)
-			 (print (#_GetLastError))
-		       
-			 (setf (gethash id *id->window-table*) window)
-		       
-			 (let ((result (#_CreateWindowExW ex-style
-							  (#_MAKEINTATOM main-window-class)
-							  wide-title
-							  style
-							  frame-x frame-y
-							  frame-width frame-height
-							  nil ;; no parent window
-							  nil ;; no window menu
-							  (#_GetModuleHandleW nil)
-							  (c-cast '#_<LPVOID> &wc)
-							  )))
-
-			   (print 'c)
+			   (print 'b)
 			   (print (#_GetLastError))
 		       
-
-			   (if result
-			       (progn
-				 (setf handle result)
-
-				 (unless (or (windows-11-build-or-later? 0)
-					     (windows-10-version-1607-or-greater?))
-				   ;; this is done in wndproc for windos-10-1607 or greater
-				   (set-window-prop handle id))
-
-				 (#_SetWindowPos handle #_HWND_TOP
-						 frame-x
-						 frame-y
-						 frame-width
-						 frame-height
-						 (logior #_SWP_NOACTIVATE #_SWP_NOZORDER)))
-			       (error "Win32: Failed to create window."))))))))
-	       
-	       (maybe-allow-messages ()
-		 (when (windows-7-or-greater?)
-		   (#_ChangeWindowMessageFilterEx handle #_WM_DROPFILES #_MSGFLT_ALLOW nil)
-		   (#_ChangeWindowMessageFilterEx handle #_WM_COPYDATA #_MSGFLT_ALLOW nil)
-		   (#_ChangeWindowMessageFilterEx handle +WM_COPYGLOBALDATA+ #_MSGFLT_ALLOW nil)))
-
-	       (maybe-reposition-window ()
-
-		 (unless monitor
-		   
-		   (clet ((rect #_<RECT>))
-		     (let ((&rect (c-addr-of rect)))
-		       (setf (#_.left &rect) 0
-			     (#_.top &rect) 0
-			     (#_.right &rect) (round width)
-			     (#_.bottom &rect) (round height))
-
-		       (clet ((wp #_<WINDOWPLACEMENT>))
-			 (let ((p-wp (c-addr-of wp)))
-			   (setf (#_.length p-wp) (load-time-value (c-sizeof-type '#_<WINDOWPLACEMENT>)))
-		     
-			   (let ((mh (#_MonitorFromWindow handle #_MONITOR_DEFAULTTONEAREST)))
-			   
-			     (when scale-to-monitor?
-		      
-			       (multiple-value-bind (xscale yscale)
-				   (get-hmonitor-content-scale mh)
-			
-				 (when (and (> xscale 0.0f0) (> yscale 0.0f0))
-			  
-				   (setf (#_.right &rect) (round (* (#_.right &rect) xscale)))
-				   (setf (#_.bottom &rect) (round (* (#_.bottom &rect) yscale))))))
-		    
-			     (if (windows-10-version-1607-or-greater?)
-				 (#_AdjustWindowRectExForDpi &rect style #_FALSE ex-style
-							     (#_GetDpiForWindow handle))
-			       
-				 (#_AdjustWindowRectEx &rect style #_FALSE ex-style))
-
-			     (#_GetWindowPlacement handle p-wp)
-
-			     (let ((prcNormalPosition (c-slot-ptr p-wp '#_<WINDOWPLACEMENT> '#_rcNormalPosition '#_<RECT*>)))
-			     
-			       (#_OffsetRect &rect
-					     (- (#_.left prcNormalPosition) (#_.left &rect))
-					     (- (#_.top prcNormalPosition)  (#_.top &rect)))
-
-			       (setf (#_.left prcNormalPosition) (#_.left &rect))
-			       (setf (#_.top prcNormalPosition) (#_.top &rect))
-			       (setf (#_.right prcNormalPosition) (#_.right &rect))
-			       (setf (#_.bottom prcNormalPosition) (#_.bottom &rect))
-		    			   
-			       (setf (#_.showCmd p-wp) #_SW_HIDE)
-
-			       (#_SetWindowPlacement handle p-wp))
+			   (setf (gethash id *id->window-table*) window)
 		       
-			     (when (and maximized? (not decorated?))
+			   (let ((result (#_CreateWindowExW ex-style
+							    (#_MAKEINTATOM main-window-class)
+							    wide-title
+							    style
+							    frame-x frame-y
+							    frame-width frame-height
+							    nil ;; no parent window
+							    nil ;; no window menu
+							    (#_GetModuleHandleW nil)
+							    (c-cast '#_<LPVOID> &wc)
+							    )))
 
-			       (clet ((mi #_<MONITORINFO>))
-				 (let ((&mi (c-addr-of mi)))
-				   (setf (#_.cbSize &mi) (load-time-value (c-sizeof-type '#_<MONITORINFO>)))
+			     (print 'c)
+			     (print (#_GetLastError))
+		       
+
+			     (if result
+				 (progn
+				   (setf handle result)
+
+				   (unless (or (windows-11-build-or-later? 0)
+					       (windows-10-version-1607-or-greater?))
+				     ;; this is done in wndproc for windos-10-1607 or greater
+				     (set-window-prop handle id))
+
+				   (#_SetWindowPos handle #_HWND_TOP
+						   frame-x
+						   frame-y
+						   frame-width
+						   frame-height
+						   (logior #_SWP_NOACTIVATE #_SWP_NOZORDER)))
+				 (error "Win32: Failed to create window."))))))))
+	       
+		 (maybe-allow-messages ()
+		   (when (windows-7-or-greater?)
+		     (#_ChangeWindowMessageFilterEx handle #_WM_DROPFILES #_MSGFLT_ALLOW nil)
+		     (#_ChangeWindowMessageFilterEx handle #_WM_COPYDATA #_MSGFLT_ALLOW nil)
+		     (#_ChangeWindowMessageFilterEx handle +WM_COPYGLOBALDATA+ #_MSGFLT_ALLOW nil)))
+
+		 (maybe-reposition-window ()
+
+		   (unless monitor
+		   
+		     (clet ((rect #_<RECT>))
+		       (let ((&rect (c-addr-of rect)))
+			 (setf (#_.left &rect) 0
+			       (#_.top &rect) 0
+			       (#_.right &rect) (round width)
+			       (#_.bottom &rect) (round height))
+
+			 (clet ((wp #_<WINDOWPLACEMENT>))
+			   (let ((p-wp (c-addr-of wp)))
+			     (setf (#_.length p-wp) (load-time-value (c-sizeof-type '#_<WINDOWPLACEMENT>)))
+		     
+			     (let ((mh (#_MonitorFromWindow handle #_MONITOR_DEFAULTTONEAREST)))
 			   
-				   (#_GetMonitorInfoW mh &mi)
-
-				   (let ((rc-work (c-slot-ptr &mi '#_<MONITORINFO> '#_rcWork '#_<RECT*>)))
+			       (when scale-to-monitor?
+		      
+				 (multiple-value-bind (xscale yscale)
+				     (get-hmonitor-content-scale mh)
+			
+				   (when (and (> xscale 0.0f0) (> yscale 0.0f0))
+			  
+				     (setf (#_.right &rect) (round (* (#_.right &rect) xscale)))
+				     (setf (#_.bottom &rect) (round (* (#_.bottom &rect) yscale))))))
+		    
+			       (if (windows-10-version-1607-or-greater?)
+				   (#_AdjustWindowRectExForDpi &rect style #_FALSE ex-style
+							       (#_GetDpiForWindow handle))
 			       
-				     (print rc-work)
-				     (print (#_.left rc-work))
-				     (print (#_.top rc-work))
-				     (print (#_.right rc-work))
-				     (print (#_.bottom rc-work))
+				   (#_AdjustWindowRectEx &rect style #_FALSE ex-style))
 
-				     (#_SetWindowPos handle #_HWND_TOP
-						     (#_.left rc-work)
-						     (#_.top rc-work)
-						     (- (#_.right rc-work) (#_.left rc-work))
-						     (- (#_.bottom rc-work) (#_.top rc-work))
-						     (logior #_SWP_NOACTIVATE #_SWP_NOZORDER))))))))))))))
+			       (#_GetWindowPlacement handle p-wp)
+
+			       (let ((prcNormalPosition (c->-addr p-wp '#_rcNormalPosition)))
+			     
+				 (#_OffsetRect &rect
+					       (- (#_.left prcNormalPosition) (#_.left &rect))
+					       (- (#_.top prcNormalPosition)  (#_.top &rect)))
+
+				 (setf (#_.left prcNormalPosition) (#_.left &rect))
+				 (setf (#_.top prcNormalPosition) (#_.top &rect))
+				 (setf (#_.right prcNormalPosition) (#_.right &rect))
+				 (setf (#_.bottom prcNormalPosition) (#_.bottom &rect))
+		    			   
+				 (setf (#_.showCmd p-wp) #_SW_HIDE)
+
+				 (#_SetWindowPlacement handle p-wp))
+		       
+			       (when (and maximized? (not decorated?))
+
+				 (clet ((mi #_<MONITORINFO>))
+				   (let ((&mi (c-addr-of mi)))
+				     (setf (#_.cbSize &mi) (load-time-value (c-sizeof-type '#_<MONITORINFO>)))
+			   
+				     (#_GetMonitorInfoW mh &mi)
+
+				     (let ((rc-work (c->-addr &mi '#_rcWork)))
+			       
+				       (print rc-work)
+				       (print (#_.left rc-work))
+				       (print (#_.top rc-work))
+				       (print (#_.right rc-work))
+				       (print (#_.bottom rc-work))
+
+				       (#_SetWindowPos handle #_HWND_TOP
+						       (#_.left rc-work)
+						       (#_.top rc-work)
+						       (- (#_.right rc-work) (#_.left rc-work))
+						       (- (#_.bottom rc-work) (#_.top rc-work))
+						       (logior #_SWP_NOACTIVATE #_SWP_NOZORDER))))))))))))))
 
 
-	  ;;(print 'aaa)
-	  ;;(print (#_GetLastError))
+	    ;;(print 'aaa)
+	    ;;(print (#_GetLastError))
 	  
-	  (maybe-register-class)
+	    (maybe-register-class)
 
-	  ;;(print 'bbb)
-	  ;;(print (#_GetLastError))
+	    ;;(print 'bbb)
+	    ;;(print (#_GetLastError))
 	  
-	  (create-window)
+	    (create-window)
 
-	  ;;(print 'ccc)
-	  ;;(print (#_GetLastError))
+	    ;;(print 'ccc)
+	    ;;(print (#_GetLastError))
 
-	  #+NIL
-	  (maybe-allow-messages)
+	    (maybe-allow-messages)
 
-	  ;;(setf (slot-value window 'scale-to-monitor?) scale-to-monitor?)
-	  ;;(setf (slot-value window 'key-menu) key-menu)
+	    (setf (slot-value window 'scale-to-monitor?) scale-to-monitor?)
+	    
+	    (maybe-reposition-window)
+	    
+	    (#_DragAcceptFiles handle #_TRUE)
+	    
 
-
-	  (maybe-reposition-window)
-
-	  #+NIL
-	  (#_DragAcceptFiles handle #_TRUE)
-
-	  #+NIL
-	  (multiple-value-bind (window-width window-height) (get-win32-window-size window)
+	    (multiple-value-bind (window-width window-height) (get-win32-window-size window)
 	  
-	    (setf (slot-value window 'width) window-width
-		  (slot-value window 'height) window-height))
-
-	  ;;(print 'heapchk)
-	  ;;(print (heapchk))
-	  t)))))
+	      (setf (last-width window) window-width
+		    (last-height window) window-height)
+	      
+	      (apply #'initialize-window-devices window
+		     :width window-width
+		     :height window-height
+		     args))
+	    t))))))
 
 (defun heapchk ()
   (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "_heapchk"))
@@ -1505,7 +1486,7 @@ int decorated;
   (declare (type os-window-mixin window))
   (clet ((mi #_<MONITORINFO>))
     (let* ((&mi (c-addr-of mi))
-	   (rcMonitor (c-slot-ptr &mi '#_<MONITORINFO> '#_rcMonitor '#_<RECT*>)))
+	   (rcMonitor (c->-addr &mi '#_rcMonitor)))
       
       (#_GetMonitorInfoW (h window) &mi)
       (#_SetWindowPos (h window) #_HWND_TOPMOST
@@ -1563,7 +1544,7 @@ int decorated;
       
       (clet ((mi #_<MONITORINFO>))
 	(let* ((&mi (c-addr-of mi))
-	       (rcMonitor (c-slot-ptr &mi '#_<MONITORINFO> '#_rcMonitor '#_<RECT*>))
+	       (rcMonitor (c->-addr &mi '#_rcMonitor))
 	       (flags (logior #_SWP_SHOWWINDOW #_SWP_NOACTIVATE #_SWP_NOCOPYBITS)))
 	  
 	  (when (last-decorated? window)
@@ -1743,7 +1724,7 @@ HMONITOR handle;
 	      (princ 6)
 	      (finish-output)
 		     
-	      (setq window (application-window-list-head app))
+	      (setq window (display-window-list-head app))
 
 	      (loop while window
 		    do (handle-event window (make-instance 'window-close-event))
@@ -1782,7 +1763,7 @@ HMONITOR handle;
 		     (princ 6)
 		     (finish-output)
 		     
-		     (setq window (application-window-list-head app))
+		     (setq window (display-window-list-head app))
 
 		     (loop while window
 			   do (handle-event window (make-instance 'window-close-event))
@@ -1792,7 +1773,7 @@ HMONITOR handle;
 		     ;;(terpri)
 		     ;;(princ 3)
 		     ;;(finish-output)
-		     ;;(#_TranslateMessage &msg)
+		     (#_TranslateMessage &msg)
 		     (#_DispatchMessageW &msg)
 
 		     (terpri)
@@ -1802,35 +1783,13 @@ HMONITOR handle;
       (princ 5)
       (finish-output))))
 
-(defun run (app)
+(defun run (&optional (display (default-display)))
   (loop ;;until (application-exit? app)
-	do (wait-application-events app)))
+	do (wait-events display)))
       
-
-#+NIL
-(defun test2 ()
-  (unless (window-display window) (make-instance 'application-mixin))
-  (test3))
-
-(defun test3 ()
-  (setq w (make-instance 'os-window))
-  (create-win32-window w)
-  (clet ((msg #_<MSG>))
-    (let ((&msg (c-addr-of msg)))
-      
-      (loop while (prog1 (> (#_GetMessage &msg nil 0 0) 0)
-		    #+NIL
-		    (print (#_GetLastError))
-		    #+NIL
-		    (finish-output))
-	    do ;;(#_TranslateMessage &msg)
-	       (#_DispatchMessage &msg)
-	       #+NIL
-		(print 2)
-		#+NIL
-	       (finish-output)))))
 
 (defun test ()
   (ccl::call-in-initial-process
    (lambda ()
-     (test2))))
+     (make-instance 'window))))
+

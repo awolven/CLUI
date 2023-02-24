@@ -77,6 +77,9 @@
    (monitors
     :accessor display-monitors
     :initform ())
+
+   (helper-window :initform nil
+		  :accessor helper-window)
    
    (clipboard-string :accessor clipboard-string
 		     :initform "")
@@ -122,7 +125,7 @@
   screen)
 
 (defclass handle-mixin ()
-  ((handle :initarg :h :accessor h)))
+  ((handle :initarg :h :initarg :handle :accessor h)))
 
 (defmethod initialize-instance ((instance display-mixin)
 				&rest initargs
@@ -130,8 +133,9 @@
 				&allow-other-keys)
 					
   (declare (ignore initargs))
-  (call-next-method)
-  (push instance (get-displays))  
+  (push instance (get-displays)) ;; we do this first because some callbacks need *displays* set
+  (handler-case (call-next-method)
+    (error () (pop (get-displays))))
   instance)
 
 (defmethod initialize-instance :after ((instance display-mixin)
@@ -253,6 +257,31 @@
    (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
    (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)))
 
+(defclass helper-window (handle-mixin)
+  ())
+
+(defmethod helper-window-class ((display display-mixin))
+  'helper-window)
+
+(defvar *window-handle->window-table* (make-hash-table :test #'eq))
+
+(defmethod find-window ((handle integer))
+  (gethash handle *window-handle->window-table*))
+
+#+sbcl
+(defmethod find-window ((handle sb::system-area-pointer))
+  (gethash (sap-int handle) *window-handle->window-table*))
+
+#+ccl
+(defmethod find-window ((handle ccl::macptr))
+  (gethash (ccl::%ptr-to-int handle) *window-handle->window-table*))
+
+(defmethod find-window ((handle noffi::cval))
+  (find-window (cval-value handle)))
+
+#+ccl
+(defmethod find-window ((handle noffi::ptr))
+  (find-window (ccl::%incf-ptr (ptr-value handle) (ptr-offset handle))))
    
 
 (defclass homemade-window-mixin (window-mixin)

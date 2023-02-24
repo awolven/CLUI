@@ -132,7 +132,6 @@
    (error-code :initform nil
 	       :accessor display-error-code)
 
-   (helper-window-handle :accessor helper-window-handle)
    (hidden-cursor :accessor hidden-cursor)
    
    (context :accessor unique-context)
@@ -217,7 +216,7 @@
   (apply #'create-native-x11-window instance initargs)
   (values))  
 
-(defvar *window-handle->window-table* (make-hash-table :test #'eq))
+
 
 (defclass x11:cursor-mixin (clui:cursor-mixin clui:handle-mixin)
   ())
@@ -252,4 +251,12 @@
   ())
 
 (defclass x11:monitor (x11:monitor-mixin)
+  ())
+
+#+vulkan
+(defclass x11:vulkan-enabled-window-mixin (vk::vulkan-window-mixin win32:window-mixin)
+  ())
+
+#+vulkan
+(defclass x11:local-server-with-vulkan-mixin (vk::vulkan-enabled-display-mixin win32:desktop-mixin)
   ())

@@ -13,14 +13,14 @@
 	   #:desktop-mixin
 	   #:screen-mixin
 
-	   #:desktop-with-vulkan-mixin
+	   #:desktop-with-krma-mixin
 	   #:desktop-with-opengl-mixin
-	   #:desktop-with-vulkan
+	   #:desktop-with-krma
 	   #:desktop-with-opengl
 
-	   #:vulkan-window-mixin
-	   #:wgl-window-mixin
+	   #:krma-enabled-window-mixin
+	   #:wgl-enabled-window-mixin
 
-	   #:wgl-window
-	   #:vulkan-window))
+	   #:wgl-enabled-window
+	   #:krma-enabled-window))
 	   
