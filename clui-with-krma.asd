@@ -5,5 +5,5 @@
 
   :components
   ((:file "krma/krma-classes")
-   (:file "win32/win32-vulkan")
-   #+NIL(:file "krma/clui-with-krma")))
+   #+windows(:file "win32/win32-vulkan")
+   #+linux(:file "x11/x11-vulkan")))

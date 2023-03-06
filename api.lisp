@@ -1040,7 +1040,7 @@
 
 #+x11
 (defmethod window-framebuffer-size ((window x11:window-mixin))
-  (get-x11-framebuffer-size window))
+  (get-x11-window-framebuffer-size window))
 
 #+wayland
 (defmethod window-framebuffer-size ((window wayland:window-mixin))

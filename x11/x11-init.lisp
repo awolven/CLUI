@@ -1,18 +1,26 @@
 (in-package :clui)
 
 (defun create-helper-x11-window (display)
-  (clet ((wa #_<XSetWindowAttributes>))
-    (let ((&wa (c-addr-of wa)))
-      (setf (#_.event_mask &wa) #_PropertyChangeMask)
+  (let ((visual (#_DefaultVisual (h display)
+				 (default-screen-id display))))
+    (clet ((wa #_<XSetWindowAttributes>))
+      (let ((&wa (c-addr-of wa)))
+	(setf (#_.event_mask &wa) #_PropertyChangeMask)
+	(setf (#_.colormap &wa) (#_XCreateColormap (h display)
+						   (default-root-window-handle display)
+						   visual
+						   #_AllocNone))
 
-      (setf (helper-window-handle display)
-	    (#_XCreateWindow (h display)
-			     (default-root-window-handle display)
-			     0 0 1 1 0 0
-			     #_InputOnly
-			     (#_DefaultVisual (h display)
-					      (default-screen-id display))
-			     #_CWEventMask &wa)))))
+	(setf (helper-window display)
+	      (make-instance (helper-window-class display)
+			     :h
+			     (#_XCreateWindow (h display)
+					      (default-root-window-handle display)
+					      0 0 1 1 0
+					      (#_DefaultDepth (h display) (default-screen-id display))
+					      #_InputOutput
+					      visual
+					      (logior #_CWEventMask #_CWColormap) &wa)))))))
 
 (defun create-hidden-x11-cursor (display)
   (let* ((size (* 16 16 4))
@@ -372,6 +380,7 @@
       (%detect-EWMH display)
 
       (create-helper-x11-window display)
+      (initialize-helper-window display (helper-window display))
       (create-hidden-x11-cursor display)
 
       (unless (zerop (#_XSupportsLocale))

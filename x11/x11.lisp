@@ -1,11 +1,11 @@
 (in-package :cl-user)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi::boot-ht)
+;;(eval-when (:compile-toplevel :load-toplevel :execute)
+;;  (noffi::boot-ht)
   (noffi::noffi-syntax t)
-  (defparameter noffi::*last-good-token* nil))
+  ;;(defparameter noffi::*last-good-token* nil))
 
-(eval-when (:compile-toplevel)
+;;(eval-when (:compile-toplevel)
   #_{
   #include <stdlib.h>
   #include <string.h>
@@ -19,7 +19,8 @@
   #include <poll.h>
   #include <signal.h>
   #include <time.h>
-  #include <X11/Xlib.h>
+#include <X11/Xlib.h>
+#include <X11/Xlib-xcb.h>
   #include <X11/Xutil.h>
   #include <X11/cursorfont.h>
   #include <X11/Xmd.h>
@@ -35,4 +36,4 @@
   #include <X11/extensions/shape.h>
 
   }
-  )
+;;  )

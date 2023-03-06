@@ -231,24 +231,27 @@
 	
 	(%grab-x11-error-handler display)
 
-	(unwind-protect
-	     (setf (h window) (#_XCreateWindow xdisplay
-					       (or (and parent (h parent)) (h root))
-					       (or (and xpos (round xpos)) 0)
-					       (or (and ypos (round ypos)) 0)
-					       (or (and width (round width)) 640)
-					       (or (and height (round height)) 480)
-					       0 ;; border width
-					       depth
-					       #_InputOutput
-					       visual
-					       (logior #_CWBorderPixel #_CWColormap #_CWEventMask)
-					       &wa))
+	(let ((w (or (and width (round width)) 640))
+	      (h (or (and height (round height)) 480)))
+	  (unwind-protect
+	       (setf (h window) (#_XCreateWindow xdisplay
+						 (or (and parent (h parent)) (h root))
+						 (or (and xpos (round xpos)) 0)
+						 (or (and ypos (round ypos)) 0)
+						 w h
+						 0 ;; border width
+						 depth
+						 #_InputOutput
+						 visual
+						 (logior #_CWBorderPixel #_CWColormap #_CWEventMask)
+						 &wa))
 
-	  (%release-x11-error-handler display))
+	    (%release-x11-error-handler display))
 
-	(when (null (h window))
-	  (error "X11: Failed to create window."))
+	  (when (null (h window))
+	    (error "X11: Failed to create window."))
+
+	  (initialize-window-devices window :width w :height h))
 
 	(setf (gethash (h window) *window-handle->window-table*) window)
 
@@ -390,11 +393,41 @@
 	    (setf (last-width window) width
 		  (last-height window) height))
 
-	  (multiple-value-bind (x y) (get-x11-cursor-pos window)
+	  (multiple-value-bind (x y) (get-x11-window-cursor-pos window)
 	    (setf (cursor-warp-pos-x window) x
 		  (cursor-warp-pos-y window) y))
 	  
 	  t)))))
+
+(defun get-x11-window-content-scale (window)
+  (let ((scale (display-content-scale (window-display window))))
+    (values scale scale)))
+
+(defun get-x11-window-cursor-pos (window)
+  (clet ((root #_<Window>)
+	 (child #_<Window>)
+	 (root-x #_<int>)
+	 (root-y #_<int>)
+	 (child-x #_<int>)
+	 (child-y #_<int>)
+	 (mask #_<unsigned int>))
+
+    (#_XQueryPointer (h (window-display window)) (h window)
+		     (c-addr-of root) (c-addr-of child)
+		     (c-addr-of root-x) (c-addr-of root-y)
+		     (c-addr-of child-x) (c-addr-of child-y)
+		     (c-addr-of mask))
+
+    (values (cval-value child-x) (cval-value child-y))))
+
+(defun set-x11-window-cursor-pos (window x y)
+  (setf (cursor-warp-pos-x window) x
+	(cursor-warp-pos-y window) y)
+
+  (let ((xdisplay (h (window-display window))))
+    (#_XWarpPointer xdisplay (h window) 0 0 0 0 (round x) (round y))
+    (#_XFlush xdisplay)
+    (values)))
 
 (defun show-x11-window (window)
 
@@ -494,6 +527,9 @@
 
     (values (#_.width &attribs)
 	    (#_.height &attribs))))
+
+(defun get-x11-window-framebuffer-size (window)
+  (get-x11-window-size window))
 
 (defun set-x11-window-size (window width height)
   (if (window-monitor window)

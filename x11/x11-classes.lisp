@@ -65,7 +65,15 @@
 		    :accessor xkb-detectable?)
 
    (xkb-group :initform nil
-	      :accessor xkb-group)))
+	      :accessor xkb-group)
+
+   (xcb-available? :initform t
+		   :accessor xcb-available?)
+
+   (xcb-vulkan-surface? :initform t
+			:accessor xcb-vulkan-surface?)))
+
+  
 
 (defclass window-manager ()
   ((NET_SUPPORTED :initform nil)
@@ -253,10 +261,4 @@
 (defclass x11:monitor (x11:monitor-mixin)
   ())
 
-#+vulkan
-(defclass x11:vulkan-enabled-window-mixin (vk::vulkan-window-mixin win32:window-mixin)
-  ())
 
-#+vulkan
-(defclass x11:local-server-with-vulkan-mixin (vk::vulkan-enabled-display-mixin win32:desktop-mixin)
-  ())

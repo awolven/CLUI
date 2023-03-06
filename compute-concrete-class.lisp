@@ -47,17 +47,30 @@
   (list* (find-class 'cocoa:desktop) initargs))
 
 #+x11
-(defmethod compute-make-display-instance-arugments (protocol
-						    (cocoa t)
+(defmethod compute-make-display-instance-arguments (protocol
+						    (cocoa null)
 						    (metal null)
 						    (opengl null)
 						    (vulkan null)
 						    (wayland null)
 						    (win32 null)
-						    (x11 null)
+						    (x11 t)
 						    &rest initargs)
 
   (list* (find-class 'x11:local-server) initargs))
+
+#+x11
+(defmethod compute-make-display-instance-arguments (protocol
+						    (cocoa null)
+						    (metal null)
+						    (opengl null)
+						    (vulkan t)
+						    (wayland null)
+						    (win32 null)
+						    (x11 t)
+						    &rest initargs)
+  (declare (ignorable protocol))
+  (list* (find-class 'x11:local-server-with-krma) initargs))
 
 #+wayland
 (defmethod compute-make-display-instance-arugments (protocol
@@ -199,19 +212,7 @@
   (declare (ignore display initargs))
   (find-class 'x11:window errorp))
 
-#+x11
-(defmethod get-an-x11-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
-  (declare (ignore initargs))
-  (if animable
-      (find-class 'x11:vulkan-window errorp)
-      (find-class 'x11:window errorp)))
 
-#+x11
-(defmethod get-an-x11-window-class ((desktop clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
-  (declare (ignore initargs))
-  (if animable
-      (find-class 'x11:glx-window errorp)
-      (find-class 'x11:window errorp)))
 
 ;; if a null passed in as parent, or if we get a screen object
 ;; then it is a top level window, which is an os-window on all platorms

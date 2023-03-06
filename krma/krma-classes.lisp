@@ -37,7 +37,7 @@
   ())
 
 #+x11
-(defclass x11:local-server-with-krma (win32:local-server-with-krma-mixin)
+(defclass x11:local-server-with-krma (x11:local-server-with-krma-mixin)
   ())
 
 #+x11
@@ -106,7 +106,7 @@
   (list* (find-class 'cocoa:desktop-with-krma) initargs))
 
 #+x11
-(defmethod compute-make-display-instance-arugments (protocol
+(defmethod compute-make-display-instance-arguments (protocol
 						    (cocoa null)
 						    (metal null)
 						    (opengl null)
@@ -117,8 +117,9 @@
 						    &rest initargs)
   (list* (find-class 'x11:local-server-with-krma) initargs))
 
+
 #+wayland
-(defmethod compute-make-display-instance-arugments (protocol
+(defmethod compute-make-display-instance-arguments (protocol
 						    (cocoa null)
 						    (metal null)
 						    (opengl null)
@@ -140,6 +141,12 @@
 ;; be used in a demand-refresh wait-for-messages manner
 
 
+#+x11
+(defmethod get-an-x11-window-class ((display x11:local-server-with-krma-mixin) errorp &rest initargs
+				     &key &allow-other-keys)
+  (declare (ignore initargs))
+  (find-class 'x11:krma-enabled-window errorp))
+
 #+win32
 (defmethod create-native-window-surface ((display win32:desktop-mixin)
 					 instance window
@@ -152,7 +159,20 @@
 					 &optional (allocator vk::+null-allocator+))
   (vk::create-cocoa-window-surface instance window allocator))
 
+#+x11
+(defmethod create-native-window-surface ((display x11:local-server-with-krma-mixin)
+					 instance window
+					 &optional (allocator vk::+null-allocator+))
+  (vk::create-x11-window-surface display instance window allocator))
 
+
+#+wayland
+(defmethod create-native-window-surface ((display wayland:desktop-mixin)
+					 instance (window wayland:window-mixin)
+					 &optional (allocator vk::+null-allocator+))
+  (vk::create-wayland-window-surface instance window allocator))
+
+#+win32
 (defmethod initialize-helper-window ((display win32:desktop-with-krma-mixin) helper-window)
   (setf (vk::render-surface helper-window)
 	(create-native-window-surface display
@@ -161,5 +181,22 @@
   (setf (vk::window (vk::render-surface helper-window)) helper-window)
   helper-window)
 
+#+x11
+(defmethod initialize-helper-window ((display x11:local-server-with-krma-mixin) helper-window)
+  (setf (vk::render-surface helper-window)
+	(create-native-window-surface display
+				      (vk::get-vulkan-instance display)
+				      helper-window))
+  (setf (vk::window (vk::render-surface helper-window)) helper-window)
+  helper-window)
+
+#+win32
 (defmethod helper-window-class ((display win32:desktop-with-krma-mixin))
+  'vk::vulkan-helper-window)
+
+#+x11
+(defmethod helper-window-class ((display x11:local-server-with-krma-mixin))
+  'vk::vulkan-helper-window)
+
+(defmethod helper-window-class ((display clui:display-mixin))
   'vk::vulkan-helper-window)

@@ -100,11 +100,13 @@
 
    #+NIL(:file "win32/test")))
 
+
 #+linux
 (defsystem clui/linux
+  :depends-on ()
   :serial t
   :components
-  ((:file "../noffi/src/patch-ccl")
+   (#+ccl(:file "../noffi/src/patch-ccl")
    (:file "../noffi/other/clex/src/clex")
    (:file "../noffi/other/lalr/lalr")
    (:file "../noffi/src/file")
@@ -125,7 +127,6 @@
    (:file "../noffi/src/comp")
    (:file "../noffi/src/runtime")
    (:file "../noffi/src/abi-amd64-sysv")
-
    (:file "../noffi/src/config")
    
    (:file "noffi-patches")

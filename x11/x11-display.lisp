@@ -108,8 +108,8 @@
 
 	      (when (#_XrmGetResource db "Xft.dpi" "Xft.Dpi" &type &value)
 
-		(when (and type (string= type "String"))
-		  (setq dpi (#_.addr &value))))))
+		(when (and type (zerop (#_strcmp type "String")))
+		  (setq dpi (ccl::%ptr-to-int (cval-value (#_.addr &value))))))))
 
 	  (#_XrmDestroyDatabase db))))
 
@@ -978,31 +978,7 @@
     (#_XFlush xdisplay)
     (values)))
 
-(defun set-x11-cursor-pos (window x y)
-  (setf (cursor-warp-pos-x window) x
-	(cursor-warp-pos-y window) y)
 
-  (let ((xdisplay (h (window-display window))))
-    (#_XWarpPointer xdisplay (h window) 0 0 0 0 (round x) (round y))
-    (#_XFlush xdisplay)
-    (values)))
-
-(defun get-x11-cursor-pos (window)
-  (clet ((root #_<Window>)
-	 (child #_<Window>)
-	 (root-x #_<int>)
-	 (root-y #_<int>)
-	 (child-x #_<int>)
-	 (child-y #_<int>)
-	 (mask #_<unsigned int>))
-
-    (#_XQueryPointer (h (window-display window)) (h window)
-		     (c-addr-of root) (c-addr-of child)
-		     (c-addr-of root-x) (c-addr-of root-y)
-		     (c-addr-of child-x) (c-addr-of child-y)
-		     (c-addr-of mask))
-
-    (values (cval-value child-x) (cval-value child-y))))
 
 (defun wait-x11-events (display &optional (timeout nil))
   (wait-for-any-event display timeout)
