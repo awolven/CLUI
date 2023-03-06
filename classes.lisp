@@ -242,10 +242,10 @@
 		  
 
 (defclass os-window-mixin (window-mixin)
-  ((%x :type (or null real) :initform nil :accessor last-pos-x)
-   (%y :type (or null real) :initform nil :accessor last-pos-y)
-   (%width :type (or null real) :initform nil :accessor last-width)
-   (%height :type (or null real) :initform nil :accessor last-height)
+  ((%x :type (or null real) :initform 0 :accessor last-pos-x)
+   (%y :type (or null real) :initform 0 :accessor last-pos-y)
+   (%width :type (or null real) :initform 0 :accessor last-width)
+   (%height :type (or null real) :initform 0 :accessor last-height)
    (%maximized? :type boolean :initform nil :accessor last-maximized?)
    (%resizable? :type boolean :initform nil :accessor last-resizable?)
    (%decorated? :type boolean :initform nil :accessor last-decorated?)

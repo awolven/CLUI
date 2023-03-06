@@ -6,7 +6,8 @@
   ((timestamp :initarg :timestamp
 	      :accessor event-timestamp)))
 
-(defmethod handle-event ((window window-mixin) (event event-mixin))
+(defmethod handle-event (object event)
+  (declare (ignorable object event))
   (values))
 
 #+NOTYET

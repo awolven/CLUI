@@ -241,8 +241,11 @@
   (values))
 
 (defun get-win32-window-cursor-pos (window)
-  (declare (ignorable window))
-  (values))
+  (clet& ((&pos #_<POINT>))
+    (if (zerop (#_GetCursorPos &pos))
+	(values 0 0)
+	(progn (#_ScreenToClient (h window) &pos)
+	       (values (#_.x &pos) (#_.y &pos))))))
 
 (defun set-win32-window-cursor-pos (window x y)
   (declare (ignorable window x y))
@@ -711,7 +714,6 @@ int decorated;
 	(warn "failed to get window id for msg: ~S" uMsg)
 	(return (#_DefWindowProcW hWnd uMsg wParam lParam)))
 	
-      
       (setq window (gethash id *id->window-table*))
       
       (tagbody
@@ -726,6 +728,7 @@ int decorated;
 	       (#.#_WM_NCCALCSIZE (go break)) ;; 131
 
 	       (#.#_WM_CREATE
+		(setf (h window) hWnd)
 		(setf (gethash
 		       (sap-int (ccl::%inc-ptr (ptr-value hWnd) (ptr-offset hWnd)))
 		       *window-handle->window-table*)
@@ -807,12 +810,17 @@ int decorated;
 						    'window-restore-event))))
 		      (handle-event window event)))
 
-		  (when (or (/= width (round (width window)))
-			    (/= height (round (height window))))
-		    (setf (width window) width
-			  (height window) height)
-		    (let ((event (make-instance 'window-resize-event)))
-		      (handle-event window event)))
+		  (when (or (/= width (round (or (last-width window) 0)))
+			    (/= height (round (or (last-height window) 0))))
+
+		    (let ((event (make-instance 'window-resize-event
+						:window window
+						:new-width width
+						:new-height height)))
+		      (handle-event window event)
+
+		      (setf (last-width window) width
+			    (last-height window) height)))
 
 		  (when (and (window-monitor window)
 			     (not (eq (last-iconified? window) iconified?)))
@@ -841,6 +849,9 @@ int decorated;
 					    :new-y (#_GET_Y_LPARAM lParam))))
 
 		  (handle-event window event)
+
+		  (setf (last-pos-x window) (#_GET_X_LPARAM lParam)
+			(last-pos-y window) (#_GET_Y_LPARAM lParam))
 
 		  (return 0)
 
@@ -1313,7 +1324,7 @@ int decorated;
 
 			     (if result
 				 (progn
-				   (setf handle result)
+				   (setf handle result) ;; wndproc should do this, but it should be ok to do again.
 
 				   (unless (or (windows-11-build-or-later? 0)
 					       (windows-10-version-1607-or-greater?))
@@ -1429,16 +1440,21 @@ int decorated;
 	    
 	    (#_DragAcceptFiles handle #_TRUE)
 	    
-
-	    (multiple-value-bind (window-width window-height) (get-win32-window-size window)
-	  
-	      (setf (last-width window) window-width
-		    (last-height window) window-height)
+	    (multiple-value-bind (xpos ypos) (get-win32-window-pos window)
 	      
-	      (apply #'initialize-window-devices window
-		     :width window-width
-		     :height window-height
-		     args))
+	      (setf (last-pos-x window) xpos
+		    (last-pos-y window) ypos)
+	      
+	      (multiple-value-bind (window-width window-height) (get-win32-window-size window)
+	  
+		(setf (last-width window) window-width
+		      (last-height window) window-height)
+
+		#+NOTNOW
+		(apply #'initialize-window-devices window
+		       :width window-width
+		       :height window-height
+		       args)))
 	    t))))))
 
 (defun heapchk ()
@@ -1704,8 +1720,8 @@ HMONITOR handle;
 	
 	(error "GetMessage returned non positive"))
 
-      (format t "~%~A" (#_GetLastError))
-      (finish-output)
+      ;;(format t "~%~A" (#_GetLastError))
+      ;;(finish-output)
 
       ;;(terpri)
       ;;(princ 1.5)
@@ -1720,9 +1736,9 @@ HMONITOR handle;
 	(if (= (#_.message &msg) #_WM_QUIT)
 
 	    (progn
-	      (terpri)
-	      (princ 6)
-	      (finish-output)
+	      ;;(terpri)
+	      ;;(princ 6)
+	;;      (finish-output)
 		     
 	      (setq window (display-window-list-head app))
 
@@ -1738,7 +1754,7 @@ HMONITOR handle;
 	      (#_DispatchMessageW &msg)
 	      
 	      ;;(terpri)
-	      (print 4)
+	      ;;(print 4)
 	      (finish-output)))))))
 
 (defun poll-win32-events (app)
@@ -1747,21 +1763,21 @@ HMONITOR handle;
 	  (window))
 
       (loop until (progn
-		    (terpri)
-		    (princ 1)
-		    (finish-output)
+	;;	    (terpri)
+	;;	    (princ 1)
+	;;	    (finish-output)
 		    (zerop (#_PeekMessageW &msg nil 0 0 #_PM_REMOVE)))
 
-	    do (terpri)
-	       (princ 2)
-	       (finish-output)
+	    do ;;(terpri)
+	       ;;(princ 2)
+	       ;;(finish-output)
 
 	       (if (= (#_.message &msg) #_WM_QUIT)
 
 		   (progn
-		     (terpri)
-		     (princ 6)
-		     (finish-output)
+		 ;;    (terpri)
+		   ;;  (princ 6)
+		     ;;(finish-output)
 		     
 		     (setq window (display-window-list-head app))
 
@@ -1776,12 +1792,14 @@ HMONITOR handle;
 		     (#_TranslateMessage &msg)
 		     (#_DispatchMessageW &msg)
 
-		     (terpri)
-		     (princ 4)
-		     (finish-output))))
-      (terpri)
-      (princ 5)
-      (finish-output))))
+		     ;;(terpri)
+		     ;;(princ 4)
+		     ;;(finish-output)
+		     )))
+      ;;(terpri)
+      ;;(princ 5)
+      ;;(finish-output)
+      )))
 
 (defun run (&optional (display (default-display)))
   (loop ;;until (application-exit? app)
