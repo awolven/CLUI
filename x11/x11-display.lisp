@@ -611,27 +611,36 @@
 	     (let ((mods (translate-x11-state (#_.state (c->-addr event '#_xbutton))))
 		   (button (#_.button (c->-addr event '#_xbutton))))
 
+	       (multiple-value-bind (x y) (window-cursor-position window)
 	       (cond ((= button #_Button1)
 		      (handle-event window (make-instance 'pointer-button-press-event
 							  :window window
+							  :x x
+							  :y y
 							  :button +pointer-left-button+
 							  :modifier-state mods)))
 
 		     ((= button #_Button2)
 		      (handle-event window (make-instance 'pointer-button-press-event
 							  :window window
+							  :x x
+							  :y y
 							  :button +pointer-middle-button+
 							  :modifier-state mods)))
 
 		     ((= button #_Button3)
 		      (handle-event window (make-instance 'pointer-button-press-event
 							  :window window
+							  :x x
+							  :y y
 							  :button +pointer-right-button+
 							  :modifier-state mods)))
 
 		     ((= button #_Button4)
 		      (handle-event window (make-instance 'pointer-wheel-event
 							  :window window
+							  :x x
+							  :y y
 							  :delta-y 1.0
 							  :delta-x 0.0
 							  :modifier-state mods)))
@@ -639,6 +648,8 @@
 		     ((= button #_Button5)
 		      (handle-event window (make-instance 'pointer-wheel-event
 							  :window window
+							  :x x
+							  :y y
 							  :delta-y -1.0
 							  :delta-x 0.0
 							  :modifier-state mods)))
@@ -646,6 +657,8 @@
 		     ((= button #_Button6)
 		      (handle-event window (make-instance 'pointer-wheel-event
 							  :window window
+							  :x x
+							  :y y
 							  :delta-x 1.0
 							  :delta-y 0.0
 							  :modifier-state mods)))
@@ -653,14 +666,17 @@
 		     ((= button #_Button7)
 		      (handle-event window (make-instance 'pointer-wheel-event
 							  :window window
+							  :x x
+							  :y y
 							  :delta-x -1.0
 							  :delta-y 0.0
 							  :modifier-state mods)))
 
 		     (t (handle-event window (make-instance 'pointer-button-press-event
 							    :window window
+							    :x x :y y
 							    :button (- button #_Button1 #_Button4)
-							    :modifier-state mods))))
+							    :modifier-state mods)))))
 
 	       (return)))
 

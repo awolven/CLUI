@@ -6,6 +6,9 @@
   ((timestamp :initarg :timestamp
 	      :accessor event-timestamp)))
 
+(defmethod clui:handle-event :after (object (event clui::event-mixin))
+  (setf (display-last-event (default-display)) event))
+
 (defmethod handle-event (object event)
   (declare (ignorable object event))
   (values))
@@ -230,6 +233,9 @@
 (defclass pointer-click-event-mixin (pointer-button-event-mixin)
   ())
 
+(defmethod pointer-click-event-p ((event pointer-click-event-mixin))
+  t)
+
 (defclass clui.v0:pointer-click-event (pointer-click-event-mixin)
   ())
 
@@ -239,8 +245,9 @@
 (defclass clui.v0:pointer-double-click-event (pointer-double-click-event-mixin)
   ())
 
-(defclass pointer-button-hold-and-drag-event-mixin (pointer-click-and-hold-mixin)
-  ())
+(defclass pointer-button-hold-and-drag-event-mixin (pointer-button-hold-event-mixin)
+  ((delta-x :initarg :delta-x :accessor pointer-drag-delta-x)
+   (delta-y :initarg :delta-x :accessor pointer-drag-delta-y)))
 
 (defclass clui.v0:pointer-button-hold-and-drag-event (pointer-click-hold-and-drag-mixin)
   ())
@@ -321,9 +328,6 @@
 
 (defclass spaceball-event-mixin (joystick-event-mixin)
   ())
-
-(trace handle-event)
-
 
 ;; these are the names we're giving the USB scan codes
 

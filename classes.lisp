@@ -105,7 +105,10 @@
 			       do (setf (aref array i)
 					(make-array 5 :initial-element nil))
 			       finally (return array)))
-	     :reader display-keynames)))
+	     :reader display-keynames)
+
+   (last-event :initform nil
+	       :accessor display-last-event)))
 			
 
 (defun default-screen (display)
@@ -238,8 +241,13 @@
    (keys)
    )
   (:default-initargs :display (default-display)))
-   
-		  
+
+(defmethod window-p ((window window-mixin))
+  t)
+
+(defmethod window-p (object)
+  (declare (ignore object))
+  nil)
 
 (defclass os-window-mixin (window-mixin)
   ((%x :type (or null real) :initform 0 :accessor last-pos-x)
