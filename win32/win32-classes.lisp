@@ -69,7 +69,12 @@
    (scale-to-monitor? :type boolean :initform nil :accessor scale-to-monitor?)
    (key-menu? :type boolean :initform nil :accessor key-menu?)
    (cursor :initform nil :accessor window-cursor)
-   (high-surrogate)))
+   (high-surrogate
+    :initform nil
+    :accessor high-surrogate)
+   (mouse-buttons
+    :initform (make-array 5 :initial-element nil)
+    :reader mouse-buttons)))
 
 (defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-native-win32-window instance initargs))

@@ -48,3 +48,12 @@ Thumbs.db
 *.mov
 *.wmv
 
+*.lisp~
+*#
+.*#
+.#*
+*.fasl
+*.wx64fsl
+*.lx64fsl
+*.asd~
+*.diff

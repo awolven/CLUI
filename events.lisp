@@ -194,6 +194,8 @@
 (defconstant +pointer-left-button+ (ash 1 0))
 (defconstant +pointer-middle-button+ (ash 1 1))
 (defconstant +pointer-right-button+ (ash 1 2))
+(defconstant +pointer-button-4+ (ash 1 3))
+(defconstant +pointer-button-5+ (ash 1 4))
 
 (defclass pointer-event-mixin (input-event-mixin)
   ((pointer :initarg :pointer
@@ -297,6 +299,22 @@
 (defconstant +num-lock-modifier+ (ash 1 6))
 (defconstant +hyper-modifier+ (ash 1 7))
 
+(defun input-char (window codepoint mods plain?)
+  
+  (when (or (< codepoint 32)
+	    (> 126 codepoint 160))
+    (return-from input-char))
+  
+  (unless (lock-key-mods? window)
+    (setq mods (logand mods (lognot (logior +caps-lock-modifier+ +num-lock-modifier+)))))
+
+  (when plain?
+    (handle-event window (make-instance 'character-event
+					:window window
+					:character (code-char codepoint)
+					:modifier-state mods)))
+  (values))
+
 (defclass keyboard-event-mixin (input-event-mixin)
   ((key-name :initarg :key-name
 	     :accessor keyboard-event-key-name)
@@ -319,6 +337,10 @@
 
 (defclass character-event-mixin (keyboard-event-mixin)
   ())
+
+(defmethod print-object ((object character-event-mixin) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~S" (keyboard-event-character object))))
 
 (defclass clui.v0:character-event (character-event-mixin)
   ())

@@ -52,11 +52,22 @@
 (defun lpcwstr->string (ptr)
   (ccl::%get-native-utf-16-cstring (noffi-ptr->ccl-ptr ptr)))
 
-
-					     
-			      
-			    
- 
+(defun get-win32-key-mods ()
+  (let ((mods 0))
+    (when (logtest (#_GetKeyState #_VK_SHIFT) #x8000)
+      (setq mods (logior mods +shift-modifier+)))
+    (when (logtest (#_GetKeyState #_VK_CONTROL) #x8000)
+      (setq mods (logior mods +ctrl-modifier+)))
+    (when (logtest (#_GetKeyState #_VK_MENU) #x8000)
+      (setq mods (logior mods +alt-modifier+)))
+    (when (or (logtest (#_GetKeyState #_VK_LWIN) #x8000)
+	      (logtest (#_GetKeyState #_VK_RWIN) #x8000))
+      (setq mods (logior mods +super-modifier+)))
+    (when (logtest (#_GetKeyState #_VK_CAPITAL) #x1)
+      (setq mods (logior mods +caps-lock-modifier+)))
+    (when (logtest (#_GetKeyState #_VK_NUMLOCK) #x1)
+      (setq mods (logior mods +num-lock-modifier+)))
+    mods)) 
 	    
 
 (defun apply-aspect-ratio (window edge area)
@@ -686,7 +697,9 @@ int decorated;
 
 
 (defun window-proc (hWnd uMsg wParam lParam)
-  ;;(format t "~&window-proc running")
+  (format t "~&window-proc running")
+  (print uMsg)
+  (finish-output)
 
   (block nil
     
@@ -700,6 +713,9 @@ int decorated;
 	       (scale-to-monitor (#_.scaletomonitor wndconfig)))
 	  
 	  (set-window-prop hWnd id)
+
+	  (let ((window (gethash id *id->window-table*)))
+	    (setf (h window) hWnd))
 	    
 	  (unless (= 0 scale-to-monitor)
 	    (#_EnableNonClientDpiScaling hWnd))))
@@ -917,10 +933,7 @@ int decorated;
 				(setf (#_.y p-pt-max-size) (- (#_.bottom p-rc-work) (#_.top p-rc-work)))))))
 
 			))))
-		(return 0)
-
-		#+NIL
-		(go break))
+		(return 0))
 
 	       (#.#_WM_MOUSEACTIVATE ;; 33
 		(when (= (#_HIWORD lParam) #_WM_LBUTTONDOWN)
@@ -993,98 +1006,172 @@ int decorated;
 		(go break))
 
 	       ((#.#_WM_CHAR #.#_WM_SYSCHAR) ;; 258 and 262
-		(go break)
-		#+NOTYET
+
 		(if (and (>= wParam #xd800) (<= wParam #xdbff))
-		    (setf high-surrogate wParam)
+		    (setf (high-surrogate window) wParam)
 		    (let ((codepoint 0))
 		      (if (and (>= wParam #xdc00) (<= wParam #xdfff))
-			  (when high-surrogate
-			    (incf codepoint (ash (- high-surrogate #xd800) 10))
+			  (when (high-surrogate window)
+			    (incf codepoint (ash (- (high-surrogate window) #xd800) 10))
 			    (incf codepoint (- wParam #xdc00))
 			    (incf codepoint #x10000))
 			  (setq codepoint wParam))
-		      (setq high-surrogate 0)
-		      (let ((event (make-instance 'keyboard-event
-						  :character (code-char codepoint)
-						  :mods (get-key-mods (window-display window))
-						  :syschar? (= uMsg #_WM_SYSCHAR))))
-			(handle-event window event))))
-		(when (and (= uMsg #_WM_SYSCHAR) key-menu)
+		      (setf (high-surrogate window) nil)
+		      (input-char window codepoint (get-win32-key-mods) (not (= uMsg #_WM_SYSCHAR)))))
+		(when (and (= uMsg #_WM_SYSCHAR) (key-menu? window))
 		  (go break))
 		(return 0))
 
 	       (#.#_WM_UNICHAR ;; 265
-		(go break)
+
 		(when (= wParam #_UNICODE_NOCHAR)
 		  (return 1))
 
-		#+NIL
-		(let ((event (make-instance 'keyboard-event
-					    :character (code-char wparam)
-					    :mods (get-key-mods (window-display window))
-					    :syschar? nil)))
-		  (handle-event window event))
+		(input-char window wParam (get-win32-key-mods) t)
 		(return 0))
 
 	       ((#.#_WM_KEYDOWN #.#_WM_SYSKEYDOWN #.#_WM_KEYUP #.#_WM_SYSKEYUP) ;; 256, 260, 257, 261
-		#+NOTYET
 		(let ((key)
 		      (scancode)
-		      (action (if (= 0 (logand (#_HIWORD lParam) +kf-up+)) :press :release))
-		      (mods (get-key-mods (window-display window))))
+		      (action (if (logtest (#_HIWORD lParam) #_KF_UP) :press :release))
+		      (mods (get-win32-key-mods))
+		      (time (#_GetMessageTime)))
 
-		  (setq scancode (logand (#_HIWORD lParam) (logior +kf-extended+ #xff)))
+		  (setq scancode (logand (#_HIWORD lParam) (logior #_KF_EXTENDED #xff)))
 
 		  (when (= 0 scancode)
-		    (setq scancode (#_MapVirtualKeyW wParam +map-vk-to-vsc+)))
+		    (setq scancode (#_MapVirtualKeyW wParam #_MAPVK_VK_TO_VSC)))
 
+		  ;; ALT+PrtSc is different than PrtSc
 		  (when (= scancode #x54)
 		    (setq scancode #x137))
 
+		  ;; Ctrl+Pause is different than Pause
 		  (when (= scancode #x146)
 		    (setq scancode #x45))
 
+		  ;; CJK IME sets the extended bit for right shift
 		  (when (= scancode #x136)
 		    (setq scancode #x36))
 
-		  (if (= wParam #_VK_CONTROL)
-		      (if (logand (#_HIWORD lParam) +kf-extended+)
-			  (setq key +key-right-control+)
-			  (clet ((next #_<MSG>))
-			    (setq time (#_GetMessageTime))
-			    (when (#_PeekMessageW (c-addr-of next) nil 0 0 #_PM_NOREMOVE)
-			      (case (#_.message (c-addr-of next))
-				((#_WM_KEYDOWN #_WM_SYSKEYDOWN #_WM_KEYUP #_WMSYSKEYUP)
-				 (when
-				     (and (= (#_.wParam (c-addr-of next)) #_VK_MENU)
-					  (and (not (zerop
-						     (logand (HIWORD (#_.lParam (c-addr-of next)))
-							     +kf-extended+)))
-					       (= (#_.time (c-addr-of next)) time)))
-				   (go break)))))
-			    (setq key +key-left-control+)))
-		      (when (= wParam #_VK_PROCESSKEY)
-			(go break)))
+		  (aref (display-keycodes (window-display window)) scancode)
 
-		  (if (and (= action +release+) (= wParam #_VK_SHIFT))
-		      (progn
-			(input-key window +key-left-shift+ scancode action mods)
-			(input-key window +key-right-shift+ scancode action mods))
-		      (if (= wParam #_VK_SNAPSHOT)
+		  (if (= wParam #_VK_CONTROL)
+		      (if (logand (#_HIWORD lParam) #_KF_EXTENDED)
+			  (setq key +key-right-ctrl+)
 			  (progn
-			    (input-key window key scancode +press+ mods)
-			    (input-key window key scancode +release+ mods))
-			  (input-key window key scancode action mods))))
-		(go break))
+			    (clet& ((&next #_<MSG>))
+			      (when (#_PeekMessageW &next nil 0 0 #_PM_NOREMOVE)
+				(case (#_.message &next)
+				  ((#_WM_KEYDOWN #_WM_SYSKEYDOWN #_WM_KEYUP #_WMSYSKEYUP)
+				   (when (and (= (#_.wParam &next) #_VK_MENU)
+					      (logtest (#_HIWORD (#_.lParam &next)) #_KF_EXTENDED)
+					      (= (#_.time &next) time))
+				     (go break)))))
+			      (setq key +key-left-ctrl+))))
+		      (if (= wParam #_VK_PROCESSKEY)
+			  (go break)
+
+			  (if (and (eq action :release) (= wParam #_VK_SHIFT))
+			      (progn
+				(handle-event window (make-instance 'key-release-event
+								    :window window
+								    :key-name +key-left-shift+
+								    :modifier-state mods))
+				(handle-event window (make-instance 'key-release-event
+								    :window window
+								    :key-name +key-right-shift+
+								    :scancode scancode
+								    :modifier-state mods)))
+			      (if (= wParam #_VK_SNAPSHOT)
+				  ;; key down is not supported for the Print Screen key
+				  (progn
+				    (handle-event window (make-instance 'key-press-event
+									:window window
+									:key-name key
+									:modifier-state mods))
+				    (handle-event window (make-instance 'key-release-event
+									:window window
+									:key-name key
+									:scancode scancode
+									:modifier-state mods)))
+				  (handle-event window (make-instance (if (eq action :release)
+									  'key-release-event
+									  'key-press-event)
+								      :window window
+								      :key-name key
+								      :modifier-state mods))))))
+		  (go break)))
 
 	       ((#.#_WM_LBUTTONDOWN
 		 #.#_WM_RBUTTONDOWN #.#_WM_MBUTTONDOWN #.#_WM_XBUTTONDOWN
 		 #.#_WM_LBUTTONUP #.#_WM_RBUTTONUP
 		 #.#_WM_MBUTTONUP #.#_WM_XBUTTONUP)
 
-		    
-		(go break))
+		(let ((button)
+		      (action))
+
+		  (cond ((or (= uMsg #_WM_LBUTTONDOWN)
+			     (= uMsg #_WM_LBUTTONUP))
+
+			 (setq button +pointer-left-button+))
+
+			((or (= uMsg #_WM_RBUTTON_DOWN)
+			     (= uMsg #_WM_RBUTTON_UP))
+
+			 (setq button +pointer-right-button+))
+
+			((or (= uMsg #_WM_MBUTTON_DOWN)
+			     (= uMsg #_WM_LBUTTON_UP))
+
+			 (setq button +pointer-middle-button+))
+
+			((= (#_GET_XBUTTON_WPARAM wParam) #_XBUTTON1)
+
+			 (setq button +pointer-button-4+))
+
+			(t (setq button +pointer-button-5+)))
+
+		  (if (or (= uMsg #_WM_LBUTTONDOWN)
+			  (= uMsg #_WM_RBUTTONDOWN)
+			  (= uMsg #_WM_MBUTTONDOWN)
+			  (= uMsg #_WM_XBUTTONDOWN))
+
+		      (setq action 'pointer-button-press-event)
+
+		      (setq action 'pointer-button-release-event))
+
+		  (let ((found? nil))
+		    (loop for i from 0 below 5
+			  when (eq (elt (mouse-buttons window) i) :press)
+			    do (setq found? t)
+			       (return))
+
+		    (when found?
+		      (#_SetCapture hWnd)))
+
+		  (multiple-value-bind (x y) (window-cursor-position window)
+		    (handle-event window (make-instance action
+							:window window
+							:button button
+							:x x :y y
+							:modifier-state (get-win32-key-mods)
+						      )))
+
+		  (let ((found? nil))
+		    (loop for i from 0 below 5
+			  when (eq (elt (mouse-buttons window) i) :press)
+			     do (setq found? t)
+				(return))
+
+		    (when found?
+		      (#_ReleaseCapture hWnd)))
+
+		  (when (or (= uMsg #_WM_XBUTTONDOWN)
+			    (= uMsg #_WM_XBUTTONUP))
+		    (return 1))
+
+		  (return 0)))
 
 	       (#.#_WM_MOUSEMOVE ;; 512
 		(let* ((x (#_GET_X_LPARAM lParam))

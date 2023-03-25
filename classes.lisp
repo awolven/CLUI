@@ -235,7 +235,7 @@
    (denom :initform :dont-care :accessor window-aspect-denom)
    (sticky-keys? :type boolean :initform nil)
    (sticky-mouse-buttons? :type boolean :initform nil)
-   (lock-key-modes? :type boolean :initform nil)
+   (lock-key-mods? :type boolean :initform nil :accessor lock-key-mods?)
    (cursor-mode :initform :normal :accessor window-cursor-mode)
    (mouse-buttons)
    (keys)

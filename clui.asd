@@ -78,6 +78,7 @@
 
    (:file "noffi-patches")
 
+   (:file "clr")
    (:file "win32/win32")
    
    (:file "package")
@@ -131,6 +132,7 @@
    
    (:file "noffi-patches")
 
+   (:file "clr")
    (:file "x11/x11")
    
    (:file "package")
