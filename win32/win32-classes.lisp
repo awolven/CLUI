@@ -6,8 +6,7 @@
     :initform (#_GetModuleHandle nil))
 
    (helper-window-class
-    :initform nil
-    :accessor helper-window-class)
+    :initform nil)
    
    (main-window-class
     :accessor main-window-class
@@ -64,9 +63,18 @@
    (big-icon)
    (small-icon)
    (cursor-tracked? :type boolean :initform nil :accessor cursor-tracked?)
-   (frame-action? :type boolean :initform nil :accessor frame-action?)
-   (transparent? :type boolean :initform nil :accessor transparent?)
-   (scale-to-monitor? :type boolean :initform nil :accessor scale-to-monitor?)
+   
+
+   (frame-action?
+    :type boolean
+    :initform nil
+    :accessor frame-action?)
+
+   (scale-to-monitor?
+    :type boolean
+    :initform nil
+    :accessor scale-to-monitor?)
+
    (key-menu? :type boolean :initform nil :accessor key-menu?)
    (cursor :initform nil :accessor window-cursor)
    (high-surrogate

@@ -342,6 +342,7 @@
   (or (apply #'get-a-wayland-window-class display nil initargs)
       (apply #'get-an-x11-window-class display t initargs)))
 
+#+NIL
 (defmethod compute-concrete-window-class (display (parent clui:homemade-window-mixin) &rest initargs)
   (declare (ignore display initargs))
   (class-of parent))

@@ -52,7 +52,7 @@
 (defun lpcwstr->string (ptr)
   (ccl::%get-native-utf-16-cstring (noffi-ptr->ccl-ptr ptr)))
 
-(defun get-win32-key-mods ()
+(defun get-win32-standard-mods ()
   (let ((mods 0))
     (when (logtest (#_GetKeyState #_VK_SHIFT) #x8000)
       (setq mods (logior mods +shift-modifier+)))
@@ -63,12 +63,15 @@
     (when (or (logtest (#_GetKeyState #_VK_LWIN) #x8000)
 	      (logtest (#_GetKeyState #_VK_RWIN) #x8000))
       (setq mods (logior mods +super-modifier+)))
+    mods))
+
+(defun get-win32-lock-mods ()
+  (let ((mods 0))
     (when (logtest (#_GetKeyState #_VK_CAPITAL) #x1)
       (setq mods (logior mods +caps-lock-modifier+)))
     (when (logtest (#_GetKeyState #_VK_NUMLOCK) #x1)
       (setq mods (logior mods +num-lock-modifier+)))
-    mods)) 
-	    
+    mods))	    
 
 (defun apply-aspect-ratio (window edge area)
   (clet ((frame #_<RECT>))
@@ -1017,7 +1020,7 @@ int decorated;
 			    (incf codepoint #x10000))
 			  (setq codepoint wParam))
 		      (setf (high-surrogate window) nil)
-		      (input-char window codepoint (get-win32-key-mods) (not (= uMsg #_WM_SYSCHAR)))))
+		      (input-char window codepoint (get-win32-standard-mods) (get-win32-lock-mods) (not (= uMsg #_WM_SYSCHAR)))))
 		(when (and (= uMsg #_WM_SYSCHAR) (key-menu? window))
 		  (go break))
 		(return 0))
@@ -1027,14 +1030,14 @@ int decorated;
 		(when (= wParam #_UNICODE_NOCHAR)
 		  (return 1))
 
-		(input-char window wParam (get-win32-key-mods) t)
+		(input-char window wParam (get-win32-standard-mods) (get-win32-lock-mods) t)
 		(return 0))
 
 	       ((#.#_WM_KEYDOWN #.#_WM_SYSKEYDOWN #.#_WM_KEYUP #.#_WM_SYSKEYUP) ;; 256, 260, 257, 261
 		(let ((key)
 		      (scancode)
-		      (action (if (logtest (#_HIWORD lParam) #_KF_UP) :press :release))
-		      (mods (get-win32-key-mods))
+		      (action (if (logtest (#_HIWORD lParam) #_KF_UP) :release :press))
+		      (mods (get-win32-standard-mods))
 		      (time (#_GetMessageTime)))
 
 		  (setq scancode (logand (#_HIWORD lParam) (logior #_KF_EXTENDED #xff)))
@@ -1054,10 +1057,10 @@ int decorated;
 		  (when (= scancode #x136)
 		    (setq scancode #x36))
 
-		  (aref (display-keycodes (window-display window)) scancode)
+		  (setq key (aref (display-keycodes (window-display window)) scancode))
 
 		  (if (= wParam #_VK_CONTROL)
-		      (if (logand (#_HIWORD lParam) #_KF_EXTENDED)
+		      (if (logtest (#_HIWORD lParam) #_KF_EXTENDED)
 			  (setq key +key-right-ctrl+)
 			  (progn
 			    (clet& ((&next #_<MSG>))
@@ -1069,38 +1072,43 @@ int decorated;
 					      (= (#_.time &next) time))
 				     (go break)))))
 			      (setq key +key-left-ctrl+))))
-		      (if (= wParam #_VK_PROCESSKEY)
-			  (go break)
+		      (when (= wParam #_VK_PROCESSKEY)
+			(go break)))
 
-			  (if (and (eq action :release) (= wParam #_VK_SHIFT))
-			      (progn
-				(handle-event window (make-instance 'key-release-event
-								    :window window
-								    :key-name +key-left-shift+
-								    :modifier-state mods))
-				(handle-event window (make-instance 'key-release-event
-								    :window window
-								    :key-name +key-right-shift+
-								    :scancode scancode
-								    :modifier-state mods)))
-			      (if (= wParam #_VK_SNAPSHOT)
-				  ;; key down is not supported for the Print Screen key
-				  (progn
-				    (handle-event window (make-instance 'key-press-event
-									:window window
-									:key-name key
-									:modifier-state mods))
-				    (handle-event window (make-instance 'key-release-event
-									:window window
-									:key-name key
-									:scancode scancode
-									:modifier-state mods)))
-				  (handle-event window (make-instance (if (eq action :release)
-									  'key-release-event
-									  'key-press-event)
-								      :window window
-								      :key-name key
-								      :modifier-state mods))))))
+		  (if (and (eq action :release) (= wParam #_VK_SHIFT))
+		      (let ((lock-mods (get-win32-lock-mods)))
+			(handle-event window (make-instance 'key-release-event
+							    :window window
+							    :input-code +key-left-shift+
+							    :modifier-state mods
+							    :lock-modifier-state lock-mods))
+			(handle-event window (make-instance 'key-release-event
+							    :window window
+							    :input-code +key-right-shift+
+							    :modifier-state mods
+							    :lock-modifier-state lock-mods)))
+		      (if (= wParam #_VK_SNAPSHOT)
+			  ;; key down is not supported for the Print Screen key
+			  (let ((lock-mods (get-win32-lock-mods)))
+			    (handle-event window (make-instance 'key-press-event
+								:window window
+								:input-code key
+								:modifier-state mods
+								:lock-modifier-state lock-mods))
+			    (handle-event window (make-instance 'key-release-event
+								:window window
+								:input-code key
+								:modifier-state mods
+								:lock-modifier-state lock-mods)))
+			  (handle-event window (make-instance (if (eq action :release)
+								  'key-release-event
+								  'key-press-event)
+							      :window window
+							      :input-code key
+							      :modifier-state mods
+							      :lock-modifier-state (get-win32-lock-mods)))))
+		  
+		  
 		  (go break)))
 
 	       ((#.#_WM_LBUTTONDOWN
@@ -1116,13 +1124,13 @@ int decorated;
 
 			 (setq button +pointer-left-button+))
 
-			((or (= uMsg #_WM_RBUTTON_DOWN)
-			     (= uMsg #_WM_RBUTTON_UP))
+			((or (= uMsg #_WM_RBUTTONDOWN)
+			     (= uMsg #_WM_RBUTTONUP))
 
 			 (setq button +pointer-right-button+))
 
-			((or (= uMsg #_WM_MBUTTON_DOWN)
-			     (= uMsg #_WM_LBUTTON_UP))
+			((or (= uMsg #_WM_MBUTTONDOWN)
+			     (= uMsg #_WM_LBUTTONUP))
 
 			 (setq button +pointer-middle-button+))
 
@@ -1153,9 +1161,10 @@ int decorated;
 		  (multiple-value-bind (x y) (window-cursor-position window)
 		    (handle-event window (make-instance action
 							:window window
-							:button button
+							:input-code button
 							:x x :y y
-							:modifier-state (get-win32-key-mods)
+							:modifier-state (get-win32-standard-mods)
+							:lock-modifier-state (get-win32-lock-mods)
 						      )))
 
 		  (let ((found? nil))
@@ -1175,12 +1184,55 @@ int decorated;
 
 	       (#.#_WM_MOUSEMOVE ;; 512
 		(let* ((x (#_GET_X_LPARAM lParam))
-		       (y (#_GET_Y_LPARAM lParam))
-		       (event (make-instance 'pointer-motion-event
-					     :x x
-					     :y y)))
-		  (handle-event window event))
-		(return 0))
+		       (y (#_GET_Y_LPARAM lParam)))
+
+		  (unless (cursor-tracked? window)
+		    (clet& ((&tme #_<TRACKMOUSEEVENT>))
+		      (let ((size (c-sizeof-type '#_<TRACKMOUSEEVENT>)))
+		      (#_memset &tme 0 size)
+			(setf (#_.cbSize &tme) size
+			      (#_.dwFlags &tme) #_TME_LEAVE
+			      (#_.hwndTrack &tme) hWnd)
+			(#_TrackMouseEvent &tme)))
+
+		    (setf (cursor-tracked? window) t)
+
+		    (handle-event window (make-instance 'pointer-enter-event
+							:window window
+							:input-code +pointer-move+
+							:x x
+							:y y
+							:modifier-state (get-win32-standard-mods)
+							:lock-modifier-state (get-win32-lock-mods))))
+
+		  (if (eq (window-cursor-mode window) :disabled)
+		      (let ((dx (- x (last-cursor-pos-x window)))
+			    (dy (- y (last-cursor-pos-y window))))
+			(unless (eq (disabled-cursor-window (window-display window)) window)
+			  (go break))
+			(when (last-raw-mouse-motion? window)
+			  (go break))
+			
+			(handle-event window (make-instance 'pointer-motion-event
+							    :window window
+							    :input-code +pointer-move+
+							    :x (+ (virtual-cursor-pos-x window) dx)
+							    :y (+ (virtual-cursor-pos-y window) dy)
+							    :modifier-state (get-win32-standard-mods)
+							    :lock-modifier-state (get-win32-lock-mods)
+							    )))
+		      (progn
+			(handle-event window (make-instance 'pointer-motion-event
+							    :window window
+							    :input-code +pointer-move+
+							    :x x
+							    :y y
+							    :modifier-state (get-win32-standard-mods)
+							    :lock-modifier-state (get-win32-lock-mods)
+							    ))
+			(setf (last-cursor-pos-x window) x
+			      (last-cursor-pos-y window) y)
+			(return 0)))))
 
 	       (#.#_WM_NCMOUSEMOVE ;; 160
 		(go break))
@@ -1188,29 +1240,145 @@ int decorated;
 	       (#.#_WM_INPUT )
 
 	       (#.#_WM_MOUSELEAVE ;; 675
-		)
+		(setf (cursor-tracked? window) nil)
+		(multiple-value-bind (x y) (window-cursor-position window)
+		  (handle-event window (make-instance 'pointer-exit-event
+						      :window window
+						      :input-code +pointer-move+
+						      :x x :y y
+						      :modifier-state (get-win32-standard-mods)
+						      :lock-modifier-state (get-win32-lock-mods)))))
 
 	       (#.#_WM_NCMOUSELEAVE ;; 674
 		)
 
-	       (#.#_WM_MOUSEWHEEL )
+	       (#.#_WM_MOUSEWHEEL
+		(multiple-value-bind (x y) (window-cursor-position window)
+		  (handle-event window (make-instance 'pointer-wheel-event
+						      :window window
+						      :input-code +pointer-wheel+
+						      :yoffset (/ (#_HIWORD wParam) #_WHEEL_DELTA)
+						      :x x :y y
+						      :modifier-state (get-win32-standard-mods)
+						      :lock-modifier-state (get-win32-lock-mods)))))
 
-	       (#.#_WM_MOUSEHWHEEL )
+	       (#.#_WM_MOUSEHWHEEL
+		(multiple-value-bind (x y) (window-cursor-position window)
+		  (handle-event window (make-instance 'pointer-wheel-event
+						      :window window
+						      :input-code +pointer-wheel+
+						      :xoffset (- (/ (#_HIWORD wParam) #_WHEEL_DELTA))
+						      :x x :y y
+						      :modifier-state (get-win32-standard-mods)
+						      :lock-modifier-state (get-win32-lock-mods)))))
 
-	       ((#.#_WM_ENTERSIZEMOVE #.#_WM_ENTERMENULOOP))
+	       ((#.#_WM_ENTERSIZEMOVE #.#_WM_ENTERMENULOOP)
+		
+		(when (frame-action? window)
+		  (go break))
 
-	       ((#.#_WM_EXITSIZEMOVE #.#_WM_EXITMENULOOP))
+		(let ((cursor-mode (window-cursor-mode window)))
+		  (case cursor-mode
+		    (:disabled (enable-cursor window))
+		    (:captured (release-cursor (window-display window)))))
 
-	       ((#.#_WM_DWMCOMPOSITIONCHANGED #.#_WM_DWMCOLORIZATIONCOLORCHANGED))
-
-	       (#.#_WM_GETDPISCALEDSIZE )
-
-	       (#.#_WM_DPICHANGED )
-
-	       (#.#_WM_SETCURSOR ;; 32
 		(go break))
 
-	       (#.#_WM_DROPFILES )
+	       ((#.#_WM_EXITSIZEMOVE #.#_WM_EXITMENULOOP)
+		
+		(when (frame-action? window)
+		  (go break))
+		
+		(let ((cursor-mode (window-cursor-mode window)))
+		  (case cursor-mode
+		    (:disabled (disable-cursor window))
+		    (:captured (capture-cursor (window-display window)))))
+		
+		(go break))
+	       
+	       ((#.#_WM_DWMCOMPOSITIONCHANGED #.#_WM_DWMCOLORIZATIONCOLORCHANGED)
+		(when (last-transparent? window)
+		  (update-framebuffer-transparency window))
+		(return 0))
+
+	       (#.#_WM_GETDPISCALEDSIZE
+		(when (scale-to-monitor? window)
+		  (go break))
+
+		(when (windows-10-version-1703-or-greater?)
+		  (let ((size (cons-ptr (ccl::%int-to-ptr lParam) 0  '#_<SIZE*>))
+			(style (get-window-style window))
+			(ex-style (get-window-ex-style window)))
+		    
+		    (clet& ((&source #_<RECT>)
+			    (&target #_<RECT>))
+		    
+		      (#_AdjustWindowRectExForDpi &source style
+						  #_FALSE ex-style
+						  (#_GetDpiForWindow hWnd))
+		      
+		      (#_AdjustWindowRectExForDpi &target style
+						  #_FALSE ex-style
+						  (#_LOWORD wParam))
+
+		      (setf (#_.cx size) (+ (#_.cx size) (- (- (#_.right &target) (#_.left &target))
+							    (- (#_.right &source) (#_.left &source))))
+			    (#_.cy size) (+ (#_.cy size) (- (- (#_.bottom &target) (#_.top &target))
+							    (- (#_.bottom &source) (#_.top &source)))))
+
+		      (return #_TRUE))))
+
+		(go break))		    
+
+	       (#.#_WM_DPICHANGED
+
+		(let ((xscale (coerce (/ (#_HIWORD wParam) #_USER_DEFAULT_SCREEN_DPI) 'single-float))
+		      (yscale (coerce (/ (#_LOWORD wParam) #_USER_DEFAULT_SCREEN_DPI) 'single-float)))
+
+		  (when (and (not (window-monitor window))
+			     (or (scale-to-monitor? window)
+				 (windows-10-version-1703-or-greater?)))
+		    (let ((suggested (cons-ptr (ccl::%int-to-ptr lParam) 0 '#_<RECT*>)))
+		      (#_SetWindowPos hWnd #_HWND_TOP
+				      (#_.left suggested)
+				      (#_.top suggested)
+				      (- (#_.right suggested) (#_.left suggested))
+				      (- (#_.bottom suggested) (#_.top suggested))
+				      (logior #_SWP_NOACTIVATE #_SWP_NOZORDER))))
+
+		  (input-window-content-scale window xscale yscale)
+		  (go break)))
+
+	       (#.#_WM_SETCURSOR ;; 32
+		(when (= (#_LOWORD lParam) #_HTCLIENT)
+		  (update-cursor-image window)
+		  (return #_TRUE))
+		(go break))
+
+	       (#.#_WM_DROPFILES
+		(let ((drop wParam)
+		      (paths ()))
+		  (clet& ((&pt #_<POINT>))
+		    (let ((count (#_DragQueryFileW drop #xffffffff nil 0)))
+		      (#_DragQueryPoint drop &pt)
+		      (input-cursor-pos window (#_.x &pt) (#_.y &pt) (get-win32-standard-mods) (get-win32-lock-mods))
+
+		      (loop for i from 0 below count
+			    do (let ((length (#_DragQueryFileW drop i nil 0)))
+				 (clet ((buffer #_<WCHAR[1024]>))
+				   (#_memset buffer 0 (* (c-sizeof-type '#_<WCHAR>) 1024))
+				   (#_DragQueryFileW drop i buffer (1+ length))
+				   (let ((string (ccl::%get-utf-8-cstring (ccl::%inc-ptr (ptr-value buffer) (ptr-offset buffer)))))
+				     (push string paths)))))
+		      
+		      (handle-event window (make-instance 'drop-event
+							  :window window
+							  :paths (nreverse paths)))
+
+		      (#_DragFinish drop)
+		      (return 0)))))
+
+		    
 	       )))
 	   
        break    

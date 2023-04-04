@@ -55,6 +55,7 @@
 	   #:video-mode
 	   #:find-window
 	   #:destroy-window
+	   #:window-parent
 	   #:window-root
 	   #:window-fullscreen?
 	   #:window-monitor

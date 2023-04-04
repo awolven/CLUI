@@ -1,11 +1,14 @@
 (in-package :clui)
 
 
+#+NIL
 (defun create-win32-key-tables (win32-desktop)
   (let ((keycodes (display-keycodes win32-desktop))
 	(scancodes (display-scancodes win32-desktop)))
     
-    (setf (aref keycodes #_VK_LBUTTON) nil
+    (setf 
+	  
+	  (aref keycodes #_VK_LBUTTON) nil
 	  (aref keycodes #_VK_RBUTTON) nil
 	  (aref keycodes #_VK_CANCEL) nil
 	  (aref keycodes #_VK_MBUTTON) nil
@@ -136,6 +139,9 @@
 
 	  (aref keycodes #_VK_NUMLOCK) +key-num-lock+
 	  (aref keycodes #_VK_SCROLL) +key-scroll-lock+
+
+	  (aref keycodes #_VK_LSHIFT) +key-left-shift+
+	  (aref keycodes #_VK_RSHIFT) +key-right-shift+	  
 	  (aref keycodes #_VK_LCONTROL) +key-left-ctrl+
 	  (aref keycodes #_VK_RCONTROL) +key-right-ctrl+
 	  (aref keycodes #_VK_LMENU) +key-left-alt+
@@ -160,17 +166,17 @@
 	  (aref keycodes #_VK_LAUNCH_APP1) nil
 	  (aref keycodes #_VK_LAUNCH_APP2) nil
 	
-	  (aref keycodes #_VK_OEM_1) nil
-	  (aref keycodes #_VK_OEM_PLUS) nil
-	  (aref keycodes #_VK_OEM_MINUS) nil
-	  (aref keycodes #_VK_OEM_PERIOD) nil
-	  (aref keycodes #_VK_OEM_2) nil
-	  (aref keycodes #_VK_OEM_3) nil
+	  (aref keycodes #_VK_OEM_1) +key-semicolon+
+	  (aref keycodes #_VK_OEM_PLUS) +key-equals+
+	  (aref keycodes #_VK_OEM_MINUS) +key-minus+
+	  (aref keycodes #_VK_OEM_PERIOD) +key-period+
+	  (aref keycodes #_VK_OEM_2) +key-slash+
+	  (aref keycodes #_VK_OEM_3) +key-grave-accent+
 	
-	  (aref keycodes #_VK_OEM_4) nil
-	  (aref keycodes #_VK_OEM_5) nil
-	  (aref keycodes #_VK_OEM_6) nil 
-	  (aref keycodes #_VK_OEM_7) nil
+	  (aref keycodes #_VK_OEM_4) +key-left-bracket+
+	  (aref keycodes #_VK_OEM_5) +key-backslash+
+	  (aref keycodes #_VK_OEM_6) +key-right-bracket+
+	  (aref keycodes #_VK_OEM_7) +key-apostrophe+
 	  (aref keycodes #_VK_OEM_8) nil
 
 	  (aref keycodes #_VK_OEM_102) nil
@@ -185,7 +191,7 @@
 	  (aref keycodes #_VK_ZOOM) nil
 	  (aref keycodes #_VK_NONAME) nil
 	  (aref keycodes #_VK_PA1) nil
-	  (aref keycodes #_VK_OEM_CLEAR) nil)
+	  (aref keycodes #_VK_OEM_CLEAR) +key-clear+)
 
 
     (loop for scancode from 0 below 256
@@ -195,3 +201,136 @@
     (values)))
 
 
+(defun create-win32-key-tables (win32-desktop)
+  (let ((keycodes (display-keycodes win32-desktop))
+	(scancodes (display-scancodes win32-desktop)))
+
+    (setf (aref keycodes #x00B) +key-0+
+	  (aref keycodes #x002) +key-1+
+	  (aref keycodes #x003) +key-2+
+	  (aref keycodes #x004) +key-3+
+	  (aref keycodes #x005) +key-4+
+	  (aref keycodes #x006) +key-5+
+	  (aref keycodes #x007) +key-6+
+	  (aref keycodes #x008) +key-7+
+	  (aref keycodes #x009) +key-8+
+	  (aref keycodes #x00A) +key-9+
+	  (aref keycodes #x01E) +key-A+
+	  (aref keycodes #x030) +key-B+
+	  (aref keycodes #x02E) +key-C+
+	  (aref keycodes #x020) +key-D+
+	  (aref keycodes #x012) +key-E+
+	  (aref keycodes #x021) +key-F+
+	  (aref keycodes #x022) +key-G+
+	  (aref keycodes #x023) +key-H+
+	  (aref keycodes #x017) +key-I+
+	  (aref keycodes #x024) +key-J+
+	  (aref keycodes #x025) +key-K+
+	  (aref keycodes #x026) +key-L+
+	  (aref keycodes #x032) +key-M+
+	  (aref keycodes #x031) +key-N+
+	  (aref keycodes #x018) +key-O+
+	  (aref keycodes #x019) +key-P+
+	  (aref keycodes #x010) +key-Q+
+	  (aref keycodes #x013) +key-R+
+	  (aref keycodes #x01F) +key-S+
+	  (aref keycodes #x014) +key-T+
+	  (aref keycodes #x016) +key-U+
+	  (aref keycodes #x02F) +key-V+
+	  (aref keycodes #x011) +key-W+
+	  (aref keycodes #x02D) +key-X+
+	  (aref keycodes #x015) +key-Y+
+	  (aref keycodes #x02C) +key-Z+
+
+	  (aref keycodes #x028) +key-apostrophe+
+	  (aref keycodes #x02B) +key-backslash+
+	  (aref keycodes #x033) +key-comma+
+	  (aref keycodes #x00D) +key-equals+
+	  (aref keycodes #x029) +key-grave-accent+
+	  (aref keycodes #x01A) +key-left-bracket+
+	  (aref keycodes #x00C) +key-minus+
+	  (aref keycodes #x034) +key-period+
+	  (aref keycodes #x01B) +key-right-bracket+
+	  (aref keycodes #x027) +key-semicolon+
+	  (aref keycodes #x035) +key-slash+
+	  (aref keycodes #x056) +key-international-2+
+
+	  (aref keycodes #x00E) +key-backspace+
+	  (aref keycodes #x153) +key-delete+
+	  (aref keycodes #x14F) +key-end+
+	  (aref keycodes #x01C) +key-enter+
+	  (aref keycodes #x001) +key-escape+
+	  (aref keycodes #x147) +key-home+
+	  (aref keycodes #x152) +key-insert+
+	  (aref keycodes #x15D) +key-menu+
+	  (aref keycodes #x151) +key-page-down+
+	  (aref keycodes #x149) +key-page-up+
+	  (aref keycodes #x045) +key-pause+
+	  (aref keycodes #x039) +key-spacebar+
+	  (aref keycodes #x00F) +key-tab+
+	  (aref keycodes #x03A) +key-caps-lock+
+	  (aref keycodes #x145) +key-num-lock+
+	  (aref keycodes #x046) +key-scroll-lock+
+	  (aref keycodes #x03B) +key-F1+
+	  (aref keycodes #x03C) +key-F2+
+	  (aref keycodes #x03D) +key-F3+
+	  (aref keycodes #x03E) +key-F4+
+	  (aref keycodes #x03F) +key-F5+
+	  (aref keycodes #x040) +key-F6+
+	  (aref keycodes #x041) +key-F7+
+	  (aref keycodes #x042) +key-F8+
+	  (aref keycodes #x043) +key-F9+
+	  (aref keycodes #x044) +key-F10+
+	  (aref keycodes #x057) +key-F11+
+	  (aref keycodes #x058) +key-F12+
+	  (aref keycodes #x064) +key-F13+
+	  (aref keycodes #x065) +key-F14+
+	  (aref keycodes #x066) +key-F15+
+	  (aref keycodes #x067) +key-F16+
+	  (aref keycodes #x068) +key-F17+
+	  (aref keycodes #x069) +key-F18+
+	  (aref keycodes #x06A) +key-F19+
+	  (aref keycodes #x06B) +key-F20+
+	  (aref keycodes #x06C) +key-F21+
+	  (aref keycodes #x06D) +key-F22+
+	  (aref keycodes #x06E) +key-F23+
+	  (aref keycodes #x076) +key-F24+
+	  (aref keycodes #x038) +key-left-alt+
+	  (aref keycodes #x01D) +key-left-ctrl+
+	  (aref keycodes #x02A) +key-left-shift+
+	  (aref keycodes #x15B) +key-left-GUI+
+	  (aref keycodes #x137) +key-print-screen+
+	  (aref keycodes #x138) +key-right-alt+
+	  (aref keycodes #x11D) +key-right-ctrl+
+	  (aref keycodes #x036) +key-right-shift+
+	  (aref keycodes #x15C) +key-right-GUI+
+	  (aref keycodes #x150) +key-down-arrow+
+	  (aref keycodes #x14B) +key-left-arrow+
+	  (aref keycodes #x14D) +key-right-arrow+
+	  (aref keycodes #x148) +key-up-arrow+
+
+	  (aref keycodes #x052) +key-pad-0+
+	  (aref keycodes #x04F) +key-pad-1+
+	  (aref keycodes #x050) +key-pad-2+
+	  (aref keycodes #x051) +key-pad-3+
+	  (aref keycodes #x04B) +key-pad-4+
+	  (aref keycodes #x04C) +key-pad-5+
+	  (aref keycodes #x04D) +key-pad-6+
+	  (aref keycodes #x047) +key-pad-7+
+	  (aref keycodes #x048) +key-pad-8+
+	  (aref keycodes #x049) +key-pad-9+
+
+	  (aref keycodes #x04E) +key-pad-plus+
+	  (aref keycodes #x053) +key-pad-decimal+
+	  (aref keycodes #x135) +key-pad-slash+
+	  (aref keycodes #x11C) +key-pad-enter+
+	  (aref keycodes #x059) +key-pad-equals+
+	  (aref keycodes #x037) +key-pad-asterisk+
+	  (aref keycodes #x04A) +key-pad-minus+)
+
+    (loop for scancode from 0 below 256
+	  when (aref keycodes scancode)
+	    do (setf (aref scancodes (aref keycodes scancode)) scancode))
+
+    (values)))
+		

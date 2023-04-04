@@ -100,13 +100,6 @@
    (scancodes :initform (make-array 256 :initial-element nil)
 	      :reader display-scancodes)
 
-   (keynames :initform (let ((array (make-array 256)))
-			 (loop for i from 0 below 256
-			       do (setf (aref array i)
-					(make-array 5 :initial-element nil))
-			       finally (return array)))
-	     :reader display-keynames)
-
    (last-event :initform nil
 	       :accessor display-last-event)))
 			
@@ -139,6 +132,7 @@
   (push instance (get-displays)) ;; we do this first because some callbacks need *displays* set
   (handler-case (call-next-method)
     (error () (pop (get-displays))))
+  
   instance)
 
 (defmethod initialize-instance :after ((instance display-mixin)
@@ -291,12 +285,6 @@
 (defmethod find-window ((handle noffi::ptr))
   (find-window (ccl::%incf-ptr (ptr-value handle) (ptr-offset handle))))
    
-
-(defclass homemade-window-mixin (window-mixin)
-  ())
-
-(defclass homemade-view-mixin (homemade-window-mixin)
-  ())
 
 (defclass os-window-with-framebuffer-mixin (os-window-mixin)
   ((xscale :accessor window-xscale)
