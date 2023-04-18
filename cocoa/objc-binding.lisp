@@ -99,7 +99,7 @@
 		   :number-of-args n
 		   :args (let ((arg-names ()))
 			   (loop for j from 2 below n ;; -2 for self, selector
-			      collect (let ((type (method_copyArgumentType m j)))				      
+			      collect (let ((type (method_copyArgumentType m j)))
 					(make-instance 'objc-method-argument
 						       :name (if (= 2 j)
 								 "_"
@@ -518,7 +518,11 @@
 			       #@NSScreen
 			       #@NSMenu
 			       #@NSMenuItem
+			       #@NSCursor
 			       #@NSString
+			       #@NSAttributedString
+			       #@NSMutableString
+			       #@NSArray
 			       #@NSNotificationCenter
 			       #@NSTrackingArea
 			       ;;#@NSWorkspace #@NSWorkspaceOpenConfiguration #@NSAppKitVersion
@@ -566,5 +570,9 @@
 			       (class_getClassMethod #@NSMenuItem @(separatorItem))
 			       (class_getClassMethod #@NSMenu @(setMenuBarVisible:))
 			       ;;(class_getClassMethod #@NSWindow @(setTouchBar:))
+			       #+NIL(class_getInstanceMethod #@NSAttributedString @(initWithAttributedString:))
+			       (class_getClassMethod #@NSArray @(array))
+			       (class_getClassMethod #@NSCursor @(arrowCursor))
 			       )
 			 :with-internals? with-internals?))
+

@@ -203,7 +203,8 @@
 
 (defmethod print-object ((event input-event-mixin) stream)
   (print-unreadable-object (event stream :type t :identity t)
-    (princ (intern-input-event (input-event-code event) (event-modifier-state event)) stream)
+    (when (input-event-code event)
+      (princ (intern-input-event (input-event-code event) (event-modifier-state event)) stream))
     event))
 
 (defclass pointer-event-mixin (input-event-mixin)

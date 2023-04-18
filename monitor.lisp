@@ -46,12 +46,6 @@
 	   (remove monitor (display-monitors display)))))
   (values))
 
-(defun input-monitor-window (monitor window)
-  (declare (ignorable monitor window))
-  (assert monitor)
-  (setf (monitor-window monitor) window)
-  (values))
-
 ;; internal API:
 
 (defun choose-video-mode (monitor desired-video-mode)

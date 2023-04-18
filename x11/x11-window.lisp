@@ -580,6 +580,18 @@
   (let ((pf (#_XRenderFindVisualFormat xdisplay visual)))
     (and pf (not (zerop (#_.alphaMask (c->-addr pf '#_direct)))))))
 
+(defun set-x11-raw-mouse-motion (window value)
+  (let ((display (window-display window)))
+    (unless (and (xi-available? (display-x11-state display))
+		 (eq (disabled-cursor-window display) window))
+      (return-from set-x11-raw-mouse-motion nil))
+
+    (if value
+	(progn (enable-x11-raw-mouse-motion window)
+	       t)
+	(progn (disable-x11-raw-mouse-motion window)
+	       nil))))
+
 (defun enable-x11-raw-mouse-motion (window)
       #+NIL
 

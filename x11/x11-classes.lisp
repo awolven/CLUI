@@ -202,23 +202,72 @@
   ((screen-id :initarg :screen-id :accessor screen-id)))
 
 (defclass x11:window-mixin (clui:os-window-mixin clui:handle-mixin)
-  ((%cursor-pos-x :initform nil :accessor last-cursor-pos-x)
-   (%cursor-pos-y :initform nil :accessor last-cursor-pos-y)
-
-   (cursor-warp-pos-x :initform nil
-		      :accessor cursor-warp-pos-x)
-
-   (cursor-warp-pos-y :initform nil
-		      :accessor cursor-warp-pos-y)
+  ((colormap
+    :initform nil
+    :accessor window-colormap)
    
-   (input-context :initform nil
-		  :accessor window-input-context)
+   (input-context
+    :initform nil
+    :accessor window-input-context)
 
-   (colormap :initform nil
-	     :accessor window-colormap)
+   (override-redirect?
+    :initform nil
+    :accessor override-redirect?)
 
-   (key-press-times :initform (make-array 256 :initial-element 0)
-		    :reader key-press-times)))
+   (%iconified?
+    :type boolean
+    :initform nil
+    :accessor last-iconified?)
+   
+   (%maximized?
+    :type boolean
+    :initform nil
+    :accessor last-maximized?)
+
+   (%transparent?
+    :type boolean
+    :initform nil
+    :accessor last-transparent?)
+
+   (%width
+    :type real
+    :initform 0
+    :accessor last-width)
+   
+   (%height
+    :type real
+    :initform 0
+    :accessor last-height)
+
+   (%xpos
+    :type real
+    :initform 0
+    :accessor last-pos-x)
+   
+   (%ypos
+    :type real
+    :initform 0
+    :accessor last-pos-y)
+   
+   (%cursor-pos-x
+    :initform nil
+    :accessor last-cursor-pos-x)
+   
+   (%cursor-pos-y
+    :initform nil
+    :accessor last-cursor-pos-y)
+
+   (cursor-warp-pos-x
+    :initform nil
+    :accessor cursor-warp-pos-x)
+
+   (cursor-warp-pos-y
+    :initform nil
+    :accessor cursor-warp-pos-y)
+   
+   (key-press-times
+    :initform (make-array 256 :initial-element 0)
+    :reader key-press-times)))
 
 (defmethod initialize-instance :after ((instance x11:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-native-x11-window instance initargs)

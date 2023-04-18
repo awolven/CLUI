@@ -7,13 +7,7 @@
 (defsystem clui
   :serial t
   :depends-on
-  (#+darwin :clui/cocoa #+windows :clui/win32 #+linux :clui/linux)
-  :components
-  (#-darwin
-   (:file "noffi-patches")
-   ))
-
-
+  (#+darwin :clui/cocoa #+windows :clui/win32 #+linux :clui/linux))
 
 #+darwin
 (defsystem clui/cocoa
@@ -26,7 +20,10 @@
    (:file "classes")
    (:file "events")
    (:file "cocoa/cocoa-package")
+   (:file "cocoa/cocoa-classes")
    (:file "x11/x11-package")
+   (:file "x11/x11-classes")
+   (:file "compute-concrete-class")
    (:file "cocoa/objc-runtime")
    (:file "cocoa/objc-binding")
    (:file "cocoa/iokit")
@@ -35,15 +32,14 @@
    (:file "cocoa/core-animation")
    (:file "cocoa/ns-support")
    (:file "cocoa/ns-bindings")
-   (:file "cocoa/cocoa-classes")
-   (:file "x11/x11-classes")
-   (:file "compute-concrete-class")
-   (:file "cocoa/cocoa-app")
+   (:file "cocoa/cocoa-display")
    (:file "cocoa/cocoa-event")
+   (:file "cocoa/cocoa-keyboard")
    (:file "cocoa/cocoa-monitor")
    (:file "cocoa/cocoa-window")
    (:file "monitor")
    (:file "abstract-os")
+   (:file "input")
    (:file "api")))
 
 #+windows
@@ -97,6 +93,7 @@
    (:file "win32/win32-monitor")
    (:file "monitor")
    (:file "abstract-os")
+   (:file "input")
    (:file "api")
 
    #+NIL(:file "win32/test")))
@@ -155,4 +152,5 @@
    (:file "compute-concrete-class")
    (:file "monitor")
    (:file "abstract-os")
+   (:file "input")
    (:file "api")))

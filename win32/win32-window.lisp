@@ -432,6 +432,40 @@
   (declare (ignorable window alpha))
   (values))
 
+(defun set-win32-raw-mouse-motion (window value)
+  (unless (eq (disabled-cursor-window (window-display window)) window)
+    (return-from set-win32-raw-mouse-motion (values)))
+  (if value
+      (enable-win32-raw-mouse-motion window)
+      (disable-win32-raw-mouse-motion window))
+  (values))
+  
+(defun enable-win32-raw-mouse-motion (window)
+  (clet& ((&rid #_<RAWINPUTDEVICE>))
+	 (setf (.usUsagePage &rid) #x01
+	       (.usUsage &rid) #x02
+	       (.dwFlags &rid) 0
+	       (.hwndTarget &rid) (h window))
+
+	 (if (#_RegisterRawInputDevices &rid 1 (c-sizeof-type '#_<RAWINPUTDEVICE>))
+	     (setf (%raw-mouse-motion? window) t)
+	     (error "Win32: Failed to register raw input device"))))
+
+(defun disable-win32-raw-mouse-motion (window)
+  (clet& ((&rid #_<RAWINPUTDEVICE>))
+	 (setf (.usUsagePage &rid) #x01
+	       (.usUsage &rid) #x02
+	       (.dwFlags &rid) #_RIDEV_REMOVE
+	       (.hwndTarget &rid) nil)
+	 
+	 (if (#_RegisterRawInputDevices &rid 1 (c-sizeof-type '#_<RAWINPUTDEVICE>))
+	     (setf (%raw-mouse-motion window) nil)
+	     (error "Win32: Failed to remove raw input device"))))
+	 
+  
+	 
+
+
 (defun set-win32-window-size-limits (window min-width min-height max-width max-height)
   (declare (ignorable window min-width min-height max-width max-height))
   (values))
@@ -1210,7 +1244,7 @@ int decorated;
 			    (dy (- y (last-cursor-pos-y window))))
 			(unless (eq (disabled-cursor-window (window-display window)) window)
 			  (go break))
-			(when (last-raw-mouse-motion? window)
+			(when (raw-mouse-motion? window)
 			  (go break))
 			
 			(handle-event window (make-instance 'pointer-motion-event

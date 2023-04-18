@@ -170,6 +170,9 @@
   ())
 
 (defclass rect-mixin (region-mixin)
+  ())
+
+(defclass rect (rect-mixin)
   ((x :initarg :x
       :accessor x
       :type real)
@@ -210,30 +213,42 @@
     
 
 (defclass window-mixin (rect-mixin)
-  ((display :initarg :display :reader window-display)
-   (parent :initarg :parent :accessor window-parent)
-   (root :initarg :root :accessor window-root)
-   (next :type (or null window-mixin) :accessor window-next)
-   (auto-iconify? :type boolean :initform nil :accessor auto-iconify?)
-   (focus-on-show? :type boolean :initform t :accessor focus-on-show?)
-   (mouse-passthrough? :type boolean :accessor mouse-passthrough?)
-   (should-close? :type boolean :initform nil :accessor should-close?)
-   (video-mode :accessor window-video-mode :initform (make-video-mode))
-   (monitor :initform nil :reader window-monitor :writer (setf %window-monitor))
-   (cursor)
-   (min-width :initform :dont-care :accessor window-min-width)
-   (min-heigh :initform :dont-care :accessor window-min-height)
-   (max-width :initform :dont-care :accessor window-max-width)
-   (max-height :initform :dont-care :accessor window-max-height)
-   (numer :initform :dont-care :accessor window-aspect-numer)
-   (denom :initform :dont-care :accessor window-aspect-denom)
-   (sticky-keys? :type boolean :initform nil)
-   (sticky-mouse-buttons? :type boolean :initform nil)
-   (lock-key-mods? :type boolean :initform nil :accessor lock-key-mods?)
-   (cursor-mode :initform :normal :accessor window-cursor-mode)
-   (mouse-buttons)
-   (keys)
-   )
+  ((display
+    :initarg :display
+    :reader window-display)
+   
+   (parent
+    :initarg :parent
+    :accessor window-parent)
+   
+   (root
+    :initarg :root
+    :accessor window-root)
+   
+   (min-width
+    :initform :dont-care
+    :accessor window-min-width)
+   
+   (min-height
+    :initform :dont-care
+    :accessor window-min-height)
+   
+   (max-width
+    :initform :dont-care
+    :accessor window-max-width)
+   
+   (max-height
+    :initform :dont-care
+    :accessor window-max-height)
+   
+   (numer
+    :initform :dont-care
+    :accessor window-aspect-numer)
+   
+   (denom
+    :initform :dont-care
+    :accessor window-aspect-denom))
+  
   (:default-initargs :display (default-display)))
 
 (defmethod window-p ((window window-mixin))
@@ -244,20 +259,92 @@
   nil)
 
 (defclass os-window-mixin (window-mixin)
-  ((%x :type (or null real) :initform 0 :accessor last-pos-x)
-   (%y :type (or null real) :initform 0 :accessor last-pos-y)
-   (%width :type (or null real) :initform 0 :accessor last-width)
-   (%height :type (or null real) :initform 0 :accessor last-height)
-   (%maximized? :type boolean :initform nil :accessor last-maximized?)
-   (%resizable? :type boolean :initform nil :accessor last-resizable?)
-   (%decorated? :type boolean :initform nil :accessor last-decorated?)
-   (%iconified? :type boolean :initform nil :accessor last-iconified?)
-   (%floating? :type boolean :initform nil :accessor last-floating?)
-   (%transparent? :type boolean :initform nil :accessor last-transparent?)
-   (%raw-mouse-motion? :type boolean :initform nil :accessor last-raw-mouse-motion?)
+  ((next
+    :type (or null window-mixin)
+    :accessor window-next)
+   
+   (%resizable?
+    :type boolean
+    :initform nil
+    :accessor last-resizable?)
+   
+   (%decorated?
+    :type boolean
+    :initform nil
+    :accessor last-decorated?)
+   
+   (auto-iconify?
+    :type boolean
+    :initform nil
+    :accessor auto-iconify?)
+   
+   (%floating?
+    :type boolean
+    :initform nil
+    :accessor last-floating?)
+   
+   (focus-on-show?
+    :type boolean
+    :initform t
+    :accessor focus-on-show?)
+   
+   (mouse-passthrough?
+    :type boolean
+    :accessor mouse-passthrough?)
+   
+   (should-close?
+    :type boolean
+    :initform nil
+    :accessor should-close?)
 
-   (virtual-cursor-pos-x :accessor virtual-cursor-pos-x)
-   (virtual-cursor-pos-y :accessor virtual-cursor-pos-y)))
+   (video-mode
+    :accessor window-video-mode
+    :initform (make-video-mode))
+   
+   (monitor
+    :initform nil
+    :reader window-monitor
+    :writer (setf %window-monitor))
+   
+   (cursor
+    :initform nil
+    :accessor window-cursor)
+
+   (sticky-keys?
+    :type boolean
+    :initform nil
+    :accessor sticky-keys?)
+   
+   (sticky-mouse-buttons?
+    :type boolean
+    :initform nil
+    :accessor sticky-mouse-buttons?)
+   
+   (lock-key-mods?
+    :type boolean
+    :initform nil
+    :accessor lock-key-mods?)
+   
+   (cursor-mode
+    :initform
+    :normal
+    :accessor window-cursor-mode)
+   
+   (keys
+    :initform (make-array 256 :initial-element nil)
+    :accessor window-keys)
+   
+   (virtual-cursor-pos-x
+    :accessor virtual-cursor-pos-x)
+   
+   (virtual-cursor-pos-y
+    :accessor virtual-cursor-pos-y)
+   
+   (raw-mouse-motion?
+    :type boolean
+    :initform nil
+    :reader raw-mouse-motion?
+    :writer (setf %raw-mouse-motion?))))
 
 (defclass helper-window (handle-mixin)
   ())
@@ -278,10 +365,11 @@
 (defmethod find-window ((handle ccl::macptr))
   (gethash (ccl::%ptr-to-int handle) *window-handle->window-table*))
 
+#-darwin
 (defmethod find-window ((handle noffi::cval))
   (find-window (cval-value handle)))
 
-#+ccl
+#+(and ccl (not darwin))
 (defmethod find-window ((handle noffi::ptr))
   (find-window (ccl::%incf-ptr (ptr-value handle) (ptr-offset handle))))
    

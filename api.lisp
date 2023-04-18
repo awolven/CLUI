@@ -94,34 +94,93 @@
 
 (defgeneric request-window-attention (window))
 
+(defgeneric enable-raw-mouse-motion (window))
+
+(defgeneric (setf raw-mouse-motion?) (value window))
+
+(defgeneric raw-mouse-motion-supported? (display))
+
+#+cocoa
+(defmethod raw-mouse-motion-supported? ((display cocoa:desktop-mixin))
+  nil)
+
+#+win32
+(defmethod raw-mouse-motion-supported? ((display win32:desktop-mixin))
+  t)
+
+#+x11
+(defmethod raw-mouse-motion-supported? ((display x11:server-mixin))
+  (with-slots (x11-state) display
+    (xi-available? x11-state)))
+
+#+wayland
+(defmethod raw-mouse-motion-supported? ((display wayland:desktop))
+  t)
+
+#+cocoa
+(defmethod (setf raw-mouse-motion?) (value (window cocoa:window-mixin))
+  (declare (ignore value))
+  (warn "Cocoa: Raw mouse motion not yet implemented. No-op.")
+  nil)
+
+#+win32
+(defmethod (setf raw-mouse-motion?) (value (window win32:window-mixin))
+  (set-win32-raw-mouse-motion window value))
+
+#+x11
+(defmethod (setf raw-mouse-motion?) (value (window x11:window-mixin))
+  (set-x11-raw-mouse-motion window value))
 
 
+#+cocoa
+(defmethod enable-raw-mouse-motion ((window cocoa:window-mixin))
+  (warn "Cocoa: Raw mouse motion not yet implemented. No-op.")
+  nil)
+
+#+win32
+(defmethod enable-raw-mouse-motion ((window win32:window-mixin))
+  (enable-win32-raw-mouse-motion window))
+
+#+x11
+(defmethod enable-raw-mouse-motion ((window x11:window-mixin))
+  (enable-x11-raw-mouse-motion window))
+
+#+cocoa
+(defmethod disable-raw-mouse-motion ((window cocoa:window-mixin))
+  (warn "Cocoa: Raw mouse motion not yet implemented. No-op.")
+  nil)
+
+#+win32
+(defmethod disable-raw-mouse-motion ((window win32:window-mixin))
+  (disable-win32-raw-mouse-motion window))
+
+#+x11
+(defmethod disable-raw-mouse-motion ((window x11:window-mixin))
+  (disable-x11-raw-mouse-motion window))
 
 (defun get-primary-monitor (&optional (display (default-display)))
   (car (display-monitors display)))
 
 
-#+NIL
-(defun set-window-monitor (window monitor &key xpos ypos width height (refresh-rate :dont-care))
-  (declare (type os-window-mixin window))
-  
-  (when (or (minusp width) (minusp height))
-    (warn "invalid window size: ~AX~A" width height)
-    (return-from set-os-window-monitor (values)))
+(defmethod set-window-monitor ((window os-window-mixin) monitor &key xpos ypos width height (refresh-rate :dont-care))
+  (declare (ignorable monitor xpos ypos width height))
+  (block set-os-window-monitor
+    
+    (when (or (minusp width) (minusp height))
+      (warn "invalid window size: ~AX~A" width height)
+      (return-from set-os-window-monitor (values)))
 
-  (when (and (not (eq refresh-rate :dont-care))
-	     (minusp refresh-rate))
-    (warn "invalid refresh rate: ~A" refresh-rate)
-    (return-from set-os-window-monitor (values)))
+    (when (and (not (eq refresh-rate :dont-care))
+	       (minusp refresh-rate))
+      (warn "invalid refresh rate: ~A" refresh-rate)
+      (return-from set-os-window-monitor (values)))
   
-  (let ((video-mode (window-video-mode window)))
-    (setf (video-mode-width video-mode) width)
-    (setf (video-mode-height video-mode) height)
-    (setf (video-mode-refresh-rate video-mode) refresh-rate))
-  
-  #+darwin(set-cocoa-window-monitor window monitor xpos ypos width height refresh-rate)
-  #+windows(set-win32-window-monitor window monitor xpos ypos width height refresh-rate)
-  #+linux(set-linux-window-monitor window monitor xpos ypos width height refresh-rate))
+    (let ((video-mode (window-video-mode window)))
+      (setf (video-mode-width video-mode) width)
+      (setf (video-mode-height video-mode) height)
+      (setf (video-mode-refresh-rate video-mode) refresh-rate))
+
+    (call-next-method)))
 
 #+win32
 (defmethod destroy-window ((window win32:window))
@@ -142,7 +201,13 @@
 
 #+win32
 (defmethod get-default-screen-workarea ((display win32:desktop-mixin))
-  #+windows(get-win32-desktop-workarea))
+  (get-win32-desktop-workarea))
+
+#+cocoa
+(defmethod get-default-screen-workarea ((display cocoa:desktop-mixin)))
+
+#+x11
+(defmethod get-default-screen-workarea ((display x11:server-mixin)))
 
 #+win32
 (defmethod window-fullscreen? ((window win32:window-mixin))
@@ -178,7 +243,7 @@
 
 (defmethod (setf window-monitor) ((monitor monitor-mixin) (window window-mixin))
   (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea (monitor-display monitor))
-    (let ((refresh-rate 60))
+    (let ((refresh-rate :dont-care))
       (set-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
       monitor)))
 
@@ -358,21 +423,11 @@
 (defmethod set-window-monitor ((window wayland:window-mixin) monitor &key xpos ypos width height refresh-rate)
   (set-wayland-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
-#+win32
-(defmethod window-cursor-position ((window win32:window-mixin))
-  (get-win32-window-cursor-pos window))
+(defmethod window-cursor-position ((window os-window-mixin))
+  (get-window-cursor-pos window))
 
-#+cocoa
-(defmethod window-cursor-position ((window cocoa:window-mixin))
-  (get-cocoa-window-cursor-pos window))
 
-#+x11
-(defmethod window-cursor-position ((window x11:window-mixin))
-  (get-x11-window-cursor-pos window))
 
-#+wayland
-(defmethod window-cursor-position ((window wayland:window-mixin))
-  (get-x11-window-cursor-pos window))
 
 #+win32
 (defmethod set-window-cursor-position ((window win32:window-mixin) x y)

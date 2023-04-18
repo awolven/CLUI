@@ -1,9 +1,9 @@
 (in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
-(defun terminate-cocoa-application (app)
+(defun terminate-cocoa-application (display)
   ;; todo: close windows here.
-  (ns:|stop:| app nil)
+  (ns:|stop:| display nil)
   (values))
 
 (deftraceable-callback application-helper-do-nothing-callback :void ((self :pointer) (_cmd :pointer) (object :pointer))
@@ -12,15 +12,15 @@
 
 (deftraceable-callback application-helper-selected-keyboard-input-source-changed-callback :void
     ((self :pointer) (_cmd :pointer) (object :pointer))
-;;  (declare (ignorable self _cmd))
-  (application-helper-selected-keyboard-input-source-changed object)
-  (values))
+  ;;  (declare (ignorable self _cmd))
+  (let ((display (find-if (lambda (object)
+			    (typep object 'cocoa:desktop-mixin))
+			  *displays*)))
+    (application-helper-selected-keyboard-input-source-changed display)
+    (values)))
 
-(defun application-helper-selected-keyboard-input-source-changed (object)
-  (declare (ignore object))
-  #+NOTYET
-  (update-unicode-data application))
-  
+(defun application-helper-selected-keyboard-input-source-changed ()
+  (update-unicode-data display (slot-value display 'kPropertyUnicodeKeyLayoutData)))
 
 (defun make-helper-class ()
   (let ((helper-class (objc-runtime::objc-allocate-class-pair #@NSObject "CluiAppHelper" 0)))
@@ -30,10 +30,6 @@
     (objc-runtime::class-add-method helper-class @(selectedKeyboardInputSourceChanged:)
 				    (cffi:callback application-helper-selected-keyboard-input-source-changed-callback)
 				    "v@:@")
-    #+NIL
-    (objc-runtime::class-add-method helper-class @(observeValueForKeyPath:ofObject:change:context:)
-				    (cffi:callback observe-value-for-key-path-callback)
-				    "v@:@@@@")
     (objc_registerClassPair helper-class)
     helper-class))
 
@@ -89,8 +85,6 @@
 (deftraceable-callback application-delegate-application-did-change-screen-parameters-callback :void
     ((self :pointer) (_cmd :pointer) (notification :pointer))
 ;;  (declare (ignorable self _cmd))
-  (format t "~%application-did-change-screen-parameters")
-  (finish-output)
   (application-did-change-screen-parameters notification)
   (values))
 
@@ -119,17 +113,7 @@
 
 (defmethod application-did-finish-launching (self notification)
   (declare (ignorable notification))
-  (print 'activationpolicy)
-  ;; this line of code is what is causing ns::|run| to crash on TouchBar Observer:
-  ;;(NS:|setAutomaticCustomizeTouchBarMenuItemEnabled:| objc-runtime::ns-app nil)
-  ;;(ns:|setTouchBar:| objc-runtime::ns-app (alloc-init #@NSTouchBar))
-  (NS:|setAutomaticCustomizeTouchBarMenuItemEnabled:| objc-runtime::ns-app t)
-  ;;(ns:|showWindow:| (display-window-controller (default-display)) self)
-  ;;(ns:|setTouchBar:| w (alloc-init #@NSTouchBar))
-  (print (ns::|setActivationPolicy:| objc-runtime::ns-app NSApplicationActivationPolicyRegular))
-  ;;(ns:|setMenuBarVisible:| (ns:|mainMenu| objc-runtime::ns-app) t)
-  (finish-output)
-
+  (ns::|setActivationPolicy:| objc-runtime::ns-app NSApplicationActivationPolicyRegular)
   (values))
 
 
@@ -164,23 +148,6 @@
     (objc-runtime::class-add-method application-delegate-class @(applicationDidHide:)
 				    (cffi:callback application-delegate-application-did-hide-callback)
 				    "v@:@")
-    #+NIL
-    (objc-runtime::class-add-method application-delegate-class @(makeTouchBar)
-				    (cffi:callback application-delegate-make-touch-bar-callback)
-				    "v@:")
-    #+NIL
-    (objc-runtime::class-add-method application-delegate-class @(touchBar)
-				    (cffi:callback application-delegate-touch-bar-callback)
-				    "v@:")
-    #+NIL
-    (objc-runtime::class-add-method application-delegate-class @(touchBar:makeItemForIdentifier:)
-				    (cffi:callback application-delegate-touch-bar-make-item-for-identifier-callback)
-				    "v@:@@")
-    
-        #+NIL
-    (objc-runtime::class-add-method application-delegate-class @(observeValueForKeyPath:ofObject:change:context:)
-				    (cffi:callback observe-value-for-key-path-callback)
-				    "v@:@@@@")
 
     (objc_registerClassPair application-delegate-class)
     application-delegate-class))
@@ -320,164 +287,165 @@
   event)
 
 (defun closure-like-thingy-named-block (event)
-  (unless (zerop (logand (ns::|modifierFlags| event) NSEventModifierFlagCommand))
+  (unless (logtest (ns::|modifierFlags| event) NSEventModifierFlagCommand)
     (ns::|sendEvent:| (ns::|keyWindow| objc-runtime::ns-app) event))
   event)
   
-(defun init-cocoa (app)
-  (flet ((pre-init-app ()
-	   (setf (application-helper app) (alloc-init (objc-helper-class app)))
+(defun init-cocoa (display)
+  (with-autorelease-pool (pool)
+    (flet ((pre-init-app ()
+	     (setf (application-helper display) (alloc-init (objc-helper-class display)))
 	   
-	   (when (cffi:null-pointer-p (application-helper app))
-	     (error "Cocoa: failed to create application helper."))
+	     (when (cffi:null-pointer-p (application-helper display))
+	       (error "Cocoa: failed to create application helper."))
   
-	   (setf (application-delegate app) (alloc-init (objc-application-delegate-class app)))
+	     (setf (application-delegate display) (alloc-init (objc-application-delegate-class display)))
 
-	   (when (cffi:null-pointer-p (application-delegate app))
-	     (error "Cocoa: failed to create application delegate."))))
+	     (when (cffi:null-pointer-p (application-delegate display))
+	       (error "Cocoa: failed to create application delegate."))))
 
-    (pre-init-app)
+      (pre-init-app)
 
-    (ns::|detachNewThreadSelector:toTarget:withObject:| #@NSThread @(doNothing:) (application-helper app) nil)
+      (ns::|detachNewThreadSelector:toTarget:withObject:| #@NSThread @(doNothing:) (application-helper display) nil)
 
-    (ns::|sharedApplication| #@NSApplication)
+      (ns::|sharedApplication| #@NSApplication)
 
-    (ns::|setDelegate:| app (application-delegate app))
+      (ns::|setDelegate:| display (application-delegate display))
 
-    (setf (key-up-monitor app)
-	  (ns::|addLocalMonitorForEventsMatchingMask:handler:| #@NSEvent NSEventMaskKeyUp (cffi:callback closure-like-thingy-named-block-callback)))
+      #+NIL
+      (setf (key-up-monitor display)
+	    (ns::|addLocalMonitorForEventsMatchingMask:handler:| #@NSEvent NSEventMaskKeyUp (cffi:callback closure-like-thingy-named-block-callback)))
 
-    (change-to-resources-directory)
+      (change-to-resources-directory)
 
-    (let ((defaults (make-dictionary (cffi:null-pointer) (objc-runtime::make-nsstring "ApplePressAndHoldEnabled")))
-	  (NSTextInputContextKeyboardSelectionDidChangeNotification
-	   (objc-runtime::make-nsstring
-	    "NSTextInputContextKeyboardSelectionDidChangeNotification")))
+      (let ((defaults (make-dictionary (cffi:null-pointer) (objc-runtime::make-nsstring "ApplePressAndHoldEnabled")))
+	    (NSTextInputContextKeyboardSelectionDidChangeNotification
+	     (objc-runtime::make-nsstring
+	      "NSTextInputContextKeyboardSelectionDidChangeNotification")))
     
-      (ns::|registerDefaults:| (ns::|standardUserDefaults| #@NSUserDefaults) defaults)
+	(ns::|registerDefaults:| (ns::|standardUserDefaults| #@NSUserDefaults) defaults)
 
-      (ns::|addObserver:selector:name:object:|
-	   (ns::|defaultCenter| #@NSNotificationCenter)
-	   (application-helper app)
-	   @(selectedKeyboardInputSourceChanged:)
-	   NSTextInputContextKeyboardSelectionDidChangeNotification
-	   nil)
+	(ns::|addObserver:selector:name:object:|
+	     (ns::|defaultCenter| #@NSNotificationCenter)
+	     (application-helper display)
+	     @(selectedKeyboardInputSourceChanged:)
+	     NSTextInputContextKeyboardSelectionDidChangeNotification
+	     nil)
 
-      ;;(create-key-tables app)
+	(create-cocoa-key-tables display)
 
-      (setf (desktop-event-source app) (CGEventSourceCreate 0))
+	(setf (desktop-event-source display) (CGEventSourceCreate 0))
 
-      (when (cffi:null-pointer-p (desktop-event-source app))
-	(return-from init-cocoa nil))
+	(when (cffi:null-pointer-p (desktop-event-source display))
+	  (return-from init-cocoa nil))
 
-      (CGEventSourceSetLocalEventsSuppressionInterval (desktop-event-source app) 0.0d0)
+	(CGEventSourceSetLocalEventsSuppressionInterval (desktop-event-source display) 0.0d0)
 
-      #+NOTYET
-      (unless (initialize-tis app)
-	(return-from init-cocoa nil))
+	(unless (initialize-tis display)
+	  (return-from init-cocoa nil))
 
-      (setf (default-screen app) (make-instance 'screen :display app))
+	(setf (default-screen display) (make-instance 'screen :display display))
 
-      t)))
+	t))))
 
-(defun update-unicode-data (app kPropertyUnicodeKeyLayoutData)
-  (when (tis-input-source app)
-    (CFRelease (tis-input-source app))
-    (setf (tis-input-source app) nil)
-    (setf (desktop-unicode-data app) nil))
+(defun update-unicode-data (display kPropertyUnicodeKeyLayoutData)
+  (when (tis-input-source display)
+    (CFRelease (tis-input-source display))
+    (setf (tis-input-source display) nil)
+    (setf (desktop-unicode-data display) nil))
 
   (let ((source (TISCopyCurrentKeyboardLayoutInputSource)))
   
     (when (cffi:null-pointer-p source)
       (error "Cocoa: Failed to retrieve keyboard layout input source."))
     
-    (setf (tis-input-source app) source)
+    (setf (tis-input-source display) source)
 
     (let ((data (TISGetInputSourceProperty source kPropertyUnicodeKeyLayoutData)))
       
       (when (cffi:null-pointer-p data)
 	(error "Cocoa: Failed to retrieve keyboard layout unicode data."))
       
-      (setf (desktop-unicode-data app) data)
+      (setf (desktop-unicode-data display) data)
       
       t)))
 
 
 
-(defun initialize-TIS (app)
+(defun initialize-TIS (display)
   (let ((tis-bundle (CFBundleGetBundleWithIdentifier
 		     (CFSTR "com.apple.HIToolbox"))))
 
     (when (cffi:null-pointer-p tis-bundle)
       (error "Cocoa: Failed to load HIToolbox.framework"))
 
-    (setf (tis-bundle app) tis-bundle)
+    (setf (tis-bundle display) tis-bundle)
 
-    (setf (slot-value app 'kPropertyUnicodeKeyLayoutData)
+    (setf (slot-value display 'kPropertyUnicodeKeyLayoutData)
 	  (CFBundleGetDataPointerForName
-	   tis-bundle (CFSTR "kPropertyUnicodeKeyLayoutData")))
+	   tis-bundle (CFSTR "kTISPropertyUnicodeKeyLayoutData")))
 
-    (setf (slot-value app 'TISCopyCurrentKeyboardLayoutInputSource)
+    (setf (slot-value display 'TISCopyCurrentKeyboardLayoutInputSource)
 	  (CFBundleGetDataPointerForName
 	   tis-bundle (CFSTR "TISCopyCurrentKeyboardLayoutInputSource")))
 
-    (setf (slot-value app 'TISGetInputSourceProperty)
+    (setf (slot-value display 'TISGetInputSourceProperty)
 	  (CFBundleGetDataPointerForName
 	   tis-bundle (CFSTR "TISGetInputSourceProperty")))
 
-    (setf (slot-value app 'LMGetKbdType)
+    (setf (slot-value display 'LMGetKbdType)
 	  (CFBundleGetDataPointerForName
 	   tis-bundle (CFSTR "LMGetKbdType")))
 
-    (when (or (cffi:null-pointer-p (slot-value app 'kPropertyUnicodeKeyLayoutData))
-	      (cffi:null-pointer-p (slot-value app 'TISCopyCurrentKeyboardLayoutInputSource))
-	      (cffi:null-pointer-p (slot-value app 'TISGetInputSourceProperty))
-	      (cffi:null-pointer-p (slot-value app 'LMGetKbdType)))
+    (when (or (cffi:null-pointer-p (slot-value display 'kPropertyUnicodeKeyLayoutData))
+	      (cffi:null-pointer-p (slot-value display 'TISCopyCurrentKeyboardLayoutInputSource))
+	      (cffi:null-pointer-p (slot-value display 'TISGetInputSourceProperty))
+	      (cffi:null-pointer-p (slot-value display 'LMGetKbdType)))
       (error "Cocoa: Failed to load TIS API symbols."))
 
-    (update-unicode-data app (cffi:mem-aref (slot-value app 'kPropertyUnicodeKeyLayoutData) :pointer))))
+    (update-unicode-data display (cffi:mem-aref (slot-value display 'kPropertyUnicodeKeyLayoutData) :pointer))))
 
-(defun poll-cocoa-events (app)
+(defun poll-cocoa-events (display)
   (with-autorelease-pool (pool)
     (loop
        do
 	 (let ((event (ns::|nextEventMatchingMask:untilDate:inMode:dequeue:|
-			   app NSEventMaskAny
+			   display NSEventMaskAny
 			   (ns::|distantPast| #@NSDate)
 			   NSDefaultRunLoopMode t)))
 	 
 	   (when (cffi:null-pointer-p event)
 	     (return (values)))
 
-	   (ns::|sendEvent:| app event)))))
+	   (ns::|sendEvent:| display event)))))
 
-(defun cocoa-finish-init (app)
+(defun cocoa-finish-init (display)
   (unless (ns::|isFinishedLaunching| (ns::|currentApplication| #@NSRunningApplication))
-    (ns::|run| app)))
+    (ns::|run| display)))
 
-(defun wait-cocoa-events (app)
+(defun wait-cocoa-events (display)
   (with-autorelease-pool (pool)
     (let ((event (ns::|nextEventMatchingMask:untilDate:inMode:dequeue:|
-		      app NSEventMaskAny
+		      display NSEventMaskAny
 		      (ns::|distantFuture| #@NSDate)
 		      NSDefaultRunLoopMode t)))
 	 
-      (ns::|sendEvent:| app event))
+      (ns::|sendEvent:| display event))
 
-    (poll-cocoa-events app)))
+    (poll-cocoa-events display)))
 
-(defun main-loop-body (app)
-  (wait-application-events app))
+(defun main-loop-body (display)
+  (wait-application-events display))
 
-(defun test-main (app)
+(defun test-main (display)
   (with-autorelease-pool (pool)
-    (with-slots (exit?) app
+    (with-slots (exit?) display
       (tagbody
        test
 	 (when exit?
 	   (return-from test-main))
        start
-	 (main-loop-body app)
+	 (main-loop-body display)
 	 (go test)))))
 
 #+NIL

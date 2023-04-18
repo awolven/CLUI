@@ -127,7 +127,7 @@
 		       (cffi:with-foreign-object (p-index :unsigned-int)
 
 			 (CFNumberGetValue index-ref kCFNumberIntType p-index)
-			 (CFRelease index-ref)
+			 (CFRelease (ccl::%int-to-ptr index-ref))
 
 			 (when (= (CGOpenGLDisplayMaskToDisplayID (ash 1 (cffi:mem-aref p-index :unsigned-int))) display-id)
 			   (let ((clock-ref)
@@ -145,11 +145,11 @@
 			  
 			       (unless (= 0 clock-ref)
 				 (CFNumberGetValue clock-ref kCFNumberIntType p-clock)
-				 (CFRelease clock-ref))
+				 (CFRelease (ccl::%int-to-ptr clock-ref)))
 
 			       (unless (= 0 count-ref)
 				 (CFNumberGetValue clock-ref kCFNumberIntType p-count)
-				 (CFRelease count-ref))
+				 (CFRelease (ccl::%int-to-ptr count-ref)))
 
 			       (let ((clock (cffi:mem-aref p-clock :unsigned-int))
 				     (count (cffi:mem-aref p-count :unsigned-int)))

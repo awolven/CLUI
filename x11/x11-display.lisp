@@ -448,7 +448,7 @@
 
 	  (let ((window (disabled-cursor-window display)))
 
-	    (when (and window (last-raw-mouse-motion? window)
+	    (when (and window (raw-mouse-motion? window)
 		       (= (#_.extension (c->-addr event '#_xcookie)) (xi-major-opcode x11-state))
 		       (#_XGetEventData (h display) (#_.xcookie event))
 		       (= (#_.evtype (c->-addr event '#_xcookie)) #_XI_RawMotion)) ;; whew.
@@ -757,7 +757,7 @@
 		       (unless (eq (disabled-cursor-window display) window)
 			 (return))
 		       
-		       (when (last-raw-mouse-motion? window)
+		       (when (raw-mouse-motion? window)
 			 (return))
 
 		       (handle-event window (make-instance 'pointer-motion-event

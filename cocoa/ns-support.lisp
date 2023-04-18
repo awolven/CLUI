@@ -5,8 +5,11 @@
 (cffi:defcstruct ns::|NSEdgeInsets|) ;;fixme
 
 (cffi:defcstruct ns::|_NSRange|
-		 (location ns::|NSUInteger|)
-		 (length ns::|NSUInteger|))
+		 (ns::location ns::|NSUInteger|)
+		 (ns::length ns::|NSUInteger|))
+
+(defun make-nsrange (loc len)
+  (list 'ns::location loc 'ns::length len))
 
 (cffi:defcstruct ns::|_NSModalSession|) ;;fixme
 (cffi:defcstruct NS::|_NSZone|)
@@ -19,6 +22,7 @@
 (cffi:defcstruct NS::|Object|)
 (cffi:defcstruct NS::|objc_method_description|)
 (cffi:defcstruct NS::|ValueInterpolator|)
+(cffi:defcstruct NS::|__sFILE|)
 
 (defvar *yes* 1)
 (defvar *no* 0)
@@ -26,14 +30,18 @@
 (defvar NSDefaultRunLoopMode (objc-runtime::make-nsstring "NSDefaultRunLoopMode"))
 (cffi:defcfun ("_NSGetProgname" _NSGetProgname) :string)
 
+(defconstant NSUTF32StringEncoding #x8c000100)
 (defconstant NSEventTypeKeyUp 11)
 (defconstant NSEventMaskKeyUp (ash 1 NSEventTypeKeyUp))
 (defconstant NSApplicationActivationPolicyRegular 0)
 
+(defconstant NSEventModifierFlagCapsLock (ash 1 16))
+(defconstant NSEventModifierFlagShift (ash 1 17))
 (defconstant NSEventModifierFlagControl (ash 1 18))
 (defconstant NSEventModifierFlagOption (ash 1 19))
 (defconstant NSEventModifierFlagCommand (ash 1 20))
 (defconstant NSEventTypeApplicationDefined 15)
+(defconstant NSEventModifierFlagDeviceIndependentFlagsMask #xffff0000)
 
 (defconstant NSWindowStyleMaskMiniaturizable (ash 1 2))
 (defconstant NSWindowStyleMaskBorderless 0)
@@ -89,6 +97,11 @@
 	':UNSIGNED-LONG-LONG arg0
 	':unsigned-long-long 0
 	':POINTER (objc-object-id handler)))
+
+(defun ns::|initWithAttributedString:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(initWithAttributedString:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 
 

@@ -62,6 +62,40 @@
 	 (frame-rect (ns:|frameRectForContentRect:| window dummy-rect)))
     (ns:|setFrameOrigin:| window (make-nspoint (ns-get-x frame-rect) (ns-get-y frame-rect)))))
 
+(defun get-cocoa-cursor-pos (window)
+  (with-autorelease-pool (pool)
+    (let ((content-rect (ns:|frame| (window-content-view window)))
+	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
+      (values (ns-get-x pos)
+	      (- (ns-get-height content-rect) (ns-get-y pos))))))
+
+(defun set-cocoa-cursor-pos (window x y)
+  (with-autorelease-pool (pool)
+    (update-cocoa-cursor-image window)
+    (let ((content-rect (ns:|frame| (window-content-view window)))
+	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
+      (setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (- (ns-get-x pos))))
+      (setf (cursor-warp-delta-y window) (+ (cursor-warp-delta-y window) y (- (ns-get-height content-rect)) (ns-get-y pos)))
+
+      (if (window-monitor window)
+	  (CGDisplayMoveCursorToPoint (monitor-display-id (window-monitor window)) (make-nspoint x y))
+
+	  (let* ((local-rect (make-nsrect x (- (ns-get-height content-rect) y 1) 0 0))
+		 (global-rect (ns:|convertRectToScreen:| window local-rect))
+		 (global-x (ns-get-x global-rect))
+		 (global-y (ns-get-y global-rect)))
+
+	    (CGWarpMouseCursorPosition (make-nspoint global-x (cocoa-transform-y global-y)))))
+
+      (unless (eq (window-cursor-mode window) :disabled)
+	(CGAssociateMouseAndMouseCursorPosition t))))
+  (values))
+
+(defun cocoa-cursor-in-content-area? (window)
+  (let ((pos (ns:|mouseLocationOutsideOfEventStream| window))
+	(view (window-content-view window)))
+    (ns:|mouse:inRect:| view pos (ns:|frame| view)))) 
+
 (defun get-cocoa-window-size (window)
   (with-autorelease-pool (pool)
     (let ((content-rect (ns::|contentRectForFrameRect:| window (ns:|frame| window))))
@@ -136,7 +170,7 @@
 
 (defun restore-cocoa-window (window)
   (if (cocoa-window-iconified? window)
-      (deiconfify-cocoa-window window)
+      (deiconify-cocoa-window window)
       (maximize-cocoa-window window)))
 
 (defun set-cocoa-window-maximized (window value)
@@ -165,7 +199,6 @@
   value)
 
 (defun request-cocoa-window-attention (window)
-  (declare (ignore window))
   (ns:|requestUserAttention:| (window-display window) NSInformationalRequest)
   (values))
 
@@ -308,9 +341,37 @@
       (values (ns-get-x pos)
 	      (- (ns-get-height content-rect) (ns-get-y pos))))))
 
+(defun update-cocoa-cursor-image (window)
+  (if (eq (window-cursor-mode window) :normal)
+      (progn
+	(show-cocoa-cursor window)
+	(if (window-cursor window)
+	    (ns:|set| (window-cursor window))
+	    (ns:|set| (ns:|arrowCursor| #@NSCursor))))
+      (hide-cocoa-cursor window)))
+
+(defun update-cocoa-cursor-mode (window)
+  (let ((display (window-display window)))
+    (cond ((eq (window-cursor-mode window) :disabled)
+	   (setf (disabled-cursor-window display) window)
+	   (multiple-value-bind (x y) (get-cocoa-cursor-pos window)
+	     (setf (restore-cursor-pos-x display) x)
+	     (setf (restore-cursor-pos-y display) y)
+	     (center-cursor-in-content-area window)
+	     (CGAssociateMouseAndMouseCursorPosition nil)))
+	  ((eq (disabled-cursor-window display) window)
+	   (setf (disabled-cursor-window display) nil)
+	   (set-cocoa-cursor-pos window
+				 (restore-cursor-pos-x display)
+				 (restore-cursor-pos-y display))))
+    (when (cocoa-cursor-in-content-area? window)
+      (update-cocoa-cursor-image window))
+    (values)))
+				 
+
 (defun set-cocoa-window-cursor-pos (window x y)
   (with-autorelease-pool (pool)
-    (update-cursor-image window)
+    (update-cocoa-cursor-image window)
     (let ((content-rect (ns:|frame| (window-content-view window)))
 	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
       (setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (- (ns-get-x pos)))
@@ -325,7 +386,7 @@
 	    (CGWarpMouseCursorPosition (make-nspoint (ns-get-x global-point)
 						     (cocoa-transform-y (ns-get-y global-point))))))
 
-      (when (eq (cursor-mode window) :disabled)
+      (when (eq (window-cursor-mode window) :disabled)
 	(CGAssociateMouseAndMouseCursorPosition t))
 
       (values))))
@@ -383,7 +444,7 @@
 (defmethod cocoa-window-can-become-key ((window window-mixin))
   nil)
 
-(defmethod cocoa-window-can-become-key ((window os-window-mixin))
+(defmethod cocoa-window-can-become-key ((window cocoa:window-mixin))
   t)
 
 (deftraceable-callback content-view-accepts-first-responder-callback :char ((self :pointer) (_cmd :pointer))
@@ -398,7 +459,7 @@
       *yes*
       *no*))
 
-(defmethod cocoa-window-accepts-first-responder ((window os-window-mixin))
+(defmethod cocoa-window-accepts-first-responder ((window cocoa:window-mixin))
   t)
 
 (defmethod cocoa-window-accepts-first-responder ((window window-mixin))
@@ -420,7 +481,7 @@
       *yes*
       *no*))
 
-(defmethod cocoa-window-wants-update-layer ((window os-window-mixin))
+(defmethod cocoa-window-wants-update-layer ((window cocoa:window-mixin))
   ;; for example, a method for this generic function for a metal window would answer differently
   nil)
 
@@ -447,8 +508,7 @@
   (cocoa-window-update-view-layer (content-view-owner content-view))
   (values))
 
-(defmethod cocoa-window-update-view-layer ((window window-mixin))
-  #+NIL(input-window-damage window))
+(defmethod cocoa-window-update-view-layer ((window window-mixin)))
 
 (deftraceable-callback content-view-cursor-update-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -460,12 +520,10 @@
 
 (defun content-view-cursor-update (content-view event)
   (declare (ignore event))
-  (update-cursor-image (content-view-owner content-view))
+  (update-cocoa-cursor-image (content-view-owner content-view))
   (values))
 
-(defun update-cursor-image (window)
-  (declare (ignore window))
-  (values))
+
 
 (deftraceable-callback content-view-accepts-first-mouse-callback :bool ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
@@ -488,7 +546,8 @@
 
 (defun content-view-mouse-down (content-view event)
   (let ((clui-event (make-instance 'pointer-button-press-event
-				   :button +pointer-left-button+
+				   :window (content-view-owner content-view)
+				   :input-code +pointer-left-button+
 				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
     (handle-event (content-view-owner content-view) clui-event)))
 
@@ -517,7 +576,8 @@
 
 (defun content-view-mouse-up (content-view event)
   (let ((clui-event (make-instance 'pointer-button-release-event
-				   :button +pointer-left-button+
+				   :window (content-view-owner content-view)
+				   :input-code +pointer-left-button+
 				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
     (handle-event (content-view-owner content-view) clui-event))
   (values))
@@ -534,28 +594,39 @@
 
 (defun content-view-mouse-moved (content-view event)
   (let ((window (content-view-owner content-view)))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
 
-    (if (eq (window-cursor-mode window) :disabled)
-	(let ((dx (- (ns:|deltaX| event) (cursor-warp-delta-x window)))
-	      (dy (- (ns:|deltaY| event) (cursor-warp-delta-y window))))
+      (if (eq (window-cursor-mode window) :disabled)
+	  (let ((dx (- (ns:|deltaX| event) (cursor-warp-delta-x window)))
+		(dy (- (ns:|deltaY| event) (cursor-warp-delta-y window))))
 
-	  (input-cursor-pos window
-			    (+ (virtual-cursor-pos-x window) dx)
-			    (+ (virtual-cursor-pos-y window) dy)))
-	(let* ((content-rect (ns:|frame| content-view))
-	       (loc (ns:|locationInWindow| event))
-	       (x (ns-get-x loc))
-	       (y (- (ns-get-y content-rect) (ns-get-y loc)))
-	       (clui-event (make-instance 'pointer-motion-event
-					  :x x
-					  :y y
-					  :native-x x
-					  :native-y y)))
-	      (handle-event window clui-event)))
+	    (handle-event window (make-instance 'pointer-motion-event
+						:window window
+						:input-code +pointer-move+
+						:x (+ (virtual-cursor-pos-x window) dx)
+						:y (+ (virtual-cursor-pos-y window) dy)
+						:modifier-state mods
+						:lock-modifier-state lock-mods)))
+	  
+	  (let* ((content-rect (ns:|frame| content-view))
+		 (loc (ns:|locationInWindow| event))
+		 (x (ns-get-x loc))
+		 (y (- (ns-get-y content-rect) (ns-get-y loc)))
+		 (clui-event (make-instance 'pointer-motion-event
+					    :window window
+					    :input-code +pointer-move+
+					    :x x
+					    :y y
+					    :native-x x
+					    :native-y y
+					    :modifier-state mods
+					    :lock-modifier-state lock-mods
+					    )))
+	    (handle-event window clui-event)))
 
-    (setf (cursor-warp-delta-x window) 0
-	  (cursor-warp-delta-y window) 0)
-    (values)))
+      (setf (cursor-warp-delta-x window) 0
+	    (cursor-warp-delta-y window) 0)
+      (values))))
 
 (deftraceable-callback content-view-right-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -567,7 +638,8 @@
 
 (defun content-view-right-mouse-down (content-view event)
   (let ((clui-event (make-instance 'pointer-button-press-event
-				   :button +pointer-right-button+
+				   :window (content-view-owner content-view)
+				   :input-code +pointer-right-button+
 				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
     (handle-event (content-view-owner content-view) clui-event)))
 
@@ -593,7 +665,7 @@
 
 (defun content-view-right-mouse-up (content-view event)
   (let ((clui-event (make-instance 'pointer-button-release-event
-				   :button +pointer-right-button+
+				   :input-code +pointer-right-button+
 				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
     (handle-event (content-view-owner content-view) clui-event))
   (values))
@@ -607,9 +679,8 @@
     (values)))
 
 (defun content-view-other-mouse-down (content-view event)
-  (ns:|toggleFullScreen:| (content-view-owner content-view) nil)
   (let ((clui-event (make-instance 'pointer-button-press-event
-				   :button (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
+				   :input-code (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
 						 (ns:|buttonNumber| event))
 				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
     (handle-event (content-view-owner content-view) clui-event)))
@@ -636,47 +707,87 @@
 
 (defun content-view-other-mouse-up (content-view event)
   (let ((clui-event (make-instance 'pointer-button-release-event
-				   :button (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
+				   :input-code (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
 						 (ns:|buttonNumber| event))
 				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
     (handle-event (content-view-owner content-view) clui-event)))
 
-(deftraceable-callback content-view-other-mouse-exited-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
+(defun show-cocoa-cursor (window)
+  (let ((display (window-display window)))
+    (when (cursor-hidden? display)
+      (ns:|unhide| #@NSCursor)
+      (setf (cursor-hidden? display) nil))
+    (values)))
+
+(defun hide-cocoa-cursor (window)
+  (let ((display (window-display window)))
+    (unless (cursor-hidden? display)
+      (ns:|hide| #@NSCursor)
+      (setf (cursor-hidden? display) t))
+    (values)))
+
+(deftraceable-callback content-view-mouse-exited-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       *content-view->clos-content-view-table*)))
     (when content-view
-      (content-view-other-mouse-exited content-view event))
+      (content-view-mouse-exited content-view event))
     (values)))
 
-(defun content-view-other-mouse-exited (view event)
+(defun content-view-mouse-exited (view event)
   (let ((window (content-view-owner view)))
-    (on-cocoa-other-mouse-exited window event)))
+    (on-cocoa-mouse-exited window event)))
 
-(defmethod on-cocoa-other-mouse-exited ((window window-mixin) event)
+
+
+(defmethod on-cocoa-mouse-exited ((window window-mixin) event)
   (when (eq (window-cursor-mode window) :hidden)
-    (show-cursor window))
-  (input-cursor-enter window nil))
-    
+    (show-cocoa-cursor window))
+  (let* ((content-rect (ns:|frame| (window-content-view window)))
+	 (loc (ns:|locationInWindow| event))
+	 (x (ns-get-x loc))
+	 (y (- (ns-get-y content-rect) (ns-get-y loc))))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (handle-event window (make-instance 'pointer-exit-event
+					  :window window
+					  :input-code +pointer-move+
+					  :x x
+					  :y y
+					  :modifier-state mods
+					  :lock-modifier-state lock-mods))))
+  (values))    
 
-(deftraceable-callback content-view-other-mouse-entered-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
+
+
+(deftraceable-callback content-view-mouse-entered-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
 			       *content-view->clos-content-view-table*)))
     (when content-view
-      (content-view-other-mouse-entered content-view event))
+      (content-view-mouse-entered content-view event))
     (values)))
 
-(defun content-view-other-mouse-entered (view event)
+(defun content-view-mouse-entered (view event)
 
   (let ((window (content-view-owner view)))
-    (on-cocoa-other-mouse-entered window event)))
+    (on-cocoa-mouse-entered window event)))
 
-(defmethod on-cocoa-other-mouse-entered ((window window-mixin) event)
-  (declare (ignore event))
+(defmethod on-cocoa-mouse-entered ((window cocoa:window-mixin) event)
   (when (eq (window-cursor-mode window) :hidden)
-    (hide-cursor window))
-  (input-cursor-enter window t))
+    (hide-cocoa-cursor window))
+  (let* ((content-rect (ns:|frame| (window-content-view window)))
+	 (loc (ns:|locationInWindow| event))
+	 (x (ns-get-x loc))
+	 (y (- (ns-get-y content-rect) (ns-get-y loc))))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (handle-event window (make-instance 'pointer-enter-event
+					  :window window
+					  :input-code +pointer-move+
+					  :x x
+					  :y y
+					  :modifier-state mods
+					  :lock-modifier-state lock-mods))))
+  (values))
 
 (deftraceable-callback content-view-view-did-change-backing-properties-callback :void ((self :pointer) (_cmd :pointer))
 ;;  (declare (ignorable _cmd))
@@ -724,7 +835,7 @@
       (content-view-draw-rect (content-view-owner content-view) content-view rect))
     (values)))
 
-(defmethod content-view-draw-rect ((window os-window-mixin) (view content-view) rect)
+(defmethod content-view-draw-rect ((window cocoa:window-mixin) (view content-view) rect)
   (declare (ignorable rect))
   (format t "~%running draw-rect")
   (finish-output)
@@ -732,11 +843,10 @@
   (ns:|strokeRect:| #@NSBezierPath (make-nsrect 0 0 1 1))
   (NSRectFill (ns:|bounds| view))
   (ns:|flushGraphics| (window-graphics-context window))
-  #+NIL(input-window-damaged window)
   )
 
 (defmethod content-view-draw-rect ((window constant-refresh-os-window-mixin) (view content-view) rect)
-  (declare (ignorable view))
+  (declare (ignorable view rect))
   (values))
 
 (deftraceable-callback content-view-update-tracking-areas-callback :void ((self :pointer) (_cmd :pointer))
@@ -749,7 +859,7 @@
 (defun content-view-update-tracking-areas (view)
   (cocoa-window-update-tracking-areas (content-view-owner view)))
 
-(defmethod cocoa-window-update-tracking-areas ((window os-window-mixin))
+(defmethod cocoa-window-update-tracking-areas ((window cocoa:window-mixin))
   (let ((content-view (window-content-view window)))
     (let ((tracking-area (content-view-tracking-area content-view)))
     
@@ -773,13 +883,297 @@
 	(super-update-tracking-areas content-view))))
   (values))
 
+(deftraceable-callback content-view-key-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-key-down content-view event))
+    (values)))
 
+(defun content-view-key-down (view event)
+  (cocoa-window-key-down (content-view-owner view) event))
+
+(defun translate-cocoa-key (window key)
+  (let ((keycodes (display-keycodes (window-display window))))
+    (when (< key (length keycodes))
+      (aref keycodes key))))
+
+(defun translate-cocoa-flags (flags)
+  (let ((mods 0)
+	(lock-mods 0))
+    (when (logtest flags NSEventModifierFlagShift)
+      (setq mods (logior mods +shift-modifier+)))
+    (when (logtest flags NSEventModifierFlagControl)
+      (setq mods (logior mods +ctrl-modifier+)))
+    (when (logtest flags NSEventModifierFLagOption)
+      (setq mods (logior mods +alt-modifier+)))
+    (when (logtest flags NSEventModifierFlagCommand)
+      (setq mods (logior mods +super-modifier+)))
+    (when (logtest flags NSEventModifierFlagCapsLock)
+      (setq lock-mods (logior lock-mods +caps-lock-modifier+)))
+    
+    (values mods lock-mods)))
+
+(defmethod cocoa-window-key-down ((window cocoa:window-mixin) event)
+  (let ((key (translate-cocoa-key window (ns:|keyCode| event))))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+
+      (handle-event window (make-instance 'key-press-event
+					  :window window
+					  :input-code key
+					  :modifier-state mods
+					  :lock-modifier-state lock-mods))
+      (ns:|interpretKeyEvents:| (window-content-view window) (array-with-objects event))
+      (values))))
+
+(deftraceable-callback content-view-flags-changed-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-flags-changed content-view event))
+    (values)))
+
+(defun translate-key-to-cocoa-modifier-flag (key)
+  (case key
+    ((+key-left-shift+ +key-right-shift+) NSEventModifierFlagShift)
+    ((+key-left-ctlr+ +key-right-ctrl+) NSEventModifierFlagControl)
+    ((+key-left-alt+ +key-right-alt+) NSEventModifierFlagOption)
+    ((+key-left-super+ +key-right-super+) NSEventModifierFlagCommand)
+    (+key-caps-lock+ NSEventModifierFlagCapsLock)
+    (t 0)))
+
+(defun content-view-flags-changed (view event)
+  (let* ((modifier-flags (logand (ns:|modifierFlags| event) NSEventModifierFlagDeviceIndependentFlagsMask))
+	 (window (content-view-owner view))
+	 (key (translate-cocoa-key window (ns:|keyCode| event)))	
+	 (lisp-event-class))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags modifier-flags)
+      (let ((key-flag (translate-key-to-cocoa-modifier-flag key)))
+
+	(if (logtest modifier-flags key-flag)
+	    (if (eq (aref (window-keys window) key) :press)
+		(setq lisp-event-class 'key-release-event)
+		(setq lisp-event-class 'key-press-event))
+	    (setq lisp-event-class 'key-release-event))
+
+	(handle-event window (make-instance lisp-event-class
+					    :window window
+					    :input-code key
+					    :modifier-state mods
+					    :lock-modifier-state lock-mods)))))
+  (values))
+
+(deftraceable-callback content-view-key-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-key-up content-view event))
+    (values)))
+
+(defun content-view-key-up (view event)
+  (cocoa-window-key-up (content-view-owner view) event))
+
+(defmethod cocoa-window-key-up ((window cocoa:window-mixin) event)
+  (let ((key (translate-cocoa-key window (ns:|keyCode| event))))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+
+      (handle-event window (make-instance 'key-release-event
+					  :window window
+					  :input-code key
+					  :modifier-state mods
+					  :lock-modifier-state lock-mods))
+      ))
+  (values))
 
 (defun cocoa-transform-y (y)
   (declare (type real y))
   (coerce (1- (- (ns-get-height (CGDisplayBounds (CGMainDisplayID))) y)) 'double-float))
 
+(deftraceable-callback content-view-scroll-wheel-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-scroll-wheel content-view event))
+    (values)))
 
+(defun content-view-scroll-wheel (view event)
+  (declare (ignore view event))
+  (values))
+
+(deftraceable-callback content-view-has-marked-text-callback :char ((self :pointer) (_cmd :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-has-marked-text content-view)
+	*no*)))
+
+(defun content-view-has-marked-text (view)
+  (plusp (ns:|length| (content-view-marked-text view))))
+
+(deftraceable-callback content-view-marked-range-callback :unsigned-long-long ((self :pointer) (_cmd :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-marked-range content-view)
+	0)))
+
+(defun content-view-marked-range (view)
+  (declare (ignore view))
+  0)
+
+(deftraceable-callback content-view-selected-range-callback :unsigned-long-long ((self :pointer) (_cmd :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-selected-range content-view)
+	0)))
+
+(defun content-view-selected-range (view)
+  (declare (ignore view))
+  0)
+
+(deftraceable-callback content-view-set-marked-text-selected-range-replacement-range-callback :void ((self :pointer) (_cmd :pointer)
+												     (string :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-set-marked-text-selected-range-replacement-range content-view string)
+	(values))))
+
+(defun content-view-set-marked-text-selected-range-replacement-range (view string)
+  (ns:|release| (content-view-marked-text view))
+  (setf (content-view-marked-text view)
+	(if (ns:|isKindOfClass:| string (ns::|class| #@NSAttributedString))
+	    (ns::|initWithAttributedString:| (ns:|alloc| #@NSMutableAttributedString) string)
+	    (ns:|initWithString:| (ns:|alloc| #@NSMutableAttributedString) string)))
+  (values))
+
+(deftraceable-callback content-view-unmark-text-callback :void ((self :pointer) (_cmd :pointer))
+  ;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-unmark-text content-view)
+	(values))))
+
+(defun content-view-unmark-text (view)
+  (setf (content-view-marked-text view) (alloc-init #@NSMutableAttributedString)))
+
+(deftraceable-callback content-view-valid-attributes-for-marked-text-callback :pointer ((self :pointer) (_cmd :pointer))
+  ;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-valid-attributes-for-marked-text content-view)
+	(cffi:null-pointer))))
+
+(defun content-view-valid-attributes-for-marked-text (view)
+  (declare (ignore view))
+  (ns:|array| #@NSArray))
+
+(deftraceable-callback content-view-attributed-substring-for-proposed-range-actual-range-callback :pointer
+    ((self :pointer) (_cmd :pointer))
+  ;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-attributed-substring-for-proposed-range-actual-range content-view)
+	(cffi:null-pointer))))
+
+(defun content-view-attributed-substring-for-proposed-range-actual-range (view)
+  (declare (ignore view))
+  (cffi:null-pointer))
+
+(deftraceable-callback content-view-character-index-for-point-callback :unsigned-long-long ((self :pointer) (_cmd :pointer))
+  ;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-character-index-for-point content-view)
+	0)))
+
+(defun content-view-character-index-for-point (view)
+  (declare (ignore view))
+  0)
+
+(deftraceable-callback content-view-first-rect-for-character-range-actual-range-callback :unsigned-long-long
+    ((self :pointer) (_cmd :pointer))
+  ;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (if content-view
+	(content-view-first-rect-for-character-range-actual-range content-view)
+	0)))
+
+(defun content-view-first-rect-for-character-range-actual-range (view)
+  (declare (ignore view))
+  0)
+
+(deftraceable-callback content-view-insert-text-replacement-range-callback :void ((self :pointer) (_cmd :pointer) (string :pointer)
+										  (replacement-range :unsigned-long-long #+NIL (:struct ns::|_NSRange|)))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-insert-text content-view string replacement-range))
+    (values)))
+
+(deftraceable-callback content-view-insert-text-callback :void ((self :pointer) (_cmd :pointer) (string :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-insert-text content-view string))
+    (values)))
+
+(defun content-view-insert-text (view string &optional replacement-range)
+  (declare (ignore replacement-range))
+  (let* ((characters)
+	 (window (content-view-owner view))
+	 (event (ns:|currentEvent| (window-display window))))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (let ((plain? (not (logtest mods +super-modifier+))))
+
+	(if (ns:|isKindOfClass:| string (ns:|class| #@NSAttributedString))
+	    (setq characters (ns:|string| string))
+	    (setq characters string))
+
+	(let ((range))
+	  (cffi:with-foreign-objects ((&codepoint :uint32)
+				      (&remaining-range '(:struct ns::|_NSRange|)))
+	    (setf (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::location) 0
+		  (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::length) (ns:|length| characters))
+	    (loop until (zerop (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'length))
+	       do (setf (cffi:mem-aref &codepoint :uint32) 0)
+		 (setq range (make-nsrange (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::location)
+					   (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::length)))
+		 (when (ns:|getBytes:maxLength:usedLength:encoding:options:range:remainingRange:|
+			   characters &codepoint (load-time-value (cffi:foreign-type-size :uint32))
+			   nil NSUTF32StringEncoding 0 range &remaining-range)
+		   (unless (and (>= (cffi:mem-aref &codepoint :uint32) #xf700)
+				(<= (cffi:mem-aref &codepoint :uint32) #xf7ff))
+		     (input-char window (cffi:mem-aref &codepoint :uint32) mods lock-mods plain?)))))))))
+  (values))
+
+(deftraceable-callback content-view-do-command-by-selector-callback :void ((self :pointer) (_cmd :pointer) (selector :pointer))
+;;  (declare (ignorable _cmd))
+  (let ((content-view (gethash (sap-int self)
+			       *content-view->clos-content-view-table*)))
+    (when content-view
+      (content-view-do-command-by-selector content-view selector))
+    (values)))
+
+(defun content-view-do-command-by-selector (view selector)
+  (declare (ignore view selector))
+  (values))
 
 
 (defun %create-native-cocoa-window (window &rest args
@@ -802,7 +1196,7 @@
     (if (window-monitor window)
 	
 	(multiple-value-bind (xpos ypos) (get-cocoa-monitor-pos (window-monitor window))
-	  (let* ((mode (get-cocoa-video-mode (window-monitor window)))
+	  (let* ((mode (get-cocoa-monitor-video-mode (window-monitor window)))
 		 (width (video-mode-width mode))
 		 (height (video-mode-height mode)))
 
@@ -832,10 +1226,6 @@
 	    (NS:|initWithContentRect:styleMask:backing:defer:|
 		(alloc (objc-window-class (window-display window)))
 		content-rect
-		#+NIL(logior NSWindowStyleMaskTitled
-			     NSWindowStyleMaskClosable
-			     NSWindowStyleMaskMiniaturizable
-			     NSWindowStyleMaskResizable)
 		style-mask
 		NSBackingStoreBuffered nil))
 
@@ -901,19 +1291,9 @@
       (ns:|setAcceptsMouseMovedEvents:| window t)
       (ns:|setRestorable:| window nil)
 
-      #+NIL
-      (let ((window-controller (alloc (objc-window-controller-class (window-display window)))))
-
-	(setf (display-window-controller (window-display window)) window-controller)
-	;;(super-init-with-window window-controller window)
-
-	;;(ns:|setTouchBar:| window (alloc-init #@NSTouchBar))
-	;;(ns:|makeTouchBar| window-controller)
-	)
-
       t)))
 
-(defmethod initialize-window-devices ((window os-window-mixin) &rest args &key &allow-other-keys)
+(defmethod initialize-window-devices ((window cocoa:window-mixin) &rest args &key &allow-other-keys)
   (declare (ignore args))
   (setf (window-graphics-context window)
 	(ns:|graphicsContextWithWindow:| #@NSGraphicsContext window))
@@ -943,7 +1323,6 @@
 	  (focus-cocoa-window window)
 	  (acquire-cocoa-monitor window (window-monitor window))
 	  (when center-cursor?
-	    #+NOTYET
 	    (center-cursor-in-content-area window)))
 	(when visible?
 	  (show-cocoa-window window)
@@ -962,14 +1341,14 @@
 			       (ns-get-width bounds)
 			       (ns-get-height bounds))))
       (ns:|setFrame:| frame t)
-      ;;(input-monitor-window monitor window)
+      (setf (monitor-window monitor) window)
       (values))))
 
-(defun release-cocoa-monitor (window monitor)
-  (unless (eq (monitor-window monitor) window)
+(defun release-cocoa-monitor (window)
+  (unless (eq (monitor-window (window-monitor window)) window)
     (return-from release-cocoa-monitor (values)))
-  ;;(input-monitor-window (window-monitor window) nil)
-  (restore-cocoa-video-mode (window-monitor window))
+  (setf (monitor-window (window-monitor window)) nil)
+  (restore-cocoa-monitor-video-mode (window-monitor window))
   (values))
 
 
@@ -986,12 +1365,14 @@
 ;;  (declare (ignore sender))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
-      (ns-window-should-close window))
+      (handle-event window (make-instance 'window-close-event
+					  :window window
+					  :timestamp (get-internal-real-time))))
     (values)))
 
 
-(defun ns-window-should-close (window)
-  (input-window-close-request window))
+
+  
 
 (deftraceable-callback window-delegate-window-did-resize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
@@ -1001,7 +1382,6 @@
 
 (defun cocoa-window-did-resize (window notification)
   (declare (ignorable notification))
-  #+NIL
   (when (eq window (disabled-cursor-window (window-display window)))
     (center-cursor-in-content-area window))
   (let* ((content-rect (ns:|frame| window)))
@@ -1047,8 +1427,6 @@
 			      :new-height 0)))
     (handle-event window event))
   (values))
-
-;;(trace release-monitor acquire-monitor release-cocoa-monitor acquire-cocoa-monitor)
 
 (deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
@@ -1188,7 +1566,7 @@
     (objc-runtime::class-add-method content-view-class @(cursorUpdate:)
 				    (cffi:callback content-view-cursor-update-callback)
 				    "v@:@")
-    (objc-runtime::class-add-method content-view-class @(acceptsFirstMouse)
+    (objc-runtime::class-add-method content-view-class @(acceptsFirstMouse:)
 				    (cffi:callback content-view-accepts-first-mouse-callback)
 				    "c@:")
     (objc-runtime::class-add-method content-view-class @(mouseDown:)
@@ -1221,13 +1599,13 @@
     (objc-runtime::class-add-method content-view-class @(otherMouseUp:)
 				    (cffi:callback content-view-other-mouse-up-callback)
 				    "v@:@")
-    (objc-runtime::class-add-method content-view-class @(otherMouseExited:)
-				    (cffi:callback content-view-other-mouse-exited-callback)
+    (objc-runtime::class-add-method content-view-class @(mouseExited:)
+				    (cffi:callback content-view-mouse-exited-callback)
 				    "v@:@")
-    (objc-runtime::class-add-method content-view-class @(otherMouseEntered:)
-				    (cffi:callback content-view-other-mouse-entered-callback)
+    (objc-runtime::class-add-method content-view-class @(mouseEntered:)
+				    (cffi:callback content-view-mouse-entered-callback)
 				    "v@:@")
-    (objc-runtime::class-add-method content-view-class @(didChangeBackingProperties)
+    (objc-runtime::class-add-method content-view-class @(viewDidChangeBackingProperties)
 				    (cffi:callback content-view-view-did-change-backing-properties-callback)
 				    "v@:")
     (objc-runtime::class-add-method content-view-class @(drawRect:)
@@ -1236,36 +1614,64 @@
     (objc-runtime::class-add-method content-view-class @(updateTrackingAreas)
 				    (cffi:callback content-view-update-tracking-areas-callback)
 				    "v@:")
+    (objc-runtime::class-add-method content-view-class @(keyDown:)
+				    (cffi:callback content-view-key-down-callback)
+				    "v@:@")
+    (objc-runtime::class-add-method content-view-class @(flagsChanged:)
+				    (cffi:callback content-view-flags-changed-callback)
+				    "v@:@")
+    (objc-runtime::class-add-method content-view-class @(keyUp:)
+				    (cffi:callback content-view-key-up-callback)
+				    "v@:@")
+    (objc-runtime::class-add-method content-view-class @(scrollWheel:)
+				    (cffi:callback content-view-scroll-wheel-callback)
+				    "v@:@")
+
+    (objc-runtime::class-add-method content-view-class @(hasMarkedText)
+				    (cffi:callback content-view-has-marked-text-callback)
+				    "c@:")
+
+    (objc-runtime::class-add-method content-view-class @(markedRange)
+				    (cffi:callback content-view-marked-range-callback)
+				    "{_NSRange=QQ}@:")
+    (objc-runtime::class-add-method content-view-class @(selectedRange)
+				    (cffi:callback content-view-selected-range-callback)
+				    "{_NSRange=QQ}@:")
+    (objc-runtime::class-add-method content-view-class @(setMarkedText:selectedRange:replacementRange:)
+				    (cffi:callback content-view-set-marked-text-selected-range-replacement-range-callback)
+				    "v@:@{_NSRange=QQ}{_NSRange=QQ}")
+    (objc-runtime::class-add-method content-view-class @(unmarkText)
+				    (cffi:callback content-view-unmark-text-callback)
+				    "v@:")
+    (objc-runtime::class-add-method content-view-class @(validAttributesForMarkedText)
+				    (cffi:callback content-view-valid-attributes-for-marked-text-callback)
+				    "@@:")
+    (objc-runtime::class-add-method content-view-class @(attributedSubstringForProposedRange:actualRange:)
+				    (cffi:callback content-view-attributed-substring-for-proposed-range-actual-range-callback)
+				    "@@:{_NSRange=QQ}@")
+    (objc-runtime::class-add-method content-view-class @(characterIndexForPoint:)
+				    (cffi:callback content-view-character-index-for-point-callback)
+				    "Q@:{CGPoint=dd}")
+    (objc-runtime::class-add-method content-view-class @(firstRectForCharacterRange:actualRange:)
+				    (cffi:callback content-view-first-rect-for-character-range-actual-range-callback)
+				    "{CGRect={CGPoint=dd}{CGSize=dd}}@:{_NSRange=QQ}@")
+    (objc-runtime::class-add-method content-view-class @(insertText:replacementRange:)
+				    (cffi:callback content-view-insert-text-replacement-range-callback)
+				    "v@:@{_NSRange=QQ}")
+    (objc-runtime::class-add-method content-view-class @(insertText:)
+				    (cffi:callback content-view-insert-text-callback)
+				    "v@:@")
+    (objc-runtime::class-add-method content-view-class @(doCommandBySelector:)
+				    (cffi:callback content-view-do-command-by-selector-callback)
+				    "v@::")
+
+    
+    
     (objc-runtime::class-add-method content-view-class @(drawInMTKView:)
 				    (cffi:callback content-view-draw-in-mtkview-callback)
 				    "v@:@")
 
 
-    (objc-runtime::class-add-method content-view-class @(makeTouchBar)
-				    (cffi:callback window-make-touch-bar-callback)
-				    "@@:")
-
-    #+NIL
-    (objc-runtime::class-add-method content-view-class @(touchBar)
-				    (cffi:callback window-touch-bar-callback)
-				    "@@:")
-
-    (objc-runtime::class-add-method content-view-class @(touchBar:makeItemForIdentifier:)
-				    (cffi:callback window-touch-bar-make-item-for-identifier-callback)
-				    "@@:@@")
-
-    #+NIL
-    (objc-runtime::class-add-method content-view-class @(respondsToSelector:)
-				    (cffi:callback content-view-responds-to-selector-callback)
-				    "c@:@")
-    #+NIL
-    (objc-runtime::class-add-method content-view-class @(resolveClassMethod:)
-				    (cffi:callback content-view-resolve-class-method-callback)
-				    "c@:@")
-
-    (objc-runtime::class-add-method content-view-class @(keyPathsForValuesAffectingTouchBar)
-				    (cffi:callback content-view-key-paths-for-values-affecting-touch-bar-callback)
-				    "@@:")
 
     (objc_registerClassPair content-view-class)
     
@@ -1299,23 +1705,11 @@
 
 
 
-#+NIL
-(trace ns-window-should-close window-did-resize window-did-move window-did-miniaturize
-       window-did-deminiaturize window-did-become-key window-did-resign-key window-did-change-occlusion-state
-       content-view-dealloc
-       content-view-is-opaque  content-view-accepts-first-responder
-       content-view-wants-update-layer content-view-update-layer content-view-cursor-update
-       content-view-accepts-first-mouse content-view-mouse-down content-view-mouse-dragged
-       content-view-mouse-up content-view-mouse-moved content-view-right-mouse-down
-       content-view-right-mouse-dragged content-view-right-mouse-up content-view-other-mouse-down
-       content-view-other-mouse-dragged content-view-other-mouse-up content-view-other-mouse-exited
-       content-view-other-mouse-entered  content-view-draw-rect
-       content-view-update-tracking-areas)
-
 (defun small-test ()
   #+sbcl
   (sb-int:set-floating-point-modes :traps '())
   (print objc-runtime::ns-app)
+  (finish-output)
   (with-autorelease-pool (pool)
     (let ((window (ns:|initWithContentRect:styleMask:backing:defer:|
 		       [#@NSWindow @(alloc)]
@@ -1366,9 +1760,9 @@
       (return-from set-cocoa-window-monitor (values)))
 
     (when (window-monitor window)
-      (release-cocoa-monitor window (window-monitor window)))
+      (release-cocoa-monitor window))
 
-    ;;(input-window-monitor window monitor)
+    (setf (window-monitor window) monitor)
 
     (poll-cocoa-events (window-display window))
 
@@ -1382,11 +1776,11 @@
 	  
 	  (progn
 	    
-	    (when (decorated? window)
+	    (when (last-decorated? window)
 	      (setq style-mask (logand style-mask (lognot NSWindowStyleMaskBorderless)))
 	      (setq style-mask (logior style-mask NSWindowStyleMaskTitled NSWindowStyleMaskClosable)))
 	    
-	    (if (resizable? window)
+	    (if (last-resizable? window)
 		
 		(setq style-mask (logior style-mask NSWindowStyleMaskResizable))
 		
@@ -1411,7 +1805,7 @@
 
 	    (unless (or (eq (window-aspect-numer window) :dont-care)
 			(eq (window-aspect-denom window) :dont-care))
-	      (ns:|setContentAspectRatio:| window (make-nssize (window-numer window) (window-denom window))))
+	      (ns:|setContentAspectRatio:| window (make-nssize (window-aspect-numer window) (window-aspect-denom window))))
 
 	    (unless (or (eq (window-min-width window) :dont-care)
 			(eq (window-min-height window) :dont-care))
@@ -1421,12 +1815,12 @@
 			(eq (window-max-height window) :dont-care))
 	      (ns:|setContentMaxSize:| window (make-nssize (window-max-width window) (window-max-height window))))
 
-	    (if (floating? window)
+	    (if (last-floating? window)
 		(ns:|setLevel:| window NSFloatingWindowLevel)
 		(ns:|setLevel:| window NSNormalWindowLevel))
 
 	    (let ((behavior))
-	      (if (resizable? window)
+	      (if (last-resizable? window)
 		  (setq behavior (logior NSWindowCollectionBehaviorFullScreenPrimary
 					 NSWindowCollectionBehaviorManaged))
 		  (setq behavior NSWindowCollectionBehaviorFullScreenNone))
@@ -1437,10 +1831,28 @@
 
 	    (ns:|setTitle:| window (ns:|miniwindowTitle| window)))))))
 
+(defun destroy-cocoa-window (window)
+  (with-autorelease-pool (pool)
 
+    (let ((display (window-display window)))
+    
+      (when (eq (disabled-cursor-window display) window)
+	(setf (disabled-cursor-window display) nil))
+      
+      (ns:|orderOut:| window nil)
+    
+      (when (window-monitor window)
+	(release-cocoa-monitor window))
+      
+      (ns:|setDelegate:| window nil)
+      (ns:|release| (window-delegate window))
+      (setf (window-delegate window) nil)
+      
+      (ns:|release| (window-content-view window))
+      (setf (window-content-view window) nil)
+      
+      (ns:|close| window)
+      
+      (poll-cocoa-events display)
 
-
-
-	    
-
-	      
+      (values))))

@@ -142,11 +142,23 @@
 #+x11
 (defmethod enable-raw-mouse-motion ((window x11:window-mixin))
   (enable-x11-raw-mouse-motion window))
-  
+
+#+cocoa
+(defmethod %get-window-cursor-pos ((window cocoa:window-mixin))
+  (get-cocoa-window-pos window))
+
+#+win32
+(defmethod %get-window-cursor-pos ((window win32:window-mixin))
+  (get-win32-window-pos window))
+
+#+x11
+(defmethod %get-window-cursor-pos ((window x11:window-mixin))
+  (get-x11-window-pos window))
+
 
 (defun enable-cursor (window)
-  (when (last-raw-mouse-motion? window)
-    (enable-raw-mouse-motion window))
+  (when (raw-mouse-motion? window)
+    (setf (raw-mouse-motion? window) t))
 
   (let ((display (window-display window)))
     

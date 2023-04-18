@@ -30,6 +30,16 @@
 (cffi:defcstruct ns::|CGSRegionObject|) ;;fixme
 (cffi:defcstruct NS::|__CGEvent|)
 
+(cffi:defctype ns::|CGError| :int32)
+
+
+(cffi:defcfun ("CGAssociateMouseAndMouseCursorPosition" CGAssociateMouseAndMouseCursorPosition) ns::|CGError| (connected? :boolean))
+
+(cffi:defcfun ("CGDisplayMoveCursorToPoint" CGDisplayMoveCursorToPoint) ns::|CGError|
+	      (display-id :unsigned-int)
+	      (point (:struct ns::|CGPoint|)))
+
+(cffi:defcfun ("CGWarpMouseCursorPosition" CGWarpMouseCursorPosition) ns::|CGError| (new-cursor-position (:struct ns::|CGPoint|)))
 
 (cffi:defcfun (CGEventSourceCreate "CGEventSourceCreate") :pointer (state-id :uint32))
 

@@ -12,10 +12,10 @@
 
 
 (defclass cocoa:desktop-mixin (clui:display-mixin)
-  ((kTISPropertyUnicodeKeyLayoutData)
+  ((kPropertyUnicodeKeyLayoutData)
+   (LMGetKbdType)
    (TISCopyCurrentKeyboardLayoutInputSource)
    (TISGetInputSourceProperty)
-   (LMGetKeyboardType)
 
    (window-controller-class
     :accessor objc-window-controller-class
@@ -51,7 +51,9 @@
 
    (delegate :accessor application-delegate)
 
-   (cursor-hidden?)
+   (cursor-hidden?
+    :initform nil
+    :accessor cursor-hidden?)
 
    (cascade-point :initform (make-nspoint 0 0) :accessor cascade-point)
    
@@ -109,13 +111,69 @@
   ((object)))
 
 (defclass cocoa:window-mixin (clui:os-window-mixin objc-object-mixin)
-  ((delegate :accessor window-delegate)
-   (view :accessor window-content-view)
-   (context :accessor window-graphics-context)
-   (occluded? :initform nil :accessor occluded?)
-   (retina? :initform nil :accessor window-retina?)
-   (cursor-warp-delta-x :accessor cursor-warp-delta-x)
-   (cursor-warp-delta-y :accessor cursor-warp-delta-y)))
+  ((delegate
+    :accessor
+    window-delegate)
+   
+   (view
+    :accessor
+    window-content-view)
+   
+   (context
+    :accessor window-graphics-context)
+   
+   (%maximized?
+    :type boolean
+    :initform nil
+    :accessor last-maximized?)
+   
+   (%occluded?
+    :type boolean
+    :initform nil
+    :accessor last-occluded?)
+   
+   (retina?
+    :type boolean
+    :initform nil
+    :accessor window-retina?)
+   
+   (%width
+    :type real
+    :initform 0
+    :accessor last-width)
+   
+   (%height
+    :type real
+    :initform 0
+    :accessor last-height)
+   
+   (%fbwidth
+    :type real
+    :initform 0
+    :accessor last-fbwidth)
+   
+   (%fbheight
+    :type real
+    :initform 0
+    :accessor last-fbheight)
+   
+   (%xscale
+    :type real
+    :initform 0
+    :accessor last-xscale)
+   
+   (%yscale
+    :type real
+    :initform 0
+    :accessor last-yscale)
+   
+   (%cursor-warp-delta-x
+    :type real
+    :accessor cursor-warp-delta-x)
+   
+   (%cursor-warp-delta-y
+    :type real
+    :accessor cursor-warp-delta-y)))
 
 (defclass cocoa:metal-window-mixin (cocoa:window-mixin)
   ((layer :accessor window-layer)))
@@ -129,7 +187,7 @@
 (defclass content-view (objc-object-mixin)
   ((owner :initarg :owner :accessor content-view-owner)
    (tracking-area :initform nil :accessor content-view-tracking-area)
-   (marked-text :initarg :marked-text :reader content-view-marked-text)))
+   (marked-text :initarg :marked-text :accessor content-view-marked-text)))
 
 
 (defmethod initialize-instance :after ((instance cocoa:window-mixin) &rest initargs &key &allow-other-keys)

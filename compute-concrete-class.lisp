@@ -35,7 +35,7 @@
   (list* (find-class 'win32:desktop) initargs))
 
 #+cocoa
-(defmethod compute-make-display-instance-arugments (protocol
+(defmethod compute-make-display-instance-arguments (protocol
 						    (cocoa t)
 						    (metal null)
 						    (opengl null)
@@ -43,7 +43,24 @@
 						    (wayland null)
 						    (win32 null)
 						    (x11 null)
-						    &rest initargs)
+						    &rest initargs
+						    &key &allow-other-keys)
+  (declare (ignore protocol))
+  (list* (find-class 'cocoa:desktop) initargs))
+
+
+#+(and cocoa x11)
+(defmethod compute-make-display-instance-arguments (protocol
+						    (cocoa t)
+						    (metal null)
+						    (opengl null)
+						    (vulkan null)
+						    (wayland null)
+						    (win32 null)
+						    (x11 t)
+						    &rest initargs
+						    &key &allow-other-keys)
+  (declare (ignore protocol))
   (list* (find-class 'cocoa:desktop) initargs))
 
 #+x11
@@ -55,8 +72,9 @@
 						    (wayland null)
 						    (win32 null)
 						    (x11 t)
-						    &rest initargs)
-
+						    &rest initargs
+						    &key &allow-other-keys)
+  (declare (ignore protocol))
   (list* (find-class 'x11:local-server) initargs))
 
 #+x11
@@ -125,6 +143,13 @@
 							 &allow-other-keys)
   (list* (find-class 'cocoa:monitor) initargs))
 
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol screen) (display cocoa:desktop-mixin)
+							 &rest initargs
+							 &key
+							 &allow-other-keys)
+  (list* (find-class 'cocoa:screen) initargs))
+
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol screen) (display x11:server-mixin)
 						&rest initargs
@@ -172,21 +197,6 @@
 (defmethod get-a-cocoa-window-class (display errorp &rest initargs &key &allow-other-keys)
   (declare (ignore display initargs))
   (find-class 'cocoa:window errorp))
-
-#+cocoa
-(defmethod get-a-cocoa-window-class ((display clui:vulkan-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
-  (declare (ignore initargs))
-  (if animable
-      (or (find-class 'cocoa:vulkan-window nil)
-	  (find-class 'cocoa:metal-window errorp))
-      (find-class 'cocoa:window errorp)))
-
-#+cocoa
-(defmethod get-a-cocoa-window-class ((display clui:opengl-support-mixin) errorp &rest initargs &key (animable nil) &allow-other-keys)
-  (declare (ignore initargs))
-  (if animable
-      (find-class 'cocoa:nsgl-window errorp)
-      (find-class 'cocoa:window errorp)))
 
 #+wayland
 (defmethod get-a-wayland-window-class (display errorp &rest initargs &key &allow-other-keys)

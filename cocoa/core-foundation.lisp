@@ -32,10 +32,16 @@
 
 (cffi:defcfun ("CFStringCreateWithCharacters" CFStringCreateWithCharacters) :pointer (alloc :pointer) (chars :string) (num-chars :int64))
 
+(cffi:defcfun ("__CFStringMakeConstantString" __CFStringMakeConstantString) :pointer (string :string))
+
+#+NIL
 (defun CFSTR (string)
   (CFStringCreateWithCharacters (cffi:null-pointer) string (length string)))
 
-(cffi:defcfun (CFNumberGetValue "CFNumberGetValue") :boolean (number :pointer) (the-type :long) (value-ptr :pointer))
+(defun CFSTR (string)
+  (__CFStringMakeConstantString string))
+
+(cffi:defcfun (CFNumberGetValue "CFNumberGetValue") :boolean (number :uint64) (the-type :long) (value-ptr :pointer))
 
 (defparameter kCFAllocatorDefault (cffi:null-pointer))
 (defconstant kCFNumberIntType 9)

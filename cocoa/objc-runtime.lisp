@@ -31,7 +31,7 @@
 (cffi:defcfun (object_setInstanceVariable "object_setInstanceVariable") :pointer (object :pointer) (name :string) (value :pointer))
 (cffi:defcfun (object_getClass "object_getClass") :pointer (object :pointer))
 (cffi:defcfun (objc_msgSendSuper "objc_msgSendSuper") :pointer (obj :pointer) (selector :pointer) &rest)
-(cffi:defcfun (objc_msgSendSuper "objc_msgSendSuper_stret") :pointer (obj :pointer) (selector :pointer) &rest)
+(cffi:defcfun (objc_msgSendSuper_stret "objc_msgSendSuper_stret") :pointer (obj :pointer) (selector :pointer) &rest)
 (cffi:defcfun (class_getProperty "class_getProperty") :pointer (class :pointer) (name :string))
 (cffi:defcfun (objc_registerClassPair "objc_registerClassPair") :void (class :pointer))
 

@@ -58,31 +58,68 @@
   ())
 
 (defclass win32:window-mixin (clui:os-window-mixin handle-mixin)
-  ((%cursor-pos-x :initform nil :accessor last-cursor-pos-x)
-   (%cursor-pos-y :initform nil :accessor last-cursor-pos-y)
-   (big-icon)
-   (small-icon)
-   (cursor-tracked? :type boolean :initform nil :accessor cursor-tracked?)
+  ((%big-icon)
    
-
-   (frame-action?
+   (%small-icon)
+   
+   (%cursor-tracked?
+    :type boolean
+    :initform nil
+    :accessor cursor-tracked?)
+   
+   (%frame-action?
     :type boolean
     :initform nil
     :accessor frame-action?)
-
-   (scale-to-monitor?
+   
+   (%iconified?
+    :type boolean
+    :initform nil
+    :accessor last-iconified?)
+   
+   (%maximized?
+    :type boolean
+    :initform nil
+    :accessor last-maximized?)
+   
+   (%transparent?
+    :type boolean
+    :initform nil
+    :accessor last-transparent?)
+   
+   (%scale-to-monitor?
     :type boolean
     :initform nil
     :accessor scale-to-monitor?)
-
-   (key-menu? :type boolean :initform nil :accessor key-menu?)
-   (cursor :initform nil :accessor window-cursor)
-   (high-surrogate
+   
+   (%key-menu?
+    :type boolean
     :initform nil
-    :accessor high-surrogate)
-   (mouse-buttons
-    :initform (make-array 5 :initial-element nil)
-    :reader mouse-buttons)))
+    :accessor key-menu?)
+
+   (%width
+    :type (or null real)
+    :initform 0
+    :accessor last-width)
+   
+   (%height
+    :type (or null real)
+    :initform 0
+    :accessor last-height)
+   
+   (%cursor-pos-x
+    :type real
+    :initform nil
+    :accessor last-cursor-pos-x)
+   
+   (%cursor-pos-y
+    :type real
+    :initform nil
+    :accessor last-cursor-pos-y)
+   
+   (%high-surrogate
+    :initform nil
+    :accessor high-surrogate)))
 
 (defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-native-win32-window instance initargs))

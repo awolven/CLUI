@@ -7,7 +7,7 @@
 (defconstant MACH_PORT_NULL 0)
 
 (cffi:defcfun (IOIteratorNext "IOIteratorNext") :unsigned-int (iterator :unsigned-int))
-(cffi:defcfun (IORegistryEntryCreateCFProperty "IORegistryEntryCreateCFProperty") :int
+(cffi:defcfun (IORegistryEntryCreateCFProperty "IORegistryEntryCreateCFProperty") :uint64
   (entry :unsigned-int) (key :pointer) (allocator :pointer) (options :unsigned-int))
 
 (cffi:defcfun (IOObjectRelease "IOObjectRelease") :int (object :unsigned-int))
