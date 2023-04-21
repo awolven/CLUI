@@ -485,6 +485,10 @@
   ;; for example, a method for this generic function for a metal window would answer differently
   nil)
 
+(defmethod cocoa-window-wants-update-layer ((window cocoa::helper-window))
+  ;; for example, a method for this generic function for a metal window would answer differently
+  nil)
+
 (deftraceable-callback content-view-draw-in-mtkview-callback :void ((self :pointer) (_cmd :pointer) (view :pointer))
 ;;  (declare (ignorable _cmd))
   (let ((content-view (gethash (sap-int self)
@@ -803,6 +807,9 @@
 (defmethod cocoa-window-did-change-backing-properties ((window window-mixin))
   (values))
 
+(defmethod cocoa-window-did-change-backing-properties ((window cocoa::helper-window))
+  (values))
+
 (defmethod cocoa-window-did-change-backing-properties ((window constant-refresh-os-window-mixin))
   #+NOTYET
   (let* ((window (content-view-owner content-view))
@@ -881,6 +888,9 @@
 
 	(ns:|addTrackingArea:| content-view tracking-area)
 	(super-update-tracking-areas content-view))))
+  (values))
+
+(defmethod cocoa-window-update-tracking-areas ((window cocoa::helper-window))
   (values))
 
 (deftraceable-callback content-view-key-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -1539,7 +1549,6 @@
 (deftraceable-callback content-view-key-paths-for-values-affecting-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
   (array-with-objects))
 
-
 (defun make-content-view-class (&optional (super #@NSView))
   (let ((content-view-class
 	 (objc-runtime::objc-allocate-class-pair
@@ -1702,7 +1711,13 @@
     
     window-class))
 
-
+(defun create-cocoa-helper-window (display)
+  (make-instance (helper-window-class display)
+		 :h (ns:|initWithContentRect:styleMask:backing:defer:|
+			(ns:|alloc| #@NSWindow)
+			(make-nsrect 0 0 1 1)
+			0
+			NSBackingStoreBuffered nil)))
 
 
 (defun small-test ()

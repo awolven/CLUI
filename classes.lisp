@@ -1,5 +1,13 @@
 (in-package :clui)
 
+  (defvar *modifiers-to-internal-masks* ())
+
+  (defvar *modifier-count* 0
+    "The number of modifiers that is currently defined.")
+
+  (defvar *all-modifier-names* ()
+    "A list of all the names of defined modifiers.")
+
 (defun sap-int (sap)
   #+sbcl(sb-sys:sap-int sap)
   #+ccl(ccl::%ptr-to-int sap))

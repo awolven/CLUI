@@ -686,35 +686,21 @@
 (defun skip-whitespace (&optional (stream *standard-input*))
   (peek-char t stream))
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defvar *modifiers-to-internal-masks* ())
 
-  (defvar *modifier-count* 0
-    "The number of modifiers that is currently defined.")
 
-  (defvar *all-modifier-names* ()
-    "A list of all the names of defined modifiers."))
 
 (defmacro define-input-event-modifier (symbol long-name short-name)
   "This establishes long-name and short-name as modifier names for purposes
    of specifying input-event-ids in #k syntax.  The names are case-insensitive and
    must be strings.  If either name is already defined, this signals an error."
-  (let ((new-bits (ash 1 *modifier-count*)))
-    (flet ((frob (name)
-             (when (assoc name *modifiers-to-internal-masks*
-                          :test #'string-equal)
-	       (return-from define-input-event-modifier nil))))
-      (frob long-name)
-      (frob short-name))
-    (unwind-protect
-	 (progn
-	   (push (cons long-name new-bits) *modifiers-to-internal-masks*)
-	   (push (cons short-name new-bits) *modifiers-to-internal-masks*)
-           (pushnew long-name *all-modifier-names* :test #'string-equal)
-	   ;; Sometimes the long-name is the same as the short-name.
-           (pushnew short-name *all-modifier-names* :test #'string-equal))
-      (incf *modifier-count*))
-    `(defconstant ,symbol ,new-bits)))
+  `(let ((new-bits (ash 1 *modifier-count*)))
+     (push (cons ,long-name new-bits) *modifiers-to-internal-masks*)
+       (push (cons ,short-name new-bits) *modifiers-to-internal-masks*)
+       (pushnew ,long-name *all-modifier-names* :test #'string-equal)
+       ;; Sometimes the long-name is the same as the short-name.
+       (pushnew ,short-name *all-modifier-names* :test #'string-equal)
+       (defparameter ,symbol new-bits)
+       (incf *modifier-count*)))
 
 (define-input-event-modifier +hyper-modifier+ "Hyper" "H")
 (define-input-event-modifier +num-lock-modifier+ "NumLock" "NumL")

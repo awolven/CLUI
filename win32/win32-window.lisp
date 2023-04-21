@@ -1737,13 +1737,7 @@ int decorated;
 	      (multiple-value-bind (window-width window-height) (get-win32-window-size window)
 	  
 		(setf (last-width window) window-width
-		      (last-height window) window-height)
-
-		#+NOTNOW
-		(apply #'initialize-window-devices window
-		       :width window-width
-		       :height window-height
-		       args)))
+		      (last-height window) window-height)))
 	    t))))))
 
 (defun heapchk ()

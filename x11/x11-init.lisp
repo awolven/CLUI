@@ -1,6 +1,6 @@
 (in-package :clui)
 
-(defun create-helper-x11-window (display)
+(defun create-x11-helper-window (display)
   (let ((visual (#_DefaultVisual (h display)
 				 (default-screen-id display))))
     (clet ((wa #_<XSetWindowAttributes>))
@@ -379,7 +379,7 @@
 		
       (%detect-EWMH display)
 
-      (create-helper-x11-window display)
+      (create-x11-helper-window display)
       (initialize-helper-window display (helper-window display))
       (create-hidden-x11-cursor display)
 

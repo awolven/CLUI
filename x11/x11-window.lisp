@@ -4,15 +4,6 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (noffi-syntax t))
 
-;;#_{extern XIC XCreateIC (XIM,
-;;			 char *, long,
-;;			 char *, unsigned long,
-;;			 char *, unsigned long,
-;;			 char *, void *,
-;;			 void *);
-;;}
-
-
 (defun update-normal-hints (window width height)
   (let ((display (window-display window)))
     (let ((hints (#_XAllocSizeHints)))

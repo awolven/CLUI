@@ -346,6 +346,20 @@
 
 	(setf (default-screen display) (make-instance 'screen :display display))
 
+	(let ((helper-window
+	       (setf (helper-window display)
+		     (create-cocoa-helper-window display))))
+
+	  (setf (window-content-view helper-window)
+		(make-instance 'content-view
+			       :ptr (alloc (objc-content-view-class display))
+			       :owner helper-window
+			       :marked-text (alloc-init #@NSMutableAttributedString)))
+
+	  (ns:|setContentView:| helper-window (window-content-view helper-window))
+
+	  (initialize-helper-window display helper-window))
+
 	t))))
 
 (defun update-unicode-data (display kPropertyUnicodeKeyLayoutData)

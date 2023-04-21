@@ -175,6 +175,15 @@
     :type real
     :accessor cursor-warp-delta-y)))
 
+(defclass cocoa::helper-window ()
+  ((delegate
+    :accessor
+    window-delegate)
+   
+   (view
+    :accessor
+    window-content-view)))
+
 (defclass cocoa:metal-window-mixin (cocoa:window-mixin)
   ((layer :accessor window-layer)))
 
@@ -237,10 +246,4 @@
   ())
 
 
-#+vulkan
-(defclass cocoa:desktop-with-vulkan-mixin (vk::vulkan-enabled-display-mixin cocoa:desktop-mixin)
-  ())
 
-#+vulkan
-(defclass cocoa:vulkan-enabled-window-mixin (vk::vulkan-window-mixin cocoa:window-mixin)
-  ())

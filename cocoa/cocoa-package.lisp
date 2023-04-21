@@ -39,4 +39,9 @@
 
 	   #:metal-window
 	   #:vulkan-window
-	   #:nsgl-window))
+	   #:nsgl-window
+
+	   #:desktop-with-krma-mixin
+	   #:desktop-with-krma
+	   #:krma-enabled-window-mixin
+	   #:krma-enabled-window))
