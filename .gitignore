@@ -55,5 +55,6 @@ Thumbs.db
 *.fasl
 *.wx64fsl
 *.lx64fsl
+*.dx64fsl
 *.asd~
 *.diff
