@@ -127,7 +127,7 @@
 		       (cffi:with-foreign-object (p-index :unsigned-int)
 
 			 (CFNumberGetValue index-ref kCFNumberIntType p-index)
-			 (CFRelease (ccl::%int-to-ptr index-ref))
+			 (CFRelease (int-sap index-ref))
 
 			 (when (= (CGOpenGLDisplayMaskToDisplayID (ash 1 (cffi:mem-aref p-index :unsigned-int))) display-id)
 			   (let ((clock-ref)
@@ -145,11 +145,11 @@
 			  
 			       (unless (= 0 clock-ref)
 				 (CFNumberGetValue clock-ref kCFNumberIntType p-clock)
-				 (CFRelease (ccl::%int-to-ptr clock-ref)))
+				 (CFRelease (int-sap clock-ref)))
 
 			       (unless (= 0 count-ref)
 				 (CFNumberGetValue clock-ref kCFNumberIntType p-count)
-				 (CFRelease (ccl::%int-to-ptr count-ref)))
+				 (CFRelease (int-sap count-ref)))
 
 			       (let ((clock (cffi:mem-aref p-clock :unsigned-int))
 				     (count (cffi:mem-aref p-count :unsigned-int)))
@@ -228,12 +228,12 @@
 	  (loop for discon in disconnected
 	     do (input-monitor desktop discon :action :disconnected)))))))
 
-(defun set-cocoa-video-mode (monitor desired-video-mode)
-  (let ((current (get-cocoa-video-mode monitor))
+(defun set-cocoa-monitor-video-mode (monitor desired-video-mode)
+  (let ((current (get-monitor-video-mode monitor))
 	(best (choose-video-mode monitor desired-video-mode)))
     
     (unless (compare-video-modes current best)
-      (return-from set-cocoa-video-mode (values)))
+      (return-from set-cocoa-monitor-video-mode (values)))
 
     (let* ((modes (CGDisplayCopyAllDisplayModes (monitor-display-id monitor) (cffi:null-pointer))))
       (unwind-protect
@@ -263,7 +263,7 @@
 	
 	(CFRelease modes)))))
 
-(defun get-cocoa-video-modes (monitor)
+(defun get-cocoa-monitor-video-modes (monitor)
   (with-autorelease-pool (pool)
     (let* ((modes (CGDisplayCopyAllDisplayModes (monitor-display-id monitor) (cffi:null-pointer)))
 	   (found (CFArrayGetCount modes)))

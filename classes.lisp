@@ -12,6 +12,10 @@
   #+sbcl(sb-sys:sap-int sap)
   #+ccl(ccl::%ptr-to-int sap))
 
+(defun int-sap (int)
+  #+sbcl(sb-sys:int-sap int)
+  #+ccl(ccl::%int-to-ptr int))
+
 (defvar *displays* ())
 
 (defmacro get-displays ()
@@ -366,7 +370,7 @@
   (gethash handle *window-handle->window-table*))
 
 #+sbcl
-(defmethod find-window ((handle sb::system-area-pointer))
+(defmethod find-window ((handle sb-sys::system-area-pointer))
   (gethash (sap-int handle) *window-handle->window-table*))
 
 #+ccl

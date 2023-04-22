@@ -199,7 +199,12 @@
    
    (lock-modifier-state :initarg :lock-modifier-state
 			:initform 0
-			:accessor event-lock-modifier-state)))
+			:accessor event-lock-modifier-state)
+   (local-x :initarg :x
+	    :accessor pointer-event-x)
+   
+   (local-y :initarg :y
+	    :accessor pointer-event-y)))
 
 (defmethod print-object ((event input-event-mixin) stream)
   (print-unreadable-object (event stream :type t :identity t)
@@ -210,10 +215,6 @@
 (defclass pointer-event-mixin (input-event-mixin)
   ((pointer :initarg :pointer
 	    :accessor pointer-event-pointer)
-   (local-x :initarg :x
-	    :accessor pointer-event-x)
-   (local-y :initarg :y
-	    :accessor pointer-event-y)
    (native-x :initarg :native-x
 	     :accessor pointer-event-native-x)
    (native-y :initarg :native-y
@@ -303,40 +304,9 @@
   ())
 
 
-(defun input-char (window codepoint mods lock-mods plain?)
-  
-  (when (or (< codepoint 32)
-	    (> 126 codepoint 160))
-    (return-from input-char))
-  
-  (unless (lock-key-mods? window)
-    (setq mods (logand mods (lognot (logior +caps-lock-modifier+ +num-lock-modifier+)))))
-
-  (when plain?
-    (handle-event window (make-instance 'character-event
-					:window window
-					:character (code-char codepoint)
-					:modifier-state mods
-					:lock-modifier-state lock-mods)))
-  (values))
-
-(defun input-cursor-pos (window xpos ypos mods lock-mods)
-  (when (and (= (virtual-cursor-pos-x window) xpos)
-	     (= (virtual-cursor-pos-y window) ypos))
-    (return-from input-cursor-pos (values)))
-
-  (handle-event window (make-instance 'pointer-motion-event
-				      :window
-				      :input-code +pointer-move+
-				      :x xpos
-				      :y ypos
-				      :modifier-state mods
-				      :lock-modifier-state lock-mods))
-  (values))
 
 (defclass keyboard-event-mixin (input-event-mixin)
   ())
-
 
 (defclass key-press-event-mixin (keyboard-event-mixin)
   ())
@@ -699,7 +669,7 @@
        (pushnew ,long-name *all-modifier-names* :test #'string-equal)
        ;; Sometimes the long-name is the same as the short-name.
        (pushnew ,short-name *all-modifier-names* :test #'string-equal)
-       (defparameter ,symbol new-bits)
+       (eval `(defconstant ,',symbol ,new-bits))
        (incf *modifier-count*)))
 
 (define-input-event-modifier +hyper-modifier+ "Hyper" "H")

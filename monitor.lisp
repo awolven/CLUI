@@ -2,7 +2,7 @@
 
 (defun %refresh-video-modes (monitor)
   (let ((modes nil))
-    
+
   (when (monitor-modes monitor)
     (return-from %refresh-video-modes t))
 
@@ -11,9 +11,9 @@
   (unless modes
     (return-from %refresh-video-modes nil))
 
-  (sort modes #'(lambda (a b)
-		  (zerop (compare-video-modes a b))))
-
+  (setq modes (sort modes #'(lambda (a b)
+			(zerop (compare-video-modes a b)))))
+  
   (setf (monitor-modes monitor) modes)
 
   t))
@@ -205,6 +205,23 @@
 #+wayland
 (defmethod get-monitor-video-modes ((monitor wayland:monitor-mixin))
   (get-wayland-monitor-video-modes monitor))
+
+(defmethod get-monitor-video-mode :around ((monitor clui:monitor-mixin))
+  (let ((mode (call-next-method)))
+    (setf (monitor-current-mode monitor) mode)))
+
+#+cocoa
+(defmethod get-monitor-video-mode ((monitor cocoa:monitor-mixin))
+  (get-cocoa-monitor-video-mode monitor))
+
+#+win32
+(defmethod get-monitor-video-mode ((monitor win32:monitor-mixin))
+  (get-win32-monitor-video-mode monitor))
+
+#+x11
+(defmethod get-monitor-video-mode ((monitor x11:monitor-mixin))
+  (get-x11-monitor-video-mode monitor))
+  
 
 (defun set-gamma (monitor gamma)
   (setq gamma (coerce gamma 'single-float))

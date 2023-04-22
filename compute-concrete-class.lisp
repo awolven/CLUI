@@ -21,6 +21,17 @@
 	 x11
 	 initargs))
 
+(defgeneric compute-make-display-instance-arguments (protocol
+						     cocoa 
+						     metal 
+						     opengl 
+						     vulkan 
+						     wayland 
+						     win32 
+						     x11 
+						     &rest initargs
+						     &key &allow-other-keys))
+
 #+win32
 (defmethod compute-make-display-instance-arguments ((protocol display)
 						    (cocoa null)
@@ -86,7 +97,8 @@
 						    (wayland null)
 						    (win32 null)
 						    (x11 t)
-						    &rest initargs)
+						    &rest initargs
+						    &key &allow-other-keys)
   (declare (ignorable protocol))
   (list* (find-class 'x11:local-server-with-krma) initargs))
 

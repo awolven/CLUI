@@ -76,14 +76,97 @@
        (setf (raw-mouse-motion? window) value)))))
 
 
-(defun get-window-cursor-pos (window)
-  (if (eq (window-cursor-mode window) :disabled)
-      (values (virtual-cursor-pos-x window)
-	      (virtual-cursor-pos-y window))
-      (%get-window-cursor-pos window)))
+
 	
+(defun input-char (window codepoint mods lock-mods plain?)
+  
+  (when (or (< codepoint 32)
+	    (> 126 codepoint 160))
+    (return-from input-char))
+  
+  (unless (lock-key-mods? window)
+    (setq mods (logand mods (lognot (logior +caps-lock-modifier+ +num-lock-modifier+)))))
 
+  (when plain?
+    (restart-bind ((ignore (lambda (&optional c)
+			     (declare (ignorable c))
+			     (throw :ignore nil))))
+      (catch :ignore
+	(handle-event window (make-instance 'character-event
+					    :window window
+					    :character (code-char codepoint)
+					    :modifier-state mods
+					    :lock-modifier-state lock-mods)))))
+  (values))
+
+(defun input-cursor-pos (window xpos ypos mods lock-mods)
+  (when (and (= (virtual-cursor-pos-x window) xpos)
+	     (= (virtual-cursor-pos-y window) ypos))
+    (return-from input-cursor-pos (values)))
+
+  (restart-bind ((ignore (lambda (&optional c)
+			   (declare (ignorable c))
+			   (throw :ignore nil))))
+    (catch :ignore
+      (handle-event window (make-instance 'pointer-motion-event
+					  :window
+					  :input-code +pointer-move+
+					  :x xpos
+					  :y ypos
+					  :modifier-state mods
+					  :lock-modifier-state lock-mods))))
+  (values))
+
+(defun input-key (window key action x y mods lock-mods timestamp)
+  (let ((keys (window-keys window)))
+
+    (when (and (eq action :release) (eq (aref keys key) :release))
+      (return-from input-key (values)))
+
+    (when (and (eq action :press) (eq (aref keys key) :press))
+      (setq action :repeat))
+
+    (if (and (eq action :press) (sticky-keys? window))
+	(setf (aref keys key) :stick)
+	(setf (aref keys key) action))
+
+    (restart-bind ((ignore (lambda (&optional c)
+			     (declare (ignorable c))
+			     (throw :ignore nil))))
+      (catch :ignore
+	(handle-event window (make-instance (ecase action
+					      (:repeat 'key-repeat-event)
+					      (:press 'key-press-event)
+					      (:release 'key-release-event))
+					    :window window
+					    :input-code key
+					    :x x
+					    :y y
+					    :modifier-state mods
+					    :lock-modifier-state lock-mods
+					    :timestamp timestamp))))
+    (values)))
+    
+(defun input-mouse-click (window button action x y mods lock-mods timestamp)
+  (if (and (eq action :release)
+	   (sticky-mouse-buttons? window))
       
+      (setf (aref (window-keys window) button) :stick)
 
-       
-	      
+      (setf (aref (window-keys window) button) action))
+  
+  (restart-bind ((ignore (lambda (&optional c)
+			   (declare (ignorable c))
+			   (throw :ignore nil))))
+    (catch :ignore
+      (handle-event window (make-instance (ecase action
+					    (:press 'pointer-button-press-event)
+					    (:release 'pointer-button-release-event))
+					  :window window
+					  :input-code button
+					  :x x
+					  :y y
+					  :modifier-state mods
+					  :lock-modifier-state lock-mods
+					  :timestamp timestamp))))
+  (values))

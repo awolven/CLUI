@@ -62,34 +62,40 @@
 	 (frame-rect (ns:|frameRectForContentRect:| window dummy-rect)))
     (ns:|setFrameOrigin:| window (make-nspoint (ns-get-x frame-rect) (ns-get-y frame-rect)))))
 
-(defun get-cocoa-cursor-pos (window)
+(defun get-cocoa-window-cursor-pos (window)
   (with-autorelease-pool (pool)
     (let ((content-rect (ns:|frame| (window-content-view window)))
 	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
-      (values (ns-get-x pos)
-	      (- (ns-get-height content-rect) (ns-get-y pos))))))
+      (multiple-value-bind (xscale yscale) (get-cocoa-window-content-scale window)
+	;; always return cursor pos in framebuffer coordinates (for your sanity)
+	(values (* xscale (ns-get-x pos))
+		(* yscale (- (ns-get-height content-rect) (ns-get-y pos))))))))
 
-(defun set-cocoa-cursor-pos (window x y)
-  (with-autorelease-pool (pool)
-    (update-cocoa-cursor-image window)
-    (let ((content-rect (ns:|frame| (window-content-view window)))
-	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
-      (setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (- (ns-get-x pos))))
-      (setf (cursor-warp-delta-y window) (+ (cursor-warp-delta-y window) y (- (ns-get-height content-rect)) (ns-get-y pos)))
+(defun set-cocoa-window-cursor-pos (window x y)
+  ;; take x, y in framebuffer coordinates
+  (multiple-value-bind (xscale yscale) (get-cocoa-window-content-scale window)
+    ;; and convert to os window coordinates
+    (with-autorelease-pool (pool)
+      (update-cocoa-cursor-image window)
+      (let ((content-rect (ns:|frame| (window-content-view window)))
+	    (pos (ns:|mouseLocationOutsideOfEventStream| window)))
+	;; cursor warp delta is in framebuffer coordinates
+	(setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (* xscale (- (ns-get-x pos))))
+	      (cursor-warp-delta-y window) (+ (cursor-warp-delta-y window) y (* yscale (- (ns-get-height content-rect)) (ns-get-y pos))))
 
-      (if (window-monitor window)
-	  (CGDisplayMoveCursorToPoint (monitor-display-id (window-monitor window)) (make-nspoint x y))
+	(if (window-monitor window)
+	    (CGDisplayMoveCursorToPoint (monitor-display-id (window-monitor window)) (make-nspoint (/ x xscale) (/ y yscale)))
+	    (let* ((local-rect (make-nsrect x (- (ns-get-height content-rect) y 1) 0 0))
+		   (global-rect (ns:|convertRectToScreen:| window local-rect))
+		   (global-point (make-nspoint (ns-get-x global-rect) (ns-get-y global-rect))))
 
-	  (let* ((local-rect (make-nsrect x (- (ns-get-height content-rect) y 1) 0 0))
-		 (global-rect (ns:|convertRectToScreen:| window local-rect))
-		 (global-x (ns-get-x global-rect))
-		 (global-y (ns-get-y global-rect)))
+	      (CGWarpMouseCursorPosition (make-nspoint (ns-get-x global-point)
+						       (cocoa-transform-y (ns-get-y global-point))))))
 
-	    (CGWarpMouseCursorPosition (make-nspoint global-x (cocoa-transform-y global-y)))))
+	(when (eq (window-cursor-mode window) :disabled)
+	  (CGAssociateMouseAndMouseCursorPosition t))
 
-      (unless (eq (window-cursor-mode window) :disabled)
-	(CGAssociateMouseAndMouseCursorPosition t))))
-  (values))
+	(values)))))
 
 (defun cocoa-cursor-in-content-area? (window)
   (let ((pos (ns:|mouseLocationOutsideOfEventStream| window))
@@ -334,12 +340,7 @@
 (defun cocoa-raw-mouse-motion-supported? ()
   nil)
 
-(defun get-cocoa-window-cursor-pos (window)
-  (with-autorelease-pool (pool)
-    (let ((content-rect (ns:|frame| (window-content-view window)))
-	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
-      (values (ns-get-x pos)
-	      (- (ns-get-height content-rect) (ns-get-y pos))))))
+
 
 (defun update-cocoa-cursor-image (window)
   (if (eq (window-cursor-mode window) :normal)
@@ -354,14 +355,14 @@
   (let ((display (window-display window)))
     (cond ((eq (window-cursor-mode window) :disabled)
 	   (setf (disabled-cursor-window display) window)
-	   (multiple-value-bind (x y) (get-cocoa-cursor-pos window)
+	   (multiple-value-bind (x y) (get-cocoa-window-cursor-pos window)
 	     (setf (restore-cursor-pos-x display) x)
 	     (setf (restore-cursor-pos-y display) y)
 	     (center-cursor-in-content-area window)
 	     (CGAssociateMouseAndMouseCursorPosition nil)))
 	  ((eq (disabled-cursor-window display) window)
 	   (setf (disabled-cursor-window display) nil)
-	   (set-cocoa-cursor-pos window
+	   (set-cocoa-window-cursor-pos window
 				 (restore-cursor-pos-x display)
 				 (restore-cursor-pos-y display))))
     (when (cocoa-cursor-in-content-area? window)
@@ -369,27 +370,7 @@
     (values)))
 				 
 
-(defun set-cocoa-window-cursor-pos (window x y)
-  (with-autorelease-pool (pool)
-    (update-cocoa-cursor-image window)
-    (let ((content-rect (ns:|frame| (window-content-view window)))
-	  (pos (ns:|mouseLocationOutsideOfEventStream| window)))
-      (setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (- (ns-get-x pos)))
-	    (cursor-warp-delta-y window) (+ (cursor-warp-delta-y window) y (- (ns-get-height content-rect)) (ns-get-y pos)))
 
-      (if (window-monitor window)
-	  (CGDisplayMoveCursorToPoint (monitor-display-id (window-monitor window)) (make-nspoint x y))
-	  (let* ((local-rect (make-nsrect x (- (ns-get-height content-rect) y 1) 0 0))
-		 (global-rect (ns:|convertRectToScreen:| window local-rect))
-		 (global-point (make-nspoint (ns-get-x global-rect) (ns-get-y global-rect))))
-
-	    (CGWarpMouseCursorPosition (make-nspoint (ns-get-x global-point)
-						     (cocoa-transform-y (ns-get-y global-point))))))
-
-      (when (eq (window-cursor-mode window) :disabled)
-	(CGAssociateMouseAndMouseCursorPosition t))
-
-      (values))))
 
 
 
@@ -549,11 +530,17 @@
     (values)))
 
 (defun content-view-mouse-down (content-view event)
-  (let ((clui-event (make-instance 'pointer-button-press-event
-				   :window (content-view-owner content-view)
-				   :input-code +pointer-left-button+
-				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
-    (handle-event (content-view-owner content-view) clui-event)))
+  (let ((time (ns:|timestamp| event))
+	(window (content-view-owner content-view)))
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-mouse-click (content-view-owner content-view)
+			   +pointer-left-button+
+			   :press
+			   x y
+			   mods lock-mods
+			   time))))
+  (values))
 
 (defun translate-flags (event-modifier-flags)
   event-modifier-flags)
@@ -579,11 +566,16 @@
     (values)))
 
 (defun content-view-mouse-up (content-view event)
-  (let ((clui-event (make-instance 'pointer-button-release-event
-				   :window (content-view-owner content-view)
-				   :input-code +pointer-left-button+
-				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
-    (handle-event (content-view-owner content-view) clui-event))
+  (let ((time (ns:|timestamp| event))
+	(window (content-view-owner content-view)))
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (input-mouse-click (content-view-owner content-view)
+			 +pointer-left-button+
+			 :release
+			 x y
+			 mods lock-mods
+			 time))))
   (values))
 
 (deftraceable-callback content-view-mouse-moved-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -594,29 +586,30 @@
       (content-view-mouse-moved content-view event))
     (values)))
 
+(defun cocoa-event-position (window event)
+  (multiple-value-bind (xscale yscale) (get-cocoa-window-content-scale window)
+    (if (eq (window-cursor-mode window) :disabled)
 
+	;; virtual-cursor-pos is in framebuffer coordinates
+	(values (+ (virtual-cursor-pos-x window)
+		   (- (* xscale (ns:|deltaX| event)) (cursor-warp-delta-x window)))
+		(+ (virtual-cursor-pos-y window)
+		   (- (* yscale (ns:|deltaY| event)) (cursor-warp-delta-y window))))
+      
+	(let* ((content-rect (ns:|frame| (window-content-view window)))
+	       ;; returned position uses base 0,1 not 0,0
+	       (loc (ns:|locationInWindow| event)))
+	  ;; event position is in framebuffer coordinates
+	  (values (* xscale (ns-get-x loc))
+		  (* yscale (- (ns-get-height content-rect) (ns-get-y loc))))))))
+      
 
 (defun content-view-mouse-moved (content-view event)
-  (let ((window (content-view-owner content-view)))
+  (let ((window (content-view-owner content-view))
+	(timestamp (ns:|timestamp| event)))
     (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
-
-      (if (eq (window-cursor-mode window) :disabled)
-	  (let ((dx (- (ns:|deltaX| event) (cursor-warp-delta-x window)))
-		(dy (- (ns:|deltaY| event) (cursor-warp-delta-y window))))
-
-	    (handle-event window (make-instance 'pointer-motion-event
-						:window window
-						:input-code +pointer-move+
-						:x (+ (virtual-cursor-pos-x window) dx)
-						:y (+ (virtual-cursor-pos-y window) dy)
-						:modifier-state mods
-						:lock-modifier-state lock-mods)))
-	  
-	  (let* ((content-rect (ns:|frame| content-view))
-		 (loc (ns:|locationInWindow| event))
-		 (x (ns-get-x loc))
-		 (y (- (ns-get-y content-rect) (ns-get-y loc)))
-		 (clui-event (make-instance 'pointer-motion-event
+      (multiple-value-bind (x y) (cocoa-event-position window event)
+	(handle-event window (make-instance 'pointer-motion-event
 					    :window window
 					    :input-code +pointer-move+
 					    :x x
@@ -625,11 +618,12 @@
 					    :native-y y
 					    :modifier-state mods
 					    :lock-modifier-state lock-mods
+					    :timestamp timestamp
 					    )))
-	    (handle-event window clui-event)))
 
       (setf (cursor-warp-delta-x window) 0
 	    (cursor-warp-delta-y window) 0)
+      
       (values))))
 
 (deftraceable-callback content-view-right-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -641,11 +635,17 @@
     (values)))
 
 (defun content-view-right-mouse-down (content-view event)
-  (let ((clui-event (make-instance 'pointer-button-press-event
-				   :window (content-view-owner content-view)
-				   :input-code +pointer-right-button+
-				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
-    (handle-event (content-view-owner content-view) clui-event)))
+  (let ((time (ns:|timestamp| event))
+	(window (content-view-owner content-view)))
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-mouse-click (content-view-owner content-view)
+			   +pointer-right-button+
+			   :press
+			   x y
+			   mods lock-mods
+			   time))))
+  (values))
 
 (deftraceable-callback content-view-right-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -668,10 +668,16 @@
     (values)))
 
 (defun content-view-right-mouse-up (content-view event)
-  (let ((clui-event (make-instance 'pointer-button-release-event
-				   :input-code +pointer-right-button+
-				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
-    (handle-event (content-view-owner content-view) clui-event))
+  (let ((time (ns:|timestamp| event))
+	(window (content-view-owner content-view)))
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-mouse-click (content-view-owner content-view)
+			   +pointer-right-button+
+			   :release
+			   x y
+			   mods lock-mods
+			   time))))
   (values))
 
 (deftraceable-callback content-view-other-mouse-down-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
@@ -683,11 +689,22 @@
     (values)))
 
 (defun content-view-other-mouse-down (content-view event)
-  (let ((clui-event (make-instance 'pointer-button-press-event
-				   :input-code (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
-						 (ns:|buttonNumber| event))
-				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
-    (handle-event (content-view-owner content-view) clui-event)))
+  (let ((time (ns:|timestamp| event))
+	(window (content-view-owner content-view)))
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-mouse-click (content-view-owner content-view)
+			   (aref (vector +pointer-right-button+
+					 +pointer-left-button+
+					 +pointer-middle-button+
+					 +pointer-button-4+
+					 +pointer-button-5+)
+				 (ns:|buttonNumber| event))
+			   :press
+			   x y
+			   mods lock-mods
+			   time))))
+  (values))
 
 (deftraceable-callback content-view-other-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -710,11 +727,22 @@
     (values)))
 
 (defun content-view-other-mouse-up (content-view event)
-  (let ((clui-event (make-instance 'pointer-button-release-event
-				   :input-code (aref #(+pointer-button-right+ +pointer-left-button+ +pointer-middle-button+)
-						 (ns:|buttonNumber| event))
-				   :modifier-state (translate-flags (ns:|modifierFlags| event)))))
-    (handle-event (content-view-owner content-view) clui-event)))
+  (let ((time (ns:|timestamp| event))
+	(window (content-view-owner content-view)))
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-mouse-click (content-view-owner content-view)
+			   (aref (vector +pointer-right-button+
+					 +pointer-left-button+
+					 +pointer-middle-button+
+					 +pointer-button-4+
+					 +pointer-button-5+)
+				 (ns:|buttonNumber| event))
+			   :release
+			   x y
+			   mods lock-mods
+			   time))))
+  (values))
 
 (defun show-cocoa-cursor (window)
   (let ((display (window-display window)))
@@ -811,26 +839,24 @@
   (values))
 
 (defmethod cocoa-window-did-change-backing-properties ((window constant-refresh-os-window-mixin))
-  #+NOTYET
-  (let* ((window (content-view-owner content-view))
-	 (content-rect [(objc-object-id content-view) @(frame)])
-	 (fb-rect [(objc-object-id content-view) @(convertRectToBacking:) :pointer content-rect])
-	 (x-scale (/ (cffi:mem-aref [[fb-rect @(size)] @(width)] :int) (cffi:mem-aref [[content-rect @(size)] @(width)] :int)))
-	 (y-scale (/ (cffi:mem-aref [[fb-rect @(size)] @(height)] :int) (cffi:mem-aref [[content-rect @(size)] @(height)] :int))))
+  (let* ((content-view (window-content-view window))
+	 (content-rect (ns:|frame| content-view))
+	 (fb-rect (ns:|convertRectToBacking:| content-view content-rect))
+	 (x-scale (/ (ns-get-width fb-rect) (ns-get-width content-rect)))
+	 (y-scale (/ (ns-get-height fb-rect) (ns-get-height content-rect))))
 
-    (when (or (/= x-scale (window-x-scale window)) (/= y-scale (window-y-scale window)))
+    (when (or (/= x-scale (last-xscale window))
+	      (/= y-scale (last-yscale window)))
       (when (and (window-retina? window) (window-layer window))
-	[(objc-object-id (window-layer)) @(setContentsScale:) :integer [(objc-object-id window) @(backingScaleFactor)]])
+	(ns:|setContentsScale:| (window-layer window) (ns:|backingScaleFactor| window)))
 
-      (setf (window-x-scale window) x-scale
-	    (window-y-scale window) y-scale)
+      (setf (last-xscale window) x-scale
+	    (last-yscale window) y-scale)
       (input-window-content-scale window x-scale y-scale))
 
-    (when (or (/= (cffi:mem-aref [[fb-rect @(size)] @(width)] :int) (framebuffer-width window))
-	      (/= (cffi:mem-aref [[fb-rect @(size)] @(height)] :int) (framebuffer-height window)))
-      (input-framebuffer-size window
-			      (cffi:mem-aref [[fb-rect @(size)] @(width)] :int)
-			      (cffi:mem-aref [[fb-rect @(size)] @(height)] :int))))
+    (when (or (/= (ns-get-width fb-rect) (last-fbwidth window))
+	      (/= (ns-get-height fb-rect) (last-fbheight window)))
+      (input-framebuffer-size window (ns-get-width fb-rect) (ns-get-height fb-rect))))
     
   (values))
 
@@ -927,15 +953,15 @@
 
 (defmethod cocoa-window-key-down ((window cocoa:window-mixin) event)
   (let ((key (translate-cocoa-key window (ns:|keyCode| event))))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
-
-      (handle-event window (make-instance 'key-press-event
-					  :window window
-					  :input-code key
-					  :modifier-state mods
-					  :lock-modifier-state lock-mods))
-      (ns:|interpretKeyEvents:| (window-content-view window) (array-with-objects event))
-      (values))))
+    (let ((time (ns:|timestamp| event))
+	  (pos (ns:|locationInWindow| event)))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-key window
+		   key :press
+		   (ns-get-x pos) (ns-get-y pos)
+		   mods lock-mods
+		   time)))
+    (ns:|interpretKeyEvents:| (window-content-view window) (array-with-objects event))))
 
 (deftraceable-callback content-view-flags-changed-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -988,14 +1014,14 @@
 
 (defmethod cocoa-window-key-up ((window cocoa:window-mixin) event)
   (let ((key (translate-cocoa-key window (ns:|keyCode| event))))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
-
-      (handle-event window (make-instance 'key-release-event
-					  :window window
-					  :input-code key
-					  :modifier-state mods
-					  :lock-modifier-state lock-mods))
-      ))
+    (let ((time (ns:|timestamp| event))
+	  (pos (ns:|locationInWindow| event)))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+	(input-key window
+		   key :release
+		   (ns-get-x pos) (ns-get-y pos)
+		   mods lock-mods
+		   time))))
   (values))
 
 (defun cocoa-transform-y (y)
@@ -1161,7 +1187,7 @@
 				      (&remaining-range '(:struct ns::|_NSRange|)))
 	    (setf (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::location) 0
 		  (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::length) (ns:|length| characters))
-	    (loop until (zerop (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'length))
+	    (loop until (zerop (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::length))
 	       do (setf (cffi:mem-aref &codepoint :uint32) 0)
 		 (setq range (make-nsrange (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::location)
 					   (cffi:foreign-slot-value &remaining-range '(:struct ns::|_NSRange|) 'ns::length)))
