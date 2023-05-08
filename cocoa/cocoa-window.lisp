@@ -5,6 +5,76 @@
 
 (defvar w)
 
+(defun translate-cocoa-key (window key)
+  (let ((keycodes (display-keycodes (window-display window))))
+    (when (< key (length keycodes))
+      (aref keycodes key))))
+
+(defun translate-cocoa-flags (window flags)
+  (let ((mods 0)
+	(lock-mods 0))
+    (when (logtest flags NSEventModifierFlagShift)
+      (setq mods (logior mods +shift-modifier+)))
+    (when (logtest flags NSEventModifierFlagControl)
+      (setq mods (logior mods +ctrl-modifier+)))
+    (when (eq (aref (window-keys window) +key-left-alt+) :press)
+      (when (logtest flags NSEventModifierFLagOption)
+	(setq mods (logior mods +meta-modifier+))))
+    (when (logtest flags NSEventModifierFlagCommand)
+      (setq mods (logior mods +super-modifier+)))
+    (when (logtest flags NSEventModifierFlagCapsLock)
+      (setq lock-mods (logior lock-mods +caps-lock-modifier+)))
+    
+    (values mods lock-mods)))
+
+(defun translate-key-to-cocoa-modifier-flag (key)
+  (cond
+    ((or (eq key +key-left-shift+) (eq key +key-right-shift+)) NSEventModifierFlagShift)
+    ((or (eq key +key-left-ctrl+) (eq key +key-right-ctrl+)) NSEventModifierFlagControl)
+    ((or (eq key +key-left-alt+) (eq key +key-right-alt+)) NSEventModifierFlagOption)
+    ((or (eq key +key-left-GUI+) (eq key +key-right-GUI+)) NSEventModifierFlagCommand)
+    ((eq key +key-caps-lock+) NSEventModifierFlagCapsLock)
+    (t 0)))
+
+(defun create-cocoa-standard-cursor (shape)
+  (with-autorelease-pool (pool)
+    (let ((cursor-selector nil)
+	  (cursor-id nil))
+      (setq cursor-selector
+	    (case shape
+	      (:ew @(_windowResizeEastWestCursor))
+	      (:ns @(_windowResizeNorthSouthCursor))
+	      (:nwse @(_windowResizeNorthWestSouthEastCursor))
+	      (:nesw @(_windowResizeNorthEastSouthWestCursor))))
+
+      (when (and cursor-selector (ns:|respondsToSelector:| #@NSCursor cursor-selector))
+	(let ((object (ns:|performSelector:| #@NSCursor cursor-selector)))
+	  (when (ns:|isKindOfClass:| object (ns:|class| #@NSCursor))
+	    (setf cursor-id object))))
+
+      (unless cursor-id
+	(setq cursor-id
+	      (case shape
+		(:arrow (ns:|arrowCursor| #@NSCursor))
+		(:ibeam (ns:|IBeamCursor| #@NSCursor))
+		(:crosshair (ns:|crosshairCursor| #@NSCursor))
+		(:pointing-hand (ns:|pointingHandCursor| #@NSCursor))
+		(:ew (ns:|resizeLeftRightCursor| #@NSCursor))
+		(:ns (ns:|resizeUpDownCursor| #@NSCursor))
+		(:closed-hand (ns:|closedHandCursor| #@NSCursor))
+		(:not-allowed (ns:|operationNotAllowedCursor| #@NSCursor)))))
+
+      (when cursor-id
+	(ns:|retain| cursor-id)
+	cursor-id))))
+
+(defun set-cocoa-window-cursor (window cursor)
+  (declare (ignore cursor))
+  (with-autorelease-pool (pool)
+    (when (cocoa-cursor-in-content-area? window)
+      (update-cocoa-cursor-image window)))
+  (values))      
+
 (defun get-cocoa-window-fullscreen (window)
   (ns::|isInFullScreenMode| window))
 
@@ -452,8 +522,7 @@
 			       *content-view->clos-content-view-table*)))
     (if content-view
       (content-view-wants-update-layer content-view)
-      (progn (break)
-      *no*))))
+      *no*)))
 
 (defun content-view-wants-update-layer (view)
   ;; rather than making a separate content-view class for each window class and dispatching on content-view type
@@ -533,7 +602,7 @@
   (let ((time (ns:|timestamp| event))
 	(window (content-view-owner content-view)))
     (multiple-value-bind (x y) (cocoa-event-position window event)
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-mouse-click (content-view-owner content-view)
 			   +pointer-left-button+
 			   :press
@@ -541,9 +610,6 @@
 			   mods lock-mods
 			   time))))
   (values))
-
-(defun translate-flags (event-modifier-flags)
-  event-modifier-flags)
 
 (deftraceable-callback content-view-mouse-dragged-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -569,7 +635,7 @@
   (let ((time (ns:|timestamp| event))
 	(window (content-view-owner content-view)))
     (multiple-value-bind (x y) (cocoa-event-position window event)
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
       (input-mouse-click (content-view-owner content-view)
 			 +pointer-left-button+
 			 :release
@@ -607,19 +673,23 @@
 (defun content-view-mouse-moved (content-view event)
   (let ((window (content-view-owner content-view))
 	(timestamp (ns:|timestamp| event)))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
       (multiple-value-bind (x y) (cocoa-event-position window event)
-	(handle-event window (make-instance 'pointer-motion-event
-					    :window window
-					    :input-code +pointer-move+
-					    :x x
-					    :y y
-					    :native-x x
-					    :native-y y
-					    :modifier-state mods
-					    :lock-modifier-state lock-mods
-					    :timestamp timestamp
-					    )))
+	(restart-bind ((ignore (lambda (&optional c)
+				 (declare (ignorable c))
+				 (throw :ignore nil))))
+	  (catch :ignore
+	    (handle-event window (make-instance 'pointer-motion-event
+						:window window
+						:input-code +pointer-move+
+						:x x
+						:y y
+						:native-x x
+						:native-y y
+						:modifier-state mods
+						:lock-modifier-state lock-mods
+						:timestamp timestamp
+						)))))
 
       (setf (cursor-warp-delta-x window) 0
 	    (cursor-warp-delta-y window) 0)
@@ -638,7 +708,7 @@
   (let ((time (ns:|timestamp| event))
 	(window (content-view-owner content-view)))
     (multiple-value-bind (x y) (cocoa-event-position window event)
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-mouse-click (content-view-owner content-view)
 			   +pointer-right-button+
 			   :press
@@ -671,7 +741,7 @@
   (let ((time (ns:|timestamp| event))
 	(window (content-view-owner content-view)))
     (multiple-value-bind (x y) (cocoa-event-position window event)
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-mouse-click (content-view-owner content-view)
 			   +pointer-right-button+
 			   :release
@@ -692,7 +762,7 @@
   (let ((time (ns:|timestamp| event))
 	(window (content-view-owner content-view)))
     (multiple-value-bind (x y) (cocoa-event-position window event)
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-mouse-click (content-view-owner content-view)
 			   (aref (vector +pointer-right-button+
 					 +pointer-left-button+
@@ -730,7 +800,7 @@
   (let ((time (ns:|timestamp| event))
 	(window (content-view-owner content-view)))
     (multiple-value-bind (x y) (cocoa-event-position window event)
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-mouse-click (content-view-owner content-view)
 			   (aref (vector +pointer-right-button+
 					 +pointer-left-button+
@@ -779,15 +849,19 @@
 	 (loc (ns:|locationInWindow| event))
 	 (x (ns-get-x loc))
 	 (y (- (ns-get-y content-rect) (ns-get-y loc))))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
-      (handle-event window (make-instance 'pointer-exit-event
-					  :window window
-					  :input-code +pointer-move+
-					  :x x
-					  :y y
-					  :modifier-state mods
-					  :lock-modifier-state lock-mods))))
-  (values))    
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
+      (restart-bind ((ignore (lambda (&optional c)
+			       (declare (ignorable c))
+			       (throw :ignore nil))))
+	(catch :ignore
+	  (handle-event window (make-instance 'pointer-exit-event
+					      :window window
+					      :input-code +pointer-move+
+					      :x x
+					      :y y
+					      :modifier-state mods
+					      :lock-modifier-state lock-mods))))))
+  (values))
 
 
 
@@ -811,14 +885,18 @@
 	 (loc (ns:|locationInWindow| event))
 	 (x (ns-get-x loc))
 	 (y (- (ns-get-y content-rect) (ns-get-y loc))))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
-      (handle-event window (make-instance 'pointer-enter-event
-					  :window window
-					  :input-code +pointer-move+
-					  :x x
-					  :y y
-					  :modifier-state mods
-					  :lock-modifier-state lock-mods))))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
+      (restart-bind ((ignore (lambda (&optional c)
+			       (declare (ignorable c))
+			       (throw :ignore nil))))
+	(catch :ignore
+	  (handle-event window (make-instance 'pointer-enter-event
+					      :window window
+					      :input-code +pointer-move+
+					      :x x
+					      :y y
+					      :modifier-state mods
+					      :lock-modifier-state lock-mods))))))
   (values))
 
 (deftraceable-callback content-view-view-did-change-backing-properties-callback :void ((self :pointer) (_cmd :pointer))
@@ -930,32 +1008,13 @@
 (defun content-view-key-down (view event)
   (cocoa-window-key-down (content-view-owner view) event))
 
-(defun translate-cocoa-key (window key)
-  (let ((keycodes (display-keycodes (window-display window))))
-    (when (< key (length keycodes))
-      (aref keycodes key))))
 
-(defun translate-cocoa-flags (flags)
-  (let ((mods 0)
-	(lock-mods 0))
-    (when (logtest flags NSEventModifierFlagShift)
-      (setq mods (logior mods +shift-modifier+)))
-    (when (logtest flags NSEventModifierFlagControl)
-      (setq mods (logior mods +ctrl-modifier+)))
-    (when (logtest flags NSEventModifierFLagOption)
-      (setq mods (logior mods +alt-modifier+)))
-    (when (logtest flags NSEventModifierFlagCommand)
-      (setq mods (logior mods +super-modifier+)))
-    (when (logtest flags NSEventModifierFlagCapsLock)
-      (setq lock-mods (logior lock-mods +caps-lock-modifier+)))
-    
-    (values mods lock-mods)))
 
 (defmethod cocoa-window-key-down ((window cocoa:window-mixin) event)
   (let ((key (translate-cocoa-key window (ns:|keyCode| event))))
     (let ((time (ns:|timestamp| event))
 	  (pos (ns:|locationInWindow| event)))
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-key window
 		   key :press
 		   (ns-get-x pos) (ns-get-y pos)
@@ -971,35 +1030,27 @@
       (content-view-flags-changed content-view event))
     (values)))
 
-(defun translate-key-to-cocoa-modifier-flag (key)
-  (case key
-    ((+key-left-shift+ +key-right-shift+) NSEventModifierFlagShift)
-    ((+key-left-ctlr+ +key-right-ctrl+) NSEventModifierFlagControl)
-    ((+key-left-alt+ +key-right-alt+) NSEventModifierFlagOption)
-    ((+key-left-super+ +key-right-super+) NSEventModifierFlagCommand)
-    (+key-caps-lock+ NSEventModifierFlagCapsLock)
-    (t 0)))
+
 
 (defun content-view-flags-changed (view event)
   (let* ((modifier-flags (logand (ns:|modifierFlags| event) NSEventModifierFlagDeviceIndependentFlagsMask))
 	 (window (content-view-owner view))
-	 (key (translate-cocoa-key window (ns:|keyCode| event)))	
-	 (lisp-event-class))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags modifier-flags)
-      (let ((key-flag (translate-key-to-cocoa-modifier-flag key)))
+	 (key (translate-cocoa-key window (ns:|keyCode| event)))
+	 (time (ns:|timestamp| event))
+	 (action))
+    (print key)
+    (finish-output)
+    (multiple-value-bind (x y) (cocoa-event-position window event)
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window modifier-flags)
+	(let ((key-flag (translate-key-to-cocoa-modifier-flag key)))
 
-	(if (logtest modifier-flags key-flag)
-	    (if (eq (aref (window-keys window) key) :press)
-		(setq lisp-event-class 'key-release-event)
-		(setq lisp-event-class 'key-press-event))
-	    (setq lisp-event-class 'key-release-event))
-
-	(handle-event window (make-instance lisp-event-class
-					    :window window
-					    :input-code key
-					    :modifier-state mods
-					    :lock-modifier-state lock-mods)))))
-  (values))
+	  (if (logtest modifier-flags key-flag)
+	      (if (eq (aref (window-keys window) key) :press)
+		  (setq action :release)
+		  (setq action :press))
+	      (setq action :release))
+	  (input-key window key action x y mods lock-mods time))))
+    (values)))
 
 (deftraceable-callback content-view-key-up-callback :void ((self :pointer) (_cmd :pointer) (event :pointer))
 ;;  (declare (ignorable _cmd))
@@ -1016,7 +1067,7 @@
   (let ((key (translate-cocoa-key window (ns:|keyCode| event))))
     (let ((time (ns:|timestamp| event))
 	  (pos (ns:|locationInWindow| event)))
-      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+      (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
 	(input-key window
 		   key :release
 		   (ns-get-x pos) (ns-get-y pos)
@@ -1037,7 +1088,21 @@
     (values)))
 
 (defun content-view-scroll-wheel (view event)
-  (declare (ignore view event))
+  (let ((time (ns:|timestamp| event))
+	(pos (ns:|locationInWindow| event))
+	(window (content-view-owner view)))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
+      (handle-event window
+		    (make-instance 'pointer-wheel-event
+				   :window window
+				   :input-code +pointer-wheel+
+				   :x (ns-get-x pos)
+				   :y (ns-get-y pos)
+				   :xoffset (ns:|scrollingDeltaX| event)
+				   :yoffset (ns:|scrollingDeltaY| event)
+				   :modifier-state mods
+				   :lock-modifier-state lock-mods
+				   :timestamp time))))
   (values))
 
 (deftraceable-callback content-view-has-marked-text-callback :char ((self :pointer) (_cmd :pointer))
@@ -1175,7 +1240,7 @@
   (let* ((characters)
 	 (window (content-view-owner view))
 	 (event (ns:|currentEvent| (window-display window))))
-    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags (ns:|modifierFlags| event))
+    (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
       (let ((plain? (not (logtest mods +super-modifier+))))
 
 	(if (ns:|isKindOfClass:| string (ns:|class| #@NSAttributedString))
@@ -1398,12 +1463,16 @@
 
 
 (deftraceable-callback window-delegate-window-should-close-callback :void ((self :pointer) (_cmd :pointer) (sender :pointer))
-;;  (declare (ignore sender))
+  ;;  (declare (ignore sender))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
     (when window
-      (handle-event window (make-instance 'window-close-event
-					  :window window
-					  :timestamp (get-internal-real-time))))
+      (restart-bind ((ignore (lambda (&optional c)
+			       (declare (ignorable c))
+			       (throw :ignore nil))))
+	(catch :ignore
+	  (handle-event window (make-instance 'window-close-event
+					      :window window
+					      :timestamp (get-internal-real-time))))))
     (values)))
 
 
@@ -1420,16 +1489,22 @@
   (declare (ignorable notification))
   (when (eq window (disabled-cursor-window (window-display window)))
     (center-cursor-in-content-area window))
-  (let* ((content-rect (ns:|frame| window)))
+  (let* ((view (window-content-view window))
+	 (content-rect (ns:|frame| view))
+	 (fb-rect (ns:|convertRectToBacking:| view content-rect)))
     (let* ((maximized? (ns:|isZoomed| window))
 	   (event (make-instance (cond (maximized? 'window-restore-event)
 				       ((not maximized?) 'window-resize-event))
 				 :timestamp (get-internal-real-time)
-				 :new-x (ns-get-x content-rect)
-				 :new-y (ns-get-y content-rect)
-				 :new-width (ns-get-width content-rect)
-				 :new-height (ns-get-height content-rect))))
-      (handle-event window event))))
+				 :new-x (ns-get-x fb-rect)
+				 :new-y (ns-get-y fb-rect)
+				 :new-width (ns-get-width fb-rect)
+				 :new-height (ns-get-height fb-rect))))
+      (restart-bind ((ignore (lambda (&optional c)
+			       (declare (ignorable c))
+			       (throw :ignore nil))))
+	(catch :ignore
+	  (handle-event window event))))))
 
 (deftraceable-callback window-delegate-window-did-move-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
@@ -1440,11 +1515,15 @@
 (defun cocoa-window-did-move (window notification)
   (declare (ignorable notification))
   (multiple-value-bind (x y) (get-cocoa-window-pos window)
-    (let ((event (make-instance 'window-move-event
-				:timestamp (get-internal-real-time)
-				:new-x x
-				:new-y y)))
-      (handle-event window event)))
+    (restart-bind ((ignore (lambda (&optional c)
+			     (declare (ignorable c))
+			     (throw :ignore nil))))
+      (catch :ignore
+	(let ((event (make-instance 'window-move-event
+				    :timestamp (get-internal-real-time)
+				    :new-x x
+				    :new-y y)))
+	  (handle-event window event)))))
   (values))
 
 (deftraceable-callback window-delegate-window-did-miniaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
@@ -1455,13 +1534,17 @@
 
 (defun cocoa-window-did-miniaturize (window notification)
   (declare (ignorable notification))
-  (let ((event (make-instance 'window-iconify-event
-			      :timestamp (get-internal-real-time)
-			      :new-x nil
-			      :new-y nil
-			      :new-width 0
-			      :new-height 0)))
-    (handle-event window event))
+  (restart-bind ((ignore (lambda (&optional c)
+			   (declare (ignorable c))
+			   (throw :ignore nil))))
+    (catch :ignore
+      (let ((event (make-instance 'window-iconify-event
+				  :timestamp (get-internal-real-time)
+				  :new-x nil
+				  :new-y nil
+				  :new-width 0
+				  :new-height 0)))
+	(handle-event window event))))
   (values))
 
 (deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
@@ -1472,14 +1555,20 @@
 
 (defun cocoa-window-did-deminiaturize (window notification)
   (declare (ignorable notification))
-  (let* ((content-rect (ns:|frame| (window-content-view window)))
+  (let* ((view (window-content-view window))
+	 (content-rect (ns:|frame| view))
+	 (fb-rect (ns:|convertRectToBacking:| view content-rect))
 	 (event (make-instance 'window-deiconify-event
 			       :timestamp (get-internal-real-time)
-			       :new-x (ns-get-x content-rect)
-			       :new-y (ns-get-y content-rect)
-			       :new-width (ns-get-width content-rect)
-			       :new-height (ns-get-height content-rect))))
-    (handle-event window event))
+			       :new-x (ns-get-x fb-rect)
+			       :new-y (ns-get-y fb-rect)
+			       :new-width (ns-get-width fb-rect)
+			       :new-height (ns-get-height fb-rect))))
+    (restart-bind ((ignore (lambda (&optional c)
+			     (declare (ignorable c))
+			     (throw :ignore nil))))
+      (catch :ignore
+	(handle-event window event))))
   (values))
 
 (deftraceable-callback window-delegate-window-did-become-key-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))

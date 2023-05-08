@@ -62,6 +62,10 @@
 (cffi:defcfun (CGDisplayCopyDisplayMode "CGDisplayCopyDisplayMode") :pointer (display :unsigned-int))
 (cffi:defcfun (CGDisplayModeGetWidth "CGDisplayModeGetWidth") :int64 (mode :pointer))
 (cffi:defcfun (CGDisplayModeGetHeight "CGDisplayModeGetHeight") :int64 (mode :pointer))
+(cffi:defcfun (CGDisplayModeGetPixelWidth "CGDisplayModeGetPixelWidth") :int64 (mode :pointer))
+(cffi:defcfun (CGDisplayModeGetPixelHeight "CGDisplayModeGetPixelHeight") :int64 (mode :pointer))
+(cffi:defcfun (CGDisplayPixelsWide "CGDisplayPixelsWide") :int64 (display :unsigned-int))
+(cffi:defcfun (CGDisplayPixelsHigh "CGDisplayPixelsHigh") :int64 (display :unsigned-int))
 (cffi:defcfun (CGDisplayModeGetRefreshRate "CGDisplayModeGetRefreshRate") :double (mode :pointer))
 (cffi:defcfun (CGDisplayModeRelease "CGDisplayModeRelease") :void (mode :pointer))
 

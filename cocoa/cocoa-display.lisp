@@ -108,7 +108,10 @@
 (deftraceable-callback application-delegate-application-did-finish-launching-callback :void
     ((self :pointer) (_cmd :pointer) (notification :pointer))
   ;;  (declare (ignorable self _cmd))
-  (application-did-finish-launching self notification)
+  (application-did-finish-launching (find-if #'(lambda (dpy)
+						 (typep dpy 'cocoa:desktop-mixin))
+					     *displays*)
+				    notification)
   (values))
 
 (defmethod application-did-finish-launching (self notification)

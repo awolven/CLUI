@@ -178,6 +178,54 @@
 (defclass cursor-mixin ()
   ())
 
+(defclass arrow-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass hand-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass pointing-hand-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass open-hand-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass closed-hand-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass ibeam-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass crosshair-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass compass-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass nwse-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass nesw-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass ew-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass ns-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass up-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass down-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass wait-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass not-allowed-cursor-mixin (cursor-mixin)
+  ())
+
 (defclass region-mixin ()
   ())
 
@@ -320,7 +368,12 @@
    
    (cursor
     :initform nil
-    :accessor window-cursor)
+    :writer (setf %window-cursor)
+    :reader window-cursor)
+
+   (previous-cursor
+    :initform nil
+    :accessor window-previous-cursor)
 
    (sticky-keys?
     :type boolean
@@ -430,6 +483,13 @@
   (call-next-method)
   (apply #'initialize-os-window window initargs)
   window)
+
+(defmethod initialize-instance :after ((window os-window-mixin)
+				&rest initargs
+				&key display
+				  &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (%window-cursor window) (make-instance 'arrow-cursor :display display)))
 
 (defclass constant-refresh-os-window-mixin ()
   ())

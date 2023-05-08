@@ -1180,3 +1180,7 @@
 #+wayland
 (defmethod poll-events ((display x11:desktop-mixin))
   (poll-wayland-events display))
+
+(defmethod (setf window-cursor) (cursor (window os-window-mixin))
+  (setf (%window-cursor window) cursor)
+  (%set-window-cursor (window-display window) window cursor))

@@ -573,6 +573,13 @@
 			       #+NIL(class_getInstanceMethod #@NSAttributedString @(initWithAttributedString:))
 			       (class_getClassMethod #@NSArray @(array))
 			       (class_getClassMethod #@NSCursor @(arrowCursor))
+			       (class_getClassMethod #@NSCursor @(IBeamCursor))
+			       (class_getClassMethod #@NSCursor @(crosshairCursor))
+			       (class_getClassMethod #@NSCursor @(pointingHandCursor))
+			       (class_getClassMethod #@NSCursor @(resizeLeftRightCursor))
+			       (class_getClassMethod #@NSCursor @(resizeUpDownCursor))
+			       (class_getClassMethod #@NSCursor @(closedHandCursor))
+			       (class_getClassMethod #@NSCursor @(operationNotAllowedCursor))
 			       )
 			 :with-internals? with-internals?))
 

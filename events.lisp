@@ -316,6 +316,12 @@
 (defclass clui.v0:key-press-event (key-press-event-mixin)
   ())
 
+(defclass key-repeat-event-mixin (key-press-event-mixin)
+  ())
+
+(defclass clui.v0::key-repeat-event (key-repeat-event-mixin)
+  ())
+
 (defclass key-release-event-mixin (keyboard-event-mixin)
   ())
 
@@ -365,32 +371,32 @@
 
 ;; these are the names we're giving the USB scan codes
 
-(define-input-code +key-A+ 4 "A") ;; vk 65
-(define-input-code +key-B+ 5 "B") ;; vk 66
-(define-input-code +key-C+ 6 "C") ;; vk 67
-(define-input-code +key-D+ 7 "D") ;; vk 68
-(define-input-code +key-E+ 8 "E") ;; vk 69
-(define-input-code +key-F+ 9 "F") ;; vk 70
-(define-input-code +key-G+ #x0A "G") ;; vk 71
-(define-input-code +key-H+ #x0B "H") ;; vk 72
-(define-input-code +key-I+ #x0C "I") ;; vk 73
-(define-input-code +key-J+ #x0D "J") ;; vk 74
-(define-input-code +key-K+ #x0E "K") ;; vk 75
-(define-input-code +key-L+ #x0F "L") ;; vk 76
-(define-input-code +key-M+ #x10 "M") ;; vk 77
-(define-input-code +key-N+ #x11 "N") ;; vk 78
-(define-input-code +key-O+ #x12 "O") ;; vk 79
-(define-input-code +key-P+ #x13 "P") ;; vk 80
-(define-input-code +key-Q+ #x14 "Q") ;; vk 81
-(define-input-code +key-R+ #x15 "R") ;; vk 82
-(define-input-code +key-S+ #x16 "S") ;; vk 83
-(define-input-code +key-T+ #x17 "T") ;; vk 84
-(define-input-code +key-U+ #x18 "U") ;; vk 85
-(define-input-code +key-V+ #x19 "V") ;; vk 86
-(define-input-code +key-W+ #x1A "W") ;; vk 87
-(define-input-code +key-X+ #x1B "X") ;; vk 88
-(define-input-code +key-Y+ #x1C "Y") ;; vk 89
-(define-input-code +key-Z+ #x1D "Z") ;; vk 90
+(define-input-code +key-A+ 4 "a") ;; vk 65
+(define-input-code +key-B+ 5 "b") ;; vk 66
+(define-input-code +key-C+ 6 "c") ;; vk 67
+(define-input-code +key-D+ 7 "d") ;; vk 68
+(define-input-code +key-E+ 8 "e") ;; vk 69
+(define-input-code +key-F+ 9 "f") ;; vk 70
+(define-input-code +key-G+ #x0A "g") ;; vk 71
+(define-input-code +key-H+ #x0B "h") ;; vk 72
+(define-input-code +key-I+ #x0C "i") ;; vk 73
+(define-input-code +key-J+ #x0D "j") ;; vk 74
+(define-input-code +key-K+ #x0E "k") ;; vk 75
+(define-input-code +key-L+ #x0F "l") ;; vk 76
+(define-input-code +key-M+ #x10 "m") ;; vk 77
+(define-input-code +key-N+ #x11 "n") ;; vk 78
+(define-input-code +key-O+ #x12 "o") ;; vk 79
+(define-input-code +key-P+ #x13 "p") ;; vk 80
+(define-input-code +key-Q+ #x14 "q") ;; vk 81
+(define-input-code +key-R+ #x15 "r") ;; vk 82
+(define-input-code +key-S+ #x16 "s") ;; vk 83
+(define-input-code +key-T+ #x17 "t") ;; vk 84
+(define-input-code +key-U+ #x18 "u") ;; vk 85
+(define-input-code +key-V+ #x19 "v") ;; vk 86
+(define-input-code +key-W+ #x1A "w") ;; vk 87
+(define-input-code +key-X+ #x1B "x") ;; vk 88
+(define-input-code +key-Y+ #x1C "y") ;; vk 89
+(define-input-code +key-Z+ #x1D "z") ;; vk 90
 
 (define-input-code +key-1+ #x1E "1") ;; vk 49
 (define-input-code +key-2+ #x1F "2") ;; vk 50

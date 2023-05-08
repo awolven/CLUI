@@ -31,6 +31,7 @@
 	   #:pointer-enter-event
 	   #:pointer-exit-event
 	   #:key-press-event
+	   #:key-repeat-event
 	   #:key-release-event
 	   #:character-event))
 	   

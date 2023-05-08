@@ -65,8 +65,7 @@
       (:raw-mouse-motion
 
        (unless (raw-mouse-motion-supported? (window-display window))
-	 (error "Raw mouse motion is not supported on this system")
-	 (return (values)))
+	 (error "Raw mouse motion is not supported on this system"))
 
        (setq value (and value t))
 
@@ -74,6 +73,24 @@
 	 (return (values)))
 
        (setf (raw-mouse-motion? window) value)))))
+
+#+cocoa
+(defmethod %set-window-cursor ((display cocoa:desktop-mixin) (window cocoa:window-mixin) (cursor cocoa:cursor-mixin))
+  (set-cocoa-window-cursor window cursor))
+
+#+x11
+(defmethod %set-window-cursor ((display x11:server-mixin) (window x11:window-mixin) (cursor x11:cursor-mixin))
+  (set-x11-window-cursor window cursor))
+
+#+win32
+(defmethod %set-window-cursor ((display win32:desktop-mixin) (window win32:window-mixin) (cursor win32:cursor-mixin))
+  (set-win32-window-cursor window cursor))
+
+#+wayland
+(defmethod %set-window-cursor ((display wayland:desktop-mixin) (window wayland:window-mixin) (cursor wayland:cursor-mixin))
+  (set-wayland-window-cursor window cursor))
+
+
 
 
 
@@ -123,10 +140,11 @@
     (when (and (eq action :release) (eq (aref keys key) :release))
       (return-from input-key (values)))
 
+
     (when (and (eq action :press) (eq (aref keys key) :press))
       (setq action :repeat))
 
-    (if (and (eq action :press) (sticky-keys? window))
+    (if (and (eq action :release) (sticky-keys? window))
 	(setf (aref keys key) :stick)
 	(setf (aref keys key) action))
 

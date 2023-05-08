@@ -61,8 +61,8 @@
 
 (defun cocoa-display-mode-is-good? (mode)
   (let ((flags (CGDisplayModeGetIOFlags mode)))
-    (unless (and (logtest flags kDisplayModeValidFlag)
-		 (logtest flags kDisplayModeSafeFlag))
+    (when (or (not (logtest flags kDisplayModeValidFlag))
+	      (not (logtest flags kDisplayModeSafeFlag)))
       (return-from cocoa-display-mode-is-good? nil))
     (when (or (logtest flags kDisplayModeInterlacedFlag)
 	      (logtest flags kDisplayModeStretchedFlag))
@@ -70,8 +70,8 @@
     t))
 
 (defun vidmode-from-cocoa-display-mode (mode &optional (fallback-refresh-rate 0.0d0))
-  (let ((width (CGDisplayModeGetWidth mode))
-	(height (CGDisplayModeGetHeight mode))
+  (let ((width (CGDisplayModeGetPixelWidth mode))
+	(height (CGDisplayModeGetPixelHeight mode))
 	(refresh-rate (CGDisplayModeGetRefreshRate mode)))
     
     (when (= 0 (round refresh-rate))

@@ -101,7 +101,9 @@
 (defun ns::|initWithAttributedString:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(initWithAttributedString:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+
 
 
 

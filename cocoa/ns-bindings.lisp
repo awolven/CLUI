@@ -342,10 +342,10 @@
          (make-message-lambda @(encodeWithCAMLWriter:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|CA_interpolateValues:::interpolator:| (thing _ g83683 g83684 interpolator)
+(defun ns::|CA_interpolateValues:::interpolator:| (thing _ g1050 g1051 interpolator)
   (let ((message-lambda 
          (make-message-lambda @(CA_interpolateValues:::interpolator:) (( :POINTER :POINTER :POINTER ( :POINTER ( :STRUCT ns::|ValueInterpolator|)))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id g83683) (objc-object-id g83684) (objc-object-id interpolator))))
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id g1050) (objc-object-id g1051) (objc-object-id interpolator))))
 
 (defun ns::|CAMLType| (thing)
   (let ((message-lambda 
@@ -8498,6 +8498,16 @@
          (make-message-lambda @(initWithContentsOfMarkdownFileAtURL:options:baseURL:error:) (( :POINTER :POINTER :POINTER ( :POINTER :POINTER))  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id options) (objc-object-id base-u-r-l) (objc-object-id error))))
 
+(defun ns::|appendLineMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(appendLineMVK:) (( :POINTER)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|appendLineMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(appendLineMVK) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
 (defun ns::|dd_appendSpaces:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(dd_appendSpaces:) (( :UNSIGNED-INT)  :VOID)))) 
@@ -8579,6 +8589,11 @@
   (if (= 0  (let ((message-lambda 
          (make-message-lambda @(applyTransform:reverse:range:updatedRange:) (( :POINTER :CHAR ( :STRUCT ns::|_NSRange|) ( :POINTER ( :STRUCT ns::|_NSRange|)))  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if reverse 1 0) range (objc-object-id updated-range)))) nil t))
+
+(defun ns::|XMLString| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(XMLString) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|fp_filter:| (thing _)
   (let ((message-lambda 
@@ -24839,6 +24854,61 @@
          (make-message-lambda @(optimizationOpportunities:) (( :CHAR)  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
+(defun ns::|naturalDrawableSizeMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(naturalDrawableSizeMVK) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|setMaximumDrawableCountMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setMaximumDrawableCountMVK:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|setDisplaySyncEnabledMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setDisplaySyncEnabledMVK:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|setColorspaceNameMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setColorspaceNameMVK:) (( ( :POINTER ( :STRUCT ns::|__CFString|)))  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setWantsExtendedDynamicRangeContentMVK:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(setWantsExtendedDynamicRangeContentMVK:) (( :CHAR)  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
+
+(defun ns::|screenMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(screenMVK) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|updatedDrawableSizeMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(updatedDrawableSizeMVK) (()  ( :STRUCT ns::|CGSize|))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|displaySyncEnabledMVK| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(displaySyncEnabledMVK) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|maximumDrawableCountMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(maximumDrawableCountMVK) (()  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|wantsExtendedDynamicRangeContentMVK| (thing)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(wantsExtendedDynamicRangeContentMVK) (()  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing) ))) nil t))
+
+(defun ns::|colorspaceNameMVK| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(colorspaceNameMVK) (()  ( :POINTER ( :STRUCT ns::|__CFString|)))))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
 
 
 
@@ -25114,7 +25184,49 @@
   (let ((message-lambda 
          (make-message-lambda @(arrowCursor) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|IBeamCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(IBeamCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|crosshairCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(crosshairCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|pointingHandCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pointingHandCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|resizeLeftRightCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(resizeLeftRightCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|resizeUpDownCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(resizeUpDownCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|closedHandCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(closedHandCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|operationNotAllowedCursor| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(operationNotAllowedCursor) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
 (export (list 
+          'ns::|operationNotAllowedCursor|
+          'ns::|closedHandCursor|
+          'ns::|resizeUpDownCursor|
+          'ns::|resizeLeftRightCursor|
+          'ns::|pointingHandCursor|
+          'ns::|crosshairCursor|
+          'ns::|IBeamCursor|
           'ns::|arrowCursor|
           'ns::|array|
           'ns::|setMenuBarVisible:|
@@ -25166,6 +25278,17 @@
           'ns::|setPixelFormat:|
           'ns::|protectionOptions|
           'ns::|setProtectionOptions:|
+          'ns::|colorspaceNameMVK|
+          'ns::|wantsExtendedDynamicRangeContentMVK|
+          'ns::|maximumDrawableCountMVK|
+          'ns::|displaySyncEnabledMVK|
+          'ns::|updatedDrawableSizeMVK|
+          'ns::|screenMVK|
+          'ns::|setWantsExtendedDynamicRangeContentMVK:|
+          'ns::|setColorspaceNameMVK:|
+          'ns::|setDisplaySyncEnabledMVK:|
+          'ns::|setMaximumDrawableCountMVK:|
+          'ns::|naturalDrawableSizeMVK|
           'ns::|optimizationOpportunities:|
           'ns::|getRendererInfo:size:|
           'ns::|setMotionBlurAmount:|
@@ -28109,6 +28232,7 @@
           'ns::|fp_itemIDs|
           'ns::|fp_map:|
           'ns::|fp_filter:|
+          'ns::|XMLString|
           'ns::|applyTransform:reverse:range:updatedRange:|
           'ns::|replaceCharactersInRange:withCString:length:|
           'ns::|replaceCharactersInRange:withCharacters:length:|
@@ -28125,6 +28249,8 @@
           'ns::|appendPrettyInt:withName:indent:|
           'ns::|appendPrettyObject:withName:indent:showFullContent:|
           'ns::|dd_appendSpaces:|
+          'ns::|appendLineMVK|
+          'ns::|appendLineMVK:|
           'ns::|initWithContentsOfMarkdownFileAtURL:options:baseURL:error:|
           'ns::|initWithMarkdown:options:baseURL:error:|
           'ns::|initWithFormat:options:locale:arguments:|

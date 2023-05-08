@@ -7,8 +7,12 @@
 (defclass ns-helper (objc-object-mixin)
   ())
 
-(defvar *delegate->clos-window-table* (make-hash-table :test #'eq))
-(defvar *content-view->clos-content-view-table* (make-hash-table :test #'eq))
+(defvar *delegate->clos-window-table*
+  #+sbcl(make-hash-table :test #'eq :weakness :value)
+  #+ccl(make-hash-table :test #'eq :weak t))
+(defvar *content-view->clos-content-view-table*
+  #+sbcl(make-hash-table :test #'eq :weakness :value)
+  #+ccl(make-hash-table :test #'eq :weak t))
 
 
 (defclass cocoa:desktop-mixin (clui:display-mixin)
@@ -107,8 +111,56 @@
   (call-next-method))
 
 
-(defclass cocoa:cursor-mixin (clui:cursor-mixin)
-  ((object)))
+(defclass cocoa:cursor-mixin (clui:cursor-mixin objc-object-mixin)
+  ())
+
+(defclass cocoa::arrow-cursor (arrow-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :arrow))))
+
+(defclass cocoa::hand-cursor (hand-cursor-mixin cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa::pointing-hand-cursor (pointing-hand-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :pointing-hand))))
+
+(defclass cocoa::open-hand-cursor (open-hand-cursor-mixin cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa::closed-hand-cursor (closed-hand-cursor-mxixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :closed-hand))))
+
+(defclass cocoa::ibeam-cursor (ibeam-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :ibeam))))
+
+(defclass cocoa::crosshair-cursor (crosshair-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :crosshair))))
+
+(defclass cocoa::compass-cursor (compass-cursor-mixin cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa::nwse-cursor (nwse-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :nwse))))
+
+(defclass cocoa::nesw-cursor (nesw-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :nesw))))
+
+(defclass cocoa::ew-cursor (ew-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :ew))))
+
+(defclass cocoa::ns-cursor (ns-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :ns))))
+
+(defclass cocoa::up-cursor (up-cursor-mixin cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa::down-cursor (down-cursor-mixin cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa::wait-cursor (wait-cursor-mixin cocoa:cursor-mixin)
+  ())
+
+(defclass cocoa::not-allowed-cursor (not-allowed-cursor-mixin cocoa:cursor-mixin)
+  ((id :initform (create-cocoa-standard-cursor :not-allowed))))
 
 (defclass cocoa:window-mixin (clui:os-window-mixin objc-object-mixin)
   ((delegate

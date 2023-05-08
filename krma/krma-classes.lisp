@@ -21,6 +21,15 @@
   ())
 
 #+cocoa
+(defmethod clui::application-did-finish-launching ((dpy cocoa:desktop-with-krma-mixin) notification)
+  (declare (ignorable notification))
+  ;;(abstract-os::post-empty-event application)
+  ;;(ns::|stop:| application nil)
+  (call-next-method)
+  (krma::start-compactor-thread dpy)
+  (values))
+
+#+cocoa
 (defclass cocoa:desktop-with-krma (cocoa:desktop-with-krma-mixin)
   ())
 

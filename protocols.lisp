@@ -80,7 +80,15 @@
   ()
   (:metaclass protocol-class))
 
+(defclass crosshair-cursor (cursor)
+  ()
+  (:metaclass protocol-class))
+
 (defclass compass-cursor (cursor)
+  ()
+  (:metaclass protocol-class))
+
+(defclass NWSE-cursor (cursor)
   ()
   (:metaclass protocol-class))
 
@@ -108,7 +116,7 @@
   ()
   (:metaclass protocol-class))
 
-(defclass no-select-cursor (cursor)
+(defclass not-allowed-cursor (cursor)
   ()
   (:metaclass protocol-class))
 
@@ -356,6 +364,10 @@
 
 ;; keyboard events
 (defclass key-press-event (display-dependent)
+  ()
+  (:metaclass protocol-class))
+
+(defclass key-repeat-event (display-dependent)
   ()
   (:metaclass protocol-class))
 
