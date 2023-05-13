@@ -217,7 +217,6 @@
 		#:c-sizeof-type
 		#:c-addr-of
 		#:c-cast
-		#:offset-of
 		#:ptr-value
 		#:cval-value
 		#:ptr-offset

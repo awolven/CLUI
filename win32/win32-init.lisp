@@ -1,21 +1,177 @@
 (in-package :clui)
 
-(noffi::noffi-syntax t)
+;; to enable one logical px to be one physical px framebuffer for MS Windows:
+;; (to be the same as it is on macos and kde)
+;; In file explorer right click sbcl.exe or wx86cl64.exe for CCL
+;; select Properties
+;; click "Change settings for All Users"
+;; click "Change High DPI Settings"
+;; check "Override high DPI scaling behavior,"
+;; select "scaling performed by Application"
+;; click Ok, click Apply, click Ok
 
+(noffi::noffi-syntax)
+
+#+NIL
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (noffi::noffi-syntax t)
   (defparameter noffi::*last-good-token* nil)
   )
 
+#+CCL
+(defun lpcwstr (string)
+  (let* ((len (length string)))
+    (multiple-value-bind (data offset) (ccl::array-data-and-offset string)
+      (let* ((end (+ offset len))
+	     (noctets (ccl::utf-16-octets-in-string data offset end))
+	     (octets (ccl::malloc (1+ noctets))))
+	(ccl::native-utf-16-memory-encode data octets 0 offset end)
+	(setf (ccl::%get-unsigned-word octets noctets) 0)
+	(%cons-ptr octets 0 '#_<LPCWSTR>)))))
+
+#+(and SBCL little-endian)
+(defun lpcwstr (string)
+  (let ((octets (SB-IMPL::OUTPUT-TO-C-STRING/UTF-16LE string)))
+    (let ((poctets (noffi::sap-malloc (length octets))))
+      (loop for i from 0 below (length octets)
+	    do (setf (sb-sys::sap-ref-8 poctets i) (aref octets i)))
+      (%cons-ptr poctets 0 '#_<LPCWSTR>))))
+
+#+CCL
+(defmacro with-lpcwstr ((var string) &body body)
+  (let ((sap-sym (gensym)))
+    `(ccl::with-native-utf-16-cstr (,sap-sym ,string)
+       (let ((,var (%cons-ptr ,sap-sym 0 '#_<LPCWSTR>)))
+	 ,@body))))
+
+#+SBCL
+(defmacro with-lpcwstr ((var string) &body body)
+  (let ((ptr-sym (gensym)))
+    `(let ((,ptr-sym (lpcwstr ,string)))
+       (unwind-protect (let ((,var ,ptr-sym))
+			 ,@body)
+	 (noffi::c-free ,ptr-sym)))))
+
+#+CCL
+(defun lpcwstr->string (ptr)
+  (ccl::%get-native-utf-16-cstring (noffi-ptr->ccl-ptr ptr)))
+
+#+(and SBCL little-endian)
+(defun lpcwstr->string (ptr)
+  (sb-impl::read-from-c-string/utf-16le (noffi-ptr->ccl-ptr ptr) 'character))
+
+#+CCL
 (defun load-win32-libraries ()
-  (ccl:open-shared-library "user32.dll")
-  (ccl:open-shared-library "dinput8.dll")
-  (ccl:open-shared-library "xinput1_4.dll")
-  (ccl:open-shared-library "xinput1_3.dll")
-  (ccl:open-shared-library "xinput9_1_0.dll")
-  (ccl:open-shared-library "xinput1_2.dll")
-  (ccl:open-shared-library "xinput1_1.dll")
   (values))
+
+#+SBCL
+(defun load-win32-libraries ()
+  (sb-alien:load-shared-object "user32.dll")
+  (sb-alien:load-shared-object "ntdll.dll")
+  (sb-alien:load-shared-object "Gdi32.dll")
+  (sb-alien:load-shared-object "Shcore.dll")
+  (values))
+
+
+
+#+SBCL
+(defun rtl-verify-version-info (posvi mask condition)
+  (sb-alien:alien-funcall (sb-alien:extern-alien "RtlVerifyVersionInfo" (sb-alien:function (sb-alien:unsigned 32)
+											   sb-sys:system-area-pointer
+											   (sb-alien:unsigned 32)
+											   (sb-alien:unsigned 64)))
+			  (noffi-ptr->ccl-ptr posvi) mask condition))
+
+#+CCL
+(defun rtl-verify-version-info (posvi mask condition)
+  (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "RtlVerifyVersionInfo"))
+		 :address (noffi-ptr->ccl-ptr posvi)
+		 :unsigned-fullword mask :unsigned-doubleword condition
+		 :unsigned-fullword))      
+
+(defun windows-version-or-greater? (major minor sp)
+  (clet ((osvi #_<OSVERSIONINFOEXW>))
+    (let ((posvi (c-addr-of osvi)))
+      ;;(clet ((csd-version #_<WCHAR[1]>))
+      (setf (#_.dwOSVersionInfoSize posvi) (c-sizeof-type '#_<OSVERSIONINFOEXW>)
+	    (#_.dwMajorVersion posvi) major
+	    (#_.dwMinorVersion posvi) minor
+	    (#_.dwBuildNumber posvi) 0
+	    (#_.dwPlatformId posvi) 0
+	    ;;(#_.szCSDVersion posvi) csd-version
+	    (#_.wServicePackMajor posvi) sp
+	    (#_.wServicePackMinor posvi) 0
+	    (#_.wSuiteMask posvi) 0
+	    (#_.wProductType posvi) 0
+	    (#_.wReserved posvi) 0)
+      (let ((mask (logior #_VER_MAJORVERSION #_VER_MINORVERSION #_VER_SERVICEPACKMAJOR))
+	    (condition (#_VerSetConditionMask 0 #_VER_MAJORVERSION #_VER_GREATER_EQUAL)))
+	(setq condition (#_VerSetConditionMask 0 #_VER_MINORVERSION #_VER_GREATER_EQUAL))
+	(setq condition (#_VerSetConditionMask 0 #_VER_SERVICEPACKMAJOR #_VER_GREATER_EQUAL))
+	(not (zerop (rtl-verify-version-info posvi mask condition)))))))
+
+
+(defun windows-7-or-greater? ()
+  (windows-version-or-greater? (#_HIBYTE #__WIN32_WINNT_WIN7) (#_LOBYTE #__WIN32_WINNT_WIN7) 0))
+
+
+(defun windows-8.1-or-greater? ()
+  #+NIL(windows-version-or-greater? (#_HIBYTE #__WIN32_WINNT_WIN81) (#_LOBYTE #__WIN32_WINNT_WIN81) 0)
+  t)
+
+(defun windows-11-or-greater? ()
+  (windows-version-or-greater? (#_HIBYTE #__WIN32_WINNT_WIN11) (#_LOBYTE #__WIN32_WINNT_WIN11) 0))
+
+(defun windows-10-build-or-later? (build)
+  (clet ((osvi #_<OSVERSIONINFOEXW>))
+    (let ((posvi (c-addr-of osvi)))
+      (setf (#_.dwOSVersionInfoSize posvi) (c-sizeof-type '#_<OSVERSIONINFOEXW>)
+	      (#_.dwMajorVersion posvi) 10
+	      (#_.dwMinorVersion posvi) 0
+	      (#_.dwBuildNumber posvi) build
+	      (#_.dwPlatformId posvi) 0
+	      (#_.wServicePackMajor posvi) 0
+	      (#_.wServicePackMinor posvi) 0
+	      (#_.wSuiteMask posvi) 0
+	      (#_.wProductType posvi) 0
+	      (#_.wReserved posvi) 0)    
+	(let ((mask (logior #_VER_MAJORVERSION #_VER_MINORVERSION #_VER_SERVICEPACKMAJOR))
+	      (condition (#_VerSetConditionMask 0 #_VER_MAJORVERSION #_VER_GREATER_EQUAL)))
+	  (setq condition (#_VerSetConditionMask 0 #_VER_MINORVERSION #_VER_GREATER_EQUAL))
+	  (setq condition (#_VerSetConditionMask 0 #_VER_SERVICEPACKMAJOR #_VER_GREATER_EQUAL))
+	  (not (zerop (rtl-verify-version-info posvi mask condition)))))))
+
+(defun windows-11-build-or-later? (build)
+  (clet ((osvi #_<OSVERSIONINFOEXW>))
+    (let ((posvi (c-addr-of osvi)))
+      (setf (#_.dwOSVersionInfoSize posvi) (c-sizeof-type '#_<OSVERSIONINFOEXW>)
+	      (#_.dwMajorVersion posvi) 11
+	      (#_.dwMinorVersion posvi) 0
+	      (#_.dwBuildNumber posvi) build
+	      (#_.dwPlatformId posvi) 0
+	      (#_.wServicePackMajor posvi) 0
+	      (#_.wServicePackMinor posvi) 0
+	      (#_.wSuiteMask posvi) 0
+	      (#_.wProductType posvi) 0
+	      (#_.wReserved posvi) 0)    
+	(let ((mask (logior #_VER_MAJORVERSION #_VER_MINORVERSION #_VER_SERVICEPACKMAJOR))
+	      (condition (#_VerSetConditionMask 0 #_VER_MAJORVERSION #_VER_GREATER_EQUAL)))
+	  (setq condition (#_VerSetConditionMask 0 #_VER_MINORVERSION #_VER_GREATER_EQUAL))
+	  (setq condition (#_VerSetConditionMask 0 #_VER_SERVICEPACKMAJOR #_VER_GREATER_EQUAL))
+	  (not (zerop (rtl-verify-version-info posvi mask condition)))))))
+
+
+(defun windows-10-version-1607-or-greater? ()
+  (prog1 (or (windows-11-build-or-later? 0)
+	     (windows-10-build-or-later? 14393))
+    (print 'dd)
+    (print (#_GetLastError))
+    (finish-output)))
+
+
+(defun windows-10-version-1703-or-greater? ()
+  (or (windows-11-build-or-later? 0)
+      (windows-10-build-or-later? 15063)))
 
 (defun create-key-tables ())
 
@@ -43,11 +199,12 @@
 (defun create-win32-helper-window (display)
   (clet& ((&msg #_<MSG>)
 	  (&wc #_<WNDCLASSEXW>))
+    (#_memset &wc 0 (c-sizeof-type '#_<WNDCLASSEXW>))
     (setf (#_.cbSize &wc) (c-sizeof-type '#_<WNDCLASSEXW>))
     (setf (#_.style &wc) #_CS_OWNDC)
-    (setf (#_.lpfnWndProc &wc) helper-window-proc-callback)
+    (setf (#_.lpfnWndProc &wc) #+SBCL (noffi::callback 'helper-window-proc-callback) #+CCL helper-window-proc-callback)
     (setf (#_.hInstance &wc) (win32-instance display))
-    (setf (#_.lpszClassName &wc) (lpcwstr "CLUI Helper"))
+    (setf (#_.lpszClassName &wc) (lpcwstr #+CCL "CLUI Helper" #+SBCL "CLUI Helper SBCL"))
 
     (unless (slot-value display 'helper-window-class)
       (setf (slot-value display 'helper-window-class) 
@@ -65,6 +222,8 @@
 			       nil nil
 			       (win32-instance display)
 			       nil)))
+
+      
 
       (unless handle
 	(error "win32: Failed to create helper window."))
@@ -106,18 +265,20 @@
     
 
 (defun win32-init (display)
-  ;;(load-win32-libraries)
+  (load-win32-libraries)
+
   (create-win32-key-tables display)
   ;;(update-win32-key-names)
 
   (cond ((windows-10-version-1703-or-greater?)
 	 (#_SetProcessDpiAwarenessContext
 	  #_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+	#+NIL
 	((windows-8.1-or-greater?)
 	 (#_SetProcessAwareness #_PROCESS_PER_MONITOR_DPI_AWARE))
-	#+NOTYET
+	#+NIL
 	((windows-vista-or-greater?)
-	 (#_SepProcessDPIAware)))
+	 (#_SetProcessDPIAware)))
 
   (setf (default-screen display) (make-instance 'screen :display display))
 

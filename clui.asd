@@ -1,5 +1,5 @@
 
-#+windows(pushnew :win32 cl:*features*)
+#+(or windows os-windows)(pushnew :win32 cl:*features*)
 #+darwin(pushnew :cocoa cl:*features*)
 #+unix(pushnew :x11 cl:*features*)
 #+(and notyet wayland)(pushnew :wayland cl:*features*)
@@ -7,7 +7,7 @@
 (defsystem clui
   :serial t
   :depends-on
-  (#+darwin :clui/cocoa #+windows :clui/win32 #+linux :clui/linux))
+  (#+darwin :clui/cocoa #+(or windows os-windows) :clui/win32 #+linux :clui/linux))
 
 #+darwin
 (defsystem clui/cocoa
@@ -42,7 +42,7 @@
    (:file "input")
    (:file "api")))
 
-#+windows
+#+(or windows os-windows)
 (defsystem clui/win32
   :depends-on ()
   :serial t
@@ -69,10 +69,6 @@
    (:file "../noffi/src/runtime")
    (:file "../noffi/src/abi-amd64-mingw64")
    (:file "../noffi/src/config")
-   ;;(:file "win32/boot-ht")
-	  
-
-   (:file "noffi-patches")
 
    (:file "clr")
    (:file "win32/win32")
@@ -84,13 +80,13 @@
    (:file "events")
    (:file "win32/win32-package")
    (:file "win32/win32-classes")
-   (:file "posix/posix")
    (:file "x11/x11-package")
    (:file "compute-concrete-class")
    (:file "win32/win32-init")
    (:file "win32/win32-keyboard")
    (:file "win32/win32-window")
    (:file "win32/win32-monitor")
+   #+vulkan(:file "win32/win32-vulkan")
    (:file "monitor")
    (:file "abstract-os")
    (:file "input")

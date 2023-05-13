@@ -4,6 +4,11 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (noffi::noffi-syntax t))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  #_{typedef struct monitor_cons {LPCWSTR adapterName; HMONITOR handle;} monitor_cons;}
+  )
+
+
 (defcfun (monitor-callback #_<BOOL>)
 	 ((handle #_<HMONITOR>)
 	  (dc #_<HDC>)
@@ -15,15 +20,12 @@
 (defun maybe-get-monitor-handle (handle data)
   (clet ((mi #_<MONITORINFOEXW>))
     (let* ((&mi (c-addr-of mi))
-	   (p-szDevice (%cons-ptr
-			(ccl::%inc-ptr (ptr-value &mi) (offset-of '#_<MONITORINFOEXW> '#_szDevice))
-			0
-			'#_<WCHAR[CCHDEVICENAME]>))
+	   (p-szDevice (c->-addr &mi '#_szDevice))
 	   (size (c-sizeof-type '#_<MONITORINFOEXW>))
-	   (&mc (noffi::cons-ptr (ccl::%int-to-ptr data) 0 '#_<monitor_cons>)))
+	   (&mc (noffi::cons-ptr (int-sap data) 0 '#_<monitor_cons>)))
       (#_memset &mi size 0)
       (setf (#_.cbSize (c-cast '#_<MONITORINFO*> &mi)) size)
-      (setf (#_.handle &mc) (noffi::%cons-ptr (ccl::%int-to-ptr 0) 0 '#_<HMONITOR>))
+      (setf (#_.handle &mc) (noffi::%cons-ptr (int-sap 0) 0 '#_<HMONITOR>))
 
       (unless (zerop (#_GetMonitorInfoW handle &mi))
 
@@ -33,22 +35,10 @@
       #_TRUE)))
 
 (defun create-monitor (&adapter &display desktop)
-  (let ((p-adapter-name (%cons-ptr
-			    (ccl::%inc-ptr (ptr-value &adapter) (offset-of '#_<DISPLAY_DEVICEW> '#_DeviceName))
-			    0
-			    '#_<WCHAR[32]>))
-	(p-display-name (%cons-ptr
-			    (ccl::%inc-ptr (ptr-value &display) (offset-of '#_<DISPLAY_DEVICEW> '#_DeviceName))
-			    0
-			    '#_<WCHAR[32]>))
-	(p-adapter-string (%cons-ptr
-			    (ccl::%inc-ptr (ptr-value &adapter) (offset-of '#_<DISPLAY_DEVICEW> '#_DeviceString))
-			    0
-			    '#_<WCHAR[32]>))
-	(p-display-string (%cons-ptr
-			    (ccl::%inc-ptr (ptr-value &display) (offset-of '#_<DISPLAY_DEVICEW> '#_DeviceString))
-			    0
-			    '#_<WCHAR[32]>))
+  (let ((p-adapter-name (c->-addr &adapter '#_DeviceName))
+	(p-display-name (c->-addr &display '#_DeviceName))
+	(p-adapter-string (c->-addr &adapter '#_DeviceString))
+	(p-display-string (c->-addr &display '#_DeviceString))
 	(width-mm)
 	(height-mm)
 	(name)
@@ -90,10 +80,8 @@
 				     :display-name (when &display
 						     (lpcwstr->string p-display-name))))
 
-	(let ((dmPosition (%cons-ptr
-			   (ccl::%inc-ptr (ptr-value &dm) (offset-of '#_<DEVMODEW> '#_dmPosition))
-			   0
-			   '#_<POINT*>)))
+	(let ((dmPosition (cons-ptr (ptr-value &dm) (+ (ptr-offset &dm) (+ (* 2 32) (* 2 4) 4))
+				    '#_<POINTL*>)))
 	  
 	  (setf (h monitor) (find-monitor-handle (lpcwstr->string p-adapter-name)
 						 (#_.x dmPosition)
@@ -105,10 +93,10 @@
 (defun find-monitor-handle (adapter-name &optional (left nil) (top nil) (right nil) (bottom nil))
   (clet ((mc #_<monitor_cons>))
     (let* ((&mc (c-addr-of mc))
-	   (lparam (noffi::cons-cval (ccl::%ptr-to-int (ptr-value &mc)) '#_<LPARAM>)))
+	   (lparam (noffi::cons-cval (sap-int (ptr-value &mc)) '#_<LPARAM>)))
       (with-lpcwstr (padaptername adapter-name)
 	(setf (#_.adapterName &mc) padaptername)
-	(setf (#_.handle &mc) (noffi::%cons-ptr (ccl::%int-to-ptr 0) 0 '#_<HMONITOR>))
+	(setf (#_.handle &mc) (noffi::%cons-ptr (int-sap 0) 0 '#_<HMONITOR>))
 	(if bottom
 	    (clet ((rect #_<RECT>))
 	      (let ((&rect (c-addr-of rect)))
@@ -116,23 +104,17 @@
 		      (#_.top &rect) top
 		      (#_.right &rect) right
 		      (#_.bottom &rect) bottom)
-		(#_EnumDisplayMonitors nil &rect monitor-callback lparam)))
-	    (#_EnumDisplayMonitors nil nil monitor-callback lparam))
+		(#_EnumDisplayMonitors nil &rect (noffi::callback 'monitor-callback) lparam)))
+	    (#_EnumDisplayMonitors nil nil (noffi::callback 'monitor-callback) lparam))
 	(#_.handle &mc)))))
 
 (defun poll-win32-monitors (desktop)
   (clet ((adapter #_<DISPLAY_DEVICEW>)
 	 (display #_<DISPLAY_DEVICEW>))
     (let* ((&adapter (c-addr-of adapter))
-	   (p-adapter-name (%cons-ptr
-			    (ccl::%inc-ptr (ptr-value &adapter) (offset-of '#_<DISPLAY_DEVICEW> '#_DeviceName))
-			    0
-			    '#_<WCHAR[32]>))
+	   (p-adapter-name (c->-addr &adapter '#_DeviceName))
 	   (&display (c-addr-of display))
-	   (p-display-name (%cons-ptr
-			    (ccl::%inc-ptr (ptr-value &display) (offset-of '#_<DISPLAY_DEVICEW> '#_DeviceName))
-			    0
-			    '#_<WCHAR[32]>))
+	   (p-display-name (c->-addr &display '#_DeviceName))
 	   (size (c-sizeof-type '#_<DISPLAY_DEVICEW>))
 	   (disconnected (copy-list (display-monitors desktop))))
 
@@ -239,7 +221,7 @@
   (clet ((dm #_<DEVMODEW>))
     (let* ((&dm (c-addr-of dm))
 	   (dm-size (c-sizeof-type '#_<DEVMODEW>))
-	   (dmPosition (c-slot-ptr &dm '#_<DEVMODE> '#_dmPosition '#_<POINT>)))
+	   (dmPosition (cons-ptr (ptr-value &dm) (+ (ptr-offset &dm) (+ (* 2 32) (* 2 4) 4)) '#_<POINTL*>)))
       (setf (#_.dmSize &dm) dm-size)
 
       (with-lpcwstr (p-adapter-name (adapter-name monitor))

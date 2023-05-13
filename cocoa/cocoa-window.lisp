@@ -859,6 +859,8 @@
 					      :input-code +pointer-move+
 					      :x x
 					      :y y
+					      :native-x x
+					      :native-y y
 					      :modifier-state mods
 					      :lock-modifier-state lock-mods))))))
   (values))
@@ -895,6 +897,8 @@
 					      :input-code +pointer-move+
 					      :x x
 					      :y y
+					      :native-x x
+					      :native-y y
 					      :modifier-state mods
 					      :lock-modifier-state lock-mods))))))
   (values))

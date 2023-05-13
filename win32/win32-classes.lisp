@@ -1,5 +1,7 @@
 (in-package :clui)
 
+(noffi::noffi-syntax)
+
 (defclass win32:desktop-mixin (clui:display-mixin)
   ((instance
     :accessor win32-instance
@@ -57,6 +59,51 @@
 (defclass win32:cursor-mixin (clui:cursor-mixin handle-mixin)
   ())
 
+(defclass win32::arrow-cursor (arrow-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :arrow))))
+
+(defclass win32::hand-cursor (hand-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :hand))))
+
+(defclass win32::pointing-hand-cursor (pointing-hand-cursor-mixin win32:cursor-mixin)
+  ())
+
+(defclass win32::open-hand-cursor (open-hand-cursor-mixin win32:cursor-mixin)
+  ())
+
+(defclass win32::ibeam-cursor (ibeam-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :ibeam))))
+
+(defclass win32::crosshair-cursor (crosshair-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :crosshair))))
+
+(defclass win32::compass-cursor (compass-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :compass))))
+
+(defclass win32::nwse-cursor (nwse-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :nwse))))
+
+(defclass win32::nesw-cursor (nesw-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :nesw))))
+
+(defclass win32::ew-cursor (ew-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :ew))))
+
+(defclass win32::ns-cursor (ns-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :ns))))
+
+(defclass win32::up-cursor (up-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :up))))
+
+(defclass win32::down-cursor (down-cursor-mixin win32:cursor-mixin)
+  ())
+
+(defclass win32::wait-cursor (wait-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :wait))))
+
+(defclass win32::not-allowed-cursor (not-allowed-cursor-mixin win32:cursor-mixin)
+  ((handle :initform (create-win32-standard-cursor :not-allowed))))
+
 (defclass win32:window-mixin (clui:os-window-mixin handle-mixin)
   ((%big-icon)
    
@@ -97,6 +144,16 @@
     :initform nil
     :accessor key-menu?)
 
+   (%pos-x
+    :type (or null real)
+    :initform 0
+    :accessor last-pos-x)
+   
+   (%pos-y
+    :type (or null real)
+    :initform 0
+    :accessor last-pos-y)
+
    (%width
     :type (or null real)
     :initform 0
@@ -108,12 +165,12 @@
     :accessor last-height)
    
    (%cursor-pos-x
-    :type real
+    :type (or null real)
     :initform nil
     :accessor last-cursor-pos-x)
    
    (%cursor-pos-y
-    :type real
+    :type (or null real)
     :initform nil
     :accessor last-cursor-pos-y)
    

@@ -489,7 +489,9 @@
 				&key display
 				  &allow-other-keys)
   (declare (ignore initargs))
-  (setf (%window-cursor window) (make-instance 'arrow-cursor :display display)))
+  (when (find-class 'arrow-cursor nil)
+    (setf (%window-cursor window) (make-instance 'arrow-cursor :display display)))
+  (values))
 
 (defclass constant-refresh-os-window-mixin ()
   ())

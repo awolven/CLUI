@@ -454,6 +454,9 @@
 (defun main-loop-body (display)
   (wait-application-events display))
 
+(defun run (display)
+  (ns:|run| display))
+
 (defun test-main (display)
   (with-autorelease-pool (pool)
     (with-slots (exit?) display
