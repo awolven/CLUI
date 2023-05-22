@@ -711,7 +711,6 @@ int decorated;
 (defun window-proc (hWnd uMsg wParam lParam)
 
   (block nil
-
     
     (when (= uMsg #_WM_NCCREATE) ;; 129
 	
@@ -1280,24 +1279,27 @@ int decorated;
 		    (handle-event window (make-instance 'pointer-wheel-event
 							:window window
 							:input-code +pointer-wheel+
-							:yoffset (/ (#_HIWORD wParam) #_WHEEL_DELTA)
+							:yoffset (/ (cval-value (c-coerce (#_HIWORD wParam) '#_<short>))
+								    #_WHEEL_DELTA)
 							:x x :y y
 							:native-x x :native-y y
 							:modifier-state mods
 							:lock-modifier-state lock-mods
-							:timestamp time))))
+							:timestamp time)))
+		  (return 0))
 
 		 (#.#_WM_MOUSEHWHEEL
 		  (multiple-value-bind (x y) (window-cursor-position window)
 		    (handle-event window (make-instance 'pointer-wheel-event
 							:window window
 							:input-code +pointer-wheel+
-							:xoffset (- (/ (#_HIWORD wParam) #_WHEEL_DELTA))
+							:xoffset (- (/ (cval-value (c-coerce (#_HIWORD wParam) '#_<short>)) #_WHEEL_DELTA))
 							:x x :y y
 							:native-x x :native-y y
 							:modifier-state mods
 							:lock-modifier-state lock-mods
-							:timestamp time))))
+							:timestamp time)))
+		  (return 0))
 
 		 ((#.#_WM_ENTERSIZEMOVE #.#_WM_ENTERMENULOOP)
 		
@@ -1472,17 +1474,12 @@ int decorated;
 			     (setf (#_.lpszClassName &wc) p-cls-nm)
 			     (setf (#_.hIconSm &wc) nil)
 
-			     ;;(print 'bb)
-			     ;;(print (#_GetLastError))
-
 			     (setf (#_.hIcon &wc) (#_LoadImageW
 						   (#_GetModuleHandleW nil)
 						   p-icon-nm
 						   #_IMAGE_ICON
 						   0 0
 						   (logior #_LR_DEFAULTSIZE #_LR_SHARED)))
-			     #+NIL
-			     (print (#_.hIcon &wc))
 			     
 			     (unless (#_.hIcon &wc)
 			       (setf (#_.hIcon &wc) (#_LoadImageW
@@ -1491,27 +1488,11 @@ int decorated;
 						     #_IMAGE_ICON
 						     0 0 (logior #_LR_DEFAULTSIZE #_LR_SHARED))))
 
-			     #+NIL
-			     (unless main-window-class
-			       (when(#_GetClassInfoExW (#_GetModuleHandleW nil) p-cls-nm &wc)
-				 (warn "class already exists, resetting...")
-				 (unless (#_UnregisterClassW p-cls-nm (#_GetModuleHandleW nil))
-				   (warn "unable to unregister class."))))
-
-			     ;;(print 'aa)
-			     ;;(print (#_GetLastError))
-
-
 			     (let ((result (#_RegisterClassExW &wc)))
-			       (print result)
 			       (if (= 0 result)
 				   (let ((error (#_GetLastError)))
 				     (error "Win32: Failed to register window class, error ~A." error))
-				   (setf main-window-class result)))
-			     #+NIL
-			     (print 'a)
-			     #+NIL
-			     (print (#_GetLastError))))))))
+				   (setf main-window-class result)))))))))
 	   
 		 (create-window ()
 			      
@@ -1542,9 +1523,6 @@ int decorated;
 		       
 			   (when maximized?
 			     (setq style (logior style #_WS_MAXIMIZE)))
-
-			   #+NIL(setf (x window) (#_.left &rect)
-				 (y window) (#_.top &rect))
 			 
 			   (setf (last-width window) (- (#_.right &rect) (#_.left &rect))
 				 (last-height window) (- (#_.bottom &rect) (#_.top &rect)))
@@ -1579,16 +1557,6 @@ int decorated;
 				 (#_.scaletomonitor &wc) (if scale-to-monitor? 1 0)
 				 (#_.decorated &wc) (if decorated? 1 0))
 
-		     
-			   (print frame-x)
-			   (print frame-y)
-			   (print frame-width)
-			   (print frame-height)
-			   (print main-window-class)
-
-			   (print 'b)
-			   (print (#_GetLastError))
-		       
 			   (setf (gethash id *id->window-table*) window)
 		       
 			   (let ((result (#_CreateWindowExW ex-style
@@ -1602,10 +1570,6 @@ int decorated;
 							    (#_GetModuleHandleW nil)
 							    (c-cast '#_<LPVOID> &wc)
 							    )))
-
-			     (print 'c)
-			     (print (#_GetLastError))
-		       
 
 			     (if result
 				 (progn
@@ -1690,12 +1654,6 @@ int decorated;
 
 				     (let ((rc-work (c->-addr &mi '#_rcWork)))
 			       
-				       (print rc-work)
-				       (print (#_.left rc-work))
-				       (print (#_.top rc-work))
-				       (print (#_.right rc-work))
-				       (print (#_.bottom rc-work))
-
 				       (#_SetWindowPos handle #_HWND_TOP
 						       (#_.left rc-work)
 						       (#_.top rc-work)
@@ -1703,19 +1661,9 @@ int decorated;
 						       (- (#_.bottom rc-work) (#_.top rc-work))
 						       (logior #_SWP_NOACTIVATE #_SWP_NOZORDER))))))))))))))
 
-
-	    ;;(print 'aaa)
-	    ;;(print (#_GetLastError))
-	  
 	    (maybe-register-class)
-
-	    ;;(print 'bbb)
-	    ;;(print (#_GetLastError))
 	  
 	    (create-window)
-
-	    ;;(print 'ccc)
-	    ;;(print (#_GetLastError))
 
 	    (maybe-allow-messages)
 
@@ -1735,13 +1683,6 @@ int decorated;
 		(setf (last-width window) window-width
 		      (last-height window) window-height)))
 	    t))))))
-
-#+NIL
-(defun heapchk ()
-  (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "_heapchk"))
-		 :signed-fullword))
-
-
 
 (defun acquire-win32-monitor (window monitor)
   (declare (type os-window-mixin window))
@@ -1982,34 +1923,16 @@ int decorated;
 	   (result)
 	   (window))
 
-      ;;(terpri)
-      ;;(princ 1)
-      ;;(finish-output)
-
       (unless (> (setq result (#_GetMessageW &msg nil 0 0)) 0)
 	
 	(error "GetMessage returned non positive"))
-
-      ;;(format t "~%~A" (#_GetLastError))
-      ;;(finish-output)
-
-      ;;(terpri)
-      ;;(princ 1.5)
-      ;;(finish-output)
       
       (unless (zerop result)
-
-	;;(terpri)
-	;;(princ 2)
-	;;(finish-output)
 
 	(if (= (#_.message &msg) #_WM_QUIT)
 
 	    (progn
-	      ;;(terpri)
-	      ;;(princ 6)
-	;;      (finish-output)
-		     
+
 	      (setq window (display-window-list-head app))
 
 	      (loop while window
@@ -2017,15 +1940,8 @@ int decorated;
 		       (setq window (window-next window))))
 
 	    (progn
-	      ;;(terpri)
-	      ;;(princ 3)
-	      ;;(finish-output)
 	      (#_TranslateMessage &msg)
-	      (#_DispatchMessageW &msg)
-	      
-	      ;;(terpri)
-	      ;;(print 4)
-	      (finish-output)))))))
+	      (#_DispatchMessageW &msg)))))))
 
 (defun poll-win32-events (app)
   (clet ((msg #_<MSG>))
@@ -2033,21 +1949,13 @@ int decorated;
 	  (window))
 
       (loop until (progn
-	;;	    (terpri)
-	;;	    (princ 1)
-	;;	    (finish-output)
+
 		    (zerop (#_PeekMessageW &msg nil 0 0 #_PM_REMOVE)))
 
-	    do ;;(terpri)
-	       ;;(princ 2)
-	       ;;(finish-output)
-
+	    do
 	       (if (= (#_.message &msg) #_WM_QUIT)
 
 		   (progn
-		 ;;    (terpri)
-		   ;;  (princ 6)
-		     ;;(finish-output)
 		     
 		     (setq window (display-window-list-head app))
 
@@ -2056,24 +1964,10 @@ int decorated;
 			      (setq window (window-next window))))
 
 		   (progn
-		     ;;(terpri)
-		     ;;(princ 3)
-		     ;;(finish-output)
 		     (#_TranslateMessage &msg)
-		     (#_DispatchMessageW &msg)
+		     (#_DispatchMessageW &msg)))))))
 
-		     ;;(terpri)
-		     ;;(princ 4)
-		     ;;(finish-output)
-		     )))
-      ;;(terpri)
-      ;;(princ 5)
-      ;;(finish-output)
-      )))
 
-(defun run (display)
-  (loop 
-	do (wait-events display)))
       
 
 

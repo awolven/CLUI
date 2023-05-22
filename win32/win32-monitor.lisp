@@ -266,7 +266,7 @@
 	   :blue-bits blue))))))
 
 (defun get-win32-monitor-video-modes (monitor)
-  (when (modes-pruned? monitor)
+  ;;(when (modes-pruned? monitor)
     (clet ((dm #_<DEVMODEW>))
       (let ((&dm (c-addr-of dm))
 	    (dm-size (c-sizeof-type '#_<DEVMODEW>)))
@@ -293,7 +293,7 @@
 			 (unless (find mode results :test (lambda (a b) (zerop (compare-video-modes a b))))
 			   (when (= (#_ChangeDisplaySettingsExW p-adapter-name &dm nil #_CDS_TEST nil)
 				    #_DISP_CHANGE_SUCCESSFUL)
-			     (push mode results)))))))))))
+			     (push mode results))))))))));;)
 			  
 			  
     

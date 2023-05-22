@@ -162,11 +162,8 @@
 
 
 (defun windows-10-version-1607-or-greater? ()
-  (prog1 (or (windows-11-build-or-later? 0)
-	     (windows-10-build-or-later? 14393))
-    (print 'dd)
-    (print (#_GetLastError))
-    (finish-output)))
+  (or (windows-11-build-or-later? 0)
+      (windows-10-build-or-later? 14393)))
 
 
 (defun windows-10-version-1703-or-greater? ()

@@ -708,6 +708,12 @@
   (modifier-bits nil :type fixnum)
   (scancode nil :type fixnum))
 
+
+(defmethod make-load-form ((self input-event-id) &optional environment)
+  (declare (ignore environment))
+  `(intern-input-event ,(input-event-id-scancode self)
+		       ,(input-event-id-modifier-bits self)))
+
 (defun intern-input-event (object &optional (bits 0))
   "This returns a input-event-id described by object with bits.  Object is one of
    keysym, string, or input-event-id.  When object is a input-event-id, this uses
