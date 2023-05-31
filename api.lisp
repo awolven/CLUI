@@ -158,6 +158,14 @@
 (defmethod disable-raw-mouse-motion ((window x11:window-mixin))
   (disable-x11-raw-mouse-motion window))
 
+#+win32
+(defmethod copy-string-to-clipboard ((display win32:desktop-mixin) (string string))
+  (win32-copy-string-to-clipboard string))
+
+#+win32
+(defmethod copy-string-from-clipboard ((display win32:desktop-mixin))
+  (win32-copy-string-from-clipboard))
+
 (defun get-primary-monitor (&optional (display (default-display)))
   (car (display-monitors display)))
 

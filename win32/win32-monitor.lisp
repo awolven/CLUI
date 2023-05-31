@@ -80,8 +80,7 @@
 				     :display-name (when &display
 						     (lpcwstr->string p-display-name))))
 
-	(let ((dmPosition (cons-ptr (ptr-value &dm) (+ (ptr-offset &dm) (+ (* 2 32) (* 2 4) 4))
-				    '#_<POINTL*>)))
+	(let ((dmPosition (ptr-inc &dm (+ (* 2 32) (* 2 4) 4) '#_<POINTL*>)))
 	  
 	  (setf (h monitor) (find-monitor-handle (lpcwstr->string p-adapter-name)
 						 (#_.x dmPosition)
@@ -93,7 +92,7 @@
 (defun find-monitor-handle (adapter-name &optional (left nil) (top nil) (right nil) (bottom nil))
   (clet ((mc #_<monitor_cons>))
     (let* ((&mc (c-addr-of mc))
-	   (lparam (noffi::cons-cval (sap-int (ptr-value &mc)) '#_<LPARAM>)))
+	   (lparam (cons-cval (sap-int (ptr-effective-sap &mc)) '#_<LPARAM>)))
       (with-lpcwstr (padaptername adapter-name)
 	(setf (#_.adapterName &mc) padaptername)
 	(setf (#_.handle &mc) (noffi::%cons-ptr (int-sap 0) 0 '#_<HMONITOR>))
@@ -221,7 +220,7 @@
   (clet ((dm #_<DEVMODEW>))
     (let* ((&dm (c-addr-of dm))
 	   (dm-size (c-sizeof-type '#_<DEVMODEW>))
-	   (dmPosition (cons-ptr (ptr-value &dm) (+ (ptr-offset &dm) (+ (* 2 32) (* 2 4) 4)) '#_<POINTL*>)))
+	   (dmPosition (ptr-inc &dm (+ (* 2 32) (* 2 4) 4) '#_<POINTL*>)))
       (setf (#_.dmSize &dm) dm-size)
 
       (with-lpcwstr (p-adapter-name (adapter-name monitor))

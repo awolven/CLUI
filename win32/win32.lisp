@@ -1,6 +1,1 @@
-(in-package :noffi)
-
-(noffi-syntax t)
-
-
-#_{#include "dependencies_mingw64.i"}
+(load "~/clui/win32/test2.lisp")

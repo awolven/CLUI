@@ -212,6 +212,42 @@
   (:export #:get-required-instance-extensions)
   #-darwin
   (:import-from :noffi
+		#:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun
+		#:size-of-typ #:c-aref #:clet&
+		#:get-c-string
+		#:get-native-utf16-string
+		#:int-ptr
+		#:use-library
+		#:use-include
+		#:c-compile-file
+		#:c-compile-file-pathname
+		#:pkg-use
+		#:cons-ptr
+		#:cons-cval
+		#:cval-value
+		#:ptr-int
+		#:ptr-base-sap
+		#:ptr-effective-sap
+		#:ptr-inc
+		#:ptr-nullptr-p
+		#:ptr-difference
+		#:null-ptr
+		#:c-make
+		#:c-sequence-coerce
+		#:make-gcable-c-string
+		#:make-gcable-c-utf-16-string
+		#:c-sizeof-type
+		#:c-alignog-type
+		#:c-ptr+
+		#:c-funcall
+		#:c-cast
+		#:c->-addr
+		#:ptr-effective-sap
+		#:sap-plus
+		#:sap-int
+		#:int-sap)
+  #+OLD
+  (:import-from :noffi
 		#:copy-ptr
 		#:%cons-ptr
 		#:c-sizeof-type

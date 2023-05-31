@@ -1,17 +1,11 @@
 (in-package :clui)
 
-  (defvar *modifiers-to-internal-masks* ())
-
-  (defvar *modifier-count* 0
-    "The number of modifiers that is currently defined.")
-
-  (defvar *all-modifier-names* ()
-    "A list of all the names of defined modifiers.")
-
+#+NIL
 (defun sap-int (sap)
   #+sbcl(sb-sys:sap-int sap)
   #+ccl(ccl::%ptr-to-int sap))
 
+#+NIL
 (defun int-sap (int)
   #+sbcl(sb-sys:int-sap int)
   #+ccl(ccl::%int-to-ptr int))
@@ -92,9 +86,6 @@
 
    (helper-window :initform nil
 		  :accessor helper-window)
-   
-   (clipboard-string :accessor clipboard-string
-		     :initform "")
 
    (restore-cursor-pos-x :initform nil
 			 :accessor restore-cursor-pos-x)

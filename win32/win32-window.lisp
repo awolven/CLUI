@@ -1,8 +1,6 @@
 (in-package :clui)
-(noffi::noffi-syntax t)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi::noffi-syntax t))
+(noffi-syntax)
 
 (defvar w)
 
@@ -24,15 +22,6 @@
 				   #+CCL my-exception-handler-callback))
 
 (add-my-exception-handler)
-
-#+ccl
-(defun noffi-ptr->ccl-ptr (ptr)
-  (ccl::%inc-ptr (ptr-value ptr) (ptr-offset ptr)))
-
-#+sbcl
-(defun noffi-ptr->ccl-ptr (ptr)
-  (sb-sys:sap+ (ptr-value ptr) (ptr-offset ptr)))
-
 
 (defconstant +WM_COPYGLOBALDATA+ #x0049)
 
@@ -328,8 +317,8 @@
   (values))
 
 (defun get-win32-window-focused (window)
-  (= (sap-int (noffi-ptr->ccl-ptr (h window)))
-     (sap-int (noffi-ptr->ccl-ptr (#_GetActiveWindow)))))
+  (= (sap-int (ptr-effective-sap (h window)))
+     (sap-int (ptr-effective-sap (#_GetActiveWindow)))))
 
 (defun set-win32-window-focused (window value)
   (declare (ignorable window value))
@@ -392,8 +381,8 @@
 	(when (= 0 (#_GetCursorPos &pos))
 	  (return nil))
 
-	(unless (= (sap-int (noffi-ptr->ccl-ptr (#_WindowFromPoint pos)))
-		   (sap-int (noffi-ptr->ccl-ptr (h window))))
+	(unless (= (sap-int (ptr-effective-sap (#_WindowFromPoint pos)))
+		   (sap-int (ptr-effective-sap (h window))))
 	  (return nil))
 
 	(#_GetClientRect (h window) &area)
@@ -591,20 +580,20 @@
 										       (sb-alien:unsigned 32)
 										       sb-sys:system-area-pointer
 										       sb-sys:system-area-pointer))
-			  (noffi-ptr->ccl-ptr hmonitor)
+			  (ptr-effective-sap hmonitor)
 			  0 ;;#_MDT_EFFECTIVE_DPI
-			  (noffi-ptr->ccl-ptr *xdpi)
-			  (noffi-ptr->ccl-ptr *ydpi)))
+			  (ptr-effective-sap *xdpi)
+			  (ptr-effective-sap *ydpi)))
 
 
 #+CCL
 (defun ff-get-dpi-for-monitor (hmonitor &xdpi &ydpi)
   (ccl::%ff-call (ccl::%reference-external-entry-point
 		  (ccl:external "GetDpiForMonitor"))
-		 :address (noffi-ptr->ccl-ptr hmonitor)
+		 :address (ptr-effective-sap hmonitor)
 		 :unsigned-fullword 0 ;;#_MDT_EFFECTIVE_DPI
-		 :address (noffi-ptr->ccl-ptr &xdpi)
-		 :address (noffi-ptr->ccl-ptr &ydpi)
+		 :address (ptr-effective-sap &xdpi)
+		 :address (ptr-effective-sap &ydpi)
 		 :signed-fullword))
 
 (defun get-dpi-for-monitor (hmonitor)
@@ -668,7 +657,7 @@ int decorated;
 (defun get-window-prop (hWnd)
   (with-lpcwstr (str "CLUI")
     (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "GetPropW"))
-		   :address (noffi-ptr->ccl-ptr hWnd) :address (noffi-ptr->ccl-ptr str)
+		   :address (ptr-effective-sap hWnd) :address (ptr-effective-sap str)
 		   :unsigned-doubleword)))
 
 #+SBCL
@@ -677,13 +666,13 @@ int decorated;
     (sb-alien:alien-funcall (sb-alien:extern-alien "GetPropW" (sb-alien:function (sb-alien:unsigned 64)
 										 sb-sys:system-area-pointer
 										 sb-sys:system-area-pointer))
-			    (noffi-ptr->ccl-ptr hWnd)
-			    (noffi-ptr->ccl-ptr str))))
+			    (ptr-effective-sap hWnd)
+			    (ptr-effective-sap str))))
 
 #+CCL
 (defun get-window-prop (hWnd)
   (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "GetPropW"))
-		 :address (noffi-ptr->ccl-ptr hWnd) :address (noffi-ptr->ccl-ptr str)
+		 :address (ptr-effective-sap hWnd) :address (ptr-effective-sap str)
 		 :unsigned-doubleword))
 
 #+SBCL
@@ -693,8 +682,8 @@ int decorated;
 										 sb-sys:system-area-pointer
 										 sb-sys:system-area-pointer
 										 (sb-alien:unsigned 64)))
-			    (noffi-ptr->ccl-ptr hWnd)
-			    (noffi-ptr->ccl-ptr str)
+			    (ptr-effective-sap hWnd)
+			    (ptr-effective-sap str)
 			    id)))
 
 #+CCL
@@ -702,7 +691,7 @@ int decorated;
   (with-lpcwstr (str "CLUI")
     (ccl::%ff-call
      (ccl::%reference-external-entry-point (ccl:external "SetPropW"))
-     :address (noffi-ptr->ccl-ptr hWnd) :address (noffi-ptr->ccl-ptr str)
+     :address (ptr-effective-sap hWnd) :address (ptr-effective-sap str)
      :unsigned-doubleword id
      :void)))
   
@@ -758,7 +747,7 @@ int decorated;
 		 (#.#_WM_CREATE
 		  (setf (h window) hWnd)
 		  (setf (gethash
-			 (sap-int (noffi::ptr-inc (ptr-value hWnd) (ptr-offset hWnd)))
+			 (sap-int (ptr-effective-sap hWnd))
 			 *window-handle->window-table*)
 			window)
 		  (go break))		; 1
@@ -911,7 +900,7 @@ int decorated;
 			    (#_.top &frame) 0
 			    (#_.right &frame) 0
 			    (#_.bottom &frame) 0)
-		      (let ((mmi (noffi::cons-ptr (int-sap lParam) 0 '#_<MINMAXINFO*>))
+		      (let ((mmi (cons-ptr (int-sap lParam) 0 '#_<MINMAXINFO*>))
 			    (style (get-window-style window))
 			    (ex-style (get-window-ex-style window)))
 
@@ -1132,35 +1121,46 @@ int decorated;
 		  (let ((button)
 			(action))
 
-		    (cond ((or (= uMsg #_WM_LBUTTONDOWN)
-			       (= uMsg #_WM_LBUTTONUP))
-
+		    (cond ((= uMsg #_WM_LBUTTONDOWN)
+			   (setq action :press)
+			   (setq button +pointer-left-button+))
+			  
+			  ((= uMsg #_WM_LBUTTONUP)
+			   (setq action :release)
 			   (setq button +pointer-left-button+))
 
-			  ((or (= uMsg #_WM_RBUTTONDOWN)
-			       (= uMsg #_WM_RBUTTONUP))
-
+			  ((= uMsg #_WM_RBUTTONDOWN)
+			   (setq action :press)
 			   (setq button +pointer-right-button+))
-
-			  ((or (= uMsg #_WM_MBUTTONDOWN)
-			       (= uMsg #_WM_LBUTTONUP))
-
+			  
+			  ((= uMsg #_WM_RBUTTONUP)
+			   (setq action :release)
+			   (setq button +pointer-right-button+))
+			  
+			  ((= uMsg #_WM_MBUTTONDOWN)
+			   (setq action :press)
+			   (setq button +pointer-middle-button+))
+			  
+			  ((= uMsg #_WM_LBUTTONUP)
+			   (setq action :release)
 			   (setq button +pointer-middle-button+))
 
-			  ((= (#_GET_XBUTTON_WPARAM wParam) #_XBUTTON1)
-
+			  ((and (= (#_GET_XBUTTON_WPARAM wParam) #_XBUTTON1)
+				(= uMsg #_WM_XBUTTONDOWN))
+			   (setq action :press)
 			   (setq button +pointer-button-4+))
-
-			  (t (setq button +pointer-button-5+)))
-
-		    (if (or (= uMsg #_WM_LBUTTONDOWN)
-			    (= uMsg #_WM_RBUTTONDOWN)
-			    (= uMsg #_WM_MBUTTONDOWN)
-			    (= uMsg #_WM_XBUTTONDOWN))
-
-			(setq action :press)
-
-			(setq action :release))
+			  
+			  ((and (= (#_GET_XBUTTON_WPARAM wParam) #_XBUTTON1)
+				(= uMsg #_WM_XBUTTONUP))
+			   (setq action :release)
+			   (setq button +pointer-button-4+))
+			  
+			  ((= uMsg #_WM_XBUTTONUP)
+			   (setq action :release)
+			   (setq button +pointer-button-5+))
+			  
+			  (t (setq action :press)
+			     (setq button +pointer-button-5+)))
 
 		    (let ((found? nil)
 			  (keys (window-keys window)))

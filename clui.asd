@@ -47,12 +47,14 @@
   :depends-on ()
   :serial t
   :components
-  (#+ccl(:file "../noffi/src/patch-ccl")
+  (#+NIL(:file "noffi-config")
    (:file "../noffi/other/clex/src/clex")
    (:file "../noffi/other/lalr/lalr")
    (:file "../noffi/src/file")
    (:file "../noffi/src/compiler-warn")
    (:file "../noffi/src/package")
+   (:file "../noffi/src/features")
+   #+SBCL (:file "../noffi/src/patch-sbcl")
    (:file "../noffi/src/forward")
    (:file "../noffi/src/lispdep")
    (:file "../noffi/src/util")
@@ -69,6 +71,7 @@
    (:file "../noffi/src/runtime")
    (:file "../noffi/src/abi-amd64-mingw64")
    (:file "../noffi/src/config")
+   (:file "../noffi/src/noffi-util")
 
    (:file "clr")
    (:file "win32/win32")
@@ -87,6 +90,7 @@
    (:file "win32/win32-window")
    (:file "win32/win32-monitor")
    #+vulkan(:file "win32/win32-vulkan")
+   (:file "win32/win32-clipboard")
    (:file "monitor")
    (:file "abstract-os")
    (:file "input")

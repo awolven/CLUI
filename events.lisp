@@ -206,10 +206,16 @@
    (local-y :initarg :y
 	    :accessor pointer-event-y)))
 
+(defclass button-press-event-mixin ()
+  ())
+
+(defclass button-release-event-mixin ()
+  ())
+
 (defmethod print-object ((event input-event-mixin) stream)
   (print-unreadable-object (event stream :type t :identity t)
     (when (input-event-code event)
-      (princ (intern-input-event (input-event-code event) (event-modifier-state event)) stream))
+      (princ (aref *keysyms* (input-event-code event)) stream))
     event))
 
 (defclass pointer-event-mixin (input-event-mixin)
@@ -223,13 +229,13 @@
 (defclass pointer-button-event-mixin (pointer-event-mixin)
   ())
 
-(defclass pointer-button-press-event-mixin (pointer-button-event-mixin)
+(defclass pointer-button-press-event-mixin (button-press-event-mixin pointer-button-event-mixin)
   ())
 
 (defclass clui.v0:pointer-button-press-event (pointer-button-press-event-mixin)
   ())
 
-(defclass pointer-button-release-event-mixin (pointer-button-event-mixin)
+(defclass pointer-button-release-event-mixin (button-release-event-mixin pointer-button-event-mixin)
   ())
 
 (defclass clui.v0:pointer-button-release-event (pointer-button-release-event-mixin)
@@ -308,7 +314,7 @@
 (defclass keyboard-event-mixin (input-event-mixin)
   ())
 
-(defclass key-press-event-mixin (keyboard-event-mixin)
+(defclass key-press-event-mixin (button-press-event-mixin keyboard-event-mixin)
   ())
 
 
@@ -322,7 +328,7 @@
 (defclass clui.v0::key-repeat-event (key-repeat-event-mixin)
   ())
 
-(defclass key-release-event-mixin (keyboard-event-mixin)
+(defclass key-release-event-mixin (button-release-event-mixin keyboard-event-mixin)
   ())
 
 (defclass clui.v0:key-release-event (key-release-event-mixin)
@@ -344,8 +350,10 @@
 (defclass spaceball-event-mixin (joystick-event-mixin)
   ())
 
-(defvar *input-code/keysym-alist* '())
 
+;; codes and names (keysyms) for inputs:
+
+(defvar *input-code/keysym-alist* '())
 (defvar *keysym-matcher->keysym* (make-hash-table :test #'equal))
 (defvar *keysym-matcher->input-code* (make-hash-table :test #'equal))
 
@@ -357,8 +365,6 @@
 	   ,keysym)
      (setf (gethash (keysym-matcher ,keysym) *keysym-matcher->input-code*)
 	   ,input-code)))
-
-
 
 (defun keysym-matcher (string)
   (string-upcase string))
@@ -447,7 +453,7 @@
 (define-input-code +key-page-up+ #x4B "PageUp") ;; VK_PRIOR
 (define-input-code +key-delete+ #x4C "Delete") ;; VK_DELETE
 (define-input-code +key-end+ #x4D "End") ;; VK_END
-(define-input-code +key-page-down+ #x4E "PageDn") ;; VK_NEXT
+(define-input-code +key-page-down+ #x4E "PageDown") ;; VK_NEXT
 (define-input-code +key-right-arrow+ #x4F "RightArrow") ;; VK_RIGHT
 (define-input-code +key-left-arrow+ #x50 "LeftArrow") ;; VK_LEFT
 (define-input-code +key-down-arrow+ #x51 "DownArrow") ;; VK_DOWN
@@ -597,16 +603,13 @@
 (define-input-code +key-right-alt+ #xE6 "RightAlt") ;; VK_MENU, VK_RMENU
 (define-input-code +key-right-GUI+ #xE7 "RightGUI") ;; windows or command key right ;; VK_RWIN
 
-(define-input-code +pointer-move+ 0 "MouseMove")
-(define-input-code +pointer-left-button+ 1 "LeftMouse")
-(define-input-code +pointer-right-button+ 2 "RightMouse")
-(define-input-code +pointer-middle-button+ 3 "MiddleMouse")
+(define-input-code +pointer-move+ 249 "MouseMove")
+(define-input-code +pointer-left-button+ 250 "LeftMouse")
+(define-input-code +pointer-right-button+ 251 "RightMouse")
+(define-input-code +pointer-middle-button+ 242 "MiddleMouse")
 (define-input-code +pointer-button-4+ 253 "Mouse4")
 (define-input-code +pointer-button-5+ 254 "Mouse5")
 (define-input-code +pointer-wheel+ 255 "MouseWheel")
-
-
-
 
 #+NIL(
 (define-input-code +ms-ext-key-junja+ #x10000 "Junja")
@@ -622,48 +625,15 @@
 	    do (setf (aref keysyms input-code) keysym)
 	  finally (return keysyms))))
 
-(defvar *input-event-id-high-bytes* (make-array 256 :initial-element nil))
+;; modifier codes and names
 
-(defun get-input-event-id* (input-code bits)
-  (let* ((high-byte (ash input-code -8))
-         (low-byte-vector (svref *input-event-id-high-bytes* high-byte)))
-    (unless low-byte-vector
-      (let ((new-vector (make-array 256 :initial-element nil)))
-        (setf (svref *input-event-id-high-bytes* high-byte) new-vector)
-        (setf low-byte-vector new-vector)))
-    (let* ((low-byte (ldb (byte 8 0) input-code))
-           (bit-vector (svref low-byte-vector low-byte)))
-      (unless bit-vector
-        (let ((new-vector (make-array 256 :initial-element nil)))
-          (setf (svref low-byte-vector low-byte) new-vector)
-          (setf bit-vector new-vector)))
-      (let ((input-event-id (svref bit-vector bits)))
-        (if input-event-id
-            input-event-id
-            (setf (svref bit-vector bits) (%make-input-event-id input-code bits)))))))
+(defvar *modifiers-to-internal-masks* ())
 
-(defun key-character-class (char)
-  (case char
-    (#\- :modifier-terminator)
-    (#\Space :event-terminator)
-    (#\" :eof)
-    (t :unicode)))
+(defvar *modifier-count* 0
+  "The number of modifiers that are currently defined.")
 
-(defconstant input-event-id-escape-char #\\
-  "The escape character that #k uses.")
-
-(defun get-key-char (stream)
-  (let ((char (read-char stream t nil t)))
-    (cond ((char= char input-event-id-escape-char)
-           (let ((char (read-char stream t nil t)))
-             (values char :escaped)))
-          (t (values char (key-character-class char))))))
-
-(defun skip-whitespace (&optional (stream *standard-input*))
-  (peek-char t stream))
-
-
-
+(defvar *all-modifier-names* ()
+  "A list of all the names of defined modifiers.")
 
 (defmacro define-input-event-modifier (symbol long-name short-name)
   "This establishes long-name and short-name as modifier names for purposes
@@ -694,172 +664,4 @@
 
 
 
-(defun input-event-id-modifier-mask (modifier-name)
-  "This function returns a mask for modifier-name.  This mask is suitable
-   for use with INPUT-EVENT-ID-BITS.  If modifier-name is undefined, this signals
-   an error."
-  (let ((res (cdr (assoc modifier-name *modifiers-to-internal-masks*
-                         :test #'string-equal))))
-    (unless res (error "Undefined input-event-id modifier -- ~S." modifier-name))
-    res))
 
-(defstruct (input-event-id (:print-function %print-input-event-id)
-			       (:constructor %make-input-event-id (scancode modifier-bits)))
-  (modifier-bits nil :type fixnum)
-  (scancode nil :type fixnum))
-
-
-(defmethod make-load-form ((self input-event-id) &optional environment)
-  (declare (ignore environment))
-  `(intern-input-event ,(input-event-id-scancode self)
-		       ,(input-event-id-modifier-bits self)))
-
-(defun intern-input-event (object &optional (bits 0))
-  "This returns a input-event-id described by object with bits.  Object is one of
-   keysym, string, or input-event-id.  When object is a input-event-id, this uses
-   INPUT-EVENT-ID-KEYSYM.  You can form bits with MAKE-INPUT-EVENT-ID-BITS or
-   INPUT-EVENT-ID-MODIFIER-MASK."
-  (etypecase object
-    (integer
-     (unless (aref *keysyms* object)
-       (error "~S is an undefined input-code." object))
-     (get-input-event-id* object bits))
-    #|(character
-     (let* ((name (char-name object))
-            (keysym (name-keysym (or name (string object)))))
-       (unless keysym
-         (error "~S is an undefined keysym." object))
-       (get-input-event-id* keysym bits)))|#
-    (string
-     (let ((input-code (keysym-input-code object)))
-       (unless input-code
-         (error "~S is an undefined keysym." object))
-       (get-input-event-id* input-code bits)))
-    (input-event-id
-     (get-input-event-id* (input-event-id-scancode object) bits))))
-
-(defun %print-input-event-id (object stream ignore)
-  (declare (ignore ignore))
-  (write-string "#k\"" stream)
-  (print-pretty-input-event-id object stream)
-  (write-char #\" stream))
-
-(defun print-pretty-input-event-id (input-event-id &optional (stream *standard-output*)
-							     long-names-p)
-  "This prints input-event-id to stream.  Long-names-p indicates whether modifier
-   names should appear using the long name or short name."
-  (do ((map (if long-names-p
-                (cdr *modifiers-to-internal-masks*)
-                *modifiers-to-internal-masks*)
-            (cddr map)))
-      ((null map))
-    (when (not (zerop (logand (cdar map) (input-event-id-modifier-bits input-event-id))))
-      (write-string (caar map) stream)
-      (write-char #\- stream)))
-  (let* ((name (aref *keysyms* (input-event-id-scancode input-event-id)))
-         (spacep (position #\space (the simple-string name))))
-    (when spacep (write-char #\< stream))
-    (write-string name stream)
-    (when spacep (write-char #\> stream))))
-
-(defun make-input-event-id-bits (&rest modifier-names)
-  "This returns bits suitable for INTERN-INPUT-EVENT-ID from the supplied modifier
-   names.  If any name is undefined, this signals an error."
-  (let ((mask 0))
-    (dolist (mod modifier-names mask)
-      (let ((this-mask (cdr (assoc mod *modifiers-to-internal-masks*
-                                   :test #'string-equal))))
-        (unless this-mask (error "~S is an undefined modifier name." mod))
-        (setf mask (logior mask this-mask))))))
-
-(defun input-event-id-bits-modifiers (bits)
-  "This returns a list of input-event-id modifier names, one for each modifier
-   set in bits."
-  (let ((res nil))
-    (do ((map (cdr *modifiers-to-internal-masks*) (cddr map)))
-        ((null map) res)
-      (when (logtest bits (cdar map))
-        (push (caar map) res)))))
-
-(defun parse-input-event-id (stream sub-char count)
-  (declare (ignore sub-char count))
-  (let ((id-namestring
-	  (make-array 30 :adjustable t :fill-pointer 0 :element-type 'character)))
-    
-    (prog ((bits 0)
-           (input-event-ids ())
-           char class)
-       (unless (char= (read-char stream) #\")
-         (error "Keys must be delimited by ~S." #\"))
-       ;; Skip any leading spaces in the string.
-       (skip-whitespace stream)
-       (multiple-value-setq (char class) (get-key-char stream))
-       (ecase class
-         ((:unicode :other :escaped) (go ID))
-         (:ISO-start (go ISOCHAR))
-         (:ISO-end (error "Angle brackets must be escaped."))
-         (:modifier-terminator (error "Dash must be escaped."))
-         (:EOF (error "No key to read.")))
-     ID
-       (vector-push-extend char id-namestring)
-       (multiple-value-setq (char class) (get-key-char stream))
-       (ecase class
-         ((:unicode :other :escaped) (go ID))
-         (:event-terminator (go GOT-CHAR))
-         (:modifier-terminator (go GOT-MODIFIER))
-         ((:ISO-start :ISO-end) (error "Angle brackets must be escaped."))
-         (:EOF (go GET-LAST-CHAR)))
-     GOT-CHAR
-       (push `(intern-input-event ,(copy-seq id-namestring) ,bits)
-             input-event-ids)
-       (setf (fill-pointer id-namestring) 0)
-       (setf bits 0)
-       ;; Skip any whitespace between characters.
-       (skip-whitespace stream)
-       (multiple-value-setq (char class) (get-key-char stream))
-       (ecase class
-         ((:unicode :other :escaped) (go ID))
-         (:ISO-start (go ISOCHAR))
-         (:ISO-end (error "Angle brackets must be escaped."))
-         (:modifier-terminator (error "Dash must be escaped."))
-         (:EOF (go FINAL)))
-     GOT-MODIFIER
-       (let ((modifier-name (car (assoc id-namestring
-                                        *modifiers-to-internal-masks*
-                                        :test #'string-equal))))
-         (unless modifier-name
-           (error "~S is not a defined modifier." id-namestring))
-         (setf (fill-pointer id-namestring) 0)
-         (setf bits (logior bits (input-event-id-modifier-mask modifier-name))))
-       (multiple-value-setq (char class) (get-key-char stream))
-       (ecase class
-         ((:unicode :other :escaped) (go ID))
-         (:ISO-start (go ISOCHAR))
-         (:ISO-end (error "Angle brackets must be escaped."))
-         (:modifier-terminator (error "Dash must be escaped."))
-         (:EOF (error "Expected something naming a input-event-id, got EOF.")))
-     ISOCHAR
-       (multiple-value-setq (char class) (get-key-char stream))
-       (ecase class
-         ((:unicode :event-terminator :other :escaped)
-          (vector-push-extend char id-namestring)
-          (go ISOCHAR))
-         (:ISO-start (error "Open Angle must be escaped."))
-         (:modifier-terminator (error "Dash must be escaped."))
-         (:EOF (error "Bad syntax in key specification, hit eof."))
-         (:ISO-end (go GOT-CHAR)))
-     GET-LAST-CHAR
-       (push `(intern-input-event ,(copy-seq id-namestring) ,bits)
-             input-event-ids)
-     FINAL
-       (return (if (cdr input-event-ids)
-                   `(vector ,@(nreverse input-event-ids))
-                   `,(car input-event-ids))))))
-
-(set-dispatch-macro-character #\# #\k 'parse-input-event-id)
-
-(defmethod input-event-id ((event input-event-mixin))
-  (intern-input-event (input-event-code event) (event-modifier-state event)))
-
-(defmethod input-event-id ((event character-event-mixin))
-  (input-event-character event))

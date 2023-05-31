@@ -2,6 +2,10 @@
 
 (noffi::noffi-syntax)
 
+#+SBCL
+(defmacro noffi::callback (name)
+  (eval `,name))
+
 (defclass win32:desktop-mixin (clui:display-mixin)
   ((instance
     :accessor win32-instance
@@ -177,6 +181,7 @@
    (%high-surrogate
     :initform nil
     :accessor high-surrogate)))
+		      
 
 (defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-native-win32-window instance initargs))

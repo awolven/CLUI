@@ -10,13 +10,7 @@
 ;; select "scaling performed by Application"
 ;; click Ok, click Apply, click Ok
 
-(noffi::noffi-syntax)
-
-#+NIL
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi::noffi-syntax t)
-  (defparameter noffi::*last-good-token* nil)
-  )
+(noffi-syntax)
 
 #+CCL
 (defun lpcwstr (string)
@@ -30,12 +24,15 @@
 	(%cons-ptr octets 0 '#_<LPCWSTR>)))))
 
 #+(and SBCL little-endian)
-(defun lpcwstr (string)
+(defun lpcwstr-1 (string)
   (let ((octets (SB-IMPL::OUTPUT-TO-C-STRING/UTF-16LE string)))
     (let ((poctets (noffi::sap-malloc (length octets))))
       (loop for i from 0 below (length octets)
 	    do (setf (sb-sys::sap-ref-8 poctets i) (aref octets i)))
-      (%cons-ptr poctets 0 '#_<LPCWSTR>))))
+      poctets)))
+
+(defun lpcwstr (string)
+  (cons-ptr (lpcwstr-1 string) 0 '#_<LPCWSTR>))
 
 #+CCL
 (defmacro with-lpcwstr ((var string) &body body)
@@ -50,15 +47,15 @@
     `(let ((,ptr-sym (lpcwstr ,string)))
        (unwind-protect (let ((,var ,ptr-sym))
 			 ,@body)
-	 (noffi::c-free ,ptr-sym)))))
+	 (noffi::sap-free (ptr-effective-sap ,ptr-sym))))))
 
 #+CCL
 (defun lpcwstr->string (ptr)
-  (ccl::%get-native-utf-16-cstring (noffi-ptr->ccl-ptr ptr)))
+  (ccl::%get-native-utf-16-cstring (ptr-effective-sap ptr)))
 
 #+(and SBCL little-endian)
 (defun lpcwstr->string (ptr)
-  (sb-impl::read-from-c-string/utf-16le (noffi-ptr->ccl-ptr ptr) 'character))
+  (sb-impl::read-from-c-string/utf-16le (ptr-effective-sap ptr) 'character))
 
 #+CCL
 (defun load-win32-libraries ()
@@ -80,12 +77,12 @@
 											   sb-sys:system-area-pointer
 											   (sb-alien:unsigned 32)
 											   (sb-alien:unsigned 64)))
-			  (noffi-ptr->ccl-ptr posvi) mask condition))
+			  (ptr-effective-sap posvi) mask condition))
 
 #+CCL
 (defun rtl-verify-version-info (posvi mask condition)
   (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "RtlVerifyVersionInfo"))
-		 :address (noffi-ptr->ccl-ptr posvi)
+		 :address (ptr-effective-sap posvi)
 		 :unsigned-fullword mask :unsigned-doubleword condition
 		 :unsigned-fullword))      
 
