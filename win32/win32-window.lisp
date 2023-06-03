@@ -18,8 +18,7 @@
       0)))
 
 (defun add-my-exception-handler ()
-  (#_AddVectoredExceptionHandler 0 #+SBCL (noffi::callback 'my-exception-handler-callback)
-				   #+CCL my-exception-handler-callback))
+  (#_AddVectoredExceptionHandler 0 my-exception-handler-callback))
 
 (add-my-exception-handler)
 
@@ -442,8 +441,10 @@
   (values))
 
 (defun set-win32-raw-mouse-motion (window value)
+  (declare (ignorable value))
   (unless (eq (disabled-cursor-window (window-display window)) window)
     (return-from set-win32-raw-mouse-motion (values)))
+  #+NOTYET
   (if value
       (enable-win32-raw-mouse-motion window)
       (disable-win32-raw-mouse-motion window))
@@ -653,12 +654,7 @@ int decorated;
       (#_EndPaint (h window) &ps))))
       
 
-#+CCL
-(defun get-window-prop (hWnd)
-  (with-lpcwstr (str "CLUI")
-    (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "GetPropW"))
-		   :address (ptr-effective-sap hWnd) :address (ptr-effective-sap str)
-		   :unsigned-doubleword)))
+
 
 #+SBCL
 (defun get-window-prop (hWnd)
@@ -671,9 +667,10 @@ int decorated;
 
 #+CCL
 (defun get-window-prop (hWnd)
-  (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "GetPropW"))
-		 :address (ptr-effective-sap hWnd) :address (ptr-effective-sap str)
-		 :unsigned-doubleword))
+  (with-lpcwstr (str "CLUI")
+    (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "GetPropW"))
+		   :address (ptr-effective-sap hWnd) :address (ptr-effective-sap str)
+		   :unsigned-doubleword)))
 
 #+SBCL
 (defun set-window-prop (hWnd id)
@@ -1698,6 +1695,7 @@ int decorated;
     (incf (acquired-monitor-count (window-display window))))
   
   (set-win32-monitor-video-mode (window-monitor window) (window-video-mode window))
+  #+NOTYET
   (input-monitor-window (window-monitor window) window))
 
 
@@ -1713,7 +1711,8 @@ int decorated;
     (#_SetThreadExecutionState #_ES_CONTINUOUS)
     (clet ((mouseTrailSize #_<UINT> (mouse-trail-size (window-display window))))
       (#_SystemParametersInfoW #_SPI_SETMOUSETRAILS 0 (c-addr-of mouseTrailSize) 0)))
-  
+
+  #+NOTYET
   (input-monitor-window monitor nil)
   (restore-win32-monitor-video-mode monitor)
   (values))

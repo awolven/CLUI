@@ -34,6 +34,9 @@
 
       #_TRUE)))
 
+(defun ptr-inc (ptr offset type)
+  (cons-ptr (int-sap (+ (sap-int (ptr-effective-sap ptr)) offset)) 0 type))
+
 (defun create-monitor (&adapter &display desktop)
   (let ((p-adapter-name (c->-addr &adapter '#_DeviceName))
 	(p-display-name (c->-addr &display '#_DeviceName))
@@ -103,8 +106,8 @@
 		      (#_.top &rect) top
 		      (#_.right &rect) right
 		      (#_.bottom &rect) bottom)
-		(#_EnumDisplayMonitors nil &rect (noffi::callback 'monitor-callback) lparam)))
-	    (#_EnumDisplayMonitors nil nil (noffi::callback 'monitor-callback) lparam))
+		(#_EnumDisplayMonitors nil &rect monitor-callback lparam)))
+	    (#_EnumDisplayMonitors nil nil monitor-callback lparam))
 	(#_.handle &mc)))))
 
 (defun poll-win32-monitors (desktop)

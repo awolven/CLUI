@@ -47,7 +47,7 @@
   :depends-on ()
   :serial t
   :components
-  (#+NIL(:file "noffi-config")
+  (#+CCL(:file "../noffi/src/patch-ccl")
    (:file "../noffi/other/clex/src/clex")
    (:file "../noffi/other/lalr/lalr")
    (:file "../noffi/src/file")
@@ -65,11 +65,12 @@
    (:file "../noffi/src/cpp")
    (:file "../noffi/src/parsing")
    (:file "../noffi/src/grammar")
-   (:file "../noffi/src/syntax")
    (:file "../noffi/src/adt")
    (:file "../noffi/src/comp")
    (:file "../noffi/src/runtime")
+   (:file "../noffi/src/syntax")
    (:file "../noffi/src/abi-amd64-mingw64")
+   (:file "../noffi/src/abi-amd64-ms-cc")
    (:file "../noffi/src/config")
    (:file "../noffi/src/noffi-util")
 

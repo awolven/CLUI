@@ -13,7 +13,7 @@
 (noffi-syntax)
 
 #+CCL
-(defun lpcwstr (string)
+(defun lpcwstr-1 (string)
   (let* ((len (length string)))
     (multiple-value-bind (data offset) (ccl::array-data-and-offset string)
       (let* ((end (+ offset len))
@@ -21,7 +21,7 @@
 	     (octets (ccl::malloc (1+ noctets))))
 	(ccl::native-utf-16-memory-encode data octets 0 offset end)
 	(setf (ccl::%get-unsigned-word octets noctets) 0)
-	(%cons-ptr octets 0 '#_<LPCWSTR>)))))
+	octets))))
 
 #+(and SBCL little-endian)
 (defun lpcwstr-1 (string)
@@ -36,10 +36,9 @@
 
 #+CCL
 (defmacro with-lpcwstr ((var string) &body body)
-  (let ((sap-sym (gensym)))
-    `(ccl::with-native-utf-16-cstr (,sap-sym ,string)
-       (let ((,var (%cons-ptr ,sap-sym 0 '#_<LPCWSTR>)))
-	 ,@body))))
+  (let ((ptr-sym (gensym)))
+    `(let ((,var (noffi::make-gcable-c-utf-16-string ,string)))
+       ,@body)))
 
 #+SBCL
 (defmacro with-lpcwstr ((var string) &body body)
@@ -117,7 +116,9 @@
   t)
 
 (defun windows-11-or-greater? ()
-  (windows-version-or-greater? (#_HIBYTE #__WIN32_WINNT_WIN11) (#_LOBYTE #__WIN32_WINNT_WIN11) 0))
+  #+NIL
+  (windows-version-or-greater? (#_HIBYTE #__WIN32_WINNT_WIN11) (#_LOBYTE #__WIN32_WINNT_WIN11) 0)
+  t)
 
 (defun windows-10-build-or-later? (build)
   (clet ((osvi #_<OSVERSIONINFOEXW>))
@@ -196,7 +197,7 @@
     (#_memset &wc 0 (c-sizeof-type '#_<WNDCLASSEXW>))
     (setf (#_.cbSize &wc) (c-sizeof-type '#_<WNDCLASSEXW>))
     (setf (#_.style &wc) #_CS_OWNDC)
-    (setf (#_.lpfnWndProc &wc) #+SBCL (noffi::callback 'helper-window-proc-callback) #+CCL helper-window-proc-callback)
+    (setf (#_.lpfnWndProc &wc) helper-window-proc-callback)
     (setf (#_.hInstance &wc) (win32-instance display))
     (setf (#_.lpszClassName &wc) (lpcwstr #+CCL "CLUI Helper" #+SBCL "CLUI Helper SBCL"))
 
