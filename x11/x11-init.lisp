@@ -31,21 +31,22 @@
 
 (defun create-empty-event-pipes (display)
   (let ((pipes (#_malloc (* 2 (cval-value (c-sizeof-type '#_<int>))))))
-    ;;(setq pipes (c-cast '#_<int*> pipes))
-    (#_pipe pipes)
-    (setq pipes (cons-ptr (ptr-value pipes) 0 '#_<int[2]>))
-    
-      (loop for i from 0 below 2
-	    with sf
-	    with df
-	    do (setq sf (#_fcntl (c-aref pipes i) #_F_GETFL 0))
-	       (setq df (#_fcntl (c-aref pipes i) #_F_GETFD 0))
 
-	       (when (or (= -1 sf)
-			 (= -1 df)
-			 (= -1 (#_fcntl (c-aref pipes i) #_F_SETFL (logior sf #_O_NONBLOCK)))
-			 (= -1 (#_fcntl (c-aref pipes i) #_F_SETFD (logior sf #_FD_CLOEXEC))))
-		 (error "Failed to set flags for empty event pipe: ~S" (#_strerror #_errno))))
+    (#_pipe pipes)
+
+    (setq pipes (c-cast '#_<int*> pipes))
+
+    (loop for i from 0 below 2
+	  with sf
+	  with df
+	  do (setq sf (c-funcall #_fcntl (c-aref pipes i) #_F_GETFL 0))
+	     (setq df (c-funcall #_fcntl (c-aref pipes i) #_F_GETFD 0))
+
+	     (when (or (= -1 sf)
+		       (= -1 df)
+		       (= -1 (c-funcall #_fcntl (c-aref pipes i) #_F_SETFL (logior sf #_O_NONBLOCK)))
+		       (= -1 (c-funcall #_fcntl (c-aref pipes i) #_F_SETFD (logior sf #_FD_CLOEXEC))))
+	       (error "Failed to set flags for empty event pipe: ~S" (#_strerror #_errno))))
 
     (setf (empty-event-pipes display) pipes)))
 
@@ -137,7 +138,8 @@
 
 	    
       
-	  
+(defmethod initialize-helper-window ((display x11:server-mixin) helper-window)
+  helper-window)	  
 
 (defun init-and-connect-x11 (display)
   (let ((x11-lib
@@ -170,7 +172,7 @@
 		  #-(or cygwin openbsd netbsd) "libXext.so.6")
 	(x11-state (display-x11-state display)))
 	
-    #+CCL (ccl:open-shared-library x11-lib)
+    (noffi::use-library x11-lib)
 
     (#_XInitThreads)
     (#_XrmInitialize)
@@ -195,11 +197,11 @@
       
       (create-empty-event-pipes display)
       
-      #+CCL (ccl:open-shared-library vidmode-lib)
+      (noffi::use-library vidmode-lib)
       
-      #+ccl (ccl:open-shared-library xi-lib)
+      (noffi::use-library xi-lib)
       
-      #+CCL (ccl:open-shared-library randr-lib)
+      (noffi::use-library randr-lib)
 
       (clet ((event-base #_<int>)
 	     (error-base #_<int>))
@@ -236,9 +238,9 @@
 	(#_XRRSelectInput xdisplay root #_RROutputChangeNotifyMask))
 		
 		      
-      #+CCL (ccl:open-shared-library xcursor-lib)
+      (noffi::use-library xcursor-lib)
 		      
-      #+CCL (ccl:open-shared-library xinerama-lib)
+      (noffi::use-library xinerama-lib)
 
       (clet ((major #_<int>)
 	     (minor #_<int>))
@@ -250,11 +252,11 @@
 	    (unless (zerop (#_XineramaIsActive xdisplay))
 	      (setf (xinerama-available? x11-state) t)))))
     
-      #+CCL (ccl:open-shared-library x11-xcb-lib)
+      (noffi::use-library x11-xcb-lib)
       
-      #+CCL (ccl:open-shared-library xrender-lib)
+      (noffi::use-library xrender-lib)
       
-      #+CCL (ccl:open-shared-library xext-lib)
+      (noffi::use-library xext-lib)
 
       (clet ((major-opcode #_<int>)
 	     (event-base #_<int>)

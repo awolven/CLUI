@@ -4,6 +4,13 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (noffi-syntax t))
 
+(defconstant MWM_HINTS_DECORATIONS 2)
+(defconstant MWM_DECOR_ALL 0)
+
+(defmethod initialize-window-devices ((window x11:window-mixin) &rest args &key &allow-other-keys)
+  (declare (ignore args))
+  (values))
+
 (defun update-normal-hints (window width height)
   (let ((display (window-display window)))
     (let ((hints (#_XAllocSizeHints)))
@@ -137,11 +144,10 @@
 	 (xdisplay (h display)))
     (clet& ((&callback #_<XIMCallback>))
       (setf (#_.callback &callback) input-context-destroy-callback)
-      (setf (#_.client_data &callback) (cons-ptr (ccl::%int-to-ptr window-handle)
-						 0 '#_<XPointer>))
+      (setf (#_.client_data &callback) (c-coerce (noffi::int-ptr window-handle) '#_<XPointer>))
 
       (setf (window-input-context window)
-	    (#_XCreateIC (display-input-method display)
+	    (noffi::c-funcall #_XCreateIC (display-input-method display)
 			 #_XNInputStyle
 			 (logior #_XIMPreeditNothing #_XIMStatusNothing)
 			 #_XNClientWindow
@@ -150,7 +156,7 @@
 			 window-handle
 			 #_XNDestroyCallback
 			 &callback
-			 nil))
+			 0))
 
       (let ((ic (window-input-context window)))
 	(when ic
@@ -158,7 +164,7 @@
 	    (#_XGetWindowAttributes xdisplay window-handle &attribs)
 	    
 	    (clet ((filter #_<unsigned long>))
-	      (when (null (#_XGetICValues ic #_XNFilterEvents (c-addr-of filter) nil))
+	      (when (null (noffi::c-funcall #_XGetICValues ic #_XNFilterEvents (c-addr-of filter) 0))
 		(#_XSelectInput xdisplay window-handle
 				(logior (#_.your_event_mask &attribs) (cval-value filter))))))))
       (values))))
@@ -246,7 +252,7 @@
 
 	(setf (gethash (h window) *window-handle->window-table*) window)
 
-	(let ((xwindow (cons-ptr (ccl::%int-to-ptr (h window)) 0 '#_<XPointer>)))
+	(let ((xwindow (c-coerce (noffi::int-ptr (h window)) '#_<XPointer>)))
 	  (#_XSaveContext xdisplay (h window)
 			  (unique-context display)
 			  xwindow))
@@ -293,7 +299,7 @@
 	    
 	    (#_XSetWMProtocols xdisplay (h window) protocols 2))
 
-	  (clet ((pid #_<long> (ccl::getpid)))
+	  (clet ((pid #_<long> #+CCL (ccl::getpid) #+SBCL (sb-unix:unix-getpid)))
 	    (#_XChangeProperty xdisplay (h window)
 			       NET_WM_PID #_XA_CARDINAL 32
 			       #_PropModeReplace
@@ -347,7 +353,7 @@
 		(setf (#_.res_name hint) instance-name
 		      (#_.res_class hint) class-name)
 
-		(let ((resource-name (ccl::getenv "RESOURCE_NAME")))
+		(let ((resource-name #+CCL (ccl::getenv "RESOURCE_NAME") #+SBCL (sb-posix:getenv "RESOURCE_NAME")))
 		  (cond ((and resource-name (not (string= resource-name "")))
 			 (setf (#_.res_name hint) resource-name))
 			((and title (not (string= title "")))
@@ -416,7 +422,7 @@
 	(cursor-warp-pos-y window) y)
 
   (let ((xdisplay (h (window-display window))))
-    (#_XWarpPointer xdisplay (h window) 0 0 0 0 (round x) (round y))
+    (#_XWarpPointer xdisplay #_None (h window) 0 0 0 0 (round x) (round y))
     (#_XFlush xdisplay)
     (values)))
 
@@ -497,9 +503,9 @@
   (let ((display (window-display window)))
     (unless (get-x11-window-visible window)
       (clet ((supplied #_<long>))
-	(let ((hints (#_AllocSizeHints)))
+	(let ((hints (#_XAllocSizeHints)))
 
-	  (unless (zerop (#_XGetWMNormalHints (h display) (h window) (c-addr-of supplied)))
+	  (unless (zerop (#_XGetWMNormalHints (h display) (h window) hints (c-addr-of supplied)))
 
 	    (setf (#_.flags hints) (logior (#_.flags hints) #_PPosition)
 		  (#_.x hints) (setf (#_.y hints) 0))
@@ -552,8 +558,8 @@
 
 (defun set-x11-window-decorated (window enabled?)
   (clet& ((&hints #_<struct decorated_hints>))
-    (setf (#_.flags &hints) #_MWM_HINTS_DECORATIONS
-	  (#_.decorations &hints) (if enabled? #_MWM_DECOR_ALL 0))
+    (setf (#_.flags &hints) MWM_HINTS_DECORATIONS
+	  (#_.decorations &hints) (if enabled? MWM_DECOR_ALL 0))
 
     (with-slots (MOTIF_WM_HINTS)
 	(display-window-manager (window-display window))

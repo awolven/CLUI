@@ -197,7 +197,7 @@
 (defmethod create-native-window-surface ((display x11:local-server-with-krma-mixin)
 					 instance window
 					 &optional (allocator vk::+null-allocator+))
-  (vk::create-x11-window-surface display window allocator))
+  (vk::create-x11-window-surface display instance window allocator))
 
 
 #+wayland

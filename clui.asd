@@ -110,6 +110,8 @@
    (:file "../noffi/src/file")
    (:file "../noffi/src/compiler-warn")
    (:file "../noffi/src/package")
+   (:file "../noffi/src/features")
+   #+sbcl(:file "../noffi/src/patch-sbcl")
    (:file "../noffi/src/forward")
    (:file "../noffi/src/lispdep")
    (:file "../noffi/src/util")
@@ -120,20 +122,19 @@
    (:file "../noffi/src/cpp")
    (:file "../noffi/src/parsing")
    (:file "../noffi/src/grammar")
-   (:file "../noffi/src/syntax")
    (:file "../noffi/src/adt")
    (:file "../noffi/src/comp")
    (:file "../noffi/src/runtime")
+   (:file "../noffi/src/syntax")
    (:file "../noffi/src/abi-amd64-sysv")
+   (:file "../noffi/src/abi-amd64-sysv-cc")
    (:file "../noffi/src/config")
-   
-   (:file "noffi-patches")
+   (:file "../noffi/src/noffi-util")
 
    (:file "clr")
    (:file "x11/x11")
    
    (:file "package")
-   
    (:file "protocols")
    (:file "app")
    (:file "classes")

@@ -228,7 +228,7 @@
 		#:ptr-int
 		#:ptr-base-sap
 		#:ptr-effective-sap
-		#:ptr-inc
+		;;#:ptr-inc
 		#:ptr-nullptr-p
 		#:ptr-difference
 		#:null-ptr
@@ -237,7 +237,7 @@
 		#:make-gcable-c-string
 		#:make-gcable-c-utf-16-string
 		#:c-sizeof-type
-		#:c-alignog-type
+		#:c-alignof-type
 		#:c-ptr+
 		#:c-funcall
 		#:c-cast

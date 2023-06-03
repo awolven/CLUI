@@ -7,13 +7,13 @@
 (defvar *xdisplay->display* (make-hash-table :test #'eq))
 
 (defun display-for-xim (xim)
-  (gethash (ccl::%ptr-to-int (ptr-value xim)) *xim->display*))
+  (gethash (noffi::ptr-int xim) *xim->display*))
 
 (defun display-for-xdisplay (xdisplay)
-  (gethash (ccl::%ptr-to-int (ptr-value xdisplay)) *xdisplay->display*))
+  (gethash (noffi::ptr-int xdisplay) *xdisplay->display*))
 
 (defun (setf display-for-xdisplay) (display xdisplay)
-  (setf (gethash (ccl::%ptr-to-int (ptr-value xdisplay)) *xdisplay->display*) display))
+  (setf (gethash (noffi::ptr-int xdisplay) *xdisplay->display*) display))
 
 (defcfun (x11-error-handler #_<int>)
 	 ((xdisplay #_<Display*>)
@@ -82,14 +82,14 @@
     do (clet ((byte #_<char> 0))
 	 (let* ((&byte (c-addr-of byte))
 		(result (#_write (c-aref (empty-event-pipes display) 1) &byte 1)))
-	   (when (or (= result 1) (and (= result -1) (/= #_errno #_EINTR)))
+	   (when (or (noffi::c== result 1) (and (noffi::c== result -1) (noffi::c!= #_errno #_EINTR)))
 	     (return (values)))))))
 
 (defun drain-empty-events (display)
   (loop
     do (clet ((dummy #_<char[64]>))
 	 (let ((result (#_read (c-aref (empty-event-pipes display) 0) dummy 64)))
-	   (when (and (= result -1) (/= #_errno #_EINTR))
+	   (when (and (noffi::c== result -1) (noffi::c!= #_errno #_EINTR))
 	     (return (values)))))))
 
 (defun get-x11-display-content-scale (display)
@@ -109,7 +109,7 @@
 	      (when (#_XrmGetResource db "Xft.dpi" "Xft.Dpi" &type &value)
 
 		(when (and type (zerop (#_strcmp type "String")))
-		  (setq dpi (ccl::%ptr-to-int (cval-value (#_.addr &value))))))))
+		  (setq dpi (#+ccl ccl::%ptr-to-int #+sbcl sb-sys::sap-int (#_.addr &value)))))))
 
 	  (#_XrmDestroyDatabase db))))
 
@@ -122,7 +122,7 @@
     (break "22")
     (when display
       (break "33")
-      (remhash (ccl::%ptr-to-int (ptr-value im)) *xim->display*)
+      (remhash (noffi::ptr-int im) *xim->display*)
       (setf (display-input-method display) nil))
     (values)))
 
@@ -149,12 +149,12 @@
 	(setf (display-input-method display) nil)))
 
     (when (display-input-method display)
-      (setf (gethash (ccl::%ptr-to-int (ptr-value (display-input-method display))) *xim->display*) display)
+      (setf (gethash (noffi::ptr-int (display-input-method display)) *xim->display*) display)
       (clet& ((&callback #_<XIMCallback>))
 	(setf (#_.callback &callback) input-method-destroy-callback
 	      (#_.client_data &callback) nil)
-	(#_XSetIMValues (display-input-method display)
-			#_XNDestroyCallback &callback nil)
+	(noffi::c-funcall #_XSetIMValues (display-input-method display)
+			#_XNDestroyCallback &callback 0)
 
 	(do ((window (display-window-list-head display) (window-next window)))
 	    ((null window))
@@ -185,8 +185,8 @@
 	 (&xselection (c->-addr notification '#_xselection)))
     (and (= (#_.type event) #_PropertyNotify)
 	 (= (#_.state (c->-addr event '#_xproperty)) #_PropertyNewValue)
-	 (= (#_.window (c->-addr event '#_xproperty)) (#_.requestor &xselection)
-	    (= (#_.atom (c->-addr event '#_xproperty)) (#_.property &xselection))))))
+	 (= (#_.window (c->-addr event '#_xproperty)) (#_.requestor &xselection))
+	 (= (#_.atom (c->-addr event '#_xproperty)) (#_.property &xselection)))))
 
 (defun send-event-to-wm (window type a b c d e)
   (clet& ((&event #_<XEvent>))
@@ -214,8 +214,8 @@
       (clet ((styles #_<XIMStyles*> #_NULL))
 	(let ((&styles (c-addr-of styles)))
 
-	  (when (#_XGetIMValues (display-input-method display)
-				#_XNQueryInputStyle &styles nil)
+	  (when (noffi::c-funcall #_XGetIMValues (display-input-method display)
+				#_XNQueryInputStyle &styles 0)
 	    (return nil))
 
 	  (loop for i from 0 below (#_.count_styles styles)
@@ -256,22 +256,24 @@
 	(#_XcursorImageDestroy native)))))
 
 (defun translate-x11-state (state)
-  (let ((mods 0))
+  (let ((mods 0)
+	(lock-mods 0))
 
     (when (logtest state #_ShiftMask)
       (setq mods (logior mods +shift-modifier+)))
     (when (logtest state #_ControlMask)
       (setq mods (logior mods +ctrl-modifier+)))
     (when (logtest state #_Mod1Mask)
-      (setq mods (logior mods +alt-modifier+)))
+      (setq mods (logior mods +meta-modifier+)))
     (when (logtest state #_Mod4Mask)
       (setq mods (logior mods +super-modifier+)))
+    
     (when (logtest state #_LockMask)
-      (setq mods (logior mods +caps-lock-modifier+)))
+      (setq lock-mods (logior lock-mods +caps-lock-modifier+)))
     (when (logtest state #_Mod2Mask)
-      (setq mods (logior mods +num-lock-modifier+)))
+      (setq lock-mods (logior lock-mods +num-lock-modifier+)))
 
-    mods))
+    (values mods lock-mods)))
 
 (defun %write-target-to-property (display request)
   (block write-target
@@ -402,14 +404,15 @@
 					#x03c82080 #xfa082080 #x82082080)))
 
 (defun decode-utf8-char (s)
-  (setq s (ccl::%inc-ptr (ptr-value s) (ptr-offset s)))
+  (setq s (ptr-effective-sap s))
   (let ((codepoint 0)
 	(count 0))
 
-    (loop do (setq codepoint (+ (ash codepoint 6) (ccl::%get-unsigned-byte s 0)))
-	     (ccl::%incf-ptr s 1)
+    (loop do (setq codepoint (+ (ash codepoint 6) (noffi::peek-u8 s 0)))
+	  #+CCL(ccl::%incf-ptr s 1)
+	  #+SBCL(setf s (sb-alien::sap+ s 1))
 	     (incf count)
-	  while (= (logand (ccl::%get-unsigned-byte s 0) #xc0) #x80))
+	  while (= (logand (noffi::peek-u8 s 0) #xc0) #x80))
 
     (assert (<= count 6))
 
@@ -419,6 +422,7 @@
   (block nil
 
     (let ((x11-state (display-x11-state display))
+	  (timestamp (get-internal-real-time))
 	  (x11-keycode)
 	  (filtered nil)
 	  (event-type (#_.type event)))
@@ -472,13 +476,8 @@
 							  :window window
 							  :x xpos
 							  :y ypos)))))))))
-
 	(return))
 
-      (print 'event-type)
-      (print event-type)
-      (finish-output)
-      
       (when (= event-type #_SelectionRequest)
 
 	(%handle-selection-request display event)
@@ -503,210 +502,174 @@
 
 	    (#.#_KeyPress
 	     (let* ((key (translate-key display x11-keycode))
-		    (&xkey (c->-addr event '#_xkey))
-		    (mods (translate-x11-state (#_.state &xkey))))
+		    (&xkey (c->-addr event '#_xkey)))
+	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state &xkey))
+		 (let ((plain? (not (logtest mods (logior +ctrl-modifier+ +meta-modifier+)))))
+		   (multiple-value-bind (x y) (window-cursor-position window)
 
-	       (if (window-input-context window)
+		     (if (window-input-context window)
 
-		   (progn
-		     (let ((diff (- (#_time &xkey) (aref (key-press-times window) x11-keycode))))
+			 (progn
+			   (let ((diff (- (#_time &xkey) (aref (key-press-times window) x11-keycode))))
 		   
-		       (when (or (= diff (#_time &xkey)) (and (> diff 0) (< diff #.(ash 1 31))))
+			     (when (or (= diff (#_time &xkey)) (and (> diff 0) (< diff #.(ash 1 31))))
 			 
-			 (unless (zerop x11-keycode)
-			   (handle-event window (make-instance 'key-press-event
-							       :window window
-							       :modifier-state mods
-							       :key-name key)))
+			       (unless (zerop x11-keycode)
+				 (input-key window key :press x y mods lock-mods timestamp))
 			 
-			 (setf (aref (key-press-times window) x11-keycode) (#_.time &xkey))))
+			       (setf (aref (key-press-times window) x11-keycode) (#_.time &xkey))))
 
-		     (when (zerop filtered)
+			   (when (zerop filtered)
 		     
-		       (let ((count)
-			     (chars))
+			     (let ((count)
+				   (chars))
 		     
-			 (clet ((status #_<Status>)
-				(buffer #_<char[100]>))
-			   (#_memset buffer 0 100)
+			       (clet ((status #_<Status>)
+				      (buffer #_<char[100]>))
+				 (#_memset buffer 0 100)
 		       
-			   (setq chars buffer)
+				 (setq chars buffer)
 			   
-			   (setq count (#_XLookupString #+NIL(window-input-context window)
-							&xkey
-							buffer 99
-							nil (c-addr-of status)))
+				 (setq count (#_Xutf8LookupString (window-input-context window)
+								  &xkey
+								  buffer 99
+								  nil (c-addr-of status)))
 
-			   (when (= (cval-value status) #_XBufferOverflow)
-			     (setq chars (#_malloc (1+ count)))
-			     (setq count  (#_Xutf8LookupString (window-input-context window)
-							       &xkey
-							       chars count
-							       nil (c-addr-of status))))
+				 (when (= (cval-value status) #_XBufferOverflow)
+				   (setq chars (#_malloc (1+ count)))
+				   (setq count  (#_Xutf8LookupString (window-input-context window)
+								     &xkey
+								     chars count
+								     nil (c-addr-of status))))
 			   
-			   (when (or (= (cval-value status) 0 #+NIL #_XLookupChars)
-				     (= (cval-value status) #_XLookupBoth))
+				 (when (or (= (cval-value status) #_XLookupChars)
+					   (= (cval-value status) #_XLookupBoth))
 
-			     (let ((c chars))
-			       (setf (c-aref chars count) 0)
-			       ;;(loop while (< (- (ptr-value c) chars) count)
-			       (handle-event window (make-instance 'character-event
-								   :window window
-								   :key-name key
-								   :modifier-state mods
-								   :character
-								   (decode-utf8-char c)))))
+				   (loop for char across (get-c-string chars)
+					 do (input-char window (char-code char) mods lock-mods plain?)))
 
-			   (unless (equalp chars buffer)
-			     (#_free chars))))))
+				 (unless (equalp chars buffer)
+				   (#_free chars))))))
 		   
-		   (clet ((keysym #_<KeySym>))
-		     (#_XLookupString (#_.xkey event) nil 0 (c-addr-of keysym) nil)
-		     
-		     (handle-event window (make-instance 'key-press-event
-							 :window window
-							 :key-name key
-							 :modifier-state mods))
+			 (clet ((keysym #_<KeySym>))
+			   (#_XLookupString (#_.xkey event) nil 0 (c-addr-of keysym) nil)
 
-		     (let ((char (xkb-keysym-to-unicode keysym)))
-		       (when char
-			 (handle-event window (make-instance 'character-event
-							     :window window
-							     :character char
-							     :modifier-state mods))))))
+			   (input-key window key :press x y mods lock-mods timestamp)
 
-	       (return)))
+			   (let ((char (xkb-keysym-to-unicode keysym)))
+			     (when char
+			       (input-char window char mods lock-mods plain?)))))
+
+		     (return))))))
 
 	    (#.#_KeyRelease
-	     (let ((key (translate-key display x11-keycode))
-		   (mods (translate-x11-state (#_.state (c->-addr event '#_xkey)))))
+	     (let ((key (translate-key display x11-keycode)))
+	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state (c->-addr event '#_xkey)))
+		 (multiple-value-bind (x y) (window-cursor-position window)
 
-	       (unless (xkb-detectable? x11-state)
+		   (unless (xkb-detectable? x11-state)
 
-		 (when (#_XEventsQueued (h display) #_QueuedAfterReading)
+		     (when (#_XEventsQueued (h display) #_QueuedAfterReading)
 
-		   (clet& ((&next #_<XEvent>))
-		     (let ((&xkey (c->-addr &next '#_xkey)))
+		       (clet& ((&next #_<XEvent>))
+			 (let ((&xkey (c->-addr &next '#_xkey)))
 			  
-		       (#_XEventPeek (h display) &next)
+			   (#_XPeekEvent (h display) &next)
 
-		       (when (and (= (#_.type &next) #_KeyPress)
-				  (= (#_.window &xkey)
-				     (#_.window (c->-addr event '#_xkey)))
-				  (= (#_.keycode &xkey) x11-keycode))
+			   (when (and (= (#_.type &next) #_KeyPress)
+				      (= (#_.window &xkey)
+					 (#_.window (c->-addr event '#_xkey)))
+				      (= (#_.keycode &xkey) x11-keycode))
 
-			 (when (< (#_time &xkey) 20)
+			     (when (< (#_time &xkey) 20)
 
-			   ;; server generated repeat event
-			   (return)))))))
+			       ;; server generated repeat event
+			       (return)))))))
 
-	       (handle-event window (make-instance 'key-release-event
-						   :window window
-						   :key-name key
-						   :modifier-state mods))
-	       (return)))
+		   (input-key window key :release x y mods lock-mods timestamp)
+	       
+		   (return)))))
 
 	    (#.#_ButtonPress
 
-	     (let ((mods (translate-x11-state (#_.state (c->-addr event '#_xbutton))))
-		   (button (#_.button (c->-addr event '#_xbutton))))
+	     (let ((button (#_.button (c->-addr event '#_xbutton))))
+	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state (c->-addr event '#_xbutton)))
+		 (multiple-value-bind (x y) (window-cursor-position window)
+		   
+		   (cond ((= button #_Button1)
+			  (input-mouse-click window +pointer-left-button+ :press x y mods lock-mods timestamp))
 
-	       (multiple-value-bind (x y) (window-cursor-position window)
-	       (cond ((= button #_Button1)
-		      (handle-event window (make-instance 'pointer-button-press-event
-							  :window window
-							  :x x
-							  :y y
-							  :button +pointer-left-button+
-							  :modifier-state mods)))
+			 ((= button #_Button2)
+			  (input-mouse-click window +pointer-middle-button+ :press x y mods lock-mods timestamp))
 
-		     ((= button #_Button2)
-		      (handle-event window (make-instance 'pointer-button-press-event
-							  :window window
-							  :x x
-							  :y y
-							  :button +pointer-middle-button+
-							  :modifier-state mods)))
+			 ((= button #_Button3)
+			
+			  (input-mouse-click window +pointer-right-button+ :press x y mods lock-mods timestamp))
 
-		     ((= button #_Button3)
-		      (handle-event window (make-instance 'pointer-button-press-event
-							  :window window
-							  :x x
-							  :y y
-							  :button +pointer-right-button+
-							  :modifier-state mods)))
+			 ((= button #_Button4)
+			  (handle-event window (make-instance 'pointer-wheel-event
+							      :window window
+							      :input-code +pointer-wheel+
+							      :yoffset 1.0
+							      :x x
+							      :y y
+							      :modifier-state mods
+							      :lock-modifier-state lock-mods
+							      :timestamp timestamp)))
 
-		     ((= button #_Button4)
-		      (handle-event window (make-instance 'pointer-wheel-event
-							  :window window
-							  :x x
-							  :y y
-							  :delta-y 1.0
-							  :delta-x 0.0
-							  :modifier-state mods)))
+			 ((= button #_Button5)
+			  (handle-event window (make-instance 'pointer-wheel-event
+							      :window window
+							      :input-code +pointer-wheel+
+							      :yoffset -1.0
+							      :x x
+							      :y y
+							      :modifier-state mods
+							      :lock-modifier-state lock-mods
+							      :timestamp timestamp)))
 
-		     ((= button #_Button5)
-		      (handle-event window (make-instance 'pointer-wheel-event
-							  :window window
-							  :x x
-							  :y y
-							  :delta-y -1.0
-							  :delta-x 0.0
-							  :modifier-state mods)))
+			 #+NOTYET
+			 ((= button #_Button6)
+			  (handle-event window (make-instance 'pointer-wheel-event
+							      :window window
+							      :x x
+							      :y y
+							      :delta-x 1.0
+							      :delta-y 0.0
+							      :modifier-state mods)))
+			 #+NOTYET
+			 ((= button #_Button7)
+			  (handle-event window (make-instance 'pointer-wheel-event
+							      :window window
+							      :x x
+							      :y y
+							      :delta-x -1.0
+							      :delta-y 0.0
+							      :modifier-state mods)))
 
-		     ((= button #_Button6)
-		      (handle-event window (make-instance 'pointer-wheel-event
-							  :window window
-							  :x x
-							  :y y
-							  :delta-x 1.0
-							  :delta-y 0.0
-							  :modifier-state mods)))
-
-		     ((= button #_Button7)
-		      (handle-event window (make-instance 'pointer-wheel-event
-							  :window window
-							  :x x
-							  :y y
-							  :delta-x -1.0
-							  :delta-y 0.0
-							  :modifier-state mods)))
-
-		     (t (handle-event window (make-instance 'pointer-button-press-event
-							    :window window
-							    :x x :y y
-							    :button (- button #_Button1 #_Button4)
-							    :modifier-state mods)))))
+			 (t (input-mouse-click window (- button #_Button1 #_Button4) :press x y mods lock-mods timestamp)))))
 
 	       (return)))
 
 	    (#.#_ButtonRelease
 
-	     (let ((mods (translate-x11-state (#_.state (c->-addr event '#_xbutton))))
-		   (button (#_.button (c->-addr event '#_xbutton))))
+	     (let ((button (#_.button (c->-addr event '#_xbutton))))
+	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state (c->-addr event '#_xbutton)))
+		 (multiple-value-bind (x y) (window-cursor-position window)
 
-	       (cond ((= button #_Button1)
-		      (handle-event window (make-instance 'pointer-button-release-event
-							  :window window
-							  :button +pointer-left-button+
-							  :modifier-state mods)))
+		   (cond ((= button #_Button1)
+			  (input-mouse-click window +pointer-left-button+ :release x y mods lock-mods timestamp))
 
-		     ((= button #_Button2)
-		      (handle-event window (make-instance 'pointer-button-release-event
-							  :window window
-							  :button +pointer-middle-button+
-							  :modifier-state mods)))
+			 ((= button #_Button2)
+			  (input-mouse-click window +pointer-middle-button+ :release x y mods lock-mods timestamp))
 
-		     ((= button #_Button3)
-		      (handle-event window (make-instance 'pointer-button-release-event
-							  :window window
-							  :button +pointer-right-button+
-							  :modifier-state mods)))
+			 ((= button #_Button3)
+			  (input-mouse-click window +pointer-right-button+ :release x y mods lock-mods timestamp))
 
-		     (t (handle-event window (make-instance 'pointer-button-release-event
-							    :window window
-							    :button (- button #_Button1 #_Button4)
-							    :modifier-state mods))))
+			 (t (handle-event window (make-instance 'pointer-button-release-event
+								:window window
+								:button (- button #_Button1 #_Button4)
+								:modifier-state mods))))))
 
 	       (return)))
 
@@ -798,10 +761,10 @@
 
 		   (clet& ((&dummy #_<Window>))
 
-		     (#_XTranslateCoordinates (h display) (h (window-parent window))
-					      xpos ypos
-					      (c-addr-of xpos) (c-addr-of ypos)
-					      &dummy))
+		     (noffi::c-funcall #_XTranslateCoordinates (h display) (h (window-parent window))
+				       xpos ypos
+				       (c-addr-of xpos) (c-addr-of ypos)
+				       &dummy))
 
 		   (%release-x11-error-handler display)
 

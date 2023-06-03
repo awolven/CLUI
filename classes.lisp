@@ -480,7 +480,7 @@
 				&key display
 				  &allow-other-keys)
   (declare (ignore initargs))
-  (when (find-class 'arrow-cursor nil)
+  #+NIL(when (find-class 'arrow-cursor nil)
     (setf (%window-cursor window) (make-instance 'arrow-cursor :display display)))
   (values))
 

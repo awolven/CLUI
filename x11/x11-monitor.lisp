@@ -82,7 +82,7 @@
 
 			       (let ((monitor (make-instance 'monitor
 							     :display display
-							     :name (ccl::%get-utf-8-cstring (ptr-value (#_.name oi)))
+							     :name (noffi::get-c-string (#_.name oi))
 							     :width-mm width-mm
 							     :height-mm height-mm
 							     :x11-output output

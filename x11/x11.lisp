@@ -19,8 +19,8 @@
   #include <poll.h>
   #include <signal.h>
   #include <time.h>
-#include <X11/Xlib.h>
-#include <X11/Xlib-xcb.h>
+  #include <X11/Xlib.h>
+  #include <X11/Xlib-xcb.h>
   #include <X11/Xutil.h>
   #include <X11/cursorfont.h>
   #include <X11/Xmd.h>
@@ -32,7 +32,8 @@
   #include <X11/extensions/Xrandr.h>
   #include <X11/XKBlib.h>
   #include <X11/extensions/Xinerama.h>
-  /*#include <X11/extensions/XInput2.h>*/
+/*#include <X11/extensions/XInput2.h>*/
+  #include <X11/extensions/XI2.h>
   #include <X11/extensions/shape.h>
 
   }

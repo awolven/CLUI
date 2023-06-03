@@ -145,6 +145,7 @@
 	(let ((scancode-min (#_.min_key_code desc))
 	      (scancode-max (#_.max_key_code desc)))
 
+
 	  (loop for scancode from scancode-min to scancode-max
 		with key = nil
 		do (loop for pair in *x11-querty-keymap*
