@@ -540,6 +540,7 @@
 			       #@NSDate
 			       #@MTKView
 			       #@NSTouchBar
+			       #@NSPasteboard
 			       #@CALayer
 			       #@CAMetalLayer)
 			 "~/clui/cocoa/ns-bindings.lisp"
@@ -580,6 +581,7 @@
 			       (class_getClassMethod #@NSCursor @(resizeUpDownCursor))
 			       (class_getClassMethod #@NSCursor @(closedHandCursor))
 			       (class_getClassMethod #@NSCursor @(operationNotAllowedCursor))
+			       (class_getClassMethod #@NSPasteboard @(pasteboardWithName:))
 			       )
 			 :with-internals? with-internals?))
 

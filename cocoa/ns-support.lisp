@@ -27,7 +27,9 @@
 (defvar *yes* 1)
 (defvar *no* 0)
 
-(defvar NSDefaultRunLoopMode (objc-runtime::make-nsstring "NSDefaultRunLoopMode"))
+(defvar NSDefaultRunLoopMode (CFSTR "NSDefaultRunLoopMode"))
+(defvar NSPasteboardTypeString (CFSTR "NSPasteboardTypeString"))
+(defvar NSPasteboardNameGeneral (CFSTR "NSPasteboardNameGeneral"))
 (cffi:defcfun ("_NSGetProgname" _NSGetProgname) :string)
 
 (defconstant NSUTF32StringEncoding #x8c000100)

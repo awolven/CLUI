@@ -166,6 +166,15 @@
 (defmethod copy-string-from-clipboard ((display win32:desktop-mixin))
   (win32-copy-string-from-clipboard))
 
+#+cocoa
+(defmethod copy-string-to-clipboard ((display cocoa:desktop-mixin) (string string))
+  (cocoa-copy-string-to-pasteboard string))
+
+#+cocoa
+(defmethod copy-string-from-clipboard ((display cocoa:desktop-mixin))
+  (cocoa-copy-string-from-pasteboard))
+
+
 (defun get-primary-monitor (&optional (display (default-display)))
   (car (display-monitors display)))
 

@@ -2,81 +2,6 @@
 (named-readtables:in-readtable :objc-readtable)
 
 
-(defun ns::|fp__ivarDescriptionForClass:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp__ivarDescriptionForClass:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp__methodDescriptionForClass:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp__methodDescriptionForClass:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_ivarDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_ivarDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_methodDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_methodDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_shortMethodDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_shortMethodDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|stringValueSafe:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(stringValueSafe:) (( ( :POINTER :INT))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|utf8ValueSafe:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(utf8ValueSafe:) (( ( :POINTER :INT))  :STRING)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|boolValueSafe| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(boolValueSafe) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|boolValueSafe:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(boolValueSafe:) (( ( :POINTER :INT))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|int64ValueSafe| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(int64ValueSafe) (()  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|int64ValueSafe:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(int64ValueSafe:) (( ( :POINTER :INT))  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|doubleValueSafe| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(doubleValueSafe) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|doubleValueSafe:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(doubleValueSafe:) (( ( :POINTER :INT))  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|stringValueSafe| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(stringValueSafe) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|utf8ValueSafe| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(utf8ValueSafe) (()  :STRING)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 (defun ns::|accessibilityOverriddenAttributes| (thing)
   (let ((message-lambda 
          (make-message-lambda @(accessibilityOverriddenAttributes) (()  :POINTER)))) 
@@ -342,10 +267,10 @@
          (make-message-lambda @(encodeWithCAMLWriter:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|CA_interpolateValues:::interpolator:| (thing _ g1050 g1051 interpolator)
+(defun ns::|CA_interpolateValues:::interpolator:| (thing _ g769 g770 interpolator)
   (let ((message-lambda 
          (make-message-lambda @(CA_interpolateValues:::interpolator:) (( :POINTER :POINTER :POINTER ( :POINTER ( :STRUCT ns::|ValueInterpolator|)))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id g1050) (objc-object-id g1051) (objc-object-id interpolator))))
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id g769) (objc-object-id g770) (objc-object-id interpolator))))
 
 (defun ns::|CAMLType| (thing)
   (let ((message-lambda 
@@ -1535,16 +1460,6 @@
 (defun ns::|preservationPriorityForTag:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(preservationPriorityForTag:) (( :POINTER)  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|encodedBytesAndReturnLength:error:| (thing _ error)
-  (let ((message-lambda 
-         (make-message-lambda @(encodedBytesAndReturnLength:error:) (( ( :POINTER :UNSIGNED-LONG-LONG) ( :POINTER :POINTER))  :STRING)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id error))))
-
-(defun ns::|encodedDataAndReturnError:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(encodedDataAndReturnError:) (( ( :POINTER :POINTER))  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 
@@ -3735,56 +3650,6 @@
   (let ((message-lambda 
          (make-message-lambda @(command) (()  :LONG-LONG)))) 
    (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|boolValueSafeForKey:status:| (thing _ status)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(boolValueSafeForKey:status:) (( :POINTER ( :POINTER :INT))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id status)))) nil t))
-
-(defun ns::|int64ValueSafeForKey:status:| (thing _ status)
-  (let ((message-lambda 
-         (make-message-lambda @(int64ValueSafeForKey:status:) (( :POINTER ( :POINTER :INT))  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id status))))
-
-(defun ns::|doubleValueSafeForKey:status:| (thing _ status)
-  (let ((message-lambda 
-         (make-message-lambda @(doubleValueSafeForKey:status:) (( :POINTER ( :POINTER :INT))  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id status))))
-
-(defun ns::|stringValueSafeForKey:status:| (thing _ status)
-  (let ((message-lambda 
-         (make-message-lambda @(stringValueSafeForKey:status:) (( :POINTER ( :POINTER :INT))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id status))))
-
-(defun ns::|utf8ValueSafeForKey:status:| (thing _ status)
-  (let ((message-lambda 
-         (make-message-lambda @(utf8ValueSafeForKey:status:) (( :POINTER ( :POINTER :INT))  :STRING)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id status))))
-
-(defun ns::|boolValueSafeForKey:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(boolValueSafeForKey:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|int64ValueSafeForKey:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(int64ValueSafeForKey:) (( :POINTER)  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|doubleValueSafeForKey:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(doubleValueSafeForKey:) (( :POINTER)  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|stringValueSafeForKey:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(stringValueSafeForKey:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|utf8ValueSafeForKey:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(utf8ValueSafeForKey:) (( :POINTER)  :STRING)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 (defun ns::|bs_setDomain:| (thing _)
   (let ((message-lambda 
@@ -6868,198 +6733,6 @@
          (make-message-lambda @(push) (()  :VOID)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|fp_obfuscatedPath| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_obfuscatedPath) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_obfuscatedFilename| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_obfuscatedFilename) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_libnotifyPerUserNotificationName| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_libnotifyPerUserNotificationName) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_formatStringWithValues:error:| (thing _ error)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_formatStringWithValues:error:) (( :POINTER ( :POINTER :POINTER))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id error))))
-
-(defun ns::|fp_localizedFormatWithKeys:fromDictionary:error:| (thing _ from-dictionary error)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_localizedFormatWithKeys:fromDictionary:error:) (( :POINTER :POINTER ( :POINTER :POINTER))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id from-dictionary) (objc-object-id error))))
-
-(defun ns::|fp_obfuscatedProviderDomainID| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_obfuscatedProviderDomainID) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_fpIdentifier| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_fpIdentifier) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_toDomainIdentifier| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_toDomainIdentifier) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_bouncedNameWithIndex:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_bouncedNameWithIndex:) (( :LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|fp_stringByDeletingPathBounceNo:andPathExtension:| (thing _ and-path-extension)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_stringByDeletingPathBounceNo:andPathExtension:) (( ( :POINTER :POINTER) ( :POINTER :POINTER))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id and-path-extension))))
-
-(defun ns::|fp_representableHFSFileNameWithNumber:addedExtension:makeDotFile:| (thing _ added-extension make-dot-file)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_representableHFSFileNameWithNumber:addedExtension:makeDotFile:) (( :POINTER :POINTER :CHAR)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id added-extension) (if make-dot-file 1 0))))
-
-(defun ns::|fp_toProviderID| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_toProviderID) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_displayNameFromFilenameWithHiddenPathExtension:isFolder:| (thing _ is-folder)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_displayNameFromFilenameWithHiddenPathExtension:isFolder:) (( :CHAR :CHAR)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0) (if is-folder 1 0))))
-
-(defun ns::|fp_isiCloudDriveOrCloudDocsIdentifier| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(fp_isiCloudDriveOrCloudDocsIdentifier) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|fp_usesDSCopyEngine| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(fp_usesDSCopyEngine) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|fp_prettyPath| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_prettyPath) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_realpath| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_realpath) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_filenameFromDisplayNameWithExtension:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_filenameFromDisplayNameWithExtension:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_alwaysObfuscatedFilename| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_alwaysObfuscatedFilename) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_prettyPathWithObfuscation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_prettyPathWithObfuscation:) (( :CHAR)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|fp_alwaysObfuscatedPath| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_alwaysObfuscatedPath) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_stringByDeletingPathExtension| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_stringByDeletingPathExtension) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_pathExtension| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_pathExtension) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_representableHFSFileNameWithSuffix:addedExtension:makeDotFile:| (thing _ added-extension make-dot-file)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_representableHFSFileNameWithSuffix:addedExtension:makeDotFile:) (( :POINTER :POINTER :CHAR)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id added-extension) (if make-dot-file 1 0))))
-
-(defun ns::|fp_fileSystemRepresentation| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_fileSystemRepresentation) (()  :STRING)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_enumerateTokensInRange:tokenizer:usingBlock:| (thing _ tokenizer using-block)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_enumerateTokensInRange:tokenizer:usingBlock:) (( ( :STRUCT ns::|_NSRange|) ( :POINTER ( :STRUCT ns::|__CFStringTokenizer|)) :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id tokenizer) (objc-object-id using-block))))
-
-(defun ns::|fp_isCJKLanguageIdentifier| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(fp_isCJKLanguageIdentifier) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|validateGSName:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(validateGSName:) (( ( :POINTER :POINTER))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|gs_stringByUpdatingPathExtensionWithPathOrURL:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(gs_stringByUpdatingPathExtensionWithPathOrURL:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|validateGSNameAllowingDot:error:| (thing _ error)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(validateGSNameAllowingDot:error:) (( :CHAR ( :POINTER :POINTER))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0) (objc-object-id error)))) nil t))
-
-(defun ns::|gs_issueExtension:error:| (thing _ error)
-  (let ((message-lambda 
-         (make-message-lambda @(gs_issueExtension:error:) (( :STRING ( :POINTER :POINTER))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id error))))
-
-(defun ns::|gs_issueReadExtensionIfNeededForAuditToken:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(gs_issueReadExtensionIfNeededForAuditToken:) (( ( :ARRAY :CHAR 32))  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|ak_urlEncoded| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_urlEncoded) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ak_SHA256String| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_SHA256String) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ak_SHA256| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_SHA256) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ak_truncatedCopy| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_truncatedCopy) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|ak_stringByZeroPaddingOccurencesOfString:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_stringByZeroPaddingOccurencesOfString:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ak_isEmailAddress| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(ak_isEmailAddress) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-
-
 (defun ns::|initWithPasteboardPropertyList:ofType:| (thing _ of-type)
   (let ((message-lambda 
          (make-message-lambda @(initWithPasteboardPropertyList:ofType:) (( :POINTER :POINTER)  :POINTER)))) 
@@ -8498,16 +8171,6 @@
          (make-message-lambda @(initWithContentsOfMarkdownFileAtURL:options:baseURL:error:) (( :POINTER :POINTER :POINTER ( :POINTER :POINTER))  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id options) (objc-object-id base-u-r-l) (objc-object-id error))))
 
-(defun ns::|appendLineMVK:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(appendLineMVK:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|appendLineMVK| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(appendLineMVK) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 (defun ns::|dd_appendSpaces:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(dd_appendSpaces:) (( :UNSIGNED-INT)  :VOID)))) 
@@ -8589,113 +8252,6 @@
   (if (= 0  (let ((message-lambda 
          (make-message-lambda @(applyTransform:reverse:range:updatedRange:) (( :POINTER :CHAR ( :STRUCT ns::|_NSRange|) ( :POINTER ( :STRUCT ns::|_NSRange|)))  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (if reverse 1 0) range (objc-object-id updated-range)))) nil t))
-
-(defun ns::|XMLString| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(XMLString) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_filter:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_filter:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_map:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_map:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_itemIDs| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_itemIDs) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_shortDescriptionExpandingAtMost:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_shortDescriptionExpandingAtMost:) (( :UNSIGNED-LONG-LONG)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|fp_mapWithIndex:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_mapWithIndex:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_removingObjectsNotKindOfClasses:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_removingObjectsNotKindOfClasses:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_categorize:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_categorize:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|fp_pickItemsFromArray:correspondingToIndexesOfItemsInArray:| (thing _ corresponding-to-indexes-of-items-in-array)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_pickItemsFromArray:correspondingToIndexesOfItemsInArray:) (( :POINTER :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id corresponding-to-indexes-of-items-in-array))))
-
-(defun ns::|fp_itemIdentifiers| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_itemIdentifiers) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_comparator| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_comparator) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|fp_compareItem:toItem:| (thing _ to-item)
-  (let ((message-lambda 
-         (make-message-lambda @(fp_compareItem:toItem:) (( :POINTER :POINTER)  :LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-item))))
-
-(defun ns::|ac_filter:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ac_filter:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ac_firstObjectPassingTest:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ac_firstObjectPassingTest:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ac_map:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ac_map:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ac_mapNullable:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ac_mapNullable:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ak_map:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_map:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ak_mapNullable:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_mapNullable:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ak_filter:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_filter:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|ak_firstObjectMatchingFilter:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_firstObjectMatchingFilter:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-
-
-(defun ns::|cuFilteredArrayUsingBlock:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(cuFilteredArrayUsingBlock:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
 (defun ns::|rangeAtIndex:| (thing _)
   (let ((message-lambda 
@@ -9441,47 +8997,6 @@
   (let ((message-lambda 
          (make-message-lambda @(setGestureBehaviors:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|respondsToAction:fromTask:| (thing _ from-task)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(respondsToAction:fromTask:) (( :POINTER ( :ARRAY :CHAR 32))  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) from-task))) nil t))
-
-(defun ns::|swizzledAccessibilityAttributeValue:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledAccessibilityAttributeValue:) (( :POINTER)  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledviewDidChangeEffectiveAppearance| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledviewDidChangeEffectiveAppearance) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|automaticallyNotifiesObserversOf_semanticContext| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(automaticallyNotifiesObserversOf_semanticContext) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|safeAreaRect| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(safeAreaRect) (()  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|automaticallyNotifiesObserversOfAdditionalSafeAreaInsets| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(automaticallyNotifiesObserversOfAdditionalSafeAreaInsets) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setAdditionalSafeAreaInsets:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setAdditionalSafeAreaInsets:) (( ( :STRUCT ns::|NSEdgeInsets|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|additionalSafeAreaInsets| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(additionalSafeAreaInsets) (()  ( :STRUCT ns::|NSEdgeInsets|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 
 
 
@@ -14765,10 +14280,6 @@
 
 
 
-
-
-
-
 (defun ns::|beginRequestWithExtensionContext:| (thing _)
   (let ((message-lambda 
          (make-message-lambda @(beginRequestWithExtensionContext:) (( :POINTER)  :VOID)))) 
@@ -19311,229 +18822,6 @@
 
 
 
-(defun ns::|viewBridgeBecomingChild| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(viewBridgeBecomingChild) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|setViewBridgeBecomingChild:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setViewBridgeBecomingChild:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|viewBridgeHostApp| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewBridgeHostApp) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setViewBridgeHostApp:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setViewBridgeHostApp:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledBackgroundColor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledBackgroundColor) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledSetBackgroundColor:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetBackgroundColor:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledAddChildWindow:ordered:| (thing _ ordered)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledAddChildWindow:ordered:) (( :POINTER :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) ordered)))
-
-(defun ns::|swizzledRemoveChildWindow:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledRemoveChildWindow:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledDragWindowRelativeToMouseDown:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledDragWindowRelativeToMouseDown:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|swizzledSetFrameCommon:display:stashSize:| (thing _ display stash-size)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetFrameCommon:display:stashSize:) (( ( :STRUCT ns::|CGRect|) :CHAR :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ (if display 1 0) (if stash-size 1 0))))
-
-(defun ns::|swizzledWindowForSheetMovementAndOrderingGroups| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledWindowForSheetMovementAndOrderingGroups) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledSetMouseMovedEventsEnabled:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetMouseMovedEventsEnabled:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|swizzledSetEventMask:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetEventMask:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|swizzledOrderedDrawerAndWindowKeyLoopGroupingViews| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledOrderedDrawerAndWindowKeyLoopGroupingViews) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledSetHidesOnDeactivate:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetHidesOnDeactivate:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|swizzledStyleMask| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledStyleMask) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledSetStyleMask:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetStyleMask:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|swizzledHierarchyDidChangeInView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledHierarchyDidChangeInView:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledBeginCriticalSheet:completionHandler:| (thing _ completion-handler)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledBeginCriticalSheet:completionHandler:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id completion-handler))))
-
-(defun ns::|swizzledBeginSheet:completionHandler:| (thing _ completion-handler)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledBeginSheet:completionHandler:) (( :POINTER :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id completion-handler))))
-
-(defun ns::|beginServiceSheet:completionHandler:isCritical:| (thing _ completion-handler is-critical)
-  (let ((message-lambda 
-         (make-message-lambda @(beginServiceSheet:completionHandler:isCritical:) (( :POINTER :POINTER :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id completion-handler) (if is-critical 1 0))))
-
-(defun ns::|swizzledEndSheet:returnCode:| (thing _ return-code)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledEndSheet:returnCode:) (( :POINTER :LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) return-code)))
-
-(defun ns::|endHostSheet:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(endHostSheet:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledConstrainFrameRect:toScreen:| (thing _ to-screen)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledConstrainFrameRect:toScreen:) (( ( :STRUCT ns::|CGRect|) :POINTER)  ( :STRUCT ns::|CGRect|))))) 
-   (funcall message-lambda (objc-object-id thing)  _ (objc-object-id to-screen))))
-
-(defun ns::|swizzledDoOrderWindow:relativeTo:findKey:forCounter:force:isModal:| (thing _ relative-to find-key for-counter force is-modal)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledDoOrderWindow:relativeTo:findKey:forCounter:force:isModal:) (( :LONG-LONG :LONG-LONG :CHAR :CHAR :CHAR :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _ relative-to (if find-key 1 0) (if for-counter 1 0) (if force 1 0) (if is-modal 1 0))))
-
-(defun ns::|swizzledOrderFrontRelativeToWindow:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledOrderFrontRelativeToWindow:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledSendEvent:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSendEvent:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledCanBecomeKeyWindow| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledCanBecomeKeyWindow) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|swizzledRegionForOpaqueViewsBlockingDraggableFrame:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledRegionForOpaqueViewsBlockingDraggableFrame:) (( ( :STRUCT ns::|CGRect|))  ( :POINTER ( :STRUCT ns::|CGSRegionObject|)))))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|swizzledSetCursorForMouseLocation:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSetCursorForMouseLocation:) (( ( :STRUCT ns::|CGPoint|))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|swizzledResignKeyWindow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledResignKeyWindow) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledBecomeKeyWindow| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledBecomeKeyWindow) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledIsKeyWindow| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledIsKeyWindow) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|swizzledHostWindowIsKey| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledHostWindowIsKey) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|swizzledMakeFirstResponder:| (thing _)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledMakeFirstResponder:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
-
-(defun ns::|swizzledBackingScaleFactor| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledBackingScaleFactor) (()  :DOUBLE)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledIsEffectivelyVisible| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledIsEffectivelyVisible) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|swizzledIsRunningADocModalAttachedSheet| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledIsRunningADocModalAttachedSheet) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|swizzledSelectKeyViewPrecedingView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSelectKeyViewPrecedingView:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledSelectKeyViewFollowingView:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledSelectKeyViewFollowingView:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledUpdateConstraintsIfNeeded| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledUpdateConstraintsIfNeeded) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|swizzledCanBecomeMainWindow| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(swizzledCanBecomeMainWindow) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|swizzledEndSheet:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledEndSheet:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|swizzledShake| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledShake) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-
-
-
 
 
 
@@ -22635,11 +21923,6 @@
          (make-message-lambda @(appendBezierPathWithPackedGlyphs:) (( :STRING)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  _)))
 
-(defun ns::|ak_serverFriendlyString| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(ak_serverFriendlyString) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 (defun ns::|isAfterDate:| (thing _)
   (if (= 0  (let ((message-lambda 
          (make-message-lambda @(isAfterDate:) (( :POINTER)  :CHAR)))) 
@@ -23112,36 +22395,6 @@
          (make-message-lambda @(autoResizeDrawable) (()  :CHAR)))) 
    (funcall message-lambda (objc-object-id thing) ))) nil t))
 
-(defun ns::|swizzledDealloc| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(swizzledDealloc) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewServiceTouchBarControllerIdentifier| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewServiceTouchBarControllerIdentifier) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setViewServiceTouchBarControllerIdentifier:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setViewServiceTouchBarControllerIdentifier:) (( :POINTER)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|addViewServiceTouchBarControllerObservers| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(addViewServiceTouchBarControllerObservers) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|removeViewServiceTouchBarControllerObservers| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(removeViewServiceTouchBarControllerObservers) (()  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|viewServiceTouchBarControllerDescription| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(viewServiceTouchBarControllerDescription) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 
 
 
@@ -23346,15 +22599,137 @@
          (make-message-lambda @(setEscapeKeyReplacementItem:) (( :POINTER)  :VOID)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 
-(defun ns::|NS_view| (thing)
+
+
+(defun ns::|changeCount| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(NS_view) (()  :POINTER)))) 
+         (make-message-lambda @(changeCount) (()  :LONG-LONG)))) 
    (funcall message-lambda (objc-object-id thing) )))
 
-(defun ns::|NS_setView:| (thing _)
+(defun ns::|types| (thing)
   (let ((message-lambda 
-         (make-message-lambda @(NS_setView:) (( :POINTER)  :VOID)))) 
+         (make-message-lambda @(types) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|availableTypeFromArray:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(availableTypeFromArray:) (( :POINTER)  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|attemptOverwrite:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(attemptOverwrite:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|declareTypes:owner:| (thing _ owner)
+  (let ((message-lambda 
+         (make-message-lambda @(declareTypes:owner:) (( :POINTER :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id owner))))
+
+(defun ns::|setString:forType:| (thing _ for-type)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(setString:forType:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-type)))) nil t))
+
+(defun ns::|dataForType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(dataForType:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|setData:forType:| (thing _ for-type)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(setData:forType:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-type)))) nil t))
+
+(defun ns::|propertyListForType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(propertyListForType:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|readObjectsForClasses:options:| (thing _ options)
+  (let ((message-lambda 
+         (make-message-lambda @(readObjectsForClasses:options:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id options))))
+
+(defun ns::|clearContents| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(clearContents) (()  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|writeObjects:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeObjects:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|setPropertyList:forType:| (thing _ for-type)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(setPropertyList:forType:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-type)))) nil t))
+
+(defun ns::|addTypes:owner:| (thing _ owner)
+  (let ((message-lambda 
+         (make-message-lambda @(addTypes:owner:) (( :POINTER :POINTER)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id owner))))
+
+(defun ns::|pasteboardItems| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(pasteboardItems) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|stringForType:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(stringForType:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|releaseGlobally| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(releaseGlobally) (()  :VOID)))) 
+   (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|prepareForNewContentsWithOptions:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(prepareForNewContentsWithOptions:) (( :UNSIGNED-LONG-LONG)  :LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  _)))
+
+(defun ns::|indexOfPasteboardItem:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(indexOfPasteboardItem:) (( :POINTER)  :UNSIGNED-LONG-LONG)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
+
+(defun ns::|canReadItemWithDataConformingToTypes:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canReadItemWithDataConformingToTypes:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|canReadObjectForClasses:options:| (thing _ options)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(canReadObjectForClasses:options:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id options)))) nil t))
+
+(defun ns::|setDataProvider:forTypes:| (thing _ for-types)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(setDataProvider:forTypes:) (( :POINTER :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id for-types)))) nil t))
+
+(defun ns::|writeFileContents:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeFileContents:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|writeFileWrapper:| (thing _)
+  (if (= 0  (let ((message-lambda 
+         (make-message-lambda @(writeFileWrapper:) (( :POINTER)  :CHAR)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+
+(defun ns::|readFileContentsType:toFile:| (thing _ to-file)
+  (let ((message-lambda 
+         (make-message-lambda @(readFileContentsType:toFile:) (( :POINTER :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _) (objc-object-id to-file))))
+
+(defun ns::|readFileWrapper| (thing)
+  (let ((message-lambda 
+         (make-message-lambda @(readFileWrapper) (()  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing) )))
 
 (defun ns::|NS_managesOpenGLDrawable| (thing)
   (if (= 0  (let ((message-lambda 
@@ -24854,61 +24229,6 @@
          (make-message-lambda @(optimizationOpportunities:) (( :CHAR)  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
 
-(defun ns::|naturalDrawableSizeMVK| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(naturalDrawableSizeMVK) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|setMaximumDrawableCountMVK:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setMaximumDrawableCountMVK:) (( :UNSIGNED-LONG-LONG)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  _)))
-
-(defun ns::|setDisplaySyncEnabledMVK:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setDisplaySyncEnabledMVK:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|setColorspaceNameMVK:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setColorspaceNameMVK:) (( ( :POINTER ( :STRUCT ns::|__CFString|)))  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
-
-(defun ns::|setWantsExtendedDynamicRangeContentMVK:| (thing _)
-  (let ((message-lambda 
-         (make-message-lambda @(setWantsExtendedDynamicRangeContentMVK:) (( :CHAR)  :VOID)))) 
-   (funcall message-lambda (objc-object-id thing)  (if _ 1 0))))
-
-(defun ns::|screenMVK| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(screenMVK) (()  :POINTER)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|updatedDrawableSizeMVK| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(updatedDrawableSizeMVK) (()  ( :STRUCT ns::|CGSize|))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|displaySyncEnabledMVK| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(displaySyncEnabledMVK) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|maximumDrawableCountMVK| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(maximumDrawableCountMVK) (()  :UNSIGNED-LONG-LONG)))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
-(defun ns::|wantsExtendedDynamicRangeContentMVK| (thing)
-  (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(wantsExtendedDynamicRangeContentMVK) (()  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing) ))) nil t))
-
-(defun ns::|colorspaceNameMVK| (thing)
-  (let ((message-lambda 
-         (make-message-lambda @(colorspaceNameMVK) (()  ( :POINTER ( :STRUCT ns::|__CFString|)))))) 
-   (funcall message-lambda (objc-object-id thing) )))
-
 
 
 
@@ -25219,7 +24539,13 @@
   (let ((message-lambda 
          (make-message-lambda @(operationNotAllowedCursor) (()  :POINTER)))) 
    (funcall message-lambda (objc-object-id thing) )))
+
+(defun ns::|pasteboardWithName:| (thing _)
+  (let ((message-lambda 
+         (make-message-lambda @(pasteboardWithName:) (( :POINTER)  :POINTER)))) 
+   (funcall message-lambda (objc-object-id thing)  (objc-object-id _))))
 (export (list 
+          'ns::|pasteboardWithName:|
           'ns::|operationNotAllowedCursor|
           'ns::|closedHandCursor|
           'ns::|resizeUpDownCursor|
@@ -25278,17 +24604,6 @@
           'ns::|setPixelFormat:|
           'ns::|protectionOptions|
           'ns::|setProtectionOptions:|
-          'ns::|colorspaceNameMVK|
-          'ns::|wantsExtendedDynamicRangeContentMVK|
-          'ns::|maximumDrawableCountMVK|
-          'ns::|displaySyncEnabledMVK|
-          'ns::|updatedDrawableSizeMVK|
-          'ns::|screenMVK|
-          'ns::|setWantsExtendedDynamicRangeContentMVK:|
-          'ns::|setColorspaceNameMVK:|
-          'ns::|setDisplaySyncEnabledMVK:|
-          'ns::|setMaximumDrawableCountMVK:|
-          'ns::|naturalDrawableSizeMVK|
           'ns::|optimizationOpportunities:|
           'ns::|getRendererInfo:size:|
           'ns::|setMotionBlurAmount:|
@@ -25575,8 +24890,32 @@
           'ns::|NS_showPrefetchedContentsIfNecessaryInRect:|
           'ns::|NS_wantsToPrefetchTiles|
           'ns::|NS_managesOpenGLDrawable|
-          'ns::|NS_setView:|
-          'ns::|NS_view|
+          'ns::|readFileWrapper|
+          'ns::|readFileContentsType:toFile:|
+          'ns::|writeFileWrapper:|
+          'ns::|writeFileContents:|
+          'ns::|setDataProvider:forTypes:|
+          'ns::|canReadObjectForClasses:options:|
+          'ns::|canReadItemWithDataConformingToTypes:|
+          'ns::|indexOfPasteboardItem:|
+          'ns::|prepareForNewContentsWithOptions:|
+          'ns::|releaseGlobally|
+          'ns::|stringForType:|
+          'ns::|pasteboardItems|
+          'ns::|addTypes:owner:|
+          'ns::|setPropertyList:forType:|
+          'ns::|writeObjects:|
+          'ns::|clearContents|
+          'ns::|readObjectsForClasses:options:|
+          'ns::|propertyListForType:|
+          'ns::|setData:forType:|
+          'ns::|dataForType:|
+          'ns::|setString:forType:|
+          'ns::|declareTypes:owner:|
+          'ns::|attemptOverwrite:|
+          'ns::|availableTypeFromArray:|
+          'ns::|types|
+          'ns::|changeCount|
           'ns::|setEscapeKeyReplacementItem:|
           'ns::|setSuppressedByLessFocusedTouchBars:|
           'ns::|setTouchBarLayoutDirection:|
@@ -25615,12 +24954,6 @@
           'ns::|setPrincipalItemIdentifier:|
           'ns::|setTemplateItems:|
           'ns::|setDefaultItemIdentifiers:|
-          'ns::|viewServiceTouchBarControllerDescription|
-          'ns::|removeViewServiceTouchBarControllerObservers|
-          'ns::|addViewServiceTouchBarControllerObservers|
-          'ns::|setViewServiceTouchBarControllerIdentifier:|
-          'ns::|viewServiceTouchBarControllerIdentifier|
-          'ns::|swizzledDealloc|
           'ns::|autoResizeDrawable|
           'ns::|enableSetNeedsDisplay|
           'ns::|depthStencilPixelFormat|
@@ -25709,7 +25042,6 @@
           'ns::|bs_dateByAddingDays:|
           'ns::|isBeforeDate:|
           'ns::|isAfterDate:|
-          'ns::|ak_serverFriendlyString|
           'ns::|appendBezierPathWithPackedGlyphs:|
           'ns::|appendBezierPathWithGlyphs:count:inFont:|
           'ns::|appendBezierPathWithGlyph:inFont:|
@@ -26279,50 +25611,6 @@
           'ns::|level|
           'ns::|hasTitleBar|
           'ns::|parentWindow|
-          'ns::|swizzledShake|
-          'ns::|swizzledEndSheet:|
-          'ns::|swizzledCanBecomeMainWindow|
-          'ns::|swizzledUpdateConstraintsIfNeeded|
-          'ns::|swizzledSelectKeyViewFollowingView:|
-          'ns::|swizzledSelectKeyViewPrecedingView:|
-          'ns::|swizzledIsRunningADocModalAttachedSheet|
-          'ns::|swizzledIsEffectivelyVisible|
-          'ns::|swizzledBackingScaleFactor|
-          'ns::|swizzledMakeFirstResponder:|
-          'ns::|swizzledHostWindowIsKey|
-          'ns::|swizzledIsKeyWindow|
-          'ns::|swizzledBecomeKeyWindow|
-          'ns::|swizzledResignKeyWindow|
-          'ns::|swizzledSetCursorForMouseLocation:|
-          'ns::|swizzledRegionForOpaqueViewsBlockingDraggableFrame:|
-          'ns::|swizzledCanBecomeKeyWindow|
-          'ns::|swizzledSendEvent:|
-          'ns::|swizzledOrderFrontRelativeToWindow:|
-          'ns::|swizzledDoOrderWindow:relativeTo:findKey:forCounter:force:isModal:|
-          'ns::|swizzledConstrainFrameRect:toScreen:|
-          'ns::|endHostSheet:|
-          'ns::|swizzledEndSheet:returnCode:|
-          'ns::|beginServiceSheet:completionHandler:isCritical:|
-          'ns::|swizzledBeginSheet:completionHandler:|
-          'ns::|swizzledBeginCriticalSheet:completionHandler:|
-          'ns::|swizzledHierarchyDidChangeInView:|
-          'ns::|swizzledSetStyleMask:|
-          'ns::|swizzledStyleMask|
-          'ns::|swizzledSetHidesOnDeactivate:|
-          'ns::|swizzledOrderedDrawerAndWindowKeyLoopGroupingViews|
-          'ns::|swizzledSetEventMask:|
-          'ns::|swizzledSetMouseMovedEventsEnabled:|
-          'ns::|swizzledWindowForSheetMovementAndOrderingGroups|
-          'ns::|swizzledSetFrameCommon:display:stashSize:|
-          'ns::|swizzledDragWindowRelativeToMouseDown:|
-          'ns::|swizzledRemoveChildWindow:|
-          'ns::|swizzledAddChildWindow:ordered:|
-          'ns::|swizzledSetBackgroundColor:|
-          'ns::|swizzledBackgroundColor|
-          'ns::|setViewBridgeHostApp:|
-          'ns::|viewBridgeHostApp|
-          'ns::|setViewBridgeBecomingChild:|
-          'ns::|viewBridgeBecomingChild|
           'ns::|orderFrontSharingServicePicker:|
           'ns::|previewPanel:transitionImageForPreviewItem:contentRect:|
           'ns::|previewPanel:sourceFrameOnScreenForPreviewItem:|
@@ -28064,14 +27352,6 @@
           'ns::|resetCursorRects|
           'ns::|layout|
           'ns::|prepareForReuse|
-          'ns::|additionalSafeAreaInsets|
-          'ns::|setAdditionalSafeAreaInsets:|
-          'ns::|automaticallyNotifiesObserversOfAdditionalSafeAreaInsets|
-          'ns::|safeAreaRect|
-          'ns::|automaticallyNotifiesObserversOf_semanticContext|
-          'ns::|swizzledviewDidChangeEffectiveAppearance|
-          'ns::|swizzledAccessibilityAttributeValue:|
-          'ns::|respondsToAction:fromTask:|
           'ns::|setGestureBehaviors:|
           'ns::|gestureBehaviors|
           'ns::|pressureConfigurations|
@@ -28212,27 +27492,6 @@
           'ns::|rangesContainLocation:|
           'ns::|indexOfFirstRangeContainingOrFollowing:|
           'ns::|rangeAtIndex:|
-          'ns::|cuFilteredArrayUsingBlock:|
-          'ns::|ak_firstObjectMatchingFilter:|
-          'ns::|ak_filter:|
-          'ns::|ak_mapNullable:|
-          'ns::|ak_map:|
-          'ns::|ac_mapNullable:|
-          'ns::|ac_map:|
-          'ns::|ac_firstObjectPassingTest:|
-          'ns::|ac_filter:|
-          'ns::|fp_compareItem:toItem:|
-          'ns::|fp_comparator|
-          'ns::|fp_itemIdentifiers|
-          'ns::|fp_pickItemsFromArray:correspondingToIndexesOfItemsInArray:|
-          'ns::|fp_categorize:|
-          'ns::|fp_removingObjectsNotKindOfClasses:|
-          'ns::|fp_mapWithIndex:|
-          'ns::|fp_shortDescriptionExpandingAtMost:|
-          'ns::|fp_itemIDs|
-          'ns::|fp_map:|
-          'ns::|fp_filter:|
-          'ns::|XMLString|
           'ns::|applyTransform:reverse:range:updatedRange:|
           'ns::|replaceCharactersInRange:withCString:length:|
           'ns::|replaceCharactersInRange:withCharacters:length:|
@@ -28249,8 +27508,6 @@
           'ns::|appendPrettyInt:withName:indent:|
           'ns::|appendPrettyObject:withName:indent:showFullContent:|
           'ns::|dd_appendSpaces:|
-          'ns::|appendLineMVK|
-          'ns::|appendLineMVK:|
           'ns::|initWithContentsOfMarkdownFileAtURL:options:baseURL:error:|
           'ns::|initWithMarkdown:options:baseURL:error:|
           'ns::|initWithFormat:options:locale:arguments:|
@@ -28529,44 +27786,6 @@
           'ns::|writableTypesForPasteboard:|
           'ns::|stringWithoutAmpersand|
           'ns::|initWithPasteboardPropertyList:ofType:|
-          'ns::|ak_isEmailAddress|
-          'ns::|ak_stringByZeroPaddingOccurencesOfString:|
-          'ns::|ak_truncatedCopy|
-          'ns::|ak_SHA256|
-          'ns::|ak_SHA256String|
-          'ns::|ak_urlEncoded|
-          'ns::|gs_issueReadExtensionIfNeededForAuditToken:|
-          'ns::|gs_issueExtension:error:|
-          'ns::|validateGSNameAllowingDot:error:|
-          'ns::|gs_stringByUpdatingPathExtensionWithPathOrURL:|
-          'ns::|validateGSName:|
-          'ns::|fp_isCJKLanguageIdentifier|
-          'ns::|fp_enumerateTokensInRange:tokenizer:usingBlock:|
-          'ns::|fp_fileSystemRepresentation|
-          'ns::|fp_representableHFSFileNameWithSuffix:addedExtension:makeDotFile:|
-          'ns::|fp_pathExtension|
-          'ns::|fp_stringByDeletingPathExtension|
-          'ns::|fp_alwaysObfuscatedPath|
-          'ns::|fp_prettyPathWithObfuscation:|
-          'ns::|fp_alwaysObfuscatedFilename|
-          'ns::|fp_filenameFromDisplayNameWithExtension:|
-          'ns::|fp_realpath|
-          'ns::|fp_prettyPath|
-          'ns::|fp_usesDSCopyEngine|
-          'ns::|fp_isiCloudDriveOrCloudDocsIdentifier|
-          'ns::|fp_displayNameFromFilenameWithHiddenPathExtension:isFolder:|
-          'ns::|fp_toProviderID|
-          'ns::|fp_representableHFSFileNameWithNumber:addedExtension:makeDotFile:|
-          'ns::|fp_stringByDeletingPathBounceNo:andPathExtension:|
-          'ns::|fp_bouncedNameWithIndex:|
-          'ns::|fp_toDomainIdentifier|
-          'ns::|fp_fpIdentifier|
-          'ns::|fp_obfuscatedProviderDomainID|
-          'ns::|fp_localizedFormatWithKeys:fromDictionary:error:|
-          'ns::|fp_formatStringWithValues:error:|
-          'ns::|fp_libnotifyPerUserNotificationName|
-          'ns::|fp_obfuscatedFilename|
-          'ns::|fp_obfuscatedPath|
           'ns::|push|
           'ns::|forceSet|
           'ns::|isSetOnMouseEntered|
@@ -29109,16 +28328,6 @@
           'ns::|objectForKey:|
           'ns::|bs_defaultExists:|
           'ns::|bs_setDomain:|
-          'ns::|utf8ValueSafeForKey:|
-          'ns::|stringValueSafeForKey:|
-          'ns::|doubleValueSafeForKey:|
-          'ns::|int64ValueSafeForKey:|
-          'ns::|boolValueSafeForKey:|
-          'ns::|utf8ValueSafeForKey:status:|
-          'ns::|stringValueSafeForKey:status:|
-          'ns::|doubleValueSafeForKey:status:|
-          'ns::|int64ValueSafeForKey:status:|
-          'ns::|boolValueSafeForKey:status:|
           'ns::|command|
           'ns::|coalescedTouchesForTouch:|
           'ns::|touchesForView:|
@@ -29545,8 +28754,6 @@
           'ns::|processPredicate|
           'ns::|rbs_pid|
           'ns::|matchesProcess:|
-          'ns::|encodedDataAndReturnError:|
-          'ns::|encodedBytesAndReturnLength:error:|
           'ns::|preservationPriorityForTag:|
           'ns::|setPreservationPriority:forTag:|
           'ns::|setPreservationPriority:forTags:|
@@ -29837,19 +29044,4 @@
           'ns::|accessibilityArrayAttributeCount:|
           'ns::|accessibilityVisibleArea|
           'ns::|accessibilityReplaceRange:withText:|
-          'ns::|accessibilityOverriddenAttributes|
-          'ns::|utf8ValueSafe|
-          'ns::|stringValueSafe|
-          'ns::|doubleValueSafe:|
-          'ns::|doubleValueSafe|
-          'ns::|int64ValueSafe:|
-          'ns::|int64ValueSafe|
-          'ns::|boolValueSafe:|
-          'ns::|boolValueSafe|
-          'ns::|utf8ValueSafe:|
-          'ns::|stringValueSafe:|
-          'ns::|fp_shortMethodDescription|
-          'ns::|fp_methodDescription|
-          'ns::|fp_ivarDescription|
-          'ns::|fp__methodDescriptionForClass:|
-          'ns::|fp__ivarDescriptionForClass:|) :ns)
+          'ns::|accessibilityOverriddenAttributes|) :ns)

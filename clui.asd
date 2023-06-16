@@ -37,6 +37,7 @@
    (:file "cocoa/cocoa-keyboard")
    (:file "cocoa/cocoa-monitor")
    (:file "cocoa/cocoa-window")
+   (:file "cocoa/cocoa-pasteboard")
    (:file "monitor")
    (:file "abstract-os")
    (:file "input")

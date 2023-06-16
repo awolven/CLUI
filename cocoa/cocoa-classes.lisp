@@ -1,6 +1,14 @@
 (in-package :clui)
 (named-readtables:in-readtable :objc-readtable)
 
+#+sbcl
+(defun int-sap (int)
+  (sb-sys:int-sap int))
+
+#+sbcl
+(defun sap-int (sap)
+  (sb-sys:sap-int sap))
+
 (defclass objc-object-mixin ()
   ((id :initarg :ptr :accessor objc-object-id)))
 
