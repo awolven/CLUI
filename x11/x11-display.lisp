@@ -92,6 +92,31 @@
 	   (when (and (noffi::c== result -1) (noffi::c!= #_errno #_EINTR))
 	     (return (values)))))))
 
+(defun create-x11-standard-cursor (display shape)
+  (setq shape (case shape
+		(:arrow #_XC_left_ptr)
+		(:ibeam #_XC_xterm)
+		(:crosshair #_XC_crosshair)
+		(:pointing-hand #_XC_hand1)
+		(:hand #_XC_hand2)
+		(:help #_XC_question_arrow)
+		(:wait #_XC_watch)
+		(:resize-ew #_XC_sb_h_double_arrow)
+		(:resize-ns #_XC_sb_v_double_arrow)
+		(:resize-e #_XC_right_side)
+		(:resize-w #_XC_left_side)
+		(:resize-n #_XC_top_side)
+		(:resize-s #_XC_bottom_side)
+		(:resize-nw #_XC_top_left_corner)
+		(:resize-ne #_XC_top_right_corner)
+		(:resize-sw #_XC_bottom_left_corner)
+		(:resize-se #_XC_bottom_right_corner)
+		(:compass #_XC_fleur)
+		(:up #_XC_sb_up_arrow)
+		(:down #_XC_sb_down_arrow)
+		(:not-allowed #_XC_X_cursor)))
+  (#_XCreateFontCursor (h display) shape))
+
 (defun get-x11-display-content-scale (display)
   (let ((dpi 96.0f0)
 	(rms (#_XResourceManagerString (h display))))
@@ -473,6 +498,7 @@
 		      (setq ypos (+ ypos (c-aref values 0)))
 
 		      (handle-event window (make-instance 'pointer-motion-event
+							  :input-code +pointer-move+
 							  :window window
 							  :x xpos
 							  :y ypos)))))))))
@@ -520,7 +546,7 @@
 			       (setf (aref (key-press-times window) x11-keycode) (#_.time &xkey))))
 
 			   (when (zerop filtered)
-		     
+
 			     (let ((count)
 				   (chars))
 		     
@@ -530,35 +556,38 @@
 		       
 				 (setq chars buffer)
 			   
-				 (setq count (#_Xutf8LookupString (window-input-context window)
-								  &xkey
+				 (setq count (#+NIL #_Xutf8LookupString #+NIL (window-input-context window)
+					      #_XLookupString &xkey
 								  buffer 99
-								  nil (c-addr-of status)))
+								  nil nil #+NIL(c-addr-of status)))
 
-				 (when (= (cval-value status) #_XBufferOverflow)
-				   (setq chars (#_malloc (1+ count)))
-				   (setq count  (#_Xutf8LookupString (window-input-context window)
-								     &xkey
-								     chars count
-								     nil (c-addr-of status))))
+				 ;;(break "1: ~A" count)
+				 ;;(break "2: ~A" (cval-value status))
+
+				 ;;(when (= (cval-value status) #_XBufferOverflow)
+				   ;;(setq chars (#_malloc (1+ count)))
+				   ;;(setq count (#_Xutf8LookupString (window-input-context window)
+				;;				    &xkey
+				;;				    chars count
+				;;				    nil (c-addr-of status))))
 			   
-				 (when (or (= (cval-value status) #_XLookupChars)
-					   (= (cval-value status) #_XLookupBoth))
+				 ;;(when (or (= (cval-value status) #_XLookupChars)
+				;;	   (= (cval-value status) #_XLookupBoth))
 
 				   (loop for char across (get-c-string chars)
-					 do (input-char window (char-code char) mods lock-mods plain?)))
+					 do (input-char window (char-code char) mods lock-mods plain?));;)
 
 				 (unless (equalp chars buffer)
 				   (#_free chars))))))
 		   
 			 (clet ((keysym #_<KeySym>))
-			   (#_XLookupString (#_.xkey event) nil 0 (c-addr-of keysym) nil)
+			   (#_XLookupString (c->-addr event '#_xkey) nil 0 (c-addr-of keysym) nil)
 
 			   (input-key window key :press x y mods lock-mods timestamp)
 
-			   (let ((char (xkb-keysym-to-unicode keysym)))
+			   (let ((char (xkb-keysym-to-unicode (cval-value keysym))))
 			     (when char
-			       (input-char window char mods lock-mods plain?)))))
+			       (input-char window (char-code char) mods lock-mods plain?)))))
 
 		     (return))))))
 
@@ -682,10 +711,12 @@
 
 	       (handle-event window (make-instance 'pointer-enter-event
 						   :window window
+						   :input-code +pointer-move+
 						   :x x
 						   :y y))
 	       (handle-event window (make-instance 'pointer-motion-event
 						   :window window
+						   :input-code +pointer-move+
 						   :x x
 						   :y y))
 
@@ -700,6 +731,7 @@
 
 	       (handle-event window (make-instance 'pointer-exit-event
 						   :window window
+						   :input-code +pointer-move+
 						   :x x
 						   :y y))
 	       (return)))
@@ -725,11 +757,13 @@
 
 		       (handle-event window (make-instance 'pointer-motion-event
 							   :window window
+							   :input-code +pointer-move+
 							   :x (+ (virtual-cursor-pos-x window) dx)
 							   :y (+ (virtual-cursor-pos-y window) dy))))
 
 		     (handle-event window (make-instance 'pointer-motion-event
 							 :window window
+							 :input-code +pointer-move+							 
 							 :x x :y y))))
 
 	       (setf (last-cursor-pos-x window) x)

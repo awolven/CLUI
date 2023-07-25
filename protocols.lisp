@@ -88,19 +88,35 @@
   ()
   (:metaclass protocol-class))
 
-(defclass NWSE-cursor (cursor)
+(defclass resize-N-cursor (cursor)
   ()
   (:metaclass protocol-class))
 
-(defclass NESW-cursor (cursor)
+(defclass resize-S-cursor (cursor)
   ()
   (:metaclass protocol-class))
 
-(defclass EW-cursor (cursor)
+(defclass resize-E-cursor (cursor)
   ()
   (:metaclass protocol-class))
 
-(defclass NS-cursor (cursor)
+(defclass resize-W-cursor (cursor)
+  ()
+  (:metaclass protocol-class))
+
+(defclass resize-NE-cursor (cursor)
+  ()
+  (:metaclass protocol-class))
+
+(defclass resize-NW-cursor (cursor)
+  ()
+  (:metaclass protocol-class))
+
+(defclass resize-SE-cursor (cursor)
+  ()
+  (:metaclass protocol-class))
+
+(defclass resize-SW-cursor (cursor)
   ()
   (:metaclass protocol-class))
 

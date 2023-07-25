@@ -39,13 +39,13 @@
     (loop for i from 0 below 2
 	  with sf
 	  with df
-	  do (setq sf (c-funcall #_fcntl (c-aref pipes i) #_F_GETFL 0))
-	     (setq df (c-funcall #_fcntl (c-aref pipes i) #_F_GETFD 0))
+	  do (setq sf (#_fcntl (cval-value (c-aref pipes i)) #_F_GETFL 0))
+	     (setq df (#_fcntl (cval-value (c-aref pipes i)) #_F_GETFD 0))
 
 	     (when (or (= -1 sf)
 		       (= -1 df)
-		       (= -1 (c-funcall #_fcntl (c-aref pipes i) #_F_SETFL (logior sf #_O_NONBLOCK)))
-		       (= -1 (c-funcall #_fcntl (c-aref pipes i) #_F_SETFD (logior sf #_FD_CLOEXEC))))
+		       (= -1 (#_fcntl (c-aref pipes i) #_F_SETFL (logior sf #_O_NONBLOCK)))
+		       (= -1 (#_fcntl (c-aref pipes i) #_F_SETFD (logior sf #_FD_CLOEXEC))))
 	       (error "Failed to set flags for empty event pipe: ~S" (#_strerror #_errno))))
 
     (setf (empty-event-pipes display) pipes)))
@@ -180,7 +180,7 @@
     (let* ((xdisplay (#_XOpenDisplay (display-name display)))
 	   (screen-id (#_DefaultScreen xdisplay))
 	   (root (#_RootWindow xdisplay screen-id)))
-      
+
       (setf (h display) xdisplay)
 
       (setf (display-for-xdisplay xdisplay) display)
@@ -194,7 +194,7 @@
       (setf (unique-context display) (#_XUniqueContext))
       
       (setf (display-content-scale display) (get-x11-display-content-scale display))
-      
+
       (create-empty-event-pipes display)
       
       (noffi::use-library vidmode-lib)
@@ -386,7 +386,7 @@
       (create-hidden-x11-cursor display)
 
       (unless (zerop (#_XSupportsLocale))
-	(#_XSetLocaleModifiers "")
+	(#_XSetLocaleModifiers "" #+NIL "@im=local")
 
 	(#_XRegisterIMInstantiateCallback xdisplay
 					  nil nil nil

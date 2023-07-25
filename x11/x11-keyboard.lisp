@@ -131,7 +131,7 @@
 
 (defun create-x11-key-tables (display)
 
-  (if (xkb-available? (display-x11-state display))
+  (if nil ;;(xkb-available? (display-x11-state display))
 
       ;; determines physical key locations independently of current keyboard layout
       ;; not sure how useful that is.

@@ -1,5 +1,9 @@
 (in-package :cl-user)
 
+;; dnf install libXinerama-devel
+;; dnf install libXrandr-devel
+;; dnf install libXcursor-devel
+
 ;;(eval-when (:compile-toplevel :load-toplevel :execute)
 ;;  (noffi::boot-ht)
   (noffi::noffi-syntax t)

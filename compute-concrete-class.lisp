@@ -488,320 +488,320 @@
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol arrow-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::arrow-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol arrow-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::arrow-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol arrow-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::arrow-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol arrow-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::arrow-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol hand-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::hand-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol hand-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::hand-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol hand-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::hand-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol hand-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::hand-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol pointing-hand-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::pointing-hand-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol pointing-hand-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::pointing-hand-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol pointing-hand-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::pointing-hand-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol pointing-hand-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::pointing-hand-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol open-hand-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::open-hand-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol open-hand-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::open-hand-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol open-hand-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::open-hand-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol open-hand-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::open-hand-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol closed-hand-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::closed-hand-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol closed-hand-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::closed-hand-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol closed-hand-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::closed-hand-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol closed-hand-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::closed-hand-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol ibeam-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::ibeam-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol ibeam-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::ibeam-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol ibeam-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::ibeam-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol ibeam-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::ibeam-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol crosshair-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::crosshair-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol crosshair-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::crosshair-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol crosshair-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::crosshair-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol crosshair-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::crosshair-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol compass-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::compass-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol compass-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::compass-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol compass-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::compass-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol compass-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::compass-cursor) initargs))
 
 #+cocoa
-(defmethod compute-make-instance-arguments-with-display ((protocol NWSE-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'cocoa::NWSE-cursor) initargs))
-
-#+win32
-(defmethod compute-make-instance-arguments-with-display ((protocol NWSE-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'win32::NWSE-cursor) initargs))
-
-#+x11
-(defmethod compute-make-instance-arguments-with-display ((protocol NWSE-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'x11::NWSE-cursor) initargs))
-
-#+wayland
-(defmethod compute-make-instance-arguments-with-display ((protocol NWSE-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'wayland::NWSE-cursor) initargs))
-
-#+cocoa
-(defmethod compute-make-instance-arguments-with-display ((protocol NESW-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'cocoa::NESW-cursor) initargs))
-
-#+win32
-(defmethod compute-make-instance-arguments-with-display ((protocol NESW-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'win32::NESW-cursor) initargs))
-
-#+x11
-(defmethod compute-make-instance-arguments-with-display ((protocol NESW-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'x11::NESW-cursor) initargs))
-
-#+wayland
-(defmethod compute-make-instance-arguments-with-display ((protocol NESW-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'wayland::NESW-cursor) initargs))
-
-#+cocoa
-(defmethod compute-make-instance-arguments-with-display ((protocol EW-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'cocoa::EW-cursor) initargs))
-
-#+win32
-(defmethod compute-make-instance-arguments-with-display ((protocol EW-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'win32::EW-cursor) initargs))
-
-#+x11
-(defmethod compute-make-instance-arguments-with-display ((protocol EW-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'x11::EW-cursor) initargs))
-
-#+wayland
-(defmethod compute-make-instance-arguments-with-display ((protocol EW-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'wayland::EW-cursor) initargs))
-
-#+cocoa
-(defmethod compute-make-instance-arguments-with-display ((protocol NS-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-N-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
   (list* (find-class 'cocoa::NS-cursor) initargs))
 
 #+win32
-(defmethod compute-make-instance-arguments-with-display ((protocol NS-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-N-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
   (list* (find-class 'win32::NS-cursor) initargs))
 
 #+x11
-(defmethod compute-make-instance-arguments-with-display ((protocol NS-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
-  (list* (find-class 'x11::NS-cursor) initargs))
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-N-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-N-cursor) initargs))
 
 #+wayland
-(defmethod compute-make-instance-arguments-with-display ((protocol NS-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-N-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
   (list* (find-class 'wayland::NS-cursor) initargs))
 
 #+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-S-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::NS-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-S-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::NS-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-S-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-S-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-S-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::NS-cursor) initargs))
+
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-E-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::EW-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-E-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::EW-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-E-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-E-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-E-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::EW-cursor) initargs))
+
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-W-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::EW-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-W-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::EW-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-W-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-W-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-W-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::EW-cursor) initargs))
+
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NE-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::NESW-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NE-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::NESW-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NE-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-NE-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NE-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::NESW-cursor) initargs))
+
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NW-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::NWSE-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NW-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::NWSE-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NW-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-NW-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-NW-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::NWSE-cursor) initargs))
+
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SE-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::NWSE-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SE-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::NWSE-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SE-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-SE-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SE-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::NWSE-cursor) initargs))
+
+#+cocoa
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SW-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'cocoa::NESW-cursor) initargs))
+
+#+win32
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SW-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'win32::NESW-cursor) initargs))
+
+#+x11
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SW-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'x11::resize-SW-cursor) initargs))
+
+#+wayland
+(defmethod compute-make-instance-arguments-with-display ((protocol resize-SW-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
+  (list* (find-class 'wayland::NESW-cursor) initargs))
+
+#+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol up-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::up-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol up-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::up-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol up-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::up-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol up-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::up-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol down-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::down-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol down-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::down-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol down-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::down-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol down-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::down-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol wait-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::wait-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol wait-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::wait-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol wait-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::wait-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol wait-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::wait-cursor) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol not-allowed-cursor) (display cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'cocoa::not-allowed-cursor) initargs))
 
 #+win32
 (defmethod compute-make-instance-arguments-with-display ((protocol not-allowed-cursor) (display win32:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'win32::not-allowed-cursor) initargs))
 
 #+x11
 (defmethod compute-make-instance-arguments-with-display ((protocol not-allowed-cursor) (display x11:server-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'x11::not-allowed-cursor) initargs))
 
 #+wayland
 (defmethod compute-make-instance-arguments-with-display ((protocol not-allowed-cursor) (display wayland:desktop-mixin) &rest initargs &key &allow-other-keys)
-  (remf initargs :display)
   (list* (find-class 'wayland::not-allowed-cursor) initargs))

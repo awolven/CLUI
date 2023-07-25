@@ -278,6 +278,161 @@
 (defclass x11:cursor-mixin (clui:cursor-mixin clui:handle-mixin)
   ())
 
+(defclass x11::arrow-cursor (arrow-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::arrow-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :arrow))
+  (values))
+
+(defclass x11::hand-cursor (hand-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::hand-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :hand))
+  (values))
+
+(defclass x11::pointing-hand-cursor (pointing-hand-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::pointing-hand-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :pointing-hand))
+  (values))
+
+(defclass x11::open-hand-cursor (open-hand-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defclass x11::ibeam-cursor (ibeam-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::ibeam-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :ibeam))
+  (values))
+
+(defclass x11::crosshair-cursor (crosshair-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::crosshair-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :crosshair))
+  (values))
+
+(defclass x11::compass-cursor (compass-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::compass-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :compass))
+  (values))
+
+
+
+(defclass x11::resize-nw-cursor (resize-nw-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-nw-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-nw))
+  (values))
+
+(defclass x11::resize-se-cursor (resize-se-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-se-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-se))
+  (values))
+
+
+
+(defclass x11::resize-ne-cursor (resize-ne-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-ne-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-ne))
+  (values))
+
+(defclass x11::resize-sw-cursor (resize-sw-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-sw-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-sw))
+  (values))
+
+
+
+(defclass x11::resize-e-cursor (resize-e-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-e-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-e))
+  (values))
+
+(defclass x11::resize-w-cursor (resize-w-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-w-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-w))
+  (values))
+
+
+
+(defclass x11::resize-n-cursor (resize-n-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-n-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-n))
+  (values))
+
+(defclass x11::resize-s-cursor (resize-s-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::resize-s-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-s))
+  (values))
+
+(defclass x11::up-cursor (up-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::up-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :resize-s))
+  (values))
+
+(defclass x11::down-cursor (down-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::down-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :down))
+  (values))
+
+(defclass x11::wait-cursor (wait-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::wait-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :wait))
+  (values))
+
+(defclass x11::not-allowed-cursor (not-allowed-cursor-mixin x11:cursor-mixin)
+  ())
+
+(defmethod initialize-instance :after ((instance x11::not-allowed-cursor) &rest initargs &key display)
+  (declare (ignore initargs))
+  (setf (h instance) (create-x11-standard-cursor display :not-allowed))
+  (values))
+
 (defclass x11:monitor-mixin (clui:monitor-mixin)
   ((display :initarg :display
 	    :initform nil

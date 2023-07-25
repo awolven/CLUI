@@ -148,15 +148,15 @@
 
       (setf (window-input-context window)
 	    (noffi::c-funcall #_XCreateIC (display-input-method display)
-			 #_XNInputStyle
-			 (logior #_XIMPreeditNothing #_XIMStatusNothing)
-			 #_XNClientWindow
-			 window-handle
-			 #_XNFocusWindow
-			 window-handle
-			 #_XNDestroyCallback
-			 &callback
-			 0))
+			      #_XNInputStyle
+			      (logior #_XIMPreeditNothing #_XIMStatusNothing)
+			      #_XNClientWindow
+			      window-handle
+			      #_XNFocusWindow
+			      window-handle
+			      #_XNDestroyCallback
+			      &callback
+			      0))
 
       (let ((ic (window-input-context window)))
 	(when ic
@@ -168,6 +168,26 @@
 		(#_XSelectInput xdisplay window-handle
 				(logior (#_.your_event_mask &attribs) (cval-value filter))))))))
       (values))))
+
+(defun set-x11-window-cursor (window cursor)
+  (declare (ignorable cursor))
+  ;;(when (win32-cursor-in-content-area? window)
+    (update-x11-cursor-image window));;)  
+
+(defun update-x11-cursor-image (window)
+  (if (or (eq (window-cursor-mode window) :normal)
+	  (eq (window-cursor-mode window) :captured))
+      (if (window-cursor window)
+	  (#_XDefineCursor (h (window-display window))
+			   (h window)
+			   (h (window-cursor window)))
+	  (#_XUndefineCursor (h (window-display window))
+			     (h window)))
+      (#_XDefineCursor (h (window-display window))
+			   (h window)
+			   (h (hidden-cursor window))))
+  (values))
+
 
 (defun create-native-x11-window (window
 				 &rest initargs
@@ -378,9 +398,7 @@
 	  (when (display-input-method display)
 	    (create-x11-input-context window))
 
-
 	  (set-x11-window-title window title)
-
 
 	  (multiple-value-bind (xpos ypos) (get-x11-window-pos window)
 	    (setf (last-pos-x window) xpos

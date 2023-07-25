@@ -205,6 +205,30 @@
 (defclass ns-cursor-mixin (cursor-mixin)
   ())
 
+(defclass resize-n-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-s-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-e-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-w-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-nw-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-ne-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-sw-cursor-mixin (cursor-mixin)
+  ())
+
+(defclass resize-se-cursor-mixin (cursor-mixin)
+  ())
+
 (defclass up-cursor-mixin (cursor-mixin)
   ())
 
@@ -479,7 +503,7 @@
 				&rest initargs
 				&key display
 				  &allow-other-keys)
-  (declare (ignore initargs))
+  (declare (ignore initargs) (ignorable display))
   #+NIL(when (find-class 'arrow-cursor nil)
     (setf (%window-cursor window) (make-instance 'arrow-cursor :display display)))
   (values))
