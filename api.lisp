@@ -174,6 +174,14 @@
 (defmethod copy-string-from-clipboard ((display cocoa:desktop-mixin))
   (cocoa-copy-string-from-pasteboard))
 
+#+x11
+(defmethod copy-string-to-clipboard ((display x11:server-mixin) (string string))
+  (x11-copy-string-to-clipboard display string))
+
+#+x11
+(defmethod copy-string-from-clipboard ((display x11:server-mixin))
+  (x11-copy-string-from-clipboard display))
+
 
 (defun get-primary-monitor (&optional (display (default-display)))
   (car (display-monitors display)))

@@ -152,6 +152,9 @@
    (primary-selection-string :initform ""
 			     :accessor primary-selection-string)
 
+   (clipboard-string :initform nil
+		     :accessor display-clipboard-string)
+
    (empty-event-pipes :initform nil
 		      :accessor empty-event-pipes)
 

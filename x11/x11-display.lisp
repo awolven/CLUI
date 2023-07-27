@@ -300,130 +300,6 @@
 
     (values mods lock-mods)))
 
-(defun %write-target-to-property (display request)
-  (block write-target
-    (with-slots (UTF8_STRING
-		 NULL)
-	display
-      (with-slots (PRIMARY
-		   TARGETS
-		   MULTIPLE
-		   ATOM_PAIR
-		   SAVE_TARGETS)
-	  (display-clipboard-manager display)
-	(let ((selection-string)
-	      (format-count 2))
-	  (clet ((formats #_<Atom[2]>))
-	    (setf (c-aref formats 0) UTF8_STRING
-		  (c-aref formats 1) #_XA_STRING)
-
-	    (if (= (#_.selection request) PRIMARY)
-		(setq selection-string (primary-selection-string display))
-		(setq selection-string (clipboard-string display)))
-
-	    (when (= (#_.property request) #_None)
-	      (return-from write-target #_None))
-
-	    (when (= (#_.target request) TARGETS)
-	      (clet ((targets #_<Atom[4]>))
-		(setf (c-aref targets 0) TARGETS
-		      (c-aref targets 1) MULTIPLE
-		      (c-aref targets 2) UTF8_STRING
-		      (c-aref targets 3) #_XA_STRING)
-
-		(#_XChangeProperty (h display)
-				   (#_.requestor request)
-				   (#_.property request)
-				   #_XA_ATOM
-				   32
-				   #_PropModeReplace
-				   targets
-				   4)
-
-		(return-from write-target (#_.property request))))
-
-	    (when (= (#_.target request) MULTIPLE)
-	      (clet ((targets #_<Atom*>))
-		(let ((count (%get-x11-window-property (h display)
-						       (#_.requestor request)
-						       (#_.property request)
-						       ATOM_PAIR
-						       (c-addr-of targets))))
-
-		  (loop for i from 0 below count by 2
-			with found? = nil
-			do (loop for j from 0 below format-count
-				 when (= (cval-value (c-aref targets i)) (cval-value (c-aref formats j)))
-				   do (setq found? t)
-				      (return))
-			   
-			   (if found?
-			       (#_XChangeProperty (h display)
-						  (#_.requestor request)
-						  (c-aref targets (1+ i))
-						  (c-aref targets i)
-						  8
-						  #_PropModeReplace
-						  selection-string
-						  (#_strlen selection-string))
-			       (setf (c-aref targets (1+ i)) #_None)))
-
-		  (#_XChangeProperty (h display)
-				     (#_.requestor request)
-				     (#_.property request)
-				     ATOM_PAIR
-				     32
-				     #_PropModeReplace
-				     targets
-				     count)
-
-		  (return-from write-target (#_.property request)))))
-
-	    (when (= (#_.target request) SAVE_TARGETS)
-
-	      (#_XChangeProperty (h display)
-				 (#_.requestor request)
-				 (#_.property request)
-				 NULL
-				 32
-				 #_PropModeReplace
-				 nil
-				 0)
-
-	      (return-from write-target (#_.property request)))
-
-	    ;; conversion to a data target was requested
-	    (loop for i from 0 below format-count
-		  when (= (cval-value (#_.target request)) (cval-value (c-aref formats i)))
-		    do (#_XChangeProperty  (h display)
-					   (#_.requestor request)
-					   (#_.property request)
-					   (#_.target request)
-					   8
-					   #_PropModeReplace
-					   selection-string
-					   (#_strlen selection-string))
-		       (return-from write-target (#_.property request)))
-
-	    #_None))))))
-  
-(defun %handle-selection-request (display event)
-  (let ((request (#_.xselectionrequest event)))
-
-    (clet& ((&reply #_<XEvent>))
-      (setf (#_.type &reply) #_SelectionNotify)
-
-      (let ((&xselection (c->-addr &reply '#_xselection)))
-
-	(setf (#_.property &xselection) (%write-target-to-property display request)
-	      (#_.display &xselection) (#_.display request)
-	      (#_.requestor &xselection) (#_.requestor request)
-	      (#_.selection &xselection) (#_.selection request)
-	      (#_.target &xselection) (#_.target request)
-	      (#_.time &xselection) (#_.time request))
-
-	(#_XSendEvent (h display) (#_.requestor request) #_False 0 &reply)))))
-
 (defparameter *utf8-offsets*
   (make-array 6 :initial-contents (list #x00000000 #x00003080 #x000e2080
 					#x03c82080 #xfa082080 #x82082080)))
@@ -695,10 +571,8 @@
 			 ((= button #_Button3)
 			  (input-mouse-click window +pointer-right-button+ :release x y mods lock-mods timestamp))
 
-			 (t (handle-event window (make-instance 'pointer-button-release-event
-								:window window
-								:button (- button #_Button1 #_Button4)
-								:modifier-state mods))))))
+			 (t
+			  (input-mouse-click window +pointer-left-button+ :release x y mods lock-mods timestamp)))))
 
 	       (return)))
 
