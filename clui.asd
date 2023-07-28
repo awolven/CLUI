@@ -132,6 +132,7 @@
    (:file "../noffi/src/abi-amd64-sysv-cc")
    (:file "../noffi/src/config")
    (:file "../noffi/src/noffi-util")
+   (:file "../noffi/patch")
 
    (:file "clr")
    (:file "x11/x11")
@@ -150,7 +151,7 @@
    (:file "x11/x11-init")
    (:file "x11/x11-window")
    (:file "x11/x11-monitor")
-   (:file "x11/x11-clipboard")
+   (:file "x11/x11-selection")
    (:file "wayland/wayland-classes")
    (:file "wayland/wayland-impl")
    (:file "compute-concrete-class")
