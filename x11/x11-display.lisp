@@ -1,8 +1,5 @@
 (in-package :clui)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi-syntax t))
-
 (defvar *xim->display* (make-hash-table :test #'equalp))
 (defvar *xdisplay->display* (make-hash-table :test #'eq))
 

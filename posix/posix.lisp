@@ -1,9 +1,4 @@
 (in-package :clui)
-(noffi::noffi-syntax t)
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi::noffi-syntax t))
-
 
 (defun poll-posix (fds count &optional (timeout nil))  ;; timeout is in seconds
   (unless timeout (setq timeout most-positive-double-float))

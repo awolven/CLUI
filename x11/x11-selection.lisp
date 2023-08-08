@@ -215,77 +215,79 @@
 		       (let ((&xselection (c->-addr &notification '#_xselection)))
 
 			 (unless (= (#_.property &xselection) #_None)
-			   
-			   (#_XCheckIfEvent (h display)
-					    &dummy
-					    isSelPropNewValueNotify
-					    &notification)
-			 
-			   (#_XGetWindowProperty (h display)
-						 (#_.requestor &xselection)
-						 (#_.property &xselection)
-						 0
-						 #_LONG_MAX
-						 #_True
-						 #_AnyPropertyType
-						 (c-addr-of actual-type)
-						 (c-addr-of actual-format)
-						 (c-addr-of item-count)
-						 (c-addr-of bytes-after)
-						 (c-addr-of data))
+			   (unless (= (#_.requestor &xselection) 0)
+			     
+			     (#_XCheckIfEvent (h display)
+					      &dummy
+					      isSelPropNewValueNotify
+					      &notification)
 
-			   (when (= (cval-value actual-type) INCR)
-			     (let ((string ""))
+			     (#_XGetWindowProperty (h display)
+						   (#_.requestor &xselection)
+						   (#_.property &xselection)
+						   0
+						   #_LONG_MAX
+						   #_True
+						   #_AnyPropertyType
+						   (c-addr-of actual-type)
+						   (c-addr-of actual-format)
+						   (c-addr-of item-count)
+						   (c-addr-of bytes-after)
+						   (c-addr-of data))
 
-			       (loop
-				 do
-				    (loop while (not (#_XCheckIfEvent (h display)
-								      &dummy
-								      isSelPropNewValueNotify
-								      &notification))
-					  do (wait-for-x11-event display))
+			     (when (= (cval-value actual-type) INCR)
+			       (let ((string ""))
 
-				    (when data
-				      (let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
-					(#_XFree data-ptr)))
-				    
-				    (#_XGetWindowProperty (h display)
-							  (#_.requestor &xselection)
-							  (#_.property &xselection)
-							  0
-							  #_LONG_MAX
-							  #_True
-							  #_AnyPropertyType
-							  (c-addr-of actual-type)
-							  (c-addr-of actual-format)
-							  (c-addr-of item-count)
-							  (c-addr-of bytes-after)
-							  (c-addr-of data))
+				 (loop
+				   do
+				      (loop while (not (#_XCheckIfEvent (h display)
+									&dummy
+									isSelPropNewValueNotify
+									&notification))
+					    do (wait-for-x11-event display))
 
-				    (unless (zerop (cval-value item-count))
 				      (when data
 					(let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
-					  (setq string (concatenate 'string string (get-c-string data-ptr))))))
+					  (#_XFree data-ptr)))
 
-				    (when (zerop (cval-value item-count))
-				      (unless (string= "" string)
-					(if (= (c-aref targets i) #_XA_STRING)
-					    (setq selection-string (convert-latin1-to-utf8 string))
-					    (setq selection-string string)))
-				      (return)))))
+				      (unless (= (#_.requestor &xselection) 0)
+					(#_XGetWindowProperty (h display)
+							      (#_.requestor &xselection)
+							      (#_.property &xselection)
+							      0
+							      #_LONG_MAX
+							      #_True
+							      #_AnyPropertyType
+							      (c-addr-of actual-type)
+							      (c-addr-of actual-format)
+							      (c-addr-of item-count)
+							      (c-addr-of bytes-after)
+							      (c-addr-of data))
 
-			   (when data
-			     (let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
+					(unless (zerop (cval-value item-count))
+					  (when data
+					    (let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
+					      (setq string (concatenate 'string string (get-c-string data-ptr))))))
 
-			       (when (= (cval-value actual-type) (cval-value (c-aref targets i)))
+					(when (zerop (cval-value item-count))
+					  (unless (string= "" string)
+					    (if (= (c-aref targets i) #_XA_STRING)
+						(setq selection-string (convert-latin1-to-utf8 string))
+						(setq selection-string string)))
+					  (return))))))
 
-				 (if (= (cval-value (c-aref targets i)) #_XA_STRING)
-				     (setq selection-string (convert-latin1-to-utf8 (get-c-string data-ptr)))
-				     (setq selection-string (get-c-string data-ptr))))
+			     (when data
+			       (let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
+
+				 (when (= (cval-value actual-type) (cval-value (c-aref targets i)))
+
+				   (if (= (cval-value (c-aref targets i)) #_XA_STRING)
+				       (setq selection-string (convert-latin1-to-utf8 (get-c-string data-ptr)))
+				       (setq selection-string (get-c-string data-ptr))))
 			     
-			       (#_XFree data-ptr)))
+				 (#_XFree data-ptr)))
 
-			   (unless (string= selection-string "")
-			     (return)))))))
+			     (unless (string= selection-string "")
+			       (return))))))))
 	  
 	  selection-string)))))

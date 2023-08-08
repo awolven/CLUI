@@ -5,6 +5,9 @@
 #+(and notyet wayland)(pushnew :wayland cl:*features*)
 
 (defsystem clui
+  :description "A cross platform OS window and input event management library."
+  :license "zlib"
+  :author "Andrew Kenneth Wolven <awolven@gmail.com>"
   :serial t
   :depends-on
   (#+darwin :clui/cocoa #+(or windows os-windows) :clui/win32 #+linux :clui/linux))
@@ -91,7 +94,6 @@
    (:file "win32/win32-keyboard")
    (:file "win32/win32-window")
    (:file "win32/win32-monitor")
-   #+vulkan(:file "win32/win32-vulkan")
    (:file "win32/win32-clipboard")
    (:file "monitor")
    (:file "abstract-os")
@@ -132,7 +134,6 @@
    (:file "../noffi/src/abi-amd64-sysv-cc")
    (:file "../noffi/src/config")
    (:file "../noffi/src/noffi-util")
-   (:file "../noffi/patch")
 
    (:file "clr")
    (:file "x11/x11")

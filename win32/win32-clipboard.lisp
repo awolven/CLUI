@@ -1,5 +1,4 @@
 (in-package :clui)
-(noffi-syntax)
 
 (defun win32-copy-string-to-clipboard (string)
   (when (stringp string)

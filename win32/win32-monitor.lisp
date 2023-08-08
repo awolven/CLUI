@@ -1,8 +1,4 @@
 (in-package :clui)
-(noffi::noffi-syntax t)
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi::noffi-syntax t))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   #_{typedef struct monitor_cons {LPCWSTR adapterName; HMONITOR handle;} monitor_cons;}

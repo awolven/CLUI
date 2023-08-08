@@ -1,7 +1,5 @@
 (in-package :clui)
 
-(noffi-syntax)
-
 (defvar w)
 
 (defcfun (my-exception-handler-callback #_<LONG>)

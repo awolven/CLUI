@@ -4,12 +4,8 @@
 ;; dnf install libXrandr-devel
 ;; dnf install libXcursor-devel
 
-;;(eval-when (:compile-toplevel :load-toplevel :execute)
-;;  (noffi::boot-ht)
-  (noffi::noffi-syntax t)
-  ;;(defparameter noffi::*last-good-token* nil))
+(noffi::noffi-syntax)
 
-;;(eval-when (:compile-toplevel)
   #_{
   #include <stdlib.h>
   #include <string.h>
@@ -41,4 +37,4 @@
   #include <X11/extensions/shape.h>
 
   }
-;;  )
+

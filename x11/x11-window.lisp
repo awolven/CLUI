@@ -1,8 +1,4 @@
 (in-package :clui)
-(noffi-syntax)
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (noffi-syntax t))
 
 (defconstant MWM_HINTS_DECORATIONS 2)
 (defconstant MWM_DECOR_ALL 0)

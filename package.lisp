@@ -202,14 +202,7 @@
 	   #:key-release-event
 	   #:character-event
 	   )
-	   
 
-  
-
-
-
-  #+vulkan
-  (:export #:get-required-instance-extensions)
   #-darwin
   (:import-from :noffi
 		#:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun

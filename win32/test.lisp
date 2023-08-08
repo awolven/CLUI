@@ -1,8 +1,5 @@
 (in-package :clui)
-(noffi::noffi-syntax t)
-
-;;(eval-when (:compile-toplevel :load-toplevel :execute)
-  ;;(noffi::noffi-syntax t))
+(noffi::noffi-syntax)
 
 (defcfun (my-exception-handler-callback #_<LONG>)
 	 ((ExceptionInfo #_<EXCEPTION_POINTERS*>))

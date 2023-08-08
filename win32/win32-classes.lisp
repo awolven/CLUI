@@ -1,7 +1,5 @@
 (in-package :clui)
 
-(noffi::noffi-syntax)
-
 #+SBCL
 (defmacro noffi::callback (name)
   (eval `,name))

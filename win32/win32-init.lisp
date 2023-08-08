@@ -10,8 +10,6 @@
 ;; select "scaling performed by Application"
 ;; click Ok, click Apply, click Ok
 
-(noffi-syntax)
-
 #+CCL
 (defun lpcwstr-1 (string)
   (let* ((len (length string)))
