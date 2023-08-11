@@ -104,7 +104,10 @@
 	      :reader display-scancodes)
 
    (last-event :initform nil
-	       :accessor display-last-event)))
+	       :accessor display-last-event)
+   
+   (exit? :initform nil
+	  :accessor run-loop-exit?)))
 			
 
 (defun default-screen (display)

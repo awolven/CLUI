@@ -25,6 +25,12 @@ freely, subject to the following restrictions:
 
 -----------------------------------------------------------------------
 
+NOFFI License:
+
+NOFFI is licensed MIT with one particular restriction: the clex.lisp file included is not to be released outside of CLUI.
+
+-----------------------------------------------------------------------
+
 CLUI License:
 
 Copyright (c) 2022-2023 Andrew Kenneth Wolven (awolven@gmail.com)

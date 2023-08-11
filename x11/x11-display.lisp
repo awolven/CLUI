@@ -868,6 +868,3 @@
   (wait-for-any-event display timeout)
   (poll-x11-events display))
 
-(defun run (&optional (display (default-display)))
-  (loop 
-	(wait-x11-events display)))

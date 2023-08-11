@@ -208,19 +208,19 @@
     (call-next-method)))
 
 #+win32
-(defmethod destroy-window ((window win32:window))
+(defmethod destroy-window ((window win32:window-mixin))
   (destroy-win32-window window))
 
 #+cocoa
-(defmethod destroy-window ((window cocoa:window))
+(defmethod destroy-window ((window cocoa:window-mixin))
   (destroy-cocoa-window window))
 
 #+x11
-(defmethod destroy-window ((window x11:window))
+(defmethod destroy-window ((window x11:window-mixin))
   (destroy-x11-window window))
 
 #+wayland
-(defmethod destroy-window ((window wayland:window))
+(defmethod destroy-window ((window wayland:window-mixin))
   (destroy-wayland-window window))
 
 
@@ -1210,3 +1210,6 @@
   (setf (%window-cursor window) cursor)
   (%set-window-cursor (window-display window) window cursor))
 
+(defun run (&optional (display (default-display)))
+  (loop until (run-loop-exit? display)
+	do (wait-events display)))

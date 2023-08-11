@@ -627,10 +627,10 @@
   (let ((display (window-display window)))
     
     (when (disabled-cursor-window display)
-      (enable-cursor window))
+      (enable-x11-cursor window))
 
     (when (window-monitor window)
-      (release-monitor window))
+      (release-monitor window (window-monitor window)))
 
     (when (window-input-context window)
       (#_XDestroyIC (window-input-context window))
@@ -642,6 +642,10 @@
       (#_XDestroyWindow (h display) (h window))
       (remhash (h window) *window-handle->window-table*)
       (setf (h window) nil))
+
+    (when (window-colormap window)
+      (#_XFreeColormap (h display) (window-colormap window))
+      (setf (window-colormap window) nil))
 
     (if (eq window (display-window-list-head display))
 	  

@@ -153,6 +153,12 @@
 
 (defmethod handle-event :before ((window os-window-mixin) (event window-close-event-mixin))
   (setf (should-close? window) t)
+  (when (or (null (display-window-list-head (window-display window))) ;; pathological case
+	    (and (eql window (display-window-list-head (window-display window)))
+		 (or (eql window (window-next (display-window-list-head (window-display window))))
+		     (null (window-next (display-window-list-head (window-display window)))))))
+    ;; this is the last window
+    (setf (run-loop-exit? (window-display window)) t))
   (values))
 
 (defmethod handle-event :after ((window os-window-mixin) (event window-close-event-mixin))
