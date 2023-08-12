@@ -218,7 +218,7 @@
       (let ((offset (ptr-offset ptr)))
         (if (eql 0 offset)
             (ptr-base-sap ptr)
-            (sap-plus (ptr-base-sap ptr) offset)))
+            (sap-plus (ptr-base-sap ptr) (sldb (byte 64 0) offset))))
       +null-ptr-sap+))
 
 (defun ptr-nullptr-p (ptr)

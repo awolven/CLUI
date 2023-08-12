@@ -2144,7 +2144,7 @@ second return value is the remaining tokens. Initial white space is skipped."
         for probe = (merge-pathnames filename directory)
         do (when (probe-file probe)
              (return probe))))
-
+#-windows
 (defun handle-system-include (filename)
   (multiple-value-bind (proc output)
       (run-program *cc* (append *cc-args* (list "-dD" "-E" "-"))

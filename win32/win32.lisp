@@ -2,4 +2,5 @@
 
 (noffi:noffi-syntax)
 
-(load "~/clui/win32/test2.lisp")
+(load (asdf/system:system-relative-pathname :clui "win32/test2.lisp"))
+
