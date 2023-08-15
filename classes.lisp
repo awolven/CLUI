@@ -172,6 +172,11 @@
 (defclass cursor-mixin ()
   ())
 
+(defmethod initialize-instance :after ((cursor cursor-mixin) &rest initargs &key display)
+  (declare (ignore initargs display))
+  ;; make :display an authorized initarg for cursor, even if there is no slot.
+  (values))
+
 (defclass arrow-cursor-mixin (cursor-mixin)
   ())
 
