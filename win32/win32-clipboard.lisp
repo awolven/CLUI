@@ -8,7 +8,8 @@
     (with-lpcwstr (lpcwstr string)
       (let ((size (* (1+ (* (length string))) (cval-value (c-sizeof-type '#_<WCHAR>)))))
 
-	;;(#_EmptyClipboard)
+	(when (zerop (#_EmptyClipboard))
+	  (error "EmptyClipboard returned error code: ~S" (#_GetLastError)))
 	
       
 	(let ((hglb (#_GlobalAlloc #_GMEM_MOVEABLE size)))
@@ -33,12 +34,16 @@
   (unless (#_OpenClipboard nil)
     (return-from win32-copy-string-from-clipboard nil))
   
-  (let* ((hglb (#_GetClipboardData #_CF_UNICODETEXT))
-	 (hglbCopy (#_GlobalLock hglb)))
-    (noffi::with-stack-allocated-sap ((lpcwstr 4096))
-      (setq lpcwstr (cons-ptr lpcwstr 0 '#_<LPCWSTR>))
-      (#_memcpy lpcwstr hglbCopy 4096)
-      (#_GlobalUnlock hglb)
-      (get-native-utf16-string lpcwstr))))
+  (let* ((hglb (#_GetClipboardData #_CF_UNICODETEXT)))
+    (unless (noffi::ptr-nullptr-p hglb)
+      (let ((hglbCopy (#_GlobalLock hglb)))
+	(unless (noffi::ptr-nullptr-p hglbCopy)
+	  (unwind-protect 
+	       (noffi::with-stack-allocated-sap ((lpcwstr 4096))
+		 (setq lpcwstr (cons-ptr lpcwstr 0 '#_<LPCWSTR>))
+		 (#_memcpy lpcwstr hglbCopy 4096)
+		 (#_GlobalUnlock hglb)
+		 (get-native-utf16-string lpcwstr))
+	    (#_CloseClipboard)))))))
 	    
     
