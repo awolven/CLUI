@@ -18,7 +18,7 @@
 (defun add-my-exception-handler ()
   (#_AddVectoredExceptionHandler 0 my-exception-handler-callback))
 
-#+NIL
+
 (add-my-exception-handler)
 
 (defconstant +WM_COPYGLOBALDATA+ #x0049)
