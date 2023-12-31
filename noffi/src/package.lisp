@@ -23,7 +23,10 @@
   #+SBCL (:import-from :SB-EXT #:QUIT)
   ;;
   (:export #:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun
-           #:size-of-typ #:c-aref #:clet&
+           #:c-sizeof-type #:c-aref #:clet&
+	   #:size-of-typ
+	   #:c->-addr
+	   #:cval-value
            #:get-c-string
            #:get-native-utf16-string
            #:int-ptr

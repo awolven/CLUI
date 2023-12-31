@@ -922,9 +922,9 @@ element and a function is turned to a pointer."
          ;; The cval-value of an array already is the thing.
          (cons-ptr (ptr-base-sap ptr) (ptr-offset ptr) base))
         ((eq :float (bare-expanded-type base nil))
-         (setf (peek-float object 0) new-value))
+         (setf (peek-float object 0) (cval-value (c-checked-coerce new-value base))))
         ((eq :double (bare-expanded-type base nil))
-         (setf (peek-double object 0) new-value))
+         (setf (peek-double object 0) (cval-value (c-checked-coerce new-value base))))
         (t
          (error "Don't know how to SETF a reference to some ~S" base)) ))))
 
@@ -1348,7 +1348,7 @@ use in an alien funcall."
 
 
 (defparameter *cheap-binop-table*
-  '((* c*) (/ c/) (% c%) (+ c+) (- c-)
+  '((progn progn) (* c*) (/ c/) (% c%) (+ c+) (- c-)
     (<< c<<) (>> c>>)
     (< c<) (> c>) (<= c<=) (>= c>=) (= c==) (/= c!=)
     (logior c-logior) (logxor c-logxor) (logand c-logand)
