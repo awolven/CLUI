@@ -222,10 +222,10 @@
 			:initform 0
 			:accessor event-lock-modifier-state)
    (local-x :initarg :x
-	    :accessor pointer-event-x)
+	    :accessor clim:pointer-event-x)
    
    (local-y :initarg :y
-	    :accessor pointer-event-y)))
+	    :accessor clim:pointer-event-y)))
 
 (defclass button-press-event-mixin ()
   ())
@@ -243,11 +243,11 @@
 
 (defclass pointer-event-mixin (clim:pointer-event input-event-mixin)
   ((pointer :initarg :pointer
-	    :accessor pointer-event-pointer)
+	    :accessor clim:pointer-event-pointer)
    (native-x :initarg :native-x
-	     :accessor pointer-event-native-x)
+	     :accessor clim:pointer-event-native-x)
    (native-y :initarg :native-y
-	     :accessor pointer-event-native-y)))
+	     :accessor clim:pointer-event-native-y)))
 
 (defclass clim:pointer-button-event () ())
 
