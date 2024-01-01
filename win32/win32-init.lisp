@@ -171,7 +171,7 @@
 (defun get-win32-display ()
   (let ((displays (get-displays)))
     (find-if #'(lambda (dpy)
-		 (typep dpy 'win32:desktop-mixin))
+		 (typep dpy 'win32:display-mixin))
 	     displays)))
 
 (defun helper-window-proc (hWnd uMsg wParam lParam)
@@ -252,7 +252,7 @@
 	  
 
 
-(defmethod initialize-helper-window ((display win32:desktop-mixin) helper-window)
+(defmethod initialize-helper-window ((display win32:display-mixin) helper-window)
   helper-window)
 
     

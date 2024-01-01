@@ -1,27 +1,33 @@
 (in-package :clui)
 
-(defgeneric handle-event (client event))
+(defgeneric clim:handle-event (client event))
 
 (defclass event-mixin ()
   ((timestamp :initarg :timestamp
 	      :accessor event-timestamp)))
 
-(defmethod clui:handle-event :after (object (event clui::event-mixin))
+(defmethod clim:handle-event :after (object (event clui::event-mixin))
   (declare (ignore object))
   (setf (display-last-event (default-display)) event))
 
-(defmethod handle-event (object event)
+(defmethod clim:handle-event (object event)
   (declare (ignorable object event))
   (values))
 
 ;; timer event
 
-(defclass clui.v0:timeout-event (event-mixin)
+(defclass clim:timer-event () ())
+
+(defclass timer-event-mixin (event-mixin) ())
+
+(defclass clui.v0:timer-event (clim:timer-event timer-event-mixin)
   ())
 
 ;; window-event
 
-(defclass window-event-mixin (event-mixin)
+(defclass clim:window-event () ())
+
+(defclass window-event-mixin (clim:window-event event-mixin)
   ((window :initarg :window
 	   :accessor event-window)
    
@@ -35,7 +41,9 @@
 
 ;; window-configuration-event
 
-(defclass window-configuration-event-mixin (window-event-mixin)
+(defclass clim:window-configuration-event () ())
+
+(defclass window-configuration-event-mixin (clim:window-configuration-event window-event-mixin)
   ())
 
 ;; window-configuration-event
@@ -72,7 +80,7 @@
 (defclass clui.v0:window-iconify-event (window-iconify-event-mixin)
   ())
 
-(defmethod handle-event :before ((window window-mixin) (event window-iconify-event-mixin))
+(defmethod clim:handle-event :before ((window window-mixin) (event window-iconify-event-mixin))
   (maybe-release-monitor window)
   (values))
 
@@ -82,7 +90,7 @@
 (defclass clui.v0:window-deiconify-event (window-deiconify-event-mixin)
   ())
 
-(defmethod handle-event :before ((window window-mixin) (event window-deiconify-event-mixin))
+(defmethod clim:handle-event :before ((window window-mixin) (event window-deiconify-event-mixin))
   (maybe-acquire-monitor window)
   (values))
 
@@ -130,7 +138,9 @@
 (defclass clui.v0:window-hide-event (window-hide-event-mixin)
   ())
 
-(defclass window-repaint-event-mixin (window-event-mixin)
+(defclass clim:window-repaint-event () ())
+
+(defclass window-repaint-event-mixin (clim:window-repaint-event window-event-mixin)
   ())
 
 (defclass clui.v0:window-repaint-event (window-repaint-event-mixin)
@@ -138,7 +148,9 @@
 
 ;; window-manager-event
 
-(defclass window-manager-event-mixin (event-mixin)
+(defclass clim:window-manager-event () ())
+
+(defclass window-manager-event-mixin (clim:window-manager-event event-mixin)
   ((window :initarg :window)))
 
 
@@ -151,7 +163,7 @@
 (defclass window-close-event-mixin (window-manager-event-mixin)
   ())
 
-(defmethod handle-event :before ((window os-window-mixin) (event window-close-event-mixin))
+(defmethod clim:handle-event :before ((window os-window-mixin) (event window-close-event-mixin))
   (setf (should-close? window) t)
   (when (or (null (display-window-list-head (window-display window))) ;; pathological case
 	    (and (eql window (display-window-list-head (window-display window)))
@@ -161,16 +173,17 @@
     (setf (run-loop-exit? (window-display window)) t))
   (values))
 
-(defmethod handle-event :after ((window os-window-mixin) (event window-close-event-mixin))
+(defmethod clim:handle-event :after ((window os-window-mixin) (event window-close-event-mixin))
   (when (should-close? window)
     (destroy-window window))
   (values))
 
 (defclass clui.v0:window-close-event (window-close-event-mixin)
   ())
-  
 
-(defclass window-destroyed-event-mixin (window-manager-event-mixin)
+(defclass clim:window-manager-delete-event () ())
+
+(defclass window-destroyed-event-mixin (clim:window-manager-delete-event window-manager-event-mixin)
   ())
 
 (defclass clui.v0:window-destroyed-event (window-destroyed-event-mixin)
@@ -184,7 +197,9 @@
 
 ;; device-event
 
-(defclass device-event-mixin (event-mixin)
+(defclass clim:device-event () ())
+
+(defclass device-event-mixin (clim:device-event event-mixin)
   ())
 
 (defclass input-event-mixin (device-event-mixin)
@@ -224,7 +239,9 @@
       (princ (aref *keysyms* (input-event-code event)) stream))
     event))
 
-(defclass pointer-event-mixin (input-event-mixin)
+(defclass clim:pointer-event () ())
+
+(defclass pointer-event-mixin (clim:pointer-event input-event-mixin)
   ((pointer :initarg :pointer
 	    :accessor pointer-event-pointer)
    (native-x :initarg :native-x
@@ -232,23 +249,33 @@
    (native-y :initarg :native-y
 	     :accessor pointer-event-native-y)))
 
-(defclass pointer-button-event-mixin (pointer-event-mixin)
+(defclass clim:pointer-button-event () ())
+
+(defclass pointer-button-event-mixin (clim:pointer-button-event pointer-event-mixin)
   ())
 
-(defclass pointer-button-press-event-mixin (button-press-event-mixin pointer-button-event-mixin)
+(defclass clim:pointer-button-press-event () ())
+
+(defclass pointer-button-press-event-mixin
+    (clim:pointer-button-press-event button-press-event-mixin pointer-button-event-mixin)
   ())
 
 (defclass clui.v0:pointer-button-press-event (pointer-button-press-event-mixin)
   ())
 
-(defclass pointer-button-release-event-mixin (button-release-event-mixin pointer-button-event-mixin)
+(defclass clim:pointer-button-release-event () ())
+
+(defclass pointer-button-release-event-mixin
+    (clim:pointer-button-release-event button-release-event-mixin pointer-button-event-mixin)
   ())
 
 (defclass clui.v0:pointer-button-release-event (pointer-button-release-event-mixin)
   ())
 
+(defclass clim:pointer-button-hold-event () ())
+
 ;; todo: make this at the gesture level
-(defclass pointer-button-hold-event-mixin (pointer-button-event-mixin)
+(defclass pointer-button-hold-event-mixin (clim:pointer-button-hold-event pointer-button-event-mixin)
   ())
 
 (defclass clui.v0:pointer-button-hold-event (pointer-button-hold-event-mixin)
@@ -292,35 +319,46 @@
 (defclass clui.v0:pointer-wheel-event (pointer-wheel-event-mixin)
   ())
 
-(defclass pointer-motion-event-mixin (pointer-event-mixin)
+(defclass clim:pointer-motion-event () ())
+
+(defclass pointer-motion-event-mixin (clim:pointer-motion-event pointer-event-mixin)
   ())
 
 (defclass clui.v0:pointer-motion-event (pointer-motion-event-mixin)
   ())  
 
-(defclass pointer-boundary-event-mixin (pointer-event-mixin)
+(defclass clim:pointer-boundary-event () ())
+
+(defclass pointer-boundary-event-mixin (clim:pointer-boundary-event pointer-event-mixin)
   ((kind :initarg :kind
 	 :initform nil
 	 :accessor pointer-boundary-event-kind)))
 
-(defclass pointer-enter-event-mixin (pointer-boundary-event-mixin)
+(defclass clim:pointer-enter-event () ())
+
+(defclass pointer-enter-event-mixin (clim:pointer-enter-event pointer-boundary-event-mixin)
   ())
 
 (defclass clui.v0:pointer-enter-event (pointer-enter-event-mixin)
   ())
 
-(defclass pointer-exit-event-mixin (pointer-boundary-event-mixin)
+(defclass clim:pointer-exit-event () ())
+
+(defclass pointer-exit-event-mixin (clim:pointer-exit-event pointer-boundary-event-mixin)
   ())
 
 (defclass clui.v0:pointer-exit-event (pointer-exit-event-mixin)
   ())
 
 
+(defclass clim:keyboard-event () ())
 
-(defclass keyboard-event-mixin (input-event-mixin)
+(defclass keyboard-event-mixin (clim:keyboard-event input-event-mixin)
   ())
 
-(defclass key-press-event-mixin (button-press-event-mixin keyboard-event-mixin)
+(defclass clim:key-press-event () ())
+
+(defclass key-press-event-mixin (clim:key-press-event button-press-event-mixin keyboard-event-mixin)
   ())
 
 
@@ -334,7 +372,9 @@
 (defclass clui.v0::key-repeat-event (key-repeat-event-mixin)
   ())
 
-(defclass key-release-event-mixin (button-release-event-mixin keyboard-event-mixin)
+(defclass clim:key-release-event () ())
+
+(defclass key-release-event-mixin (clim:key-release-event button-release-event-mixin keyboard-event-mixin)
   ())
 
 (defclass clui.v0:key-release-event (key-release-event-mixin)

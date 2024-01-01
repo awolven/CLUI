@@ -2,9 +2,9 @@
 
 
 #+NIL
-(defun create-win32-key-tables (win32-desktop)
-  (let ((keycodes (display-keycodes win32-desktop))
-	(scancodes (display-scancodes win32-desktop)))
+(defun create-win32-key-tables (win32-display)
+  (let ((keycodes (display-keycodes win32-display))
+	(scancodes (display-scancodes win32-display)))
     
     (setf 
 	  
@@ -201,9 +201,9 @@
     (values)))
 
 
-(defun create-win32-key-tables (win32-desktop)
-  (let ((keycodes (display-keycodes win32-desktop))
-	(scancodes (display-scancodes win32-desktop)))
+(defun create-win32-key-tables (win32-display)
+  (let ((keycodes (display-keycodes win32-display))
+	(scancodes (display-scancodes win32-display)))
 
     (setf (aref keycodes #x00B) +key-0+
 	  (aref keycodes #x002) +key-1+

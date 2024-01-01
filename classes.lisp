@@ -72,7 +72,7 @@
 (defclass opengl-support-mixin ()
   ())
 
-(defclass display-mixin ()
+(defclass display-mixin (clim:port)
   ((window-list-head
     :accessor display-window-list-head
     :initform nil)
@@ -341,7 +341,7 @@
   (declare (ignore object))
   nil)
 
-(defclass os-window-mixin (window-mixin)
+(defclass os-window-mixin (window-mixin clim:mirrored-sheet-mixin)
   ((next
     :type (or null window-mixin)
     :accessor window-next)

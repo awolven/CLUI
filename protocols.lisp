@@ -267,7 +267,7 @@
 
 
 ;; events
-(defclass timeout-event (display-dependent)
+(defclass timer-event (display-dependent)
   ()
   (:metaclass protocol-class))
 

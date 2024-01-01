@@ -770,7 +770,7 @@ int decorated;
 
 		 (#.#_WM_PAINT ;; 15
 
-		  (handle-event window (make-instance 'window-repaint-event
+		  (clim:handle-event window (make-instance 'window-repaint-event
 						      :window window
 						      :timestamp time))
 
@@ -787,7 +787,7 @@ int decorated;
 
 		 (#.#_WM_SETFOCUS ;; 7
 
-		  (handle-event window (make-instance 'window-focus-event
+		  (clim:handle-event window (make-instance 'window-focus-event
 						      :window window
 						      :timestamp time))
 
@@ -818,7 +818,7 @@ int decorated;
 		      (capture-win32-cursor window))
 
 		    (unless (eq (last-iconified? window) iconified?)
-		      (handle-event window (make-instance 'window-iconify-event
+		      (clim:handle-event window (make-instance 'window-iconify-event
 							  :window window
 							  :new-width width
 							  :new-height height
@@ -832,7 +832,7 @@ int decorated;
 						  :new-width width
 						  :new-height height
 						  :timestamp time)))
-			(handle-event window event)))
+			(clim:handle-event window event)))
 
 		    (when (or (/= width (round (or (last-width window) 0)))
 			      (/= height (round (or (last-height window) 0))))
@@ -842,7 +842,7 @@ int decorated;
 						  :new-width width
 						  :new-height height
 						  :timestamp time)))
-			(handle-event window event)
+			(clim:handle-event window event)
 
 			(setf (last-width window) width
 			      (last-height window) height)))
@@ -875,7 +875,7 @@ int decorated;
 					      :new-y (#_GET_Y_LPARAM lParam)
 					      :timestamp time)))
 
-		    (handle-event window event)
+		    (clim:handle-event window event)
 
 		    (setf (last-pos-x window) (#_GET_X_LPARAM lParam)
 			  (last-pos-y window) (#_GET_Y_LPARAM lParam))
@@ -985,7 +985,7 @@ int decorated;
 		  (when (and monitor auto-iconify?)
 		    (iconify-win32-window window))
 
-		  (handle-event window (make-instance 'window-defocus-event
+		  (clim:handle-event window (make-instance 'window-defocus-event
 						      :window window
 						      :timestamp time))
 		  (return 0))
@@ -1009,7 +1009,7 @@ int decorated;
 
 		 (#.#_WM_CLOSE ;; 16
 
-		  (handle-event window (make-instance 'window-close-event
+		  (clim:handle-event window (make-instance 'window-close-event
 						      :window window
 						      :timestamp time))
 		  (return 0))
@@ -1206,7 +1206,7 @@ int decorated;
 
 		      (setf (cursor-tracked? window) t)
 
-		      (handle-event window (make-instance 'pointer-enter-event
+		      (clim:handle-event window (make-instance 'pointer-enter-event
 							  :window window
 							  :input-code +pointer-move+
 							  :x x
@@ -1225,7 +1225,7 @@ int decorated;
 			  (when (raw-mouse-motion? window)
 			    (go break))
 			
-			  (handle-event window (make-instance 'pointer-motion-event
+			  (clim:handle-event window (make-instance 'pointer-motion-event
 							      :window window
 							      :input-code +pointer-move+
 							      :x (+ (virtual-cursor-pos-x window) dx)
@@ -1236,7 +1236,7 @@ int decorated;
 							      :lock-modifier-state lock-mods
 							      :timestamp time)))
 			(progn
-			  (handle-event window (make-instance 'pointer-motion-event
+			  (clim:handle-event window (make-instance 'pointer-motion-event
 							      :window window
 							      :input-code +pointer-move+
 							      :x x
@@ -1258,7 +1258,7 @@ int decorated;
 		 (#.#_WM_MOUSELEAVE ;; 675
 		  (setf (cursor-tracked? window) nil)
 		  (multiple-value-bind (x y) (window-cursor-position window)
-		    (handle-event window (make-instance 'pointer-exit-event
+		    (clim:handle-event window (make-instance 'pointer-exit-event
 							:window window
 							:input-code +pointer-move+
 							:x x :y y
@@ -1272,7 +1272,7 @@ int decorated;
 
 		 (#.#_WM_MOUSEWHEEL
 		  (multiple-value-bind (x y) (window-cursor-position window)
-		    (handle-event window (make-instance 'pointer-wheel-event
+		    (clim:handle-event window (make-instance 'pointer-wheel-event
 							:window window
 							:input-code +pointer-wheel+
 							:yoffset (/ (cval-value (c-coerce (#_HIWORD wParam) '#_<short>))
@@ -1286,7 +1286,7 @@ int decorated;
 
 		 (#.#_WM_MOUSEHWHEEL
 		  (multiple-value-bind (x y) (window-cursor-position window)
-		    (handle-event window (make-instance 'pointer-wheel-event
+		    (clim:handle-event window (make-instance 'pointer-wheel-event
 							:window window
 							:input-code +pointer-wheel+
 							:xoffset (- (/ (cval-value (c-coerce (#_HIWORD wParam) '#_<short>)) #_WHEEL_DELTA))
@@ -1398,7 +1398,7 @@ int decorated;
 				     (let ((string (noffi::get-c-string buffer)))
 				       (push string paths)))))
 		      
-			(handle-event window (make-instance 'drop-event
+			(clim:handle-event window (make-instance 'drop-event
 							    :window window
 							    :timestamp time
 							    :modifier-state mods
@@ -1934,7 +1934,7 @@ int decorated;
 	      (setq window (display-window-list-head app))
 
 	      (loop while window
-		    do (handle-event window (make-instance 'window-close-event))
+		    do (clim:handle-event window (make-instance 'window-close-event))
 		       (setq window (window-next window))))
 
 	    (progn
@@ -1958,7 +1958,7 @@ int decorated;
 		     (setq window (display-window-list-head app))
 
 		     (loop while window
-			   do (handle-event window (make-instance 'window-close-event))
+			   do (clim:handle-event window (make-instance 'window-close-event))
 			      (setq window (window-next window))))
 
 		   (progn

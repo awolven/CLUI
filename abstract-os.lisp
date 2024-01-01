@@ -74,11 +74,11 @@
 
 
 #+win32
-(defmethod poll-monitors ((display win32:desktop-mixin))
+(defmethod poll-monitors ((display win32:display-mixin))
   (poll-win32-monitors display))
 
 #+cocoa
-(defmethod poll-monitors ((display cocoa:desktop-mixin))
+(defmethod poll-monitors ((display cocoa:display-mixin))
   (poll-cocoa-monitors display))
 
 #+x11
@@ -86,7 +86,7 @@
   (poll-x11-monitors display))
 
 #+wayland
-(defmethod poll-monitors ((display wayland:desktop-mixin))
+(defmethod poll-monitors ((display wayland:display-mixin))
   (poll-wayland-monitors display))  
 
 #+win32
@@ -128,11 +128,11 @@
   #+windows(update-win32-cursor-image window))
 
 #+win32
-(defmethod release-cursor ((display win32:desktop-mixin))
+(defmethod release-cursor ((display win32:display-mixin))
   (release-win32-cursor display))
 
 #+cocoa
-(defmethod release-cursor ((display cocoa:desktop-mixin))
+(defmethod release-cursor ((display cocoa:display-mixin))
   (release-cocoa-cursor display))
 
 #+x11

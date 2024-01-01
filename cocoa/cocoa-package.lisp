@@ -14,7 +14,7 @@
 	   #:window
 	   #:cursor
 	   #:platform
-	   #:desktop
+	   #:display
 	   #:screen
 	   #:view
 
@@ -23,7 +23,7 @@
 	   #:nsgl-view
 	   
 	   #:platform-mixin
-	   #:desktop-mixin
+	   #:display-mixin
 	   #:screen-mixin
 	   #:window-mixin
 	   #:view-mixin
@@ -34,14 +34,14 @@
 	   #:metal-window-mixin
 	   #:nsgl-window-mixin
 
-	   #:desktop-with-metal
-	   #:desktop-with-opengl	   
+	   #:display-with-metal
+	   #:display-with-opengl	   
 
 	   #:metal-window
 	   #:vulkan-window
 	   #:nsgl-window
 
-	   #:desktop-with-krma-mixin
-	   #:desktop-with-krma
+	   #:display-with-krma-mixin
+	   #:display-with-krma
 	   #:krma-enabled-window-mixin
 	   #:krma-enabled-window))

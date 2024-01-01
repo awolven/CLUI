@@ -33,7 +33,7 @@
 (defun ptr-inc (ptr offset type)
   (cons-ptr (int-sap (+ (sap-int (ptr-effective-sap ptr)) offset)) 0 type))
 
-(defun create-monitor (&adapter &display desktop)
+(defun create-monitor (&adapter &display display)
   (let ((p-adapter-name (c->-addr &adapter '#_DeviceName))
 	(p-display-name (c->-addr &display '#_DeviceName))
 	(p-adapter-string (c->-addr &adapter '#_DeviceString))
@@ -70,7 +70,7 @@
 	    (#_DeleteDC hdc)))
 
 	(setq monitor (make-instance 'monitor
-				     :display desktop
+				     :display display
 				     :name name
 				     :width-mm width-mm
 				     :height-mm height-mm
@@ -106,7 +106,7 @@
 	    (#_EnumDisplayMonitors nil nil monitor-callback lparam))
 	(#_.handle &mc)))))
 
-(defun poll-win32-monitors (desktop)
+(defun poll-win32-monitors (dpy)
   (clet ((adapter #_<DISPLAY_DEVICEW>)
 	 (display #_<DISPLAY_DEVICEW>))
     (let* ((&adapter (c-addr-of adapter))
@@ -114,7 +114,7 @@
 	   (&display (c-addr-of display))
 	   (p-display-name (c->-addr &display '#_DeviceName))
 	   (size (c-sizeof-type '#_<DISPLAY_DEVICEW>))
-	   (disconnected (copy-list (display-monitors desktop))))
+	   (disconnected (copy-list (display-monitors dpy))))
 
       (loop for adapter-index from 0
 	    do (let ((placement :insert-last))
@@ -151,16 +151,16 @@
 				  (return))))
 
 			    (unless found?
-			      (setq monitor (create-monitor &adapter &display desktop))
+			      (setq monitor (create-monitor &adapter &display dpy))
 			      (unless monitor
 				(return))
 
-			      (input-monitor desktop monitor :action :connected :placement placement))
+			      (input-monitor dpy monitor :action :connected :placement placement))
 
 			    (setq placement :insert-last)))))
 
       (loop for discon in disconnected
-	    do (input-monitor desktop discon :action :disconnected)))))
+	    do (input-monitor dpy discon :action :disconnected)))))
 
 (defun restore-win32-monitor-video-mode (monitor)
   (when (mode-changed? monitor)

@@ -370,7 +370,7 @@
 		    (unless (zerop (#_XIMaskIsSet (#_.mask (c->-addr re '#_valuators)) 1))
 		      (setq ypos (+ ypos (c-aref values 0)))
 
-		      (handle-event window (make-instance 'pointer-motion-event
+		      (clim:handle-event window (make-instance 'pointer-motion-event
 							  :input-code +pointer-move+
 							  :window window
 							  :x xpos
@@ -509,7 +509,7 @@
 			  (input-mouse-click window +pointer-right-button+ :press x y mods lock-mods timestamp))
 
 			 ((= button #_Button4)
-			  (handle-event window (make-instance 'pointer-wheel-event
+			  (clim:handle-event window (make-instance 'pointer-wheel-event
 							      :window window
 							      :input-code +pointer-wheel+
 							      :yoffset 1.0
@@ -520,7 +520,7 @@
 							      :timestamp timestamp)))
 
 			 ((= button #_Button5)
-			  (handle-event window (make-instance 'pointer-wheel-event
+			  (clim:handle-event window (make-instance 'pointer-wheel-event
 							      :window window
 							      :input-code +pointer-wheel+
 							      :yoffset -1.0
@@ -532,7 +532,7 @@
 
 			 #+NOTYET
 			 ((= button #_Button6)
-			  (handle-event window (make-instance 'pointer-wheel-event
+			  (clim:handle-event window (make-instance 'pointer-wheel-event
 							      :window window
 							      :x x
 							      :y y
@@ -541,7 +541,7 @@
 							      :modifier-state mods)))
 			 #+NOTYET
 			 ((= button #_Button7)
-			  (handle-event window (make-instance 'pointer-wheel-event
+			  (clim:handle-event window (make-instance 'pointer-wheel-event
 							      :window window
 							      :x x
 							      :y y
@@ -580,12 +580,12 @@
 	       (when (eq (window-cursor-mode window) :hidden)
 		 (update-cursor-image window))
 
-	       (handle-event window (make-instance 'pointer-enter-event
+	       (clim:handle-event window (make-instance 'pointer-enter-event
 						   :window window
 						   :input-code +pointer-move+
 						   :x x
 						   :y y))
-	       (handle-event window (make-instance 'pointer-motion-event
+	       (clim:handle-event window (make-instance 'pointer-motion-event
 						   :window window
 						   :input-code +pointer-move+
 						   :x x
@@ -600,7 +600,7 @@
 	     (let ((x (#_.x (c->-addr event '#_xcrossing)))
 		   (y (#_.y (c->-addr event '#_xcrossing))))
 
-	       (handle-event window (make-instance 'pointer-exit-event
+	       (clim:handle-event window (make-instance 'pointer-exit-event
 						   :window window
 						   :input-code +pointer-move+
 						   :x x
@@ -626,13 +626,13 @@
 		       (when (raw-mouse-motion? window)
 			 (return))
 
-		       (handle-event window (make-instance 'pointer-motion-event
+		       (clim:handle-event window (make-instance 'pointer-motion-event
 							   :window window
 							   :input-code +pointer-move+
 							   :x (+ (virtual-cursor-pos-x window) dx)
 							   :y (+ (virtual-cursor-pos-y window) dy))))
 
-		     (handle-event window (make-instance 'pointer-motion-event
+		     (clim:handle-event window (make-instance 'pointer-motion-event
 							 :window window
 							 :input-code +pointer-move+							 
 							 :x x :y y))))
@@ -648,7 +648,7 @@
 	       (when (or (/= (#_.width &xconfigure) (last-width window))
 			 (/= (#_.height &xconfigure) (last-height window)))
 
-		 (handle-event window (make-instance 'window-resize-event
+		 (clim:handle-event window (make-instance 'window-resize-event
 						     :window window
 						     :new-width (#_.width &xconfigure)
 						     :new-height (#_.height &xconfigure)))
@@ -679,7 +679,7 @@
 		   (when (or (/= (last-pos-x window) (cval-value xpos))
 			     (/= (last-pos-y window) (cval-value ypos)))
 		     
-		     (handle-event window (make-instance 'window-move-event
+		     (clim:handle-event window (make-instance 'window-move-event
 							 :window window
 							 :new-x (cval-value xpos)
 							 :new-y (cval-value ypos)))
@@ -717,7 +717,7 @@
 			    (cond ((= protocol #_None) (return))
 			      
 				  ((= protocol WM_DELETE_WINDOW)
-				   (handle-event window (make-instance 'window-close-event
+				   (clim:handle-event window (make-instance 'window-close-event
 								       :window window)))
 			      
 				  ((= protocol NET_WM_PING)
@@ -757,7 +757,7 @@
 	     (when (window-input-context window)
 	       (#_XSetICFocus (window-input-context window)))
 
-	     (handle-event window (make-instance 'window-focus-event
+	     (clim:handle-event window (make-instance 'window-focus-event
 						 :window window))
 	     (return))
 
@@ -776,12 +776,12 @@
 	     (when (and (window-monitor window) (auto-iconify? window))
 	       (setf (window-iconified? window) t))
 
-	     (handle-event window (make-instance 'window-defocus-event
+	     (clim:handle-event window (make-instance 'window-defocus-event
 						 :window window))
 	     (return))	     
 
 	    (#.#_Expose
-	     (handle-event window (make-instance 'window-repaint-event
+	     (clim:handle-event window (make-instance 'window-repaint-event
 						 :window window)))
 
 	    (#.#_PropertyNotify
@@ -809,11 +809,11 @@
 			  (setf (last-iconified? window) iconified?)
 
 			  (if iconified?
-			      (handle-event window (make-instance 'window-iconify-event
+			      (clim:handle-event window (make-instance 'window-iconify-event
 								  :window window
 								  :new-width 0
 								  :new-height 0))
-			      (handle-event window (make-instance 'window-restore-event))))))
+			      (clim:handle-event window (make-instance 'window-restore-event))))))
 		   
 		     ((= (#_.atom (c->-addr event '#_xproperty)) NET_WM_STATE)
 
@@ -824,9 +824,9 @@
 			  (setf (window-maximized? window) maximized?)
 
 			  (if maximized?
-			      (handle-event window (make-instance 'window-maximize-event
+			      (clim:handle-event window (make-instance 'window-maximize-event
 								  :window window))
-			      (handle-event window (make-instance 'window-restore-event
+			      (clim:handle-event window (make-instance 'window-restore-event
 								  :window window))))))))
 	     (return))
 

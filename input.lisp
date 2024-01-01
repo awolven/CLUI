@@ -75,7 +75,7 @@
        (setf (raw-mouse-motion? window) value)))))
 
 #+cocoa
-(defmethod %set-window-cursor ((display cocoa:desktop-mixin) (window cocoa:window-mixin) (cursor cocoa:cursor-mixin))
+(defmethod %set-window-cursor ((display cocoa:display-mixin) (window cocoa:window-mixin) (cursor cocoa:cursor-mixin))
   (set-cocoa-window-cursor window cursor))
 
 #+x11
@@ -83,11 +83,11 @@
   (set-x11-window-cursor window cursor))
 
 #+win32
-(defmethod %set-window-cursor ((display win32:desktop-mixin) (window win32:window-mixin) (cursor win32:cursor-mixin))
+(defmethod %set-window-cursor ((display win32:display-mixin) (window win32:window-mixin) (cursor win32:cursor-mixin))
   (set-win32-window-cursor window cursor))
 
 #+wayland
-(defmethod %set-window-cursor ((display wayland:desktop-mixin) (window wayland:window-mixin) (cursor wayland:cursor-mixin))
+(defmethod %set-window-cursor ((display wayland:display-mixin) (window wayland:window-mixin) (cursor wayland:cursor-mixin))
   (set-wayland-window-cursor window cursor))
 
 
@@ -109,7 +109,7 @@
 			     (declare (ignorable c))
 			     (throw :ignore nil))))
       (catch :ignore
-	(handle-event window (make-instance 'character-event
+	(clim:handle-event window (make-instance 'character-event
 					    :window window
 					    :character (code-char codepoint)
 					    :modifier-state mods
@@ -125,7 +125,7 @@
 			   (declare (ignorable c))
 			   (throw :ignore nil))))
     (catch :ignore
-      (handle-event window (make-instance 'pointer-motion-event
+      (clim:handle-event window (make-instance 'pointer-motion-event
 					  :window
 					  :input-code +pointer-move+
 					  :x xpos
@@ -152,7 +152,7 @@
 			     (declare (ignorable c))
 			     (throw :ignore nil))))
       (catch :ignore
-	(handle-event window (make-instance (ecase action
+	(clim:handle-event window (make-instance (ecase action
 					      (:repeat 'key-repeat-event)
 					      (:press 'key-press-event)
 					      (:release 'key-release-event))
@@ -177,7 +177,7 @@
 			   (declare (ignorable c))
 			   (throw :ignore nil))))
     (catch :ignore
-      (handle-event window (make-instance (ecase action
+      (clim:handle-event window (make-instance (ecase action
 					    (:press 'pointer-button-press-event)
 					    (:release 'pointer-button-release-event))
 					  :window window

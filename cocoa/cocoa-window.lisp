@@ -679,7 +679,7 @@
 				 (declare (ignorable c))
 				 (throw :ignore nil))))
 	  (catch :ignore
-	    (handle-event window (make-instance 'pointer-motion-event
+	    (clim:handle-event window (make-instance 'pointer-motion-event
 						:window window
 						:input-code +pointer-move+
 						:x x
@@ -854,7 +854,7 @@
 			       (declare (ignorable c))
 			       (throw :ignore nil))))
 	(catch :ignore
-	  (handle-event window (make-instance 'pointer-exit-event
+	  (clim:handle-event window (make-instance 'pointer-exit-event
 					      :window window
 					      :input-code +pointer-move+
 					      :x x
@@ -892,7 +892,7 @@
 			       (declare (ignorable c))
 			       (throw :ignore nil))))
 	(catch :ignore
-	  (handle-event window (make-instance 'pointer-enter-event
+	  (clim:handle-event window (make-instance 'pointer-enter-event
 					      :window window
 					      :input-code +pointer-move+
 					      :x x
@@ -1096,7 +1096,7 @@
 	(pos (ns:|locationInWindow| event))
 	(window (content-view-owner view)))
     (multiple-value-bind (mods lock-mods) (translate-cocoa-flags window (ns:|modifierFlags| event))
-      (handle-event window
+      (clim:handle-event window
 		    (make-instance 'pointer-wheel-event
 				   :window window
 				   :input-code +pointer-wheel+
@@ -1474,7 +1474,7 @@
 			       (declare (ignorable c))
 			       (throw :ignore nil))))
 	(catch :ignore
-	  (handle-event window (make-instance 'window-close-event
+	  (clim:handle-event window (make-instance 'window-close-event
 					      :window window
 					      :timestamp (get-internal-real-time))))))
     (values)))
@@ -1508,7 +1508,7 @@
 			       (declare (ignorable c))
 			       (throw :ignore nil))))
 	(catch :ignore
-	  (handle-event window event))))))
+	  (clim:handle-event window event))))))
 
 (deftraceable-callback window-delegate-window-did-move-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
@@ -1527,7 +1527,7 @@
 				    :timestamp (get-internal-real-time)
 				    :new-x x
 				    :new-y y)))
-	  (handle-event window event)))))
+	  (clim:handle-event window event)))))
   (values))
 
 (deftraceable-callback window-delegate-window-did-miniaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
@@ -1548,7 +1548,7 @@
 				  :new-y nil
 				  :new-width 0
 				  :new-height 0)))
-	(handle-event window event))))
+	(clim:handle-event window event))))
   (values))
 
 (deftraceable-callback window-delegate-window-did-deminiaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
@@ -1572,7 +1572,7 @@
 			     (declare (ignorable c))
 			     (throw :ignore nil))))
       (catch :ignore
-	(handle-event window event))))
+	(clim:handle-event window event))))
   (values))
 
 (deftraceable-callback window-delegate-window-did-become-key-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))

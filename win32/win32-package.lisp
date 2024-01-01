@@ -4,19 +4,19 @@
   (:export #:monitor
 	   #:window
 	   #:cursor
-	   #:desktop
+	   #:display
 	   #:screen
 
 	   #:monitor-mixin
 	   #:window-mixin
 	   #:cursor-mixin
-	   #:desktop-mixin
+	   #:display-mixin
 	   #:screen-mixin
 
-	   #:desktop-with-krma-mixin
-	   #:desktop-with-opengl-mixin
-	   #:desktop-with-krma
-	   #:desktop-with-opengl
+	   #:display-with-krma-mixin
+	   #:display-with-opengl-mixin
+	   #:display-with-krma
+	   #:display-with-opengl
 
 	   #:krma-enabled-window-mixin
 	   #:wgl-enabled-window-mixin

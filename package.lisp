@@ -3,7 +3,7 @@
 (defpackage :x11)
 
 (defpackage :clui.v0
-  (:export #:timeout-event
+  (:export #:timer-event
 	   #:window-move-event
 	   #:window-resize-event
 	   #:window-iconify-event
@@ -113,8 +113,6 @@
 
 	   #:choose-video-mode
 
-	   #:handle-event
-	   
 	   #:display
 	   #:medium
 	   #:region

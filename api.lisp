@@ -101,11 +101,11 @@
 (defgeneric raw-mouse-motion-supported? (display))
 
 #+cocoa
-(defmethod raw-mouse-motion-supported? ((display cocoa:desktop-mixin))
+(defmethod raw-mouse-motion-supported? ((display cocoa:display-mixin))
   nil)
 
 #+win32
-(defmethod raw-mouse-motion-supported? ((display win32:desktop-mixin))
+(defmethod raw-mouse-motion-supported? ((display win32:display-mixin))
   t)
 
 #+x11
@@ -114,7 +114,7 @@
     (xi-available? x11-state)))
 
 #+wayland
-(defmethod raw-mouse-motion-supported? ((display wayland:desktop))
+(defmethod raw-mouse-motion-supported? ((display wayland:display))
   t)
 
 #+cocoa
@@ -159,19 +159,19 @@
   (disable-x11-raw-mouse-motion window))
 
 #+win32
-(defmethod copy-string-to-clipboard ((display win32:desktop-mixin) (string string))
+(defmethod copy-string-to-clipboard ((display win32:display-mixin) (string string))
   (win32-copy-string-to-clipboard string))
 
 #+win32
-(defmethod copy-string-from-clipboard ((display win32:desktop-mixin))
+(defmethod copy-string-from-clipboard ((display win32:display-mixin))
   (win32-copy-string-from-clipboard))
 
 #+cocoa
-(defmethod copy-string-to-clipboard ((display cocoa:desktop-mixin) (string string))
+(defmethod copy-string-to-clipboard ((display cocoa:display-mixin) (string string))
   (cocoa-copy-string-to-pasteboard string))
 
 #+cocoa
-(defmethod copy-string-from-clipboard ((display cocoa:desktop-mixin))
+(defmethod copy-string-from-clipboard ((display cocoa:display-mixin))
   (cocoa-copy-string-from-pasteboard))
 
 #+x11
@@ -225,11 +225,11 @@
 
 
 #+win32
-(defmethod get-default-screen-workarea ((display win32:desktop-mixin))
-  (get-win32-desktop-workarea))
+(defmethod get-default-screen-workarea ((display win32:display-mixin))
+  (get-win32-display-workarea))
 
 #+cocoa
-(defmethod get-default-screen-workarea ((display cocoa:desktop-mixin)))
+(defmethod get-default-screen-workarea ((display cocoa:display-mixin)))
 
 #+x11
 (defmethod get-default-screen-workarea ((display x11:server-mixin)))
@@ -1175,11 +1175,11 @@
     (set-window-cursor-position window (/ width 2) (/ height 2))))
 
 #+win32
-(defmethod wait-events ((display win32:desktop-mixin) &optional (timeout nil))
+(defmethod wait-events ((display win32:display-mixin) &optional (timeout nil))
   (wait-win32-events display))
 
 #+cocoa
-(defmethod wait-events ((display cocoa:desktop-mixin) &optional (timeout nil))
+(defmethod wait-events ((display cocoa:display-mixin) &optional (timeout nil))
   (wait-cocoa-events display timeout))
 
 #+x11
@@ -1187,15 +1187,15 @@
   (wait-x11-events display timeout))
 
 #+wayland
-(defmethod wait-events ((display wayland:desktop-mixin) &optional (timeout nil)
+(defmethod wait-events ((display wayland:display-mixin) &optional (timeout nil)
   (wait-wayland-events display) timeout))
 
 #+win32
-(defmethod poll-events ((display win32:desktop-mixin))
+(defmethod poll-events ((display win32:display-mixin))
   (poll-win32-events display))
 
 #+cocoa
-(defmethod poll-events ((display cocoa:desktop-mixin))
+(defmethod poll-events ((display cocoa:display-mixin))
   (poll-cocoa-events display))
 
 #+x11
@@ -1203,7 +1203,7 @@
   (poll-x11-events display))
 
 #+wayland
-(defmethod poll-events ((display wayland:desktop-mixin))
+(defmethod poll-events ((display wayland:display-mixin))
   (poll-wayland-events display))
 
 (defmethod (setf window-cursor) (cursor (window os-window-mixin))

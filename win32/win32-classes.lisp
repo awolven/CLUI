@@ -4,7 +4,7 @@
 (defmacro noffi::callback (name)
   (eval `,name))
 
-(defclass win32:desktop-mixin (clui:display-mixin)
+(defclass win32:display-mixin (clui:display-mixin)
   ((instance
     :accessor win32-instance
     :initform (#_GetModuleHandle nil))
@@ -38,7 +38,7 @@
   ())
 
 
-(defmethod initialize-instance ((instance win32:desktop-mixin) &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance ((instance win32:display-mixin) &rest initargs &key &allow-other-keys)
   (declare (ignorable initargs))
 
   (call-next-method)
@@ -185,7 +185,7 @@
   (apply #'create-native-win32-window instance initargs))
 
 
-(defclass win32:desktop (win32:desktop-mixin)
+(defclass win32:display (win32:display-mixin)
   ())
 
 (defclass win32:screen (win32:screen-mixin)

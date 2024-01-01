@@ -10,7 +10,7 @@
   :author "Andrew Kenneth Wolven <awolven@gmail.com>"
   :serial t
   :depends-on
-  (#+darwin :clui/cocoa #+(or windows os-windows) :clui/win32 #+linux :clui/linux))
+  (:clim-protocol #+darwin :clui/cocoa #+(or windows os-windows) :clui/win32 #+linux :clui/linux))
 
 #+darwin
 (defsystem clui/cocoa

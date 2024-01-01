@@ -1,8 +1,8 @@
 (in-package :clui)
 
-(defun create-cocoa-key-tables (cocoa-desktop)
-  (let ((keycodes (display-keycodes cocoa-desktop))
-	(scancodes (display-scancodes cocoa-desktop)))
+(defun create-cocoa-key-tables (cocoa-display)
+  (let ((keycodes (display-keycodes cocoa-display))
+	(scancodes (display-scancodes cocoa-display)))
     
     ;; i don't know where these scancodes come from.
     ;; pre macos 10.12 maybe?

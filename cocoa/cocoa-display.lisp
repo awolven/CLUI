@@ -14,7 +14,7 @@
     ((self :pointer) (_cmd :pointer) (object :pointer))
   ;;  (declare (ignorable self _cmd))
   (let ((display (find-if (lambda (object)
-			    (typep object 'cocoa:desktop-mixin))
+			    (typep object 'cocoa:display-mixin))
 			  *displays*)))
     (application-helper-selected-keyboard-input-source-changed display)
     (values)))
@@ -109,7 +109,7 @@
     ((self :pointer) (_cmd :pointer) (notification :pointer))
   ;;  (declare (ignorable self _cmd))
   (application-did-finish-launching (find-if #'(lambda (dpy)
-						 (typep dpy 'cocoa:desktop-mixin))
+						 (typep dpy 'cocoa:display-mixin))
 					     *displays*)
 				    notification)
   (values))
@@ -337,12 +337,12 @@
 
 	(create-cocoa-key-tables display)
 
-	(setf (desktop-event-source display) (CGEventSourceCreate 0))
+	(setf (display-event-source display) (CGEventSourceCreate 0))
 
-	(when (cffi:null-pointer-p (desktop-event-source display))
+	(when (cffi:null-pointer-p (display-event-source display))
 	  (return-from init-cocoa nil))
 
-	(CGEventSourceSetLocalEventsSuppressionInterval (desktop-event-source display) 0.0d0)
+	(CGEventSourceSetLocalEventsSuppressionInterval (display-event-source display) 0.0d0)
 
 	(unless (initialize-tis display)
 	  (return-from init-cocoa nil))
@@ -369,7 +369,7 @@
   (when (tis-input-source display)
     (CFRelease (tis-input-source display))
     (setf (tis-input-source display) nil)
-    (setf (desktop-unicode-data display) nil))
+    (setf (display-unicode-data display) nil))
 
   (let ((source (TISCopyCurrentKeyboardLayoutInputSource)))
   
@@ -383,7 +383,7 @@
       (when (cffi:null-pointer-p data)
 	(error "Cocoa: Failed to retrieve keyboard layout unicode data."))
       
-      (setf (desktop-unicode-data display) data)
+      (setf (display-unicode-data display) data)
       
       t)))
 

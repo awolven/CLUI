@@ -23,7 +23,7 @@
   #+ccl(make-hash-table :test #'eq :weak t))
 
 
-(defclass cocoa:desktop-mixin (clui:display-mixin)
+(defclass cocoa:display-mixin (clui:display-mixin)
   ((kPropertyUnicodeKeyLayoutData)
    (LMGetKbdType)
    (TISCopyCurrentKeyboardLayoutInputSource)
@@ -69,23 +69,23 @@
 
    (cascade-point :initform (make-nspoint 0 0) :accessor cascade-point)
    
-   (event-source :accessor desktop-event-source)
+   (event-source :accessor display-event-source)
 
    (keynames)
    (keycodes)
    (scancodes)
 
    (key-up-monitor :accessor key-up-monitor)
-   (unicode-data :initform nil :accessor desktop-unicode-data)
+   (unicode-data :initform nil :accessor display-unicode-data)
    (input-source :initform nil :accessor tis-input-source)
    (tis-bundle :initform nil :accessor tis-bundle)
    (hid-manager)
    (nib-objects)))
 
-(defmethod objc-object-id ((app cocoa:desktop-mixin))
+(defmethod objc-object-id ((app cocoa:display-mixin))
   objc-runtime::ns-app)
 
-(defmethod initialize-instance ((instance cocoa:desktop-mixin) &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance ((instance cocoa:display-mixin) &rest initargs &key &allow-other-keys)
   (declare (ignorable initargs))
   (call-next-method)
   (init-cocoa instance)
@@ -278,7 +278,7 @@
   (values))
 
 
-(defclass cocoa:desktop (cocoa:desktop-mixin)
+(defclass cocoa:display (cocoa:display-mixin)
   ())
 			  
 (defclass cocoa:screen (cocoa:screen-mixin)

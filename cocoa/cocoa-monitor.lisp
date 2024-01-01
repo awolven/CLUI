@@ -159,7 +159,7 @@
 		finally (return-from get-cocoa-display-fallback-refresh-rate refresh-rate)))
 	(IOObjectRelease (cffi:mem-aref it :unsigned-int))))))
 
-(defun poll-cocoa-monitors (desktop)
+(defun poll-cocoa-monitors (display)
   (cffi:with-foreign-object (p-display-count :unsigned-int)
    (CGGetOnlineDisplayList 0 (cffi:null-pointer) p-display-count)
     (let* ((display-count (cffi:mem-aref p-display-count :unsigned-int)))
@@ -168,9 +168,9 @@
 
 	(mapcar #'(lambda (monitor)
 		    (setf (monitor-screen monitor) nil))
-		(display-monitors desktop))
+		(display-monitors display))
 	
-	(let ((disconnected (copy-list (display-monitors desktop))))
+	(let ((disconnected (copy-list (display-monitors display))))
 	  
 	  (loop for i from 0 below display-count
 	     with display-id
@@ -208,7 +208,7 @@
 		      (mode))
 		  (when name
 		    (setq monitor (make-instance 'monitor
-						 :display desktop
+						 :display display
 						 :name name
 						 :width-mm (getf size 'ns::width)
 						 :height-mm (getf size 'ns::height)
@@ -223,10 +223,10 @@
 		    
 		    (CGDisplayModeRelease mode)
 		    
-		    (input-monitor desktop monitor :action :connected :placement :insert-last))))
+		    (input-monitor display monitor :action :connected :placement :insert-last))))
 
 	  (loop for discon in disconnected
-	     do (input-monitor desktop discon :action :disconnected)))))))
+	     do (input-monitor display discon :action :disconnected)))))))
 
 (defun set-cocoa-monitor-video-mode (monitor desired-video-mode)
   (let ((current (get-monitor-video-mode monitor))
