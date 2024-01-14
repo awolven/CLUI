@@ -36,9 +36,9 @@
      (do ((window (display-window-list-head display) (window-next window)))
 	 ((not window))
 	 
-       (when (eq (window-monitor window) monitor)
+       (when (eq (window-fullscreen-monitor window) monitor)
 	 (multiple-value-bind (width height) (window-size window)
-	   (set-window-monitor window nil :xpos 0 :ypos 0 :width width :height height :refresh-rate :blah)
+	   (set-window-fullscreen-monitor window nil :xpos 0 :ypos 0 :width width :height height :refresh-rate :blah)
 	   (multiple-value-bind (xoff yoff) (window-frame-size window)
 	     (set-window-position window xoff yoff)))))
 

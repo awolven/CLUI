@@ -196,7 +196,7 @@
 (defun focus-x11-window (x11-window)
   (declare (ignorable x11-window)))
 
-(defun (setf x11-window-monitor) (x11-monitor x11-window)
+(defun (setf x11-window-fullscreen-monitor) (x11-monitor x11-window)
   (declare (ignorable x11-monitor x11-window)))
 
 (defun x11-window-focused? (x11-window)
@@ -312,8 +312,8 @@
 (defun focus-os-window (os-window)
   (focus-x11-window os-window))
 
-(defun (setf os-window-monitor) (os-window monitor)
-  (setf (x11-window-monitor os-window) monitor))
+(defun (setf os-window-fullscreen-monitor) (os-window monitor)
+  (setf (x11-window-fullscreen-monitor os-window) monitor))
 
 (defun os-window-focused? (os-window)
   (x11-window-focused? os-window))

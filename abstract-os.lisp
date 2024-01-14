@@ -198,12 +198,12 @@
       (values))))
 
 (defun maybe-acquire-monitor (window)
-  (let ((monitor (window-monitor window)))
+  (let ((monitor (window-fullscreen-monitor window)))
     (when monitor
       (acquire-monitor window monitor))))
 
 (defun maybe-release-monitor (window)
-  (let ((monitor (window-monitor window)))
+  (let ((monitor (window-fullscreen-monitor window)))
     (when monitor
       (release-monitor window monitor))))
 

@@ -258,7 +258,7 @@
 
 (defclass pointer-button-press-event-mixin
     (clim:pointer-button-press-event button-press-event-mixin pointer-button-event-mixin)
-  ())
+  ((clicked-items :initarg :clicked-items :accessor clicked-items)))
 
 (defclass clui.v0:pointer-button-press-event (pointer-button-press-event-mixin)
   ())

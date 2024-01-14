@@ -5,8 +5,8 @@
 (defgeneric window-fullscreen? (window))
 (defgeneric (setf window-fullscreen?) (value window))
 
-(defgeneric window-monitor (window))
-(defgeneric (setf window-monitor) (monitor window))
+(defgeneric window-fullscreen-monitor (window))
+(defgeneric (setf window-fullscreen-monitor) (monitor window))
 
 (defgeneric window-closable? (window))
 (defgeneric (setf window-closable?) (value window))
@@ -186,19 +186,31 @@
 (defun get-primary-monitor (&optional (display (default-display)))
   (car (display-monitors display)))
 
+#+windows
+(defmethod window-monitor ((window win32:window-mixin))
+  (get-win32-window-monitor window))
 
-(defmethod set-window-monitor ((window os-window-mixin) monitor &key xpos ypos width height (refresh-rate :dont-care))
+#+cocoa
+(defmethod window-monitor ((window cocoa:window-mixin))
+  (get-cocoa-window-monitor window))
+
+#+x11
+(defmethod window-monitor ((window x11:window-mixin))
+  (get-x11-window-monitor window))
+
+
+(defmethod set-window-fullscreen-monitor ((window os-window-mixin) monitor &key xpos ypos width height (refresh-rate :dont-care))
   (declare (ignorable monitor xpos ypos width height))
-  (block set-os-window-monitor
+  (block set-fullscreen-monitor
     
     (when (or (minusp width) (minusp height))
       (warn "invalid window size: ~AX~A" width height)
-      (return-from set-os-window-monitor (values)))
+      (return-from set-fullscreen-monitor (values)))
 
     (when (and (not (eq refresh-rate :dont-care))
 	       (minusp refresh-rate))
       (warn "invalid refresh rate: ~A" refresh-rate)
-      (return-from set-os-window-monitor (values)))
+      (return-from set-fullscreen-monitor (values)))
   
     (let ((video-mode (window-video-mode window)))
       (setf (video-mode-width video-mode) width)
@@ -266,10 +278,10 @@
 (defmethod (setf window-fullscreen?) (value (window wayland:window-mixin))
   (set-wayland-window-fullscreen window value))
 
-(defmethod (setf window-monitor) ((monitor monitor-mixin) (window window-mixin))
+(defmethod (setf window-fullscreen-monitor) ((monitor monitor-mixin) (window window-mixin))
   (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea (monitor-display monitor))
     (let ((refresh-rate :dont-care))
-      (set-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
+      (set-window-fullscreen-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
       monitor)))
 
 #+win32
@@ -433,20 +445,20 @@
   (set-wayland-window-size window width height))
 
 #+win32
-(defmethod set-window-monitor ((window win32:window-mixin) monitor &key xpos ypos width height refresh-rate)
-  (set-win32-window-monitor window monitor xpos ypos width height refresh-rate))
+(defmethod set-window-fullscreen-monitor ((window win32:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-win32-window-fullscreen-monitor window monitor xpos ypos width height refresh-rate))
 
 #+cocoa
-(defmethod set-window-monitor ((window cocoa:window-mixin) monitor &key xpos ypos width height refresh-rate)
-  (set-cocoa-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+(defmethod set-window-fullscreen-monitor ((window cocoa:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-cocoa-window-fullscreen-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
 #+x11
-(defmethod set-window-monitor ((window x11:window-mixin) monitor &key xpos ypos width height refresh-rate)
-  (set-x11-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+(defmethod set-window-fullscreen-monitor ((window x11:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-x11-window-fullscreen-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
 #+wayland
-(defmethod set-window-monitor ((window wayland:window-mixin) monitor &key xpos ypos width height refresh-rate)
-  (set-wayland-window-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
+(defmethod set-window-fullscreen-monitor ((window wayland:window-mixin) monitor &key xpos ypos width height refresh-rate)
+  (set-wayland-window-fullscreen-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate))
 
 (defmethod window-cursor-position ((window os-window-mixin))
   (get-window-cursor-pos window))

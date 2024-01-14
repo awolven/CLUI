@@ -20,7 +20,7 @@
 	      (logand (#_.flags hints)
 		      (lognot (logior #_PMinSize #_PMaxSize #_PAspect))))
 
-	(unless (window-monitor window)
+	(unless (window-fullscreen-monitor window)
 	  (if (last-resizable? window)
 
 	      (progn
@@ -288,7 +288,7 @@
 	    
 	    (display-window-manager display)
 
-	  (when (and NET_WM_STATE (not (window-monitor window)))
+	  (when (and NET_WM_STATE (not (window-fullscreen-monitor window)))
 
 	    (clet ((states #_<Atom[3]>))
 	      (let ((count -1))
@@ -543,10 +543,10 @@
   (get-x11-window-size window))
 
 (defun set-x11-window-size (window width height)
-  (if (window-monitor window)
+  (if (window-fullscreen-monitor window)
       
-      (when (eq (monitor-window (window-monitor window)) window)
-	(acquire-x11-monitor window (window-monitor window)))
+      (when (eq (monitor-window (window-fullscreen-monitor window)) window)
+	(acquire-x11-monitor window (window-fullscreen-monitor window)))
 
       (progn
 
@@ -629,8 +629,8 @@
     (when (disabled-cursor-window display)
       (enable-x11-cursor window))
 
-    (when (window-monitor window)
-      (release-monitor window (window-monitor window)))
+    (when (window-fullscreen-monitor window)
+      (release-monitor window (window-fullscreen-monitor window)))
 
     (when (window-input-context window)
       (#_XDestroyIC (window-input-context window))

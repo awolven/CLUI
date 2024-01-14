@@ -386,8 +386,8 @@
    
    (monitor
     :initform nil
-    :reader window-monitor
-    :writer (setf %window-monitor))
+    :reader window-fullscreen-monitor
+    :writer (setf %window-fullscreen-monitor))
    
    (cursor
     :initform nil

@@ -773,7 +773,7 @@
 	     (when (window-input-context window)
 	       (#_XUnsetICFocus (window-input-context window)))
 
-	     (when (and (window-monitor window) (auto-iconify? window))
+	     (when (and (window-fullscreen-monitor window) (auto-iconify? window))
 	       (setf (window-iconified? window) t))
 
 	     (clim:handle-event window (make-instance 'window-defocus-event
@@ -800,11 +800,11 @@
 		    
 			(let ((iconified? state))
 		      
-			  (if (window-monitor window)
+			  (if (window-fullscreen-monitor window)
 			  
 			      (if iconified?
-				  (release-monitor window (window-monitor window))
-				  (acquire-monitor window (window-monitor window))))
+				  (release-monitor window (window-fullscreen-monitor window))
+				  (acquire-monitor window (window-fullscreen-monitor window))))
 
 			  (setf (last-iconified? window) iconified?)
 

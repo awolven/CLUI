@@ -509,7 +509,13 @@
 (defun get-win32-window-content-scale (window)
   (let ((mh (#_MonitorFromWindow (h window) #_MONITOR_DEFAULTTONEAREST)))
     (get-hmonitor-content-scale mh)))
-		      
+
+(defun get-win32-window-monitor (window)
+  (let ((mh (#_MonitorFromWindow (h window) #_MONITOR_DEFAULTTONEAREST)))
+    (find mh (display-monitors (window-display window)) :test #'(lambda (x y)
+								  (= (sap-int (cval-value x))
+								     (sap-int (cval-value y))))
+	  :key #'h)))	      
 			       
 
 (defun request-win32-window-attention (window)
@@ -518,8 +524,8 @@
 
 
 (defun destroy-win32-window (window)
-  (when (window-monitor window)
-    (release-win32-monitor window (window-monitor window)))
+  (when (window-fullscreen-monitor window)
+    (release-win32-monitor window (window-fullscreen-monitor window)))
   (when (eq (disabled-cursor-window (window-display window)) window)
     (enable-cursor window))
   (when (eq (captured-cursor-window (window-display window)) window)
@@ -550,7 +556,7 @@
   (declare (type os-window-mixin win32-window))
   (let ((style (logior #_WS_CLIPSIBLINGS #_WS_CLIPCHILDREN #_WS_VISIBLE)))
     
-    (if (window-monitor win32-window)
+    (if (window-fullscreen-monitor win32-window)
 	(setq style (logior style #_WS_POPUP))
 	(progn
 	  (setq style (logior style #_WS_SYSMENU #_WS_MINIMIZEBOX))
@@ -566,7 +572,7 @@
 (defun get-window-ex-style (window)
   (let ((style #_WS_EX_APPWINDOW))
 
-    (when (or (window-monitor window) (last-floating? window))
+    (when (or (window-fullscreen-monitor window) (last-floating? window))
       (setq style (logior style #_WS_POPUP)))
 
     style))
@@ -770,20 +776,24 @@ int decorated;
 
 		 (#.#_WM_PAINT ;; 15
 
-		  (clim:handle-event window (make-instance 'window-repaint-event
-						      :window window
-						      :timestamp time))
-
-		  (default-paint-win32-window window)
-
-		  (return 0)
-
-		  #+NIL
-		  (go break))
+		  (if (clim:handle-event window (make-instance 'window-repaint-event
+							       :window window
+							       :timestamp time))
+		      (return 0)
+		      (go break)))
 
 		 (#.#_WM_IME_SETCONTEXT (go break)) ;; 641
 
 		 (#.#_WM_IME_NOTIFY (go break)) ;; 642
+
+		 (#.#_WM_DISPLAYCHANGE
+
+		  (if (clim:handle-event window (make-instance 'window-monitor-switched-event
+							       :window window
+							       :timestamp time))
+
+		      (return 0)
+		      (go break)))
 
 		 (#.#_WM_SETFOCUS ;; 7
 
@@ -836,7 +846,6 @@ int decorated;
 
 		    (when (or (/= width (round (or (last-width window) 0)))
 			      (/= height (round (or (last-height window) 0))))
-
 		      (let ((event (make-instance 'window-resize-event
 						  :window window
 						  :new-width width
@@ -847,20 +856,16 @@ int decorated;
 			(setf (last-width window) width
 			      (last-height window) height)))
 
-		    (when (and (window-monitor window)
+		    (when (and (window-fullscreen-monitor window)
 			       (not (eq (last-iconified? window) iconified?)))
 		      (if iconified?
-			  (release-win32-monitor window (window-monitor window))
+			  (release-win32-monitor window (window-fullscreen-monitor window))
 			  (progn
-			    (acquire-win32-monitor window (window-monitor window))
+			    (acquire-win32-monitor window (window-fullscreen-monitor window))
 			    (fit-to-monitor window))))
 
 		    (setf (last-iconified? window) iconified?)
 		    (setf (last-maximized? window) maximized?)
-
-		    (terpri)
-		    (princ 'success)
-		    (finish-output)
 
 		    (return 0)))
 
@@ -887,7 +892,7 @@ int decorated;
 
 		 (#.#_WM_GETMINMAXINFO ;; 36
 
-		  (when (window-monitor window)
+		  (when (window-fullscreen-monitor window)
 		    (go break))
 
 		  (clet ((frame #_<RECT>))
@@ -1170,24 +1175,30 @@ int decorated;
 			      do (setq found? t)
 				 (return))
 
-		      (when found?
+		      (unless found?
+
 			(#_SetCapture hWnd)))
 
 		    (multiple-value-bind (x y) (window-cursor-position window)
 		      (input-mouse-click window button action x y mods lock-mods time))
 
-		    (let ((found? nil))
-		      (loop for i from 0 below 5
-			    when (eq (elt (window-keys window) i) :press)
+		    (let ((found? nil)
+			  (keys (window-keys window)))
+		      (loop for i in (list +pointer-left-button+
+					   +pointer-right-button+
+					   +pointer-middle-button+
+					   +pointer-button-4+
+					   +pointer-button-5+)
+			    when (eq (elt keys i) :press)
 			      do (setq found? t)
 				 (return))
 
-		      (when found?
+		      (unless found?
 			(#_ReleaseCapture)))
 
 		    (when (or (= uMsg #_WM_XBUTTONDOWN)
 			      (= uMsg #_WM_XBUTTONUP))
-		      (return 1))
+		      (return #_TRUE))
 
 		    (return 0)))
 
@@ -1362,7 +1373,7 @@ int decorated;
 		  (let ((xscale (coerce (/ (#_HIWORD wParam) #_USER_DEFAULT_SCREEN_DPI) 'single-float))
 			(yscale (coerce (/ (#_LOWORD wParam) #_USER_DEFAULT_SCREEN_DPI) 'single-float)))
 
-		    (when (and (not (window-monitor window))
+		    (when (and (not (window-fullscreen-monitor window))
 			       (or (scale-to-monitor? window)
 				   (windows-10-version-1703-or-greater?)))
 		      (let ((suggested (cons-ptr (int-sap lParam) 0 '#_<RECT*>)))
@@ -1693,9 +1704,9 @@ int decorated;
   (unless (monitor-window monitor)
     (incf (acquired-monitor-count (window-display window))))
   
-  (set-win32-monitor-video-mode (window-monitor window) (window-video-mode window))
+  (set-win32-monitor-video-mode (window-fullscreen-monitor window) (window-video-mode window))
   #+NOTYET
-  (input-monitor-window (window-monitor window) window))
+  (input-monitor-window (window-fullscreen-monitor window) window))
 
 
 (defun release-win32-monitor (window monitor)
@@ -1732,12 +1743,12 @@ int decorated;
   (values))
   
 
-(defun set-win32-window-monitor (window monitor xpos ypos width height refresh-rate)
+(defun set-win32-window-fullscreen-monitor (window monitor xpos ypos width height refresh-rate)
   (declare (ignorable refresh-rate))
   (declare (type os-window-mixin window))
   (declare (type (or null monitor-mixin) monitor))
   
-  (when (eq (window-monitor window) monitor)
+  (when (eq (window-fullscreen-monitor window) monitor)
     
     (if monitor
 	
@@ -1767,14 +1778,14 @@ int decorated;
 			    (- (#_.bottom &rect) (#_.top &rect))
 			    (logior #_SWP_NOCOPYBITS #_SWP_NOACTIVATE #_SWP_NOZORDER))
 	  
-	    (return-from set-win32-window-monitor (values))))))
+	    (return-from set-win32-window-fullscreen-monitor (values))))))
 
-  (when (window-monitor window)
-    (release-win32-monitor window (window-monitor window)))
+  (when (window-fullscreen-monitor window)
+    (release-win32-monitor window (window-fullscreen-monitor window)))
 
-  (setf (%window-monitor window) monitor)
+  (setf (%window-fullscreen-monitor window) monitor)
 
-  (if (window-monitor window)
+  (if (window-fullscreen-monitor window)
       
       (clet ((mi #_<MONITORINFO>))
 	(let* ((&mi (c-addr-of mi))
@@ -1790,7 +1801,7 @@ int decorated;
 	
 	  (acquire-win32-monitor window monitor)
 
-	  (#_GetMonitorInfoW (h (window-monitor window)) &mi)
+	  (#_GetMonitorInfoW (h (window-fullscreen-monitor window)) &mi)
 	  (#_SetWindowPos (h window) #_HWND_TOPMOST
 			  (#_.left rcMonitor)
 			  (#_.top rcMonitor)
@@ -1899,11 +1910,11 @@ int decorated;
       (progn
 	(when mouse-passthrough?
 	  (set-win32-window-mouse-passthrough window t))
-	(if (window-monitor window)
+	(if (window-fullscreen-monitor window)
 	    (progn
 	      (show-win32-window window)
 	      (focus-win32-window window)
-	      (acquire-win32-monitor window (window-monitor window))
+	      (acquire-win32-monitor window (window-fullscreen-monitor window))
 	      (fit-to-monitor window))
 	    (when visible?
 	      (show-win32-window window)

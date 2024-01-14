@@ -86,7 +86,7 @@
 (defun focus-os-window (os-window)
   (declare (ignorable os-window)))
 
-(defun (setf os-window-monitor) (os-window monitor)
+(defun (setf os-window-fullscreen-monitor) (os-window monitor)
   (declare (ignorable os-window monitor)))
 
 (defun os-window-focused? (os-window)

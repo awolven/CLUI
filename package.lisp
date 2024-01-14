@@ -60,6 +60,7 @@
 	   #:window-root
 	   #:window-fullscreen?
 	   #:window-monitor
+	   #:window-fullscreen-monitor
 	   #:window-closable?
 	   #:window-title
 	   #:window-titled?

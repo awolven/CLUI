@@ -153,8 +153,8 @@
 	(setf (cursor-warp-delta-x window) (+ (cursor-warp-delta-x window) x (* xscale (- (ns-get-x pos))))
 	      (cursor-warp-delta-y window) (+ (cursor-warp-delta-y window) y (* yscale (- (ns-get-height content-rect)) (ns-get-y pos))))
 
-	(if (window-monitor window)
-	    (CGDisplayMoveCursorToPoint (monitor-display-id (window-monitor window)) (make-nspoint (/ x xscale) (/ y yscale)))
+	(if (window-fullscreen-monitor window)
+	    (CGDisplayMoveCursorToPoint (monitor-display-id (window-fullscreen-monitor window)) (make-nspoint (/ x xscale) (/ y yscale)))
 	    (let* ((local-rect (make-nsrect x (- (ns-get-height content-rect) y 1) 0 0))
 		   (global-rect (ns:|convertRectToScreen:| window local-rect))
 		   (global-point (make-nspoint (ns-get-x global-rect) (ns-get-y global-rect))))
@@ -179,7 +179,7 @@
 
 (defun set-cocoa-window-size (window width height)
   (with-autorelease-pool (pool)
-    (let ((monitor (window-monitor window)))
+    (let ((monitor (window-fullscreen-monitor window)))
       (if monitor
 	  (when (eq (monitor-window monitor) window)
 	    (acquire-cocoa-monitor window monitor))
@@ -1298,10 +1298,10 @@
   (sb-int:set-floating-point-modes :traps '())
   
   (let ((content-rect))
-    (if (window-monitor window)
+    (if (window-fullscreen-monitor window)
 	
-	(multiple-value-bind (xpos ypos) (get-cocoa-monitor-pos (window-monitor window))
-	  (let* ((mode (get-cocoa-monitor-video-mode (window-monitor window)))
+	(multiple-value-bind (xpos ypos) (get-cocoa-monitor-pos (window-fullscreen-monitor window))
+	  (let* ((mode (get-cocoa-monitor-video-mode (window-fullscreen-monitor window)))
 		 (width (video-mode-width mode))
 		 (height (video-mode-height mode)))
 
@@ -1316,7 +1316,7 @@
 
     (let ((style-mask NSWindowStyleMaskMiniaturizable))
 
-      (if (or (window-monitor window) (not decorated?))
+      (if (or (window-fullscreen-monitor window) (not decorated?))
 
 	  (progn
 	    (setq style-mask (logior style-mask NSWindowStyleMaskBorderless)))
@@ -1358,7 +1358,7 @@
 
       (apply #'initialize-window-devices window args)
 	
-      (if (window-monitor window)
+      (if (window-fullscreen-monitor window)
 
 	  (ns:|setLevel:| window (1+ NSMainMenuWindowLevel))
 	    
@@ -1422,11 +1422,11 @@
       #+NOTYET
       (set-cocoa-window-mouse-passthrough window t))
 
-    (if (window-monitor window)
+    (if (window-fullscreen-monitor window)
 	(progn
 	  (show-cocoa-window window)
 	  (focus-cocoa-window window)
-	  (acquire-cocoa-monitor window (window-monitor window))
+	  (acquire-cocoa-monitor window (window-fullscreen-monitor window))
 	  (when center-cursor?
 	    (center-cursor-in-content-area window)))
 	(when visible?
@@ -1450,10 +1450,10 @@
       (values))))
 
 (defun release-cocoa-monitor (window)
-  (unless (eq (monitor-window (window-monitor window)) window)
+  (unless (eq (monitor-window (window-fullscreen-monitor window)) window)
     (return-from release-cocoa-monitor (values)))
-  (setf (monitor-window (window-monitor window)) nil)
-  (restore-cocoa-monitor-video-mode (window-monitor window))
+  (setf (monitor-window (window-fullscreen-monitor window)) nil)
+  (restore-cocoa-monitor-video-mode (window-fullscreen-monitor window))
   (values))
 
 
@@ -1879,11 +1879,11 @@
   return 0;
 |#
 
-(defun set-cocoa-window-monitor (window monitor &key xpos ypos width height refresh-rate)
+(defun set-cocoa-window-fullscreen-monitor (window monitor &key xpos ypos width height refresh-rate)
   (declare (ignorable refresh-rate))
   (with-autorelease-pool (pool)
     
-    (when (eq (window-monitor window) monitor)
+    (when (eq (window-fullscreen-monitor window) monitor)
       (if monitor
 	  (when (eq (monitor-window monitor) window)
 	    (acquire-cocoa-monitor window monitor))
@@ -1891,18 +1891,18 @@
 		 (style-mask (ns:|styleMask| window))
 		 (frame-rect (ns:|frameRectForContentRect:styleMask:| window content-rect style-mask)))
 	    (ns:|setFrame:display:| window frame-rect t)))
-      (return-from set-cocoa-window-monitor (values)))
+      (return-from set-cocoa-window-fullscreen-monitor (values)))
 
-    (when (window-monitor window)
+    (when (window-fullscreen-monitor window)
       (release-cocoa-monitor window))
 
-    (setf (window-monitor window) monitor)
+    (setf (window-fullscreen-monitor window) monitor)
 
     (poll-cocoa-events (window-display window))
 
     (let ((style-mask (ns:|styleMask| window)))
 
-      (if (window-monitor window)
+      (if (window-fullscreen-monitor window)
 	  
 	  (progn
 	    (setq style-mask (logand style-mask (lognot (logior NSWindowStyleMaskTitled NSWindowStyleMaskClosable))))
@@ -1924,13 +1924,13 @@
 
       (ns:|makeFirstResponder:| window (window-content-view window))
 
-      (if (window-monitor window)
+      (if (window-fullscreen-monitor window)
 
 	  (progn
 	    (ns:|setLevel:| window (1+ NSMainMenuWindowLevel))
 	    (ns:|setHasShadow:| window nil)
 
-	    (acquire-cocoa-monitor window (window-monitor window)))
+	    (acquire-cocoa-monitor window (window-fullscreen-monitor window)))
 
 	  (let* ((content-rect (make-nsrect xpos (cocoa-transform-y (1- (+ ypos height))) width height))
 		 (frame-rect (ns:|frameRectForContentRect:styleMask:| window content-rect style-mask)))
@@ -1975,7 +1975,7 @@
       
       (ns:|orderOut:| window nil)
     
-      (when (window-monitor window)
+      (when (window-fullscreen-monitor window)
 	(release-cocoa-monitor window))
       
       (ns:|setDelegate:| window nil)

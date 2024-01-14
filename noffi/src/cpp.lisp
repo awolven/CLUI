@@ -2188,7 +2188,8 @@ second return value is the remaining tokens. Initial white space is skipped."
      (ccl:external-process-input-stream proc)))
   #+SBCL
   (let ((proc
-         (apply #'sb-ext:run-program program arguments
+	  (apply #'sb-ext:run-program program arguments
+		 :if-output-exists :supersede
                 :search t
                 :external-format external-format
                 rest)))
