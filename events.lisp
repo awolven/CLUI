@@ -143,7 +143,7 @@
 (defclass window-repaint-event-mixin (clim:window-repaint-event window-event-mixin)
   ())
 
-(defclass clui.v0:window-repaint-event (window-repaint-event-mixin)
+(defclass clui.v0::window-repaint-event (window-repaint-event-mixin)
   ())
 
 ;; window-manager-event
@@ -260,7 +260,7 @@
     (clim:pointer-button-press-event button-press-event-mixin pointer-button-event-mixin)
   ((clicked-items :initarg :clicked-items :accessor clicked-items)))
 
-(defclass clui.v0:pointer-button-press-event (pointer-button-press-event-mixin)
+(defclass clui.v0::pointer-button-press-event (pointer-button-press-event-mixin)
   ())
 
 (defclass clim:pointer-button-release-event () ())
@@ -269,7 +269,7 @@
     (clim:pointer-button-release-event button-release-event-mixin pointer-button-event-mixin)
   ())
 
-(defclass clui.v0:pointer-button-release-event (pointer-button-release-event-mixin)
+(defclass clui.v0::pointer-button-release-event (pointer-button-release-event-mixin)
   ())
 
 (defclass clim:pointer-button-hold-event () ())
@@ -278,7 +278,7 @@
 (defclass pointer-button-hold-event-mixin (clim:pointer-button-hold-event pointer-button-event-mixin)
   ())
 
-(defclass clui.v0:pointer-button-hold-event (pointer-button-hold-event-mixin)
+(defclass clui.v0::pointer-button-hold-event (pointer-button-hold-event-mixin)
   ())
 
 ;; todo: make this be a gesture instead of an event
@@ -288,14 +288,14 @@
 (defmethod pointer-click-event-p ((event pointer-click-event-mixin))
   t)
 
-(defclass clui.v0:pointer-click-event (pointer-click-event-mixin)
+(defclass clui.v0::pointer-click-event (pointer-click-event-mixin)
   ())
 
 ;; todo: make this be a gesture instead of an event
 (defclass pointer-double-click-event-mixin (pointer-button-event-mixin)
   ())
 
-(defclass clui.v0:pointer-double-click-event (pointer-double-click-event-mixin)
+(defclass clui.v0::pointer-double-click-event (pointer-double-click-event-mixin)
   ())
 
 ;; todo: make this be a gesture instead of an event
@@ -303,7 +303,7 @@
   ((delta-x :initarg :delta-x :accessor pointer-drag-delta-x)
    (delta-y :initarg :delta-x :accessor pointer-drag-delta-y)))
 
-(defclass clui.v0:pointer-button-hold-and-drag-event (pointer-click-hold-and-drag-mixin)
+(defclass clui.v0::pointer-button-hold-and-drag-event (pointer-click-hold-and-drag-mixin)
   ())
 
 (defclass pointer-wheel-event-mixin (pointer-event-mixin)
@@ -316,7 +316,7 @@
 	    :initform 0
 	    :accessor pointer-wheel-event-xoffset)))
 
-(defclass clui.v0:pointer-wheel-event (pointer-wheel-event-mixin)
+(defclass clui.v0::pointer-wheel-event (pointer-wheel-event-mixin)
   ())
 
 (defclass clim:pointer-motion-event () ())
@@ -324,7 +324,7 @@
 (defclass pointer-motion-event-mixin (clim:pointer-motion-event pointer-event-mixin)
   ())
 
-(defclass clui.v0:pointer-motion-event (pointer-motion-event-mixin)
+(defclass clui.v0::pointer-motion-event (pointer-motion-event-mixin)
   ())  
 
 (defclass clim:pointer-boundary-event () ())
@@ -339,7 +339,7 @@
 (defclass pointer-enter-event-mixin (clim:pointer-enter-event pointer-boundary-event-mixin)
   ())
 
-(defclass clui.v0:pointer-enter-event (pointer-enter-event-mixin)
+(defclass clui.v0::pointer-enter-event (pointer-enter-event-mixin)
   ())
 
 (defclass clim:pointer-exit-event () ())
@@ -347,7 +347,7 @@
 (defclass pointer-exit-event-mixin (clim:pointer-exit-event pointer-boundary-event-mixin)
   ())
 
-(defclass clui.v0:pointer-exit-event (pointer-exit-event-mixin)
+(defclass clui.v0::pointer-exit-event (pointer-exit-event-mixin)
   ())
 
 
@@ -363,7 +363,7 @@
 
 
 
-(defclass clui.v0:key-press-event (key-press-event-mixin)
+(defclass clui.v0::key-press-event (key-press-event-mixin)
   ())
 
 (defclass key-repeat-event-mixin (key-press-event-mixin)
@@ -377,7 +377,7 @@
 (defclass key-release-event-mixin (clim:key-release-event button-release-event-mixin keyboard-event-mixin)
   ())
 
-(defclass clui.v0:key-release-event (key-release-event-mixin)
+(defclass clui.v0::key-release-event (key-release-event-mixin)
   ())
 
 (defclass character-event-mixin (keyboard-event-mixin)
@@ -387,7 +387,7 @@
   (print-unreadable-object (event stream :type t :identity t)
     (format stream "~S" (input-event-character event))))
 
-(defclass clui.v0:character-event (character-event-mixin)
+(defclass clui.v0::character-event (character-event-mixin)
   ())
 
 (defclass joystick-event-mixin (input-event-mixin)

@@ -15,24 +15,24 @@
 	   #:window-focus-event
 	   #:window-defocus-event
 	   #:window-hide-event
-	   #:window-repaint-event
+	   ;;#:window-repaint-event
 	   #:window-created-event
 	   #:window-close-event
 	   #:window-destroyed-event
 	   #:window-monitor-switched-event
-	   #:pointer-button-press-event
-	   #:pointer-button-release-event
-	   #:pointer-button-hold-event
-	   #:pointer-click-event
-	   #:pointer-double-click-event
-	   #:pointer-button-hold-and-drag-event
+	   ;;#:pointer-button-press-event
+	   ;;#:pointer-button-release-event
+	   ;;#:pointer-button-hold-event
+	   ;;#:pointer-click-event
+	   ;;#:pointer-double-click-event
+	   ;;#:pointer-button-hold-and-drag-event
 	   #:pointer-wheel-event
-	   #:pointer-motion-event
-	   #:pointer-enter-event
-	   #:pointer-exit-event
-	   #:key-press-event
+	   ;;#:pointer-motion-event
+	   ;;#:pointer-enter-event
+	   ;;#:pointer-exit-event
+	   ;;#:key-press-event
 	   #:key-repeat-event
-	   #:key-release-event
+	   ;;#:key-release-event
 	   #:character-event))
 	   
 
@@ -115,7 +115,7 @@
 	   #:choose-video-mode
 
 	   #:display
-	   #:medium
+	   ;;#:medium
 	   #:region
 	   #:window
 	   #:view
@@ -182,23 +182,23 @@
 	   #:window-focus-event
 	   #:window-defocus-event
 	   #:window-hide-event
-	   #:window-repaint-event
+	   ;;#:window-repaint-event
 	   #:window-created-event
 	   #:window-close-event
 	   #:window-destroyed-event
 	   #:window-monitor-switched-event
-	   #:pointer-button-press-event
-	   #:pointer-button-release-event
-	   #:pointer-button-click-event
+	   ;;#:pointer-button-press-event
+	   ;;#:pointer-button-release-event
+	   ;;#:pointer-button-click-event
 	   #:pointer-button-double-click-event
-	   #:pointer-button-hold-event
+	   ;;#:pointer-button-hold-event
 	   #:pointer-button-hold-and-drag-event
 	   #:pointer-wheel-event
-	   #:pointer-motion-event
-	   #:pointer-enter-event
-	   #:pointer-exit-event
-	   #:key-press-event
-	   #:key-release-event
+	   ;;#:pointer-motion-event
+	   ;;#:pointer-enter-event
+	   ;;#:pointer-exit-event
+	   ;;#:key-press-event
+	   ;;#:key-release-event
 	   #:character-event
 	   )
 

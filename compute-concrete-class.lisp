@@ -372,107 +372,107 @@
 
 (defmethod compute-make-instance-arguments-with-display ((protocol clim:timer-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:timer-event) initargs))
+  (list* (find-class 'clui.v0::timer-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-move-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-move-event) initargs))
+  (list* (find-class 'clui.v0::window-move-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-resize-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-resize-event) initargs))
+  (list* (find-class 'clui.v0::window-resize-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-iconify-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-iconify-event) initargs))
+  (list* (find-class 'clui.v0::window-iconify-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-deiconify-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-deiconify-event) initargs))
+  (list* (find-class 'clui.v0::window-deiconify-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-maximize-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-maximize-event) initargs))
+  (list* (find-class 'clui.v0::window-maximize-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-restore-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-restore-event) initargs))
+  (list* (find-class 'clui.v0::window-restore-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-fullscreen-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-fullscreen-event) initargs))
+  (list* (find-class 'clui.v0::window-fullscreen-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-show-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-show-event) initargs))
+  (list* (find-class 'clui.v0::window-show-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-focus-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-focus-event) initargs))
+  (list* (find-class 'clui.v0::window-focus-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-defocus-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-defocus-event) initargs))
+  (list* (find-class 'clui.v0::window-defocus-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-hide-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-hide-event) initargs))
+  (list* (find-class 'clui.v0::window-hide-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-repaint-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-repaint-event) initargs))
+  (list* (find-class 'clui.v0::window-repaint-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-created-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-created-event) initargs))
+  (list* (find-class 'clui.v0::window-created-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-close-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-close-event) initargs))
+  (list* (find-class 'clui.v0::window-close-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-destroyed-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-destroyed-event) initargs))
+  (list* (find-class 'clui.v0::window-destroyed-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol window-monitor-switched-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:window-monitor-switched-event) initargs))
+  (list* (find-class 'clui.v0::window-monitor-switched-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-button-press-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-button-press-event) initargs))
+  (list* (find-class 'clui.v0::pointer-button-press-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-button-release-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-button-release-event) initargs))
+  (list* (find-class 'clui.v0::pointer-button-release-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-button-hold-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-button-hold-event) initargs))
+  (list* (find-class 'clui.v0::pointer-button-hold-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-button-hold-and-drag-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-button-hold-and-drag-event) initargs))
+  (list* (find-class 'clui.v0::pointer-button-hold-and-drag-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-wheel-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-wheel-event) initargs))
+  (list* (find-class 'clui.v0::pointer-wheel-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-motion-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-motion-event) initargs))
+  (list* (find-class 'clui.v0::pointer-motion-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-enter-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-enter-event) initargs))
+  (list* (find-class 'clui.v0::pointer-enter-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol pointer-exit-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:pointer-exit-event) initargs))
+  (list* (find-class 'clui.v0::pointer-exit-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol key-press-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:key-press-event) initargs))
+  (list* (find-class 'clui.v0::key-press-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol key-repeat-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
@@ -480,11 +480,11 @@
 
 (defmethod compute-make-instance-arguments-with-display ((protocol key-release-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:key-release-event) initargs))
+  (list* (find-class 'clui.v0::key-release-event) initargs))
 
 (defmethod compute-make-instance-arguments-with-display ((protocol character-event) display &rest initargs &key &allow-other-keys)
   (declare (ignore display))
-  (list* (find-class 'clui.v0:character-event) initargs))
+  (list* (find-class 'clui.v0::character-event) initargs))
 
 #+cocoa
 (defmethod compute-make-instance-arguments-with-display ((protocol arrow-cursor) (display cocoa:display-mixin) &rest initargs &key &allow-other-keys)
