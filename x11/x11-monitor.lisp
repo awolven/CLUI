@@ -89,8 +89,8 @@
 							     :x11-crtc crtc)))
 		     
 				 (loop for j from 0 below (cval-value screen-count) ;; ugly.
-				       when (and (= (#_.x_org (c-aref screens j)) (#_.y ci))
-						 (= (#_.y_org (c-aref screens j)) (#_.x ci))
+				       when (and (= (#_.x_org (c-aref screens j)) (#_.x ci))
+						 (= (#_.y_org (c-aref screens j)) (#_.y ci))
 						 (= (#_.width (c-aref screens j)) (#_.width ci))
 						 (= (#_.height (c-aref screens j)) (#_.height ci)))
 					 do (setf (monitor-x11-index monitor) j)

@@ -622,6 +622,83 @@
 	   (values))
       (#_free mask)))))
 
+(defun get-x11-window-screen-and-root (window)
+  (let ((display (window-display window)))
+    (clet& ((&attribs #_<XWindowAttributes>))
+      (#_XGetWindowAttributes (h display) (h window) &attribs)
+      (values (#_.screen &attribs)
+	      (#_.root &attribs)))))
+  
+(defun get-x11-window-monitor (window)
+  ;; we're going by the upper left hand coordinate of the window
+  ;; being within the monitor's coordinates
+  (let* ((display (window-display window))
+	 (x11-state (display-x11-state display)))
+    (unless (display-monitors display)
+      (poll-x11-monitors display))
+    (clet& ((&attribs #_<XWindowAttributes>))
+      (#_XGetWindowAttributes (h display) (h window) &attribs)
+      (labels ((no-xinerama-method ()
+		 (let ((sr (#_XRRGetScreenResourcesCurrent (h display) (#_.root &attribs))))
+		   (unwind-protect 
+			(loop for i from 0 below (#_.noutput sr)
+			      do (let* ((output (c-aref (#_.outputs sr) i))
+					(oi (#_XRRGetOutputInfo (h display) sr output)))
+				   (unwind-protect
+					(when (and (= (#_.connection oi) #_RR_Connected)
+						   (not (noffi::ptr-nullptr-p (#_.crtcs oi))))
+					  (let* ((crtc (#_.crtc oi))
+						 (ci (#_XRRGetCrtcInfo (h display) sr crtc)))
+					    (unwind-protect
+						 (unless (= 0 (#_.noutput ci))
+						   (let ((x (#_.x ci))
+							 (y (#_.y ci)))
+						     (when (and (<= x (#_.x &attribs) (+ x (#_.width ci)))
+								(<= y (#_.y &attribs) (+ y (#_.height ci))))
+						       (mapcar #'(lambda (monitor)
+								   (and (equalp (monitor-x11-crtc monitor) crtc)
+									(equalp (monitor-x11-output monitor) output))
+								   (return-from get-x11-window-monitor monitor))
+							       (display-monitors display)))))
+					      (#_XRRFreeCrtcInfo ci))))
+				     (#_XRRFreeOutputInfo oi))))
+		     (#_XRRFreeScreenResources sr))))
+
+	       (xinerama-method ()
+		 (clet ((screen-count #_<int> 0))
+		   (let ((xinerama-screens (#_XineramaQueryScreens (h display) (c-addr-of screen-count)))
+			 (xinerama-screen-index))
+		     (progn
+		       (unwind-protect
+			    (loop for i from 0 below (cval-value screen-count)
+				  do (let ((xorg (#_.x_org (c-aref xinerama-screens i)))
+					   (yorg (#_.y_org (c-aref xinerama-screens i))))
+				       (when (and (<= xorg
+						      (#_.x &attribs)
+						      (+ xorg (#_.width (c-aref xinerama-screens i))))
+						  (<= yorg
+						      (#_.y &attribs)
+						      (+ yorg (#_.height (c-aref xinerama-screens i)))))
+					 ;; upper left coordinate of window is in xinerama-screen
+					 (setq xinerama-screen-index i)
+					 (return))))
+			 (#_XFree xinerama-screens))
+		       (if xinerama-screen-index
+			   (or
+			    (mapcar #'(lambda (monitor)
+					(when (and (monitor-x11-index monitor)
+						   (= (monitor-x11-index monitor) xinerama-screen-index))
+					  (return-from get-x11-window-monitor monitor)))
+				    (display-monitors display))
+			    (no-xinerama-method))
+			   (no-xinerama-method)))))))
+	
+	(if (and x11-state (xinerama-available? x11-state))
+	    (xinerama-method)
+	    (no-xinerama-method))))))
+	      
+
+
 
 (defun destroy-x11-window (window)
   (let ((display (window-display window)))
