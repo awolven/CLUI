@@ -15,17 +15,17 @@
 	   #:window-focus-event
 	   #:window-defocus-event
 	   #:window-hide-event
-	   ;;#:window-repaint-event
+	   ;;#:window-repaint-event ;; clim
 	   #:window-created-event
 	   #:window-close-event
 	   #:window-destroyed-event
 	   #:window-monitor-switched-event
-	   ;;#:pointer-button-press-event
-	   ;;#:pointer-button-release-event
-	   ;;#:pointer-button-hold-event
-	   ;;#:pointer-click-event
-	   ;;#:pointer-double-click-event
-	   ;;#:pointer-button-hold-and-drag-event
+	   ;;#:pointer-button-press-event ;; clim
+	   ;;#:pointer-button-release-event ;; clim
+	   ;;#:pointer-button-hold-event ;; clim
+	   ;;#:pointer-click-event ;; clim
+	   ;;#:pointer-double-click-event ;; clim
+	   ;;#:pointer-button-hold-and-drag-event ;; clim
 	   #:pointer-wheel-event
 	   ;;#:pointer-motion-event
 	   ;;#:pointer-enter-event
@@ -100,6 +100,7 @@
 	   #:window-framebuffer-size
 	   #:window-content-scale
 	   #:request-window-attention
+	   #:window-display
 
 	   #:get-primary-monitor
 	   #:set-window-monitor
@@ -200,6 +201,8 @@
 	   ;;#:key-press-event
 	   ;;#:key-release-event
 	   #:character-event
+
+	   #:clicked-items
 	   )
 
   #-darwin
