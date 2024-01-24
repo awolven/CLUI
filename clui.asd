@@ -11,8 +11,6 @@
   :serial t
   :depends-on
   (:clim-protocol #+darwin :clui/cocoa #+(or windows os-windows) :clui/win32 #+linux :clui/linux))
-<<<<<<< Updated upstream
-=======
 
 (defsystem clui/noffi
   :depends-on ()
@@ -49,7 +47,6 @@
    (:file "noffi/src/noffi-util")
 
    (:file "clr")))
->>>>>>> Stashed changes
 
 #+darwin
 (defsystem clui/cocoa
@@ -118,35 +115,7 @@
   :depends-on (:clui/noffi)
   :serial t
   :components
-   (#+ccl(:file "../noffi/src/patch-ccl")
-   (:file "noffi/other/clex/src/clex")
-   (:file "noffi/other/lalr/lalr")
-   (:file "noffi/src/file")
-   (:file "noffi/src/compiler-warn")
-   (:file "noffi/src/package")
-   (:file "noffi/src/features")
-   #+sbcl(:file "noffi/src/patch-sbcl")
-   (:file "noffi/src/forward")
-   (:file "noffi/src/lispdep")
-   (:file "noffi/src/util")
-   (:file "noffi/src/string-table")
-   (:file "noffi/src/abi")
-   (:file "noffi/src/define-grammar")
-   (:file "noffi/src/lexer")
-   (:file "noffi/src/cpp")
-   (:file "noffi/src/parsing")
-   (:file "noffi/src/grammar")
-   (:file "noffi/src/adt")
-   (:file "noffi/src/comp")
-   (:file "noffi/src/runtime")
-   (:file "noffi/src/syntax")
-   (:file "noffi/src/abi-amd64-sysv")
-   (:file "noffi/src/abi-amd64-sysv-cc")
-   (:file "noffi/src/config")
-   (:file "noffi/src/noffi-util")
-
-   (:file "clr")
-   (:file "x11/x11")
+  ((:file "x11/x11")
    
    (:file "package")
    (:file "protocols")

@@ -1358,14 +1358,6 @@
 
       (setf (last-cocoa-screen window) (ns::|screen| window))
 
-      (ns::|addObserver:selector:name:object:|
-	   (ns::|defaultCenter| #@NSNotificationCenter)
-	   (window-content-view window)
-	   @(windowDidMove:)
-	   (objc-runtime::make-nsstring
-	    "NSWindowDidMoveNotification")
-	   nil)
-
       (apply #'initialize-window-devices window args)
 	
       (if (window-fullscreen-monitor window)
