@@ -19,7 +19,7 @@
     (application-helper-selected-keyboard-input-source-changed display)
     (values)))
 
-(defun application-helper-selected-keyboard-input-source-changed ()
+(defun application-helper-selected-keyboard-input-source-changed (display)
   (update-unicode-data display (slot-value display 'kPropertyUnicodeKeyLayoutData)))
 
 (defun make-helper-class ()

@@ -850,7 +850,7 @@
 (defun ns::|isToManyKey:| (thing _)
   (if (= 0  (let ((message-lambda 
          (make-message-lambda @(isToManyKey:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+	      (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
 
 (defun ns::|removeObject:fromPropertyWithKey:| (thing _ from-property-with-key)
   (let ((message-lambda 
@@ -3658,8 +3658,8 @@
 
 (defun ns::|bs_defaultExists:| (thing _)
   (if (= 0  (let ((message-lambda 
-         (make-message-lambda @(bs_defaultExists:) (( :POINTER)  :CHAR)))) 
-   (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
+		   (make-message-lambda @(bs_defaultExists:) (( :POINTER)  :CHAR)))) 
+     (funcall message-lambda (objc-object-id thing)  (objc-object-id _)))) nil t))
 
 
 

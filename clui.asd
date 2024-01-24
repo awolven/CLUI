@@ -11,6 +11,45 @@
   :serial t
   :depends-on
   (:clim-protocol #+darwin :clui/cocoa #+(or windows os-windows) :clui/win32 #+linux :clui/linux))
+<<<<<<< Updated upstream
+=======
+
+(defsystem clui/noffi
+  :depends-on ()
+  :author "Gilbert Baummann"
+  :serial t
+  :components
+  (#+ccl(:file "../noffi/src/patch-ccl")
+   (:file "noffi/other/clex/src/clex")
+   (:file "noffi/other/lalr/lalr")
+   (:file "noffi/src/file")
+   (:file "noffi/src/compiler-warn")
+   (:file "noffi/src/package")
+   (:file "noffi/src/features")
+   #+sbcl(:file "noffi/src/patch-sbcl")
+   (:file "noffi/src/forward")
+   (:file "noffi/src/lispdep")
+   (:file "noffi/src/util")
+   (:file "noffi/src/string-table")
+   (:file "noffi/src/abi")
+   (:file "noffi/src/define-grammar")
+   (:file "noffi/src/lexer")
+   (:file "noffi/src/cpp")
+   (:file "noffi/src/parsing")
+   (:file "noffi/src/grammar")
+   (:file "noffi/src/adt")
+   (:file "noffi/src/comp")
+   (:file "noffi/src/runtime")
+   (:file "noffi/src/syntax")
+   (:file "noffi/src/abi-amd64-sysv")
+   (:file "noffi/src/abi-amd64-sysv-cc")
+   (:file "noffi/src/abi-amd64-mingw64")
+   (:file "noffi/src/abi-amd64-ms-cc")
+   (:file "noffi/src/config")
+   (:file "noffi/src/noffi-util")
+
+   (:file "clr")))
+>>>>>>> Stashed changes
 
 #+darwin
 (defsystem clui/cocoa
@@ -48,38 +87,10 @@
 
 #+(or windows os-windows)
 (defsystem clui/win32
-  :depends-on ()
+  :depends-on (:clui/noffi)
   :serial t
   :components
-  (#+CCL(:file "noffi/src/patch-ccl")
-   (:file "noffi/other/clex/src/clex")
-   (:file "noffi/other/lalr/lalr")
-   (:file "noffi/src/file")
-   (:file "noffi/src/compiler-warn")
-   (:file "noffi/src/package")
-   (:file "noffi/src/features")
-   #+SBCL (:file "noffi/src/patch-sbcl")
-   (:file "noffi/src/forward")
-   (:file "noffi/src/lispdep")
-   (:file "noffi/src/util")
-   (:file "noffi/src/string-table")
-   (:file "noffi/src/abi")
-   (:file "noffi/src/define-grammar")
-   (:file "noffi/src/lexer")
-   (:file "noffi/src/cpp")
-   (:file "noffi/src/parsing")
-   (:file "noffi/src/grammar")
-   (:file "noffi/src/adt")
-   (:file "noffi/src/comp")
-   (:file "noffi/src/runtime")
-   (:file "noffi/src/syntax")
-   (:file "noffi/src/abi-amd64-mingw64")
-   (:file "noffi/src/abi-amd64-ms-cc")
-   (:file "noffi/src/config")
-   (:file "noffi/src/noffi-util")
-
-   (:file "clr")
-   (:file "win32/win32")
+  ((:file "win32/win32")
    
    (:file "package")
    (:file "protocols")
@@ -102,10 +113,9 @@
 
    #+NIL(:file "win32/test")))
 
-
 #+linux
 (defsystem clui/linux
-  :depends-on ()
+  :depends-on (:clui/noffi)
   :serial t
   :components
    (#+ccl(:file "../noffi/src/patch-ccl")

@@ -91,6 +91,7 @@
   (init-cocoa instance)
   instance)
 
+
 (defclass application-delegate (obj-object-mixin)
   ())
 
@@ -181,6 +182,10 @@
    
    (context
     :accessor window-graphics-context)
+
+   (%screen
+    :initform nil
+    :accessor last-cocoa-screen)
    
    (%maximized?
     :type boolean

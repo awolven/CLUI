@@ -1356,6 +1356,16 @@
 
       (ns:|setContentView:| window (window-content-view window))
 
+      (setf (last-cocoa-screen window) (ns::|screen| window))
+
+      (ns::|addObserver:selector:name:object:|
+	   (ns::|defaultCenter| #@NSNotificationCenter)
+	   (window-content-view window)
+	   @(windowDidMove:)
+	   (objc-runtime::make-nsstring
+	    "NSWindowDidMoveNotification")
+	   nil)
+
       (apply #'initialize-window-devices window args)
 	
       (if (window-fullscreen-monitor window)
@@ -1518,17 +1528,30 @@
 
 (defun cocoa-window-did-move (window notification)
   (declare (ignorable notification))
-  (multiple-value-bind (x y) (get-cocoa-window-pos window)
-    (restart-bind ((ignore (lambda (&optional c)
-			     (declare (ignorable c))
-			     (throw :ignore nil))))
-      (catch :ignore
-	(let ((event (make-instance 'window-move-event
-				    :timestamp (get-internal-real-time)
-				    :new-x x
-				    :new-y y)))
-	  (clim:handle-event window event)))))
-  (values))
+  (let ((timestamp (get-internal-real-time)))
+     
+    (let ((current-screen (ns::|screen| window))
+	  (last-screen (last-cocoa-screen window)))
+      (setf (last-cocoa-screen window) current-screen)
+      (when last-screen
+	(unless (= (sap-int current-screen) (sap-int last-screen))
+	  (clim:handle-event window (make-instance 'window-monitor-switched-event
+						   :window window
+						   :timestamp timestamp)))))
+  
+    (multiple-value-bind (x y) (get-cocoa-window-pos window)
+      (restart-bind ((ignore (lambda (&optional c)
+			       (declare (ignorable c))
+			       (throw :ignore nil))))
+	(catch :ignore
+	  (let ((event (make-instance 'window-move-event
+				      :timestamp timestamp
+				      :window window
+				      :new-x x
+				      :new-y y)))
+	    (clim:handle-event window event)))))
+    
+    (values)))
 
 (deftraceable-callback window-delegate-window-did-miniaturize-callback :void ((self :pointer) (_cmd :pointer) (notification :pointer))
   (let ((window (gethash (sap-int self) *delegate->clos-window-table*)))
@@ -1668,6 +1691,12 @@
 (deftraceable-callback content-view-key-paths-for-values-affecting-touch-bar-callback :pointer ((self :pointer) (_cmd :pointer))
   (array-with-objects))
 
+#+NIL
+(deftraceable-callback content-view-window-did-move-callback :void ((self :pointer) (_cmd :pointer)
+									  (notification :pointer))
+
+  (window-did-move self))
+
 (defun make-content-view-class (&optional (super #@NSView))
   (let ((content-view-class
 	 (objc-runtime::objc-allocate-class-pair
@@ -1798,6 +1827,10 @@
     (objc-runtime::class-add-method content-view-class @(drawInMTKView:)
 				    (cffi:callback content-view-draw-in-mtkview-callback)
 				    "v@:@")
+    #+NIL
+    (objc-runtime::class-add-method content-view-class @(windowDidMove:)
+				    (cffi:callback content-view-window-did-move-callback)
+				    "v@:@")
 
 
 
@@ -1825,7 +1858,7 @@
     (objc-runtime::class-add-method window-class @(canBecomeMainWindow)
 				    (cffi:callback window-can-become-main-window-callback)
 				    "c@:")
-
+    
     (objc_registerClassPair window-class)
     
     window-class))
@@ -1964,6 +1997,21 @@
 	    (ns:|setHasShadow:| window t)
 
 	    (ns:|setTitle:| window (ns:|miniwindowTitle| window)))))))
+
+(defun get-cocoa-window-monitor (window)
+  (let* ((screen (ns::|screen| window))
+	 (description (ns::|deviceDescription| screen)) ;; is this unique
+	 (screen-number-object
+	  (ns::|objectForKey:| description (objc-runtime::make-nsstring "NSScreenNumber")))
+	 (screen-number (ns::|unsignedIntValue| screen-number-object))
+	 (unit-number (CGDisplayUnitNumber screen-number))
+	 (display (window-display window)))
+    (unless (display-monitors display)
+      (poll-cocoa-monitors display))
+    (mapcar #'(lambda (monitor)
+		(when (= (monitor-unit-number monitor) unit-number)
+		  (return-from get-cocoa-window-monitor monitor)))
+	    (display-monitors display))))    
 
 (defun destroy-cocoa-window (window)
   (with-autorelease-pool (pool)
