@@ -433,6 +433,7 @@
     :initform nil
     :reader raw-mouse-motion?
     :writer (setf %raw-mouse-motion?))))
+    
 
 (defclass helper-window (handle-mixin)
   ())

@@ -6,7 +6,7 @@
 
 (cffi:use-foreign-library metalkit)
 
-(defvar *trace-callbacks* t)
+(defvar *trace-callbacks* nil)
 
 (defmacro deftraceable-callback (name return-type (&rest args) &body body)
   `(cffi:defcallback ,name ,return-type (,@args)

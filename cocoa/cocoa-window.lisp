@@ -1990,6 +1990,10 @@
 
 	    (ns:|setTitle:| window (ns:|miniwindowTitle| window)))))))
 
+(defun get-cocoa-window-focused (window)
+  (with-autorelease-pool (pool)
+    (ns::|isKeyWindow| window)))
+
 (defun get-cocoa-window-monitor (window)
   (let* ((screen (ns::|screen| window))
 	 (description (ns::|deviceDescription| screen)) ;; is this unique
