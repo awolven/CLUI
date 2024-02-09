@@ -90,6 +90,7 @@
   ((:file "win32/win32")
    
    (:file "package")
+   (:file "os")
    (:file "protocols")
    (:file "app")
    (:file "classes")
