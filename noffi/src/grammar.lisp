@@ -90,9 +90,6 @@
 (defparameter *auto-typedef-p*
   nil)
 
-(defun identifierp (object)
-  (and object (symbolp object) (not (keywordp object))))
-
 (defun note (fmt &rest args)
   (format t "~&~<;; ~@;~?~:>" (list fmt args)))
 
@@ -729,10 +726,16 @@
    -> "enum" :identifier                         => `(:enum ,$2)
    -> "enum" :identifier enum-def                => `(:enum ,$2 ,$3)
    -> "enum" enum-def                            => `(:enum nil ,$2)
+   #||
    -> "enum" derived                             => `(:derived (:enum nil) ,$2)
    -> "enum" derived enum-def                    => `(:derived (:enum nil ,$3) ,$2)
    -> "enum" :identifier derived                 => `(:derived (:enum ,$2) ,$3)
    -> "enum" :identifier derived enum-def        => `(:derived (:enum ,$2 ,$4) ,$3)
+   ||#
+   -> "enum" derived                             => `(:enum nil)
+   -> "enum" derived enum-def                    => `(:enum nil ,$3)
+   -> "enum" :identifier derived                 => `(:enum ,$2)
+   -> "enum" :identifier derived enum-def        => `(:enum ,$2 ,$4)
    )
 
   (enum-def -> "{" (++ "," enumerator) (? ",") "}" => $2)
@@ -826,8 +829,9 @@
    => `(:objc-method ,$2 ,$1 ())
 
    ->   (? "(" type-name ")" => $2)
-        (+ (? :identifier) ":" "(" type-name ")" :identifier => (list $1 $4 $6))
+        (+ (? :identifier) ":" "(" (? "out") type-name ")" :identifier => (list $1 $4 $6))
         (? "," "..." => t)
+        (? (+ :function-specifier))
    => `(:objc-method ,(intern (format nil "~{~A:~}" (mapcar #'verbatim (mapcar 'car $2))) *c-package*)
                      ,$1
                      (,@(mapcar (lambda (param)
@@ -985,7 +989,7 @@
                            (list nil)))))
           (when (member :typedef storage-classes :key #'cadr)
             (mapc #'announce-typedef (mapcar #'car init-declarator-list)))
-          `(decl (,@ storage-classes ,@more-declaration-specifiers)
+          `(decl (,@storage-classes ,@more-declaration-specifiers)
                  ,@ (reverse init-declarator-list)))))))
 
 (defun apply-function-specifiers (function-specifiers type)

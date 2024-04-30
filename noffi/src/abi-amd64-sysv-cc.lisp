@@ -208,8 +208,10 @@ type. Returns a vector of the classes. May also just return :MEMORY."
                         (when param.q (error "Too few arguments."))
                         (when (and arg.q (not restp)) (error "Too many arguments."))
                         (loop for arg in arg.q do
-                              (let ((arg (promoted-cval-for-funcall arg)))
-                                (add-arg (cval-type arg) arg))))
+                              (if (null arg)
+                                  (add-arg '(:pointer :void) nil)
+                                  (let ((arg (promoted-cval-for-funcall arg)))
+                                    (add-arg (cval-type arg) arg)))))
                      (cond #+CCL
                            ((eq :registers (car param.q))
                             (push (car param.q) ff-args)
@@ -253,7 +255,7 @@ type. Returns a vector of the classes. May also just return :MEMORY."
 
 (defun function-and-signature-for-funcall (fun)
   (when (and (pointer-type-p (cval-type fun)) (function-type-p (pointer-type-base (cval-type fun))))
-    (setq fun (c-aref fun)))
+    (setq fun (%c-aref fun)))
   (unless (function-type-p (cval-type fun))
     (error "~S is not a C function" fun))
   (multiple-value-bind (r ps r?)
@@ -277,7 +279,7 @@ type. Returns a vector of the classes. May also just return :MEMORY."
               ;;
               ($double-u64 (x) `(double-u64 ,x))
               ($c-make (&rest xs) `(c-make ,@xs))
-              ($c-aref (&rest xs) `(c-aref ,@xs))
+              ($c-aref (&rest xs) `(%c-aref ,@xs))
               ($sap-peek-u64 (&rest xs) `(sap-peek-u64 ,@xs))
               ($poke-u64 (nv sap off) `(setf (peek-u64 ,sap ,off) ,nv))
               ($poke-double (nv sap off) `(setf (peek-double ,sap ,off) ,nv))
@@ -304,7 +306,7 @@ type. Returns a vector of the classes. May also just return :MEMORY."
                      `(with-stack-allocated-sap ,(list ,@(mapcar (lambda (b) `(list ,(cadr b) ,(caddr b))) bindings))
                         ,@(list ,@body))))))
      (labels (($c-make (type &rest xs) `(c-make ',type ,@xs))
-              ($c-aref (&rest xs) `(c-aref ,@xs))
+              ($c-aref (&rest xs) `(%c-aref ,@xs))
               ($sap-peek-u64 (&rest xs) `(sap-peek-u64 ,@xs))
               ($poke-u64 (nv sap off) `(setf (peek-u64 ,sap ,off) ,nv))
               ($poke-double (nv sap off) `(setf (peek-double ,sap ,off) ,nv))

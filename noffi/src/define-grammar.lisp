@@ -1,6 +1,7 @@
 (in-package :noffi)
 
-(locally (declaim (optimize (speed 1) (safety 3)))
+(eval-when (:compile-toplevel)
+  (declaim (optimize (speed 1) (safety 3))))
 
 (defstruct (fancy-lalr-table (:include lalr-table))
   terminals)
@@ -422,4 +423,4 @@ because of SBCL. Thanks."
                  (prin1 x stream)
                  (write-char #\space stream))))))))
 
-) ;fin
+

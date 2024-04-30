@@ -22,19 +22,28 @@
   #+CCL (:import-from :CCL #:QUIT)
   #+SBCL (:import-from :SB-EXT #:QUIT)
   ;;
-  (:export #:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun
-           #:c-sizeof-type #:c-aref #:clet&
-	   #:size-of-typ
+  (:export #:noffi-syntax
+           #:clet
+           #:clet&
+           #:ctypep
+           #:c-make
+           #:c-coerce
+           #:c-aref
+           #:c-addr-of
 	   #:c->-addr
-	   #:cval-value
+	   #:c-sizeof-type
            #:get-c-string
            #:get-native-utf16-string
            #:int-ptr
+           #:ptr-int
+           #:defcfun
+           #:size-of-type
            #:use-library
            #:use-include
            #:c-compile-file
            #:c-compile-file-pathname
-           #:pkg-use)
+           #:pkg-use
+	   #:cval-value)
   #+(OR CCL ECL CLISP)
   (:import-from #+CCL :ccl #+ECL :gray #+CLISP :gray
                 #:fundamental-binary-input-stream

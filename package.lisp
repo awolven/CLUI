@@ -208,7 +208,7 @@
   #-darwin
   (:import-from :noffi
 		#:noffi-syntax #:clet #:c-addr-of #:pkg-use #:c-coerce #:defcfun
-		#:size-of-typ #:c-aref #:clet&
+		#:size-of-type #:c-aref #:clet&
 		#:get-c-string
 		#:get-native-utf16-string
 		#:int-ptr

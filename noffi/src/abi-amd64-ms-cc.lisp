@@ -57,7 +57,7 @@
 (defmacro $amd64-ms-funcall-template ()
   ` (let ((to-free nil))
       (when (and (pointer-type-p (cval-type fun)) (function-type-p (pointer-type-base (cval-type fun))))
-        (setq fun (c-aref fun)))
+        (setq fun (%c-aref fun)))
       (unless (function-type-p (cval-type fun))
         (error "~S is not a C function" fun))
       (multiple-value-bind (rtype ptypes restp)

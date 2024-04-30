@@ -67,6 +67,12 @@
 ;; constants become important. The bad news about this is: Here we derivate
 ;; from what the parser returns.
 
+(defun identifierp (object)
+  (and object (symbolp object) (not (keywordp object))))
+
+(deftype identifier ()
+  '(satisfies identifierp))
+
 (defun arithmetic-type-p (type &optional env)
   ;; What about _Complex?
   (or (integer-type-p type env)
@@ -256,7 +262,28 @@
 ;;;
 
 (defun make-function-type (result-type parameter-declarations)
-  `(:function ,result-type ,parameter-declarations))
+  "Creates a new function datatype.
+_result_type_ is the return type of the function. _parameters_ is a
+list of declarations optionally ended in &REST for variadic functions.
+
+Note: The idiosyncrasies of C for functions of zero arity versus
+unspecified function parameters are _not_ exposed here. Use
+_parameters_ = NIL for a function taking no parameter and _parameters_
+= :UNSPECIFIED for a function or no specified parameters."
+  (let ((parameters
+         (cond ((eq parameter-declarations ':unspecified)
+                nil)
+               ((null parameter-declarations)
+                (list (make-declaration :name nil :type ':void)))
+               (t
+                (do ((q parameter-declarations (cdr q)))
+                    ((or (endp q)
+                         (and (endp (cdr q)) (eq (car q) '&rest))))
+                  (assert (declaration-p (car q)) nil
+                          "~@<Does not look like a declaration: ~S~:@>" (car q)))
+                parameter-declarations))))
+    ;;
+    `(:function ,result-type ,parameters)))
 
 (defun function-type-p (type &optional env)
   (let ((type (bare-expanded-type type env)))
@@ -361,21 +388,34 @@ returns it as a complete record type, if there is any."
       (or it q))))
 
 (defun make-struct-type (name &rest args &key (members nil members-p) pack)
-  (declare (ignore members pack))
+  "See MAKE-RECORD-TYPE"
+  (declare (ignore members members-p pack))
   (apply #'make-record-type :struct name args))
 
 (defun make-union-type (name &rest args &key (members nil members-p) pack)
-  (declare (ignore members pack))
+  "See MAKE-RECORD-TYPE"
+  (declare (ignore members members-p pack))
   (apply #'make-record-type :union name args))
 
 (defun make-record-type (kind name &key (members nil members-p) pack)
+  "Creates a new record data type of kind _kind_ which must be
+either :STRUCT or :UNION. _name_ is the struct type tag name and must
+either be NIL for an anonymous struct or a C identifier. The structure
+members are given my _members_ as a list of declarations."
   (check-type kind (member :struct :union))
+  (check-type name (or null identifier))
+  (when (and members-p (null members))
+    (error "Attempt to define an empty struct"))
+  (assert (every (lambda (member)
+                   (declaration-p member))
+                 members))
   (list* kind name (if members-p (list members) nil)))
 
 ;; Hmm, this might be too simplistic.
 ;;(defun record-member-offset (member))   ;in bits
 ;; (defun record-member-size (member))     ;in bits
 
+#+NOMORE
 (defun record-type-member-layout (record-type member env &key (errorp t))
   (let ((layout (record-type-layout (find-record-type record-type env) env)))
     (labels ((aux (member layout delta)
@@ -457,6 +497,17 @@ not already mention them."
         (error "Incomplete enumeration type: ~S" def))
       (values (caddr def) (not (null (cddr def)))))))
 
+(defun enum-member-name (enum-member)
+  (etypecase enum-member
+    (symbol enum-member)
+    ((cons symbol t)
+     (car enum-member))))
+
+(defun enum-member-value-form (enum-member)
+  (etypecase enum-member
+    (symbol nil)
+    ((cons symbol t) (cadr enum-member))))
+
 (defun find-enum-type (type env)
   "Returns a complete version of the enumeration type _type_ if one
 could be found, when in doubt the incomplete type is returned."
@@ -502,7 +553,7 @@ could be found, when in doubt the incomplete type is returned."
             ((integer-type-p type env)
              (integer-type-size type))
             ((float-type-p type env)
-             (float-type-size type) bits-per-byte)
+             (float-type-size type))
             ((pointer-type-p type env)
              (pointer-type-size type env))
             (t
@@ -518,6 +569,7 @@ could be found, when in doubt the incomplete type is returned."
   (cond ((and (consp type) (eq (car type) :type-qualifier))
          (cons (cadr type)
                (type-qualifiers (caddr type) env)))
+        #+(or)
         ((named-type-p type)
          (type-qualifiers (named-type-expansion type) env))
         (t nil)))
@@ -574,7 +626,12 @@ could be found, when in doubt the incomplete type is returned."
 ;; This is only half the truth as one DECL form may carry more than one
 ;; defined identifier.
 
-(defun make-declaration (name type &key (init nil init-p) specifiers)
+(defun make-declaration (&key name type
+                              (init nil init-p)
+                              specifiers
+                              (storage-class nil storage-class-p))
+  (when storage-class-p
+    (push `(:storage-class ,storage-class) specifiers))
   `(decl ,specifiers (,name ,type ,@(and init-p (list init)))))
 
 (defun declaration-p (object)
@@ -756,7 +813,8 @@ are measured in bits. Second and third return value are the size and alignment i
         ((setq it (float-type-p type env))
          (values (float-type-size type)
                  (float-type-align type)))
-        ((setq it (pointer-type-p type env))
+        ((or (setq it (pointer-type-p type env))
+             (setq it (block-pointer-type-p type env)))
          (values (pointer-type-size type)
                  (pointer-type-align type)))
         ((setq it (record-type-p type))
@@ -846,9 +904,18 @@ are measured in bits. Second and third return value are the size and alignment i
                                     (record-type-name type-2 env))))
                           ((record-type-name type-2 env) nil)
                           (t
-                           ;; ###
-                           (equal (record-type-layout type-1 env)
-                                  (record-type-layout type-2 env))))))
+                           (let ((members-1 (record-type-members type-1 env))
+                                 (members-2 (record-type-members type-2 env)))
+                             (and (= (length members-1) (length members-2))
+                                  (every (lambda (member-1 member-2)
+                                           (and
+                                            (eq (record-member-name member-1)
+                                                (record-member-name member-2))
+                                            (eql (record-member-pack member-1)
+                                                 (record-member-pack member-2))
+                                            (types-compatible-p (record-member-type member-1)
+                                                                (record-member-type member-2))))
+                                         members-1 members-2)))))))
               ((bit-field-type-p type-1 env)
                (and (bit-field-type-p type-2 env)
                     (and (types-compatible-p (bit-field-type-base-type type-1) (bit-field-type-base-type type-2))
@@ -866,4 +933,85 @@ are measured in bits. Second and third return value are the size and alignment i
               ((and (consp type-2) (eq :function-specifier(car type-2)))
                t)
               (t
-               (error "What kind of type are ~S and ~S" type-1 type-2))))))
+               (warn "~@<What kind of types are ~S and ~S?~@:>" type-1 type-2)
+               nil)))))
+
+                    
+(defun record-type-member-layout (record-type member env &key (errorp t))
+  (let ((layout (record-type-layout (find-record-type record-type env) env)))
+    (labels ((aux (member layout delta)
+               (cond ((null layout) nil)
+                     (t
+                      (destructuring-bind (name type size offset) (car layout) ;ADT
+                        (cond ((eq name member)
+                               (list name type size (+ offset delta)))
+                              ((and (null name)
+                                    (record-type-p type)
+                                    (aux member (record-type-layout (find-record-type type env) env) (+ delta offset))))
+                              (t
+                               (aux member (cdr layout) delta))))))))
+      (values-list
+       (or (cdr (aux member layout 0))
+           (and errorp (error "Record type ~S has no member ~S" record-type member)))))))
+
+(defun c-> (object member)
+  ;; ### bit fields!
+  (setq object (promoted-cval object))
+  (labels ((doit (record-type)
+             (multiple-value-bind (type size offset)
+                 (record-type-member-layout record-type member nil)
+               (declare (ignore size))
+               (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                                      (/ offset 8))
+                                  (make-pointer-type type))))))
+    (cond ((and (cvalp object)
+                (pointer-type-p (cval-type object))
+                (record-type-p (pointer-type-base (cval-type object))))
+           (doit (pointer-type-base (cval-type object))))
+          ((and (cvalp object)
+                (record-type-p (cval-type object)))
+           (doit (cval-type object)))
+          (t
+           (error "~S is not a pointer to a record, nor some record reference." object)))))
+
+(defun (setf c->) (nv object member)
+  ;; ### bit fields!
+  (setq object (promoted-cval object))
+  (labels ((doit (record-type)
+             (multiple-value-bind (type size offset)
+                 (record-type-member-layout record-type member nil)
+               (declare (ignore size))
+               (setf
+                (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                                       (/ offset 8))
+                                   (make-pointer-type type)))
+                nv))))
+    (cond ((and (cvalp object)
+                (pointer-type-p (cval-type object))
+                (record-type-p (pointer-type-base (cval-type object))))
+           (doit (pointer-type-base (cval-type object))))
+          ((and (cvalp object)
+                (record-type-p (cval-type object)))
+           (doit (cval-type object)))
+          (t
+           (error "~S is not a pointer to a record, nor some record reference." object)))))
+
+(defun c->-addr (object member)
+  ;; ### code duplication
+  (setq object (promoted-cval object))
+  (labels ((doit (record-type)
+             (multiple-value-bind (type size offset)
+                 (record-type-member-layout record-type member nil)
+               (declare (ignore size))
+               (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                             (/ offset 8))
+                         (make-pointer-type type)))))
+    (cond ((and (cvalp object)
+                (pointer-type-p (cval-type object))
+                (record-type-p (pointer-type-base (cval-type object))))
+           (doit (pointer-type-base (cval-type object))))
+          ((and (cvalp object)
+                (record-type-p (cval-type object)))
+           (doit (cval-type object)))
+          (t
+           (error "~S is not a pointer to a record, nor some record reference." object)))))

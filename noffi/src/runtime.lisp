@@ -90,7 +90,7 @@
   (defmacro sap-peek-sap (sap &optional (offset 0))    `(sb-sys:sap-ref-sap ,sap ,offset))
   (defmacro sap-int (sap)                              `(sb-sys:sap-int ,sap))
   (defmacro int-sap (int)                              `(sb-sys:int-sap (ldb (byte #+64-BIT 64 #-64-BIT 32 0) ,int)))
-  (defmacro sap-plus (sap delta)                       `(sb-sys:sap+ ,sap ,delta))
+  (defmacro sap-plus (sap delta)                       `(sb-sys:sap+ ,sap (sldb (byte #+64-BIT 64 #-64-BIT 32 0) ,delta)))
 
   (defun sap-malloc (size)
     ;; this is the native way to allocate foreign memory in SBCL
@@ -218,7 +218,7 @@
       (let ((offset (ptr-offset ptr)))
         (if (eql 0 offset)
             (ptr-base-sap ptr)
-            (sap-plus (ptr-base-sap ptr) (sldb (byte 64 0) offset))))
+            (sap-plus (ptr-base-sap ptr) offset)))
       +null-ptr-sap+))
 
 (defun ptr-nullptr-p (ptr)
@@ -309,9 +309,12 @@
    0 (make-pointer-type type)))
 
 #+SBCL
+;; What SBCL does here somehow isn't the right thing. It does fail for
+;; #_stdout e.g. SB-ALIEN however works for getting at a _value_, but
+;; not at the address. Perhaps we need a different approach?
 (defun extern-addr (name-string type)
   (cons-ptr
-   (SB-SYS:FOREIGN-SYMBOL-SAP (string name-string))
+   (sb-sys:foreign-symbol-sap (string name-string))
    0 (make-pointer-type type)))
 
 
@@ -416,6 +419,7 @@
 (defun make-gcable (ptr)
   (let ((sap (ptr-base-sap ptr)))
     (setf (ptr-cookie ptr) (list nil))
+    #+(OR)
     (sb-ext:finalize (ptr-cookie ptr) #'(lambda ()
                                           ;; (format *trace-output* "~&freeing ~S~%" sap)
                                           (sap-free sap))))
@@ -427,8 +431,17 @@
    pointer to it. If _count_ is given a vector of that length is
    allocated. When _clear_ is true (the default) the memory is zeroed
    before being returned."
+  ;; We said SB-ALIEN::%MAKE-ALIEN here, but it also just calls malloc(3).
+  ;; So we call either malloc(3) or calloc(3).
   (let* ((size (type-size-align type nil))
-         (sap  (SB-ALIEN::%MAKE-ALIEN (* count (/ size 8))))
+         (bytes (* count (/ size 8)))
+         (sap  (if clear
+                   (SB-ALIEN:ALIEN-FUNCALL
+                    (SB-ALIEN:EXTERN-ALIEN "calloc" (FUNCTION SB-SYS:SYSTEM-AREA-POINTER SB-ALIEN:SIZE-T SB-ALIEN:SIZE-T))
+                    1 bytes)
+                   (SB-ALIEN:ALIEN-FUNCALL
+                    (SB-ALIEN:EXTERN-ALIEN "malloc" (FUNCTION SB-SYS:SYSTEM-AREA-POINTER SB-ALIEN:SIZE-T))
+                    bytes)))
          (ptr  (cons-ptr sap 0 (make-pointer-type type))))
     (make-gcable ptr)))
 
@@ -438,11 +451,11 @@
            (let* ((ptr (c-make (pointer-type-base result-type) (1+ (length object)))))
              (loop for i below (length object)
                    for x = (elt object i)
-                   do (setf (c-aref ptr i) x)
+                   do (setf (%c-aref ptr i) x)
                    finally (cond ((integer-type-p base-type)
-                                  (setf (c-aref ptr i) 0))
+                                  (setf (%c-aref ptr i) 0))
                                  ((pointer-type-p base-type)
-                                  (setf (c-aref ptr i) nil))))
+                                  (setf (%c-aref ptr i) nil))))
              ptr)))
         (t
          (error "huh? coercing ~S to ~S" object result-type))))
@@ -734,13 +747,17 @@
          (- (cval-value x)))
         (t (error "Don't know how to do unary plus (+) on ~S" x))))
 
-(defun c-aref (ptr &optional (delta 0 delta-p))
+(defun %c-aref (ptr &optional (delta 0 delta-p))
+  ;; This is the thing that the "compiler" emits. Returns a CVAL.
   (setq ptr (promoted-cval ptr))
   (when delta-p (setq ptr (c+ delta ptr)))
   (cond ((and (cvalp ptr) (pointer-type-p (cval-type ptr)))
          (c-aref-1 (pointer-type-base (cval-type ptr)) ptr))
         (t
          (error "~S is not a pointer, don't know how to dereference it." ptr))))
+
+(defun c-aref (ptr &optional (delta 0))
+  (as-lisp (%c-aref ptr delta)))
 
 (defun c-aref-1 (base ptr)
   (cond ((integer-type-p base)
@@ -856,7 +873,7 @@
               `(cons-cval ',(declaration-init decl)
                           ',(declaration-type decl)))
              ((extern-declaration-p decl)
-              `(c-aref (extern-addr ',identifier ',(declaration-type decl))))
+              `(%c-aref (extern-addr ',identifier ',(declaration-type decl))))
              ((constant-static-declaration-p decl)
               (assert (not (null (declaration-init decl))))
               ;; Hmm
@@ -885,7 +902,7 @@ element and a function is turned to a pointer."
 
 ;;;; ------------------------------------------------------------------------------------------
 
-(defun (setf c-aref) (new-value object &optional (offset 0))
+(defun (setf %c-aref) (new-value object &optional (offset 0))
   (prog1 new-value
     ;; ### reverse arguments?
     (setq object (promoted-cval object))
@@ -922,11 +939,14 @@ element and a function is turned to a pointer."
          ;; The cval-value of an array already is the thing.
          (cons-ptr (ptr-base-sap ptr) (ptr-offset ptr) base))
         ((eq :float (bare-expanded-type base nil))
-         (setf (peek-float object 0) (cval-value (c-checked-coerce new-value base))))
+         (setf (peek-float object 0) (cval-value (c-checked-coerce new-value ':float))))
         ((eq :double (bare-expanded-type base nil))
-         (setf (peek-double object 0) (cval-value (c-checked-coerce new-value base))))
+         (setf (peek-double object 0) (cval-value (c-checked-coerce new-value ':double))))
         (t
          (error "Don't know how to SETF a reference to some ~S" base)) ))))
+
+(defun (setf c-aref) (new-value object &optional (offset 0))
+  (setf (%c-aref object offset) new-value))
 
 (defun c-checked-coerce (object type)
   (c-coerce object type))
@@ -950,7 +970,7 @@ element and a function is turned to a pointer."
 (defmacro static-c-funcall-2 (fun-type identifier &rest arguments)
   #+(or)
   (when (and (pointer-type-p fun-type) (function-type-p (pointer-type-base fun-type)))
-    (setq fun (c-aref fun)))
+    (setq fun (%c-aref fun)))
   (unless (function-type-p fun-type)
     (error "~S is not a C function" identifier))
   ;;
@@ -1062,7 +1082,7 @@ element and a function is turned to a pointer."
   (error "foo!")
   #+(or)
   (when (and (pointer-type-p fun-type) (function-type-p (pointer-type-base fun-type)))
-    (setq fun (c-aref fun)))
+    (setq fun (%c-aref fun)))
   (unless (function-type-p fun-type)
     (error "~S is not a C function" identifier))
   ;;
@@ -1226,6 +1246,7 @@ use in an alien funcall."
 
 ;; This is still _way_ too much cut and paste here. 
 
+#+NOMORE
 (defun c-> (object member)
   ;; ### bit fields!
   (setq object (promoted-cval object))
@@ -1237,7 +1258,7 @@ use in an alien funcall."
                (multiple-value-bind (type offset)
                    (values (member-layout-type member-layout)
                            (member-layout-bit-offset member-layout))
-                 (c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                 (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
                                        (/ offset 8))
                                    (make-pointer-type type)))))))
     (cond ((and (cvalp object)
@@ -1250,6 +1271,7 @@ use in an alien funcall."
           (t
            (error "~S is not a pointer to a record, nor some record reference." object)))))
 
+#+NOMORE
 (defun (setf c->) (nv object member)
   ;; ### bit fields!
   (setq object (promoted-cval object))
@@ -1262,7 +1284,7 @@ use in an alien funcall."
                    (values (member-layout-type member-layout)
                            (member-layout-bit-offset member-layout))
                  (setf
-                  (c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                  (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
                                         (/ offset 8))
                                     (make-pointer-type type)))
                   nv)))))
@@ -1276,6 +1298,7 @@ use in an alien funcall."
           (t
            (error "~S is not a pointer to a record, nor some record reference." object)))))
 
+#+NOMORE
 (defun c->-addr (object member)
   ;; ### code duplication
   (setq object (promoted-cval object))
@@ -1314,7 +1337,7 @@ use in an alien funcall."
 
 (defmacro c-addr-of (place &environment env)
   (setf place (macroexpand place env))
-  (cond ((and (consp place) (eq (car place) 'c-aref))
+  (cond ((and (consp place) (member (car place) '(c-aref %c-aref)))
          `(c-aref-addr ,@(cdr place)))
         ((and (consp place) (eq (car place) 'c->))
          `(c->-addr ,@(cdr place)))
@@ -1348,14 +1371,15 @@ use in an alien funcall."
 
 
 (defparameter *cheap-binop-table*
-  '((progn progn) (* c*) (/ c/) (% c%) (+ c+) (- c-)
+  '((* c*) (/ c/) (% c%) (+ c+) (- c-)
     (<< c<<) (>> c>>)
     (< c<) (> c>) (<= c<=) (>= c>=) (= c==) (/= c!=)
     (logior c-logior) (logxor c-logxor) (logand c-logand)
-    (aref c-aref)))
+    (aref %c-aref)
+    (progn progn)))
 
 (defparameter *cheap-unop-table*
-  '((+ c+/1) (- c-/1) (aref c-aref)
+  '((+ c+/1) (- c-/1) (aref %c-aref)
     (lognot c-lognot)
     (& c-addr-of)
     (not c-not)))
@@ -1587,7 +1611,7 @@ use in an alien funcall."
 #+CCL
 (defun c-funcall (fun &rest args)
   (when (and (pointer-type-p (cval-type fun)) (function-type-p (pointer-type-base (cval-type fun))))
-    (setq fun (c-aref fun)))
+    (setq fun (%c-aref fun)))
   (unless (function-type-p (cval-type fun))
     (error "~S is not a C function" fun))
   (multiple-value-bind (rtype ptypes restp)
@@ -1644,8 +1668,9 @@ use in an alien funcall."
 
 #+SBCL
 (defun c-funcall (fun &rest args)
+  (error "foo!")
   (when (and (pointer-type-p (cval-type fun)) (function-type-p (pointer-type-base (cval-type fun))))
-    (setq fun (c-aref fun)))
+    (setq fun (%c-aref fun)))
   (unless (function-type-p (cval-type fun))
     (error "~S is not a C function" fun))
   (multiple-value-bind (rtype ptypes restp)
@@ -1714,6 +1739,139 @@ use in an alien funcall."
     (cond ((nth-value 2 (function-type-signature type))
            `(c-funcall (c-identifier ,identifier) ,@args))
           (t
-           `(static-c-funcall-2 ,type
-                                ,identifier
-                                ,@args)))))
+           (translate-funcall type identifier args)))))
+
+(defun translate-funcall (function-type identifier args)
+  ;; Arguments of the the form (:out) are treated as "out" arguments. Storage is
+  ;; allocated on the stack with CLET&, a pointer is passed, and the resut of
+  ;; C-AREF then is returned as secondary or further return value.
+  ;;
+  ;; E.g. (#_remquo 4.5 1 (:out)) -> 0.5D0; 4
+  ;;
+  ;; Or (#_gettimeofday (:out) nil)
+  ;;
+  (multiple-value-bind (result-type parameters restp)
+      (function-type-signature function-type)
+    (declare (ignore result-type))
+    (assert (not restp))
+    (when (< (length args) (length parameters))
+      (error "Too few arguments to ~S" identifier))
+    (when (> (length args) (length parameters))
+      (error "Too many arguments to ~S" identifier))
+    (let* ((wrappers nil)
+           (values-forms nil)
+           (new-args
+            (loop for ptype in parameters
+                  for arg in args
+                  collect (let ((arg arg) (ptype ptype))
+                            (cond ((and (consp arg) (eq (car arg) ':out))
+                                   (destructuring-bind (&optional (out-type (pointer-type-base ptype)))
+                                       (cdr arg)
+                                     (let ((g (gensym "OUT.")))
+                                       (cond ((record-type-p out-type)
+                                              ;; A kludge as our C-AREF doesn't copy on aggegrate types yet.
+                                              (push (lambda (body)
+                                                      `(let ((,g (c-make ',out-type)))
+                                                         ,body))
+                                                    wrappers))
+                                             (t
+                                              (push (lambda (body)
+                                                      `(clet& ((,g ,out-type))
+                                                         ,body))
+                                                    wrappers)))
+                                       (push `(c-aref ,g) values-forms)
+                                       g)))
+                                  (t
+                                   arg))))))
+      (let ((body `(static-c-funcall-2
+                    ,function-type
+                    ,identifier
+                    ,@new-args)))
+        (setq body
+              `(values ,body
+                       ,@values-forms))
+        (dolist (w wrappers) (setq body (funcall w body)))
+        body))))
+
+
+
+(defun ctypep (object ctype &optional env)
+  ;; ### What about (ctypep 0 '#_<void*>)
+  ;; ### What about (ctypep (c-make '#_<char>) '#_<void*>)? Perhaps NIL, read ISO C.
+  (typecase object
+    (integer
+     (and (integer-type-p ctype env)
+          (<= (integer-type-min-value ctype env) object (integer-type-max-value ctype env))))
+    (float
+     (and (float-type-p ctype env)
+          (typep object (float-type-lisp-type ctype env))))
+    (cval
+     (types-compatible-p (cval-type object) ctype env))
+    (null
+     ;; Null pointer
+     (pointer-type-p ctype env))
+    (t
+     nil)))
+
+
+(defun c-> (object member)
+  ;; ### bit fields!
+  (setq object (promoted-cval object))
+  (labels ((doit (record-type)
+             (multiple-value-bind (type size offset)
+                 (record-type-member-layout record-type member nil)
+               (declare (ignore size))
+               (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                                      (/ offset 8))
+                                  (make-pointer-type type))))))
+    (cond ((and (cvalp object)
+                (pointer-type-p (cval-type object))
+                (record-type-p (pointer-type-base (cval-type object))))
+           (doit (pointer-type-base (cval-type object))))
+          ((and (cvalp object)
+                (record-type-p (cval-type object)))
+           (doit (cval-type object)))
+          (t
+           (error "~S is not a pointer to a record, nor some record reference." object)))))
+
+(defun (setf c->) (nv object member)
+  ;; ### bit fields!
+  (setq object (promoted-cval object))
+  (labels ((doit (record-type)
+             (multiple-value-bind (type size offset)
+                 (record-type-member-layout record-type member nil)
+               (declare (ignore size))
+               (setf
+                (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                                       (/ offset 8))
+                                   (make-pointer-type type)))
+                nv))))
+    (cond ((and (cvalp object)
+                (pointer-type-p (cval-type object))
+                (record-type-p (pointer-type-base (cval-type object))))
+           (doit (pointer-type-base (cval-type object))))
+          ((and (cvalp object)
+                (record-type-p (cval-type object)))
+           (doit (cval-type object)))
+          (t
+           (error "~S is not a pointer to a record, nor some record reference." object)))))
+
+(defun c->-addr (object member)
+  ;; ### code duplication
+  (setq object (promoted-cval object))
+  (labels ((doit (record-type)
+             (multiple-value-bind (type size offset)
+                 (record-type-member-layout record-type member nil)
+               (declare (ignore size))
+               (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
+                             (/ offset 8))
+                         (make-pointer-type type)))))
+    (cond ((and (cvalp object)
+                (pointer-type-p (cval-type object))
+                (record-type-p (pointer-type-base (cval-type object))))
+           (doit (pointer-type-base (cval-type object))))
+          ((and (cvalp object)
+                (record-type-p (cval-type object)))
+           (doit (cval-type object)))
+          (t
+           (error "~S is not a pointer to a record, nor some record reference." object)))))

@@ -86,8 +86,8 @@
   '(defparameter +optimize-fast+
     '(optimize (speed 1) (safety 2) (debug 3))))
 
-(locally
-    (declare (optimize (speed 3) (safety 2) (debug 3)))
+(eval-when (:compile-toplevel)
+  (declaim (optimize (speed 3) (safety 2) (debug 3))))
 
 
 ;;;; -- TODO ----------------------------------------------------------------------------------
@@ -97,7 +97,8 @@
 
 ;; - Why isn't a pp-stream a Gray stream?
 
-;;;; -- Overview ------------------------------------------------------------------------------
+;; - Don't process output of the system preprocessor again. For speed
+;;   and for semantics.
 
 
 ;;;; -- Some Notes ----------------------------------------------------------------------------
@@ -566,7 +567,7 @@ string to defeat that."
            (incf (pp-stream-line input))
            c)
           ((eql c #\return)
-           (error "how did that happen?"))
+           (error "Stray CR. How did that happen?~%"))
           (t
            c))))
 
@@ -1220,7 +1221,7 @@ second return value is the remaining tokens. Initial white space is skipped."
    filename))
 
 (defun push-input-stream (stream filename)
-  #+SBCL
+  #+(AND SBCL NOFFI-WINDOWS)
   (setq stream (make-crlf-input-stream stream))
   (push filename *files-read*)
   (push *pp-input-stream* *pp-input-stack*)
@@ -1244,7 +1245,8 @@ second return value is the remaining tokens. Initial white space is skipped."
     (let ((now (get-universal-time)))
       (multiple-value-bind (s m h day mon year) (decode-universal-time now)
         (setf (c-macro-definition (make-ident-token "__DATE__") env)
-              (list :lambda (lambda ()
+              (make-lambda-macro-definition
+               (lambda ()
                               (list (make-string-token
                                      (format nil "~A ~2D ~D"
                                              (verbatim
@@ -1254,18 +1256,21 @@ second return value is the remaining tokens. Initial white space is skipped."
                                              day
                                              year))))))
         (setf (c-macro-definition (make-ident-token "__TIME__") env)
-              (list :lambda (lambda ()
-                              (list (make-string-token (format nil "~2,'0D:~2,'0D:~2,'0D" h m s))))))
+              (make-lambda-macro-definition
+               (lambda ()
+                 (list (make-string-token (format nil "~2,'0D:~2,'0D:~2,'0D" h m s))))))
         (setf (c-macro-definition (make-ident-token "__FILE__") env)
-              (list :lambda (lambda ()
-                              (list (make-string-token (pp-stream-file *pp-input-stream*))))))
+              (make-lambda-macro-definition
+               (lambda ()
+                 (list (make-string-token (pp-stream-file *pp-input-stream*))))))
         (setf (c-macro-definition (make-ident-token "__LINE__") env)
-              (list :lambda (lambda ()
-                              (list (make-number-token (pp-stream-line *pp-input-stream*))))))
+              (make-lambda-macro-definition
+               (lambda ()
+                 (list (make-number-token (pp-stream-line *pp-input-stream*))))))
         (setf (c-macro-definition (make-ident-token "__STDC__") env)
-              (list :object (make-number-token 1)))
+              (make-object-macro-definition (list (make-number-token 1))))
         (setf (c-macro-definition (make-ident-token "__NOFFI__") env)
-              (list :object (make-number-token 1)))
+              (make-object-macro-definition (list (make-number-token 1))))
         #+NIL (setf (gethash (make-ident-token "__STDC_HOSTED__") res))
         #+NIL (setf (gethash (make-ident-token "__STDC_MB_MIGHT_NEQ_WC__") res))
         #+NIL (setf (gethash (make-ident-token "__STDC_VERSION__") res))
@@ -1274,15 +1279,52 @@ second return value is the remaining tokens. Initial white space is skipped."
 (defun pp-macro-definition (ident)
   (c-macro-definition ident *defs*))
 
+#|
+(defun make-function-macro-definition (parameters body)
+  (list :function parameters body))
+
+(defun make-lambda-macro-definition (body)
+  (list :lambda body))
+
+(defun make-object-macro-definition (body)
+  (cons :object body))
+
+(defun macro-definition-kind (macro-definition)
+  (car macro-definition))
+
+(defun macro-definition-body (macro-definition)
+  (ecase (macro-definition-kind macro-definition)
+    (:object (cdr macro-definition))
+    (:function (caddr macro-definition))
+    (:lambda (cadr macro-definition))))
+
+(defun macro-definition-parameters (macro-definition)
+  (if (eq (macro-definition-kind macro-definition) :object) nil (cadr macro-definition)))
+|#
+
+(defstruct macro-definition
+  kind parameters body sloc)
+
+(defun make-function-macro-definition (parameters body &key sloc)
+  (make-macro-definition :kind :function :parameters parameters :body body :sloc sloc))
+
+(defun make-object-macro-definition (body &key sloc)
+  (make-macro-definition :kind :object :body body :sloc sloc))
+
+(defun make-lambda-macro-definition (function)
+  (make-macro-definition :kind :lambda :body function))
+
 (defun (setf pp-macro-definition) (new-value ident)
+  (when (equal "USE_OLD_TTY" (pp-token-text ident))
+    (error "USE_OLD_TTY"))
   (labels ((blame (fmt &rest args)
              (apply #'cpp-error fmt args)
              (return-from pp-macro-definition new-value)))
     ;;
     (when new-value
       (let ((old (c-macro-definition ident *defs*))
-            (body (if (eq (car new-value) :object) (cdr new-value) (caddr new-value)))
-            (params (if (eq (car new-value) :object) nil (cadr new-value))))
+            (body (macro-definition-body new-value))
+            (params (macro-definition-parameters new-value)))
         (unless (or (null old) (macro-definitions-are-equal old new-value))
           (cpp-warning "Macro ~A redefined.~%  old = ~A~%  new = ~A~%"
                        (verbatim ident)
@@ -1298,7 +1340,7 @@ second return value is the remaining tokens. Initial white space is skipped."
           (blame "\"##\" at beginning of replacement list."))
         (when (and (cdr body) (punct= "##" (car (last body))))
           (blame "\"##\" at end of replacement list."))
-        (when (eq (car new-value) :function)
+        (when (eq :function (macro-definition-kind new-value))
           (do ((q body (cdr q)))
               ((null q))
             (when (and (punct= "#" (car q))
@@ -1323,15 +1365,19 @@ second return value is the remaining tokens. Initial white space is skipped."
                     nil)
                    ((string= (pp-token-text (car xs)) (pp-token-text (car ys)))
                     (compare (cdr xs) (cdr ys))))))
-    (cond ((not (eq (car old) (car new)))
-           nil)
-          ((eq (car new) :object)
-           (compare (cdr old) (cdr new)))
-          ((eq (car new) :function)
-           (and (equal (second old) (second new))
-                (compare (third old) (third new))))
-          (t
-           t))))
+    (and (eq (macro-definition-kind old)
+             (macro-definition-kind new))
+         (case (macro-definition-kind new)
+           (:object
+            (compare (macro-definition-body old)
+                     (macro-definition-body new)))
+           (:function
+            (and (equal (macro-definition-parameters old)
+                        (macro-definition-parameters new))
+                 (compare (macro-definition-body old)
+                          (macro-definition-body new))))
+           (otherwise
+            t)))))
 
 
 ;;;; -- Constant Expressions ------------------------------------------------------------------
@@ -1809,8 +1855,10 @@ second return value is the remaining tokens. Initial white space is skipped."
                  (setf p (+ q 1))))
              (values t (reverse param-parts) (trim-white-space body-tokens)))))))
 
-(defun process-define (xs)
+(defun process-define (xs &aux sloc)
   ;; "#define" is already read.
+  (setq sloc (list (pp-stream-file *pp-input-stream*)
+                   (pp-stream-line *pp-input-stream*)))
   (block grok-define
     (setf xs (left-trim-whitespace xs))
     (cond ((and xs (ident-token-p (car xs)))
@@ -1820,12 +1868,12 @@ second return value is the remaining tokens. Initial white space is skipped."
                         (parse-define-function-macro (cdr xs))
                       (when successp
                         (setf (pp-macro-definition id)
-                              (list :function params body))) ))
+                              (make-function-macro-definition params body :sloc sloc))) ))
                    (t
                     (unless (or (null xs) (white-token-p (car xs)))
                       (cpp-warning "There shall be white space between the identifier and the replacement list."))
                     (setf (pp-macro-definition id)
-                          (cons :object (trim-white-space xs)))))))
+                          (make-object-macro-definition (trim-white-space xs) :sloc sloc))))))
           (t
            (cpp-warning "Malformed define.")))))
 
@@ -2144,6 +2192,7 @@ second return value is the remaining tokens. Initial white space is skipped."
         for probe = (merge-pathnames filename directory)
         do (when (probe-file probe)
              (return probe))))
+
 #-windows
 (defun handle-system-include (filename)
   (multiple-value-bind (proc output)
@@ -2188,8 +2237,7 @@ second return value is the remaining tokens. Initial white space is skipped."
      (ccl:external-process-input-stream proc)))
   #+SBCL
   (let ((proc
-	  (apply #'sb-ext:run-program program arguments
-		 :if-output-exists :supersede
+         (apply #'sb-ext:run-program program arguments
                 :search t
                 :external-format external-format
                 rest)))
@@ -2334,18 +2382,18 @@ whether we assume that rest arguments are present or not."
         (t
          (cons (car tokens) (expand-va-opt (cdr tokens) have-remaining-args-p)))))
 
-(defun expand-macro (macro-name dumper q it)
+(defun expand-macro (macro-name dumper q def)
   ;; ### result versus calling dumper?
-  (ecase (car it)
+  (ecase (macro-definition-kind def)
     (:object
-     (let ((exp (insert-arguments macro-name (cdr it) nil nil)))
+     (let ((exp (insert-arguments macro-name (macro-definition-body def) nil nil)))
        (if *kill-newlines-p* (kill-newlines exp) exp)))
     (:function
      (cond ((looking-at-lparen-p)
             (multiple-value-bind (is-call-p arguments)
                 (read-macro-arguments q)
               (cond (is-call-p
-                     (let ((exp (expand-function-macro macro-name it arguments)))
+                     (let ((exp (expand-function-macro macro-name def arguments)))
                        (setf exp (if *kill-newlines-p* (kill-newlines exp) exp))
                        exp))
                     (t
@@ -2358,7 +2406,7 @@ whether we assume that rest arguments are present or not."
             (funcall dumper q)          ;hmm
             nil)))
     (:lambda
-     (funcall (cadr it)))))
+     (funcall (macro-definition-body def)))))
 
 (defun read-macro-arguments (macro-name)
   (let ((xs nil) (nest 0) args)
@@ -2518,9 +2566,10 @@ When sth else is seen whine and return NIL."
              nil)))))
 
 (defun expand-function-macro (macro-name definition args)
-  (let ((params (cadr definition))
-        (exp (caddr definition)))
-    (insert-arguments macro-name exp params args)))
+  (insert-arguments macro-name
+                    (macro-definition-body definition)
+                    (macro-definition-parameters definition)
+                    args))
 
 
 ;;;; -- Driver --------------------------------------------------------------------------------
@@ -2563,7 +2612,7 @@ When sth else is seen whine and return NIL."
    (lambda (k v)
      (when v                            ;Huh???
        (let ((name (pp-token-text k)))
-         (when (or include-lambda (not (eql :lambda (car v))))
+         (when (or include-lambda (not (eql :lambda (macro-definition-kind v))))
            (when guard-by-undef
              (format output "#ifdef ~A~%#undef ~A~%#endif~%" (verbatim name) (verbatim name)))
            (when guard-by-ifndef
@@ -2574,42 +2623,40 @@ When sth else is seen whine and return NIL."
              (format output "#endif~%"))))))
    *defs*))
 
-(defun macro-def-parameters (macro-def) (cadr macro-def))
-
 (defun print-macro-def (name def &optional (output *standard-output*))
-  (cond ((null output)
-         (with-output-to-string (output) (print-macro-def name def output)))
-        (t
-         (when (pp-token-p name)
-           (setq name (pp-token-text name)))
-         (labels ((aux (name v output)
-                    (ecase (car v)
-                      (:object
-                       (format output "#define ~A ~A"
-                               (verbatim name)
-                               (join-strings "" (mapcar #'pp-token-text (cdr v)))))
-                      (:function
-                       (format output "#define ~A(" (verbatim name))
-                       (do ((q (macro-def-parameters v) (cdr q))
-                            (c nil t))
-                           ((null q))
-                         (and c (write-string ", " output))
-                         (cond ((eq '&rest (car q))
-                                (let ((p (cadr q)))
-                                  (pop q)
-                                  (unless (eq p (make-ident-token "__VA_ARGS__"))
-                                    (write-string (pp-token-text p) output))
-                                  (write-string "..." output)))
-                               (t
-                                (write-string (pp-token-text (car q)) output))))
-                       (format output ") ~A" (join-strings "" (mapcar #'pp-token-text (caddr v)))))
-                      ((:lambda)
-                       (format output "#define ~A ~A"
-                               (verbatim name)
-                               (join-strings "" (mapcar #'pp-token-text (funcall (cadr v)))))))))
-           (etypecase output
-             ((or stream string) (aux name def output))
-             ((eql nil) (with-output-to-string (output) (aux name def output))))))))
+  (when (pp-token-p name)
+    (setq name (pp-token-text name)))
+  (labels ((aux (name v output)
+             (let ((sloc (macro-definition-sloc def)))
+               (when sloc
+                 (format output "#line ~D ~S~%" (cadr sloc) (verbatim (car sloc)))))
+             (ecase (macro-definition-kind v)
+               (:object
+                (format output "#define ~A ~A"
+                        (verbatim name)
+                        (join-strings "" (mapcar #'pp-token-text (macro-definition-body v)))))
+               (:function
+                (format output "#define ~A(" (verbatim name))
+                (do ((q (macro-definition-parameters v) (cdr q))
+                     (c nil t))
+                    ((null q))
+                  (and c (write-string ", " output))
+                  (cond ((eq '&rest (car q))
+                         (let ((p (cadr q)))
+                           (pop q)
+                           (unless (eq p (make-ident-token "__VA_ARGS__"))
+                             (write-string (pp-token-text p) output))
+                           (write-string "..." output)))
+                        (t
+                         (write-string (pp-token-text (car q)) output))))
+                (format output ") ~A" (join-strings "" (mapcar #'pp-token-text (macro-definition-body v)))))
+               ((:lambda)
+                (format output "#define ~A ~A"
+                        (verbatim name)
+                        (join-strings "" (mapcar #'pp-token-text (funcall (macro-definition-body v)))))))))
+    (etypecase output
+      ((or stream string) (aux name def output))
+      ((eql nil) (with-output-to-string (output) (aux name def output))))))
 
 (defun cpp-reset ()
   "Use this to reset all definitions."
@@ -3297,10 +3344,11 @@ When sth else is seen whine and return NIL."
                               :error *error-output*
                               :input nil
                               :wait t
+			      :if-output-exists :supersede
                               :output output
                               :external-format *cpp-default-file-encoding*)
                (declare (ignore proc))
                (push-input-stream (open output :direction :input :external-format *cpp-default-file-encoding*)
                                   (format nil "<~A>" (verbatim filename))))))
       (delete-file fodder))))
-) ;locally
+

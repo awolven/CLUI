@@ -513,8 +513,8 @@
 (defun get-win32-window-monitor (window)
   (let ((mh (#_MonitorFromWindow (h window) #_MONITOR_DEFAULTTONEAREST)))
     (find mh (display-monitors (window-display window)) :test #'(lambda (x y)
-								  (= (sap-int (cval-value x))
-								     (sap-int (cval-value y))))
+								  (= (ptr-int x)
+								     (ptr-int y)))
 	  :key #'h)))	      
 			       
 
@@ -607,7 +607,7 @@
 	 (ydpi #_<UINT>))
     
     (if (zerop (ff-get-dpi-for-monitor hmonitor (c-addr-of xdpi) (c-addr-of ydpi)))
-	(values (cval-value xdpi) (cval-value ydpi))
+	(values xdpi ydpi)
 	nil)))
 
 (defun get-hmonitor-content-scale (handle)
@@ -1286,8 +1286,9 @@ int decorated;
 		    (clim:handle-event window (make-instance 'pointer-wheel-event
 							:window window
 							:input-code +pointer-wheel+
-							:yoffset (/ (cval-value (c-coerce (#_HIWORD wParam) '#_<short>))
-								    #_WHEEL_DELTA)
+							:yoffset (/
+								  (noffi::sldb (byte 16 0) (#_HIWORD wParam))
+								  #_WHEEL_DELTA)
 							:x x :y y
 							:native-x x :native-y y
 							:modifier-state mods
@@ -1300,7 +1301,8 @@ int decorated;
 		    (clim:handle-event window (make-instance 'pointer-wheel-event
 							:window window
 							:input-code +pointer-wheel+
-							:xoffset (- (/ (cval-value (c-coerce (#_HIWORD wParam) '#_<short>)) #_WHEEL_DELTA))
+							:xoffset (- (/ (noffi::sldb (byte 16 0) (#_HIWORD wParam))
+								       #_WHEEL_DELTA))
 							:x x :y y
 							:native-x x :native-y y
 							:modifier-state mods
@@ -1698,7 +1700,7 @@ int decorated;
     (#_SetThreadExecutionState (logior #_ES_CONTINUOUS #_ES_DISPLAY_REQUIRED))
     (clet ((mouseTrailSize #_<UINT> (mouse-trail-size (window-display window))))
       (#_SystemParametersInfoW #_SPI_GETMOUSETRAILS 0 (c-addr-of mouseTrailSize) 0)
-      (setf (mouse-trail-size (window-display window)) (cval-value mouseTrailSize))
+      (setf (mouse-trail-size (window-display window)) mouseTrailSize)
       (#_SystemParametersInfoW #_SPI_SETMOUSETRAILS 0 0 0)))
   
   (unless (monitor-window monitor)
@@ -1868,7 +1870,7 @@ int decorated;
 	    (setq ex-style (logand ex-style (lognot #_WS_EX_TRANSPARENT)))
 
 	    (unless (= 0 (logand ex-style #_WS_EX_LAYERED))
-	      (when (= 0 (logand (cval-value flags) #_LWA_ALPHA))
+	      (when (= 0 (logand flags #_LWA_ALPHA))
 		(setq ex-style (logand ex-style (lognot #_WS_EX_LAYERED)))))))
 
 

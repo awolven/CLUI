@@ -156,7 +156,7 @@
                      (when v            ;Huh?
                        (unless (and (not from-blank)
                                     (nth-value 1 (de.bauhh.cpp::c-macro-definition k old)))
-                         (unless (eq :lambda (car v))
+                         (unless (eq :lambda (de.bauhh.cpp::macro-definition-kind v))
                            (push `(c-macro ,(de.bauhh.cpp::print-macro-def (de.bauhh.cpp::pp-token-text k) v nil))
                                  r)))))
                    new)
@@ -506,6 +506,33 @@
            (frob (identifier-name (named-type-name type))))
           ((void-type-p type)
            (frob "void"))
+          ((enum-type-p type)
+           (write-string "enum" stream)
+           (let ((name (enum-type-name type)))
+             (when name
+               (format stream " ~A" (verbatim (identifier-name name)))))
+           (multiple-value-bind (members complete-p)
+               (enum-type-members type nil :errorp nil)
+             (when complete-p
+               (princ " {" stream)
+               (terpri stream)
+               (pprint-logical-block (stream members :per-line-prefix "  ")
+                 (let ((first t))
+                 (loop
+                   (pprint-exit-if-list-exhausted)
+                   (unless (shiftf first nil)
+                     (write-string "," stream)
+                     (pprint-newline :mandatory stream))
+                   (multiple-value-bind (name init)
+                       (let ((member (pprint-pop)))
+                         (values (enum-member-name member)
+                                 (enum-member-value-form member)))
+                     (print-expression (if init `(setf ,name ,init) name) stream)))))
+               (terpri stream)
+               (princ "}" stream)))
+           (when inner
+             (princ " " stream)
+             (funcall inner stream)))
           ((integer-type-p type)
            (frob (integer-type-spelling type)))
           ((float-type-p type)
@@ -1051,6 +1078,11 @@
 
 (defun print-declaration-1 (decl stream)
   (destructuring-bind (specifiers &rest things) (cdr decl)
+    (let ((source-location (assoc :source-location specifiers)))
+      (when source-location
+        (format stream "~&/* ~A:~D: */~%"
+                (princ-to-string (second source-location))
+                (third source-location))))
     (pprint-logical-block (stream nil)
       (loop for thing in things
             for nil = nil then (pprint-newline :mandatory stream)
@@ -1067,3 +1099,10 @@
      (write-string " = " stream)
      (print-expression init stream)))
   (write-string ";" stream))
+
+
+;;;;
+
+(defun ~decl (stream declaration colon at)
+  (declare (ignore colon at))
+  (print-declaration declaration stream))

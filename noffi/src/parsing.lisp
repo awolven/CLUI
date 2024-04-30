@@ -297,6 +297,13 @@
 
 ;;;; ------------------------------------------------------------------------------------------
 
+(defun show-context (sloc &optional (format-control "Here") &rest format-args)
+  (show-context-1 (line-col-sloc-source sloc)
+                  :line-col
+                  (list (line-col-sloc-start-line sloc)
+                        (line-col-sloc-start-col sloc))
+                  format-control format-args))
+
 (defgeneric show-context-1 (source sloc-kind sloc-args format-control format-args))
 
 (defmethod show-context-1 ((source pathname) sloc-kind sloc-args format-control format-args)
@@ -426,17 +433,16 @@
                               nil)
                              (t
                               (let ((*global-this-sloc* (token-sloc (car k))))
-                                ;;(prin1 (line-col-sloc-start-line *global-this-sloc*)) (princ " ") (when (> (ccl:stream-line-column *standard-output*) 96) (terpri)) (force-output)
                                 (multiple-value-bind (form out-machine)
                                     (handler-case
                                         (parse-token-list k :inject inject :grammar grammar :proto-machine machine)
-                                      #+NIL
-                                      (error ()
+                                      #-NIL
+                                      (error (c)
+                                        (princ c)
                                         (values nil nil)))
                                   (when out-machine
                                     (setf machine out-machine)
                                     (dolist (p (machine-typedefs out-machine)) (setf (gethash p *typedefs*) t)))
-                                  '(ignore-errors(eval form))
                                   form)))))
                      (token-list-declaration-subseqs (tokenize input))))
             *typedefs*)))))
@@ -702,7 +708,7 @@
 (defun bf-step (m token)
   (handler-bind
       ((error (lambda (cond)
-                (format t "~&ERROR: ~A~%" cond)
+                (blame-for-token token "~&ERROR: ~A~%" cond)
                 (with-simple-restart (:backtrack "Backtrack and try something else")
                   (invoke-debugger cond))
                 (return-from bf-step (values nil nil)))))
@@ -769,23 +775,22 @@
                        ;; (format t "~&**** invoking ~S with ~S" (reduce-action-function next) args)
                        (let ((semantic-value
                               (apply-action (reduce-action-function-1 next) args)))
-                         (unless (atom semantic-value)
+                         (unless (or (null new-sloc) (atom semantic-value))
                            (when (and *sloc-table*
                                       (not (gethash semantic-value *sloc-table*)))
-                             ;; ### gross hack
-                             (when (and (consp semantic-value) (eq 'decl (car semantic-value)))
-			       #+NIL
-                               (when (pathnamep (line-col-sloc-source new-sloc))
-                                 (setq semantic-value
-                                       (list* (car semantic-value)
-                                              (cons `(:source-location
-                                                      ,(line-col-sloc-source new-sloc)
-                                                      ,(line-col-sloc-start-line new-sloc)
-                                                      ,(line-col-sloc-end-line new-sloc))
-                                                    (cadr semantic-value))
-                                              (cddr semantic-value)))))
                              (setf (gethash semantic-value *sloc-table*)
-                                   new-sloc)))
+                                   new-sloc))
+                           ;; ### gross hack
+                           (when (and (consp semantic-value) (eq 'decl (car semantic-value)))
+                             (when (and (pathnamep (line-col-sloc-source new-sloc))
+                                        (not (assoc :source-location (cadr semantic-value))))
+                               (setq semantic-value
+                                     (list* (car semantic-value)
+                                            (cons `(:source-location
+                                                    ,(line-col-sloc-source new-sloc)
+                                                    ,(line-col-sloc-start-line new-sloc))
+                                                  (cadr semantic-value))
+                                            (cddr semantic-value))))) )
                          ;; (setq next (table-next '(machine-table m) state new-cat))
                          (push (list new-cat
                                      semantic-value

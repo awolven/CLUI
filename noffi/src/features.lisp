@@ -1,4 +1,6 @@
 
+(pushnew :noffi *features*)
+
 ;;; The Operating System
 
 #+(OR (AND CCL DARWIN) (AND SBCL DARWIN))

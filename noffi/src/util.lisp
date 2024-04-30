@@ -145,3 +145,27 @@
 would invoke *PRINT-CIRCLE* processing even for strings. When given a
 string argument, we copy that string to defeat that."
   (if (stringp x) (copy-seq x) x))
+
+
+;;;;
+
+(defun c-inspect (what &aux it)
+  (fresh-line)
+  (when (stringp what)
+    (setq what (cintern what)))
+  (when (typep what '(cons (member :enum :struct :union)))
+    (setq what (cadr what)))
+  (let ((decl (find-identifier-declaration what nil :errorp nil)))
+    (when (declaration-p decl)
+      (when (setq it (assoc :sloc (declaration-specifiers decl)))
+        (prin1 it)
+        (set'/sloc (cadr it))
+        (terpri))
+      (print-declaration decl *standard-output*)))
+  (let ((decl (or (find-identifier-declaration `(:union ,what) nil :errorp nil)
+                  (find-identifier-declaration `(:struct ,what) nil :errorp nil)
+                  (find-identifier-declaration `(:enum ,what) nil :errorp nil))))
+    (when decl
+      (print-type decl *standard-output*)
+      (princ ";")))
+  (values))

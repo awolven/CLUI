@@ -51,7 +51,7 @@
 (defmethod abi-integer-types-1 ((abi abi-amd64-sysv))
   ;; our name                   size  align signed?     rank    C Name
   ;; ----------------------------------------------------------------------------
-  '((:bool                        1      8 nil          -3      "_Bool")
+  '((:bool                        8      8 nil          -3      "_Bool")
     (:char                        8      8 t            -2      "char")
     (:signed-char                 8      8 t            -2      "signed char")
     (:short                      16     16 t            -1      "short")

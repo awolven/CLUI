@@ -21,9 +21,12 @@
 	(setf (ccl::%get-unsigned-word octets noctets) 0)
 	octets))))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (sb-ext:unlock-package :sb-impl))
+
 #+(and SBCL little-endian)
 (defun lpcwstr-1 (string)
-  (let ((octets (SB-IMPL::OUTPUT-TO-C-STRING/UTF-16LE string)))
+  (let ((octets (SB-IMPL::OUTPUT-TO-C-STRING/UTF-16LE/lf string)))
     (let ((poctets (noffi::sap-malloc (length octets))))
       (loop for i from 0 below (length octets)
 	    do (setf (sb-sys::sap-ref-8 poctets i) (aref octets i)))
@@ -52,7 +55,7 @@
 
 #+(and SBCL little-endian)
 (defun lpcwstr->string (ptr)
-  (sb-impl::read-from-c-string/utf-16le (ptr-effective-sap ptr) 'character))
+  (sb-impl::read-from-c-string/utf-16le/lf (ptr-effective-sap ptr) 'character))
 
 #+CCL
 (defun load-win32-libraries ()

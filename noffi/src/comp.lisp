@@ -59,7 +59,7 @@
       (cond ((identifierp key)
              ;; storage class?
              (unless (types-compatible-p (declaration-type old) (declaration-type def))
-               (warn "Incompatible redefinition of ~S~%old = ~S~%new = ~S"
+               (warn "Incompatible redefinition of ~S~%old = ~/NOFFI:~DECL/~%new = ~/NOFFI:~DECL/"
                      key old def)))
             ((and (consp key) (member (car key) '(:enum :struct :union)))
              (unless (types-compatible-p old def)
@@ -80,7 +80,8 @@
   `(c-header-seen-1 ',header-name))
 
 (defmacro decl (storage-classes &rest declarators)
-  `(decl-1 ',storage-classes '(,@ declarators)))
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (decl-1 ',storage-classes '(,@ declarators))))
 
 (defmacro objc-interface (&rest xs) nil)
 (defmacro objc-protocol (&rest xs) nil)

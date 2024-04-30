@@ -50,7 +50,7 @@
   (declare (ignorable abi))
   ;; our name                   size  align signed?     rank    C Name
   ;; ----------------------------------------------------------------------------
-  '((:bool                        1      8 nil          -3      "_Bool")
+  '((:bool                        8      8 nil          -3      "_Bool")
     (:char                        8      8 t            -2      "char")
     (:signed-char                 8      8 t            -2      "signed char")
     (:unsigned-char               8      8 nil          -2      "unsigned char")

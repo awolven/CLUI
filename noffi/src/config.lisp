@@ -32,6 +32,12 @@
      (setf de.bauhh.cpp::*cc* "cc"
            de.bauhh.cpp::*cc-args* '("-m32")))
 
+   #+(or (AND CCL LINUX-TARGET ARM-TARGET 32BIT-TARGET))
+   (progn
+     (setq *abi* +abi-arm32+)
+     (setf de.bauhh.cpp::*cc* "cc"
+           de.bauhh.cpp::*cc-args* '()))
+
    ;; Windows
 
    ;; This is a mess as there are several ABIs for Windows to pick from. We

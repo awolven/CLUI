@@ -290,6 +290,7 @@
    ;; Directives
    (:pragma -> "^[ \\t]*#[ \\t]*pragma[ \\t]+((?:pack).*)" => $1)
    ("^[ \\t]*#.*"
+    #+NIL
     (note "Unknown directive: ~S" clex2::$$))
 
    ;; Comments

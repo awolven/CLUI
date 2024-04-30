@@ -28,12 +28,13 @@
 
 (in-package :noffi)
 
-(defun use-include (name)
+(defmacro use-include (name)
   (setq name (cond ((pathnamep name) (concatenate 'string "\""  (namestring name) "\""))
                    ((char= (char name 0) #\<) name)
                    (t (concatenate 'string "\"" name "\""))))
-  (eval (c-toplevel-process-string (format nil "#include ~A~%" (verbatim name))))
-  name)
+  `(progn
+     ,(c-toplevel-process-string (format nil "#include ~A~%" (verbatim name)))
+     ',name))
 
 (defparameter +c-shared-object-pathname-type+
   (or
@@ -68,41 +69,60 @@
       output-file)))
 
 #+(OR CCL SBCL)
-(defun use-library (name)
-  "Uses the library named by `name' which is the name of the library
-  without platform specific suffixes or prefix just like you would
-  pass it as \"-lfoo\" to the C compiler."
+(defun use-library (name &key search-path)
+  "Uses the library named by `name'.
+
+   The name can be the library name without platform-specific prefixes or
+   suffixes, just like you would pass it as e.g. `-lfoo` to the C
+   linker/compiler.
+
+   _search-path_ is a list of directories to search for the library. System
+   default directories (like e.g. `/usr/lib` are always searched)."
   (when (pathnamep name)
-    (setq name (native-namestring name)))
-  (let ((prefixes (list #+(AND (OR CCL UNIX) UNIX) "" "lib"))
-        (suffixes (list #+(AND (OR CCL SBCL) DARWIN) "" ".dylib"
-                        #+(AND (OR CCL SBCL) UNIX) ".so"
-                        #+(OR (AND CCL WINDOWS) (AND SBCL WIN32)) ".dll")))
-    (let ((names (cons name
-                       (loop for suffix in suffixes append
-                             (loop for prefix in prefixes collect
-                                   (concatenate 'string prefix name suffix))))))
-      (or (some #'(lambda (candidate)
-                    (block nil
-                      (handler-case
-                          (progn
-                            #+CCL  (ccl:open-shared-library candidate)
-                            #+SBCL (sb-alien:load-shared-object candidate)
-                            (when *load-verbose*
-                              (format t "~&; Loaded ~S.~%" candidate)
-                              (force-output)))
-                          (error (c)
-                            (declare (ignore c))
-                            (return nil)))
-                      ;; Fall through
-                      candidate))
-                names)
-          (error "Cannot load shared library ~S, tried: ~S." name names)))))
+    (setq name (native-namestring name))) ;Really?
+  ;; This is trial and error.
+  (let ((candidates nil))
+    (labels ((candidate (x)
+               (setf candidates (nconc candidates (list x))))
+             (try-path (path)
+               (when (pathnamep path)
+                 (setq path (native-namestring path)))
+               ;; Ensure exactly one slash
+               (try-path-1
+                (concatenate 'string (string-right-trim "/" (concatenate 'string path "/")) "/")))
+             (try-path-1 (path)
+               (dolist (suffix (list #+(AND (OR CCL SBCL) DARWIN) ".dylib"
+                                     #+(AND (OR CCL SBCL) UNIX (NOT DARWIN)) ".so"
+                                     #+(OR (AND CCL WINDOWS) (AND SBCL WIN32)) ".dll"
+                                     ""))
+                 (dolist (prefix (list #+(AND (OR CCL UNIX) UNIX) "lib"
+                                       ""))
+                   (candidate (concatenate 'string path prefix name suffix))))))
+      (mapc #'try-path search-path)
+      (try-path-1 "")
+      ;;
+      (unless (block try
+                (dolist (candidate candidates)
+                  (handler-case
+                      (progn
+                        #+CCL  (ccl:open-shared-library candidate)
+                        #+SBCL (sb-alien:load-shared-object candidate)
+                        (when *load-verbose*
+                          (format t "~&; Loaded ~S.~%" candidate)
+                          (force-output))
+                        (return-from try 't))
+                    (error (c)
+                      (declare (ignore c))
+                      nil))))
+        (error "~@<Cannot load library ~S. We tried looking at: ~@<~{~S~^ ~}~:>~@:>"
+               name candidates)))))
 
 
-;;;; pkg-config support
+;;;; -- pkg-config Support --------------------------------------------------------------------
 
-(defvar *pkg-config-program* "pkg-config")
+(defvar *pkg-config-program*
+  "pkg-config"
+  "Default program to use to find pkg configurations.")
 
 (defun pkg-config (&rest args)
   (let* ((output (make-string-output-stream))
@@ -163,9 +183,7 @@
              (verbatim (get-output-stream-string error-output))))
     (get-output-stream-string output)))
 
-(defun pkg-link (pkg-names)
-  (unless (listp pkg-names)
-    (setq pkg-names (list pkg-names)))
+(defun pkg-link (&rest pkg-names)
   (let ((flags (apply #'pkg-libs pkg-names))
         (search-path nil)
         (to-load nil))
@@ -180,30 +198,62 @@
     (setq search-path (reverse search-path))
     (setq to-load (reverse to-load))
     (loop for lib in to-load do
-          (block attempt
-            (loop for p in (cons "" search-path)
-                  do (let ((lib (format nil "~A~A" (verbatim p) (verbatim lib))))
-                       (handler-case
-                           (progn (use-library lib)
-                                  (return-from attempt t))
-                         (error (c) (declare (ignore c))))))
-            ;;
-            (error "Cannot load ~S, looked at ~S, no luck."
-                   lib search-path)))))
+          (use-library lib :search-path search-path))))
 
-(defmacro pkg-use (pkg-names &rest c-stuff-or-options)
+(defmacro pkg-use (pkg-names &body c-stuff-or-options)
+  "Arranges to use a given pkg by means of `pkg-config`.
+
+_pkg-names_ is either a single pkg name or a list of pkg names. Then follows
+either C material for `#include` directives or options. Options supported are:
+
+`(:additional-config-args `{ _string_ }*`)` ::
+
+    Additional command line arguments to pass to the `pkg-config` program.
+
+`(:config-program `_string_`)` ::
+
+    The program to use for `pkg-config`. The default is
+    `*pkg-config-program*` which in turn defaults to `\"pkg-config\"`.
+
+`pkg-use` then processes remaining strings as C (at compile time) and arranges for
+the needed libraries to be linked into the running image at runtime.
+
+#### Examples
+
+    (pkg-use \"x11\"
+        \"#include <X11/Xlib.h>\")
+
+    (pkg-use (\"acme\" \"acme-extra\")
+        (:additional-config-args \"--atleast-version=42\")
+        (:config-program \"/opt/acme/acme-config\")
+        \"#define ACME_SMALL\"
+        \"#include <acme/acme.h>\")
+"
   (unless (listp pkg-names)
     (setq pkg-names (list pkg-names)))
-  (let ((c-stuff nil) (config-program nil))
+  (let ((c-stuff nil)
+        (config-program nil)
+        (config-args nil))
     (loop for q in c-stuff-or-options do
           (etypecase q
             (string (setf c-stuff (nconc c-stuff (list q))))
+            ((cons (member :ADDITIONAL-CONFIG-ARGS))
+             ;; I'm not happy with this, those args should rather be evaluated.
+             (mapc (lambda (x)
+                     (unless (stringp x)
+                       (error "~S must be a list of strings, got ~S"
+                              ':additional-config-args q)))
+                   (cdr q))
+             (setq config-args
+                   (append config-args (cdr q))))
             ((cons (member :CONFIG-PROGRAM) (cons string null))
              (setq config-program (cadr q)))))
     (let ((*pkg-config-program* (or config-program *pkg-config-program*)))
-      (let ((de.bauhh.cpp::*cc-args* (apply #'pkg-cflags pkg-names)))
-        `(progn
-           ,(parse-top-level
-             (cpp (format nil "~{~A~%~}" (mapcar #'verbatim c-stuff))))
-           (let ((*pkg-config-program* ',*pkg-config-program*))
-             (pkg-link ',pkg-names))))))) ;Hmm
+      (let ((pkg-args (append config-args pkg-names)))
+        (let ((de.bauhh.cpp::*cc-args* (apply #'pkg-cflags pkg-args)))
+          `(progn
+             ,(parse-top-level
+               (cpp (format nil "~{~A~%~}" (mapcar #'verbatim c-stuff))))
+             (let ((*pkg-config-program* ',*pkg-config-program*))
+               (pkg-link ,@(mapcar (lambda (x) `',x) pkg-args)))))))))
+

@@ -45,7 +45,8 @@
 
 (in-package :de.bauhh.lalr)
 
-(declaim (optimize (speed 1) (safety 3)))
+(eval-when (:compile-toplevel)
+  (declaim (optimize (speed 1) (safety 3))))
 
 ;;; definitions of constants and global variables used
 
