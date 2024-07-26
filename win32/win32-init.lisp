@@ -21,6 +21,11 @@
 	(setf (ccl::%get-unsigned-word octets noctets) 0)
 	octets))))
 
+#+ALLEGRO
+(defun lpcwstr-1 (string)
+  (excl:string-to-native string :external-format :16-bit))
+
+#+SBCL
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (sb-ext:unlock-package :sb-impl))
 
@@ -49,9 +54,27 @@
 			 ,@body)
 	 (noffi::sap-free (ptr-effective-sap ,ptr-sym))))))
 
+#+ALLEGRO
+(defmacro with-lpcwstr ((var string) &body body)
+  (let ((ptr-sym (gensym)))
+    `(excl:with-native-string (,ptr-sym ,string :external-format :16-bit)
+       (let ((,var (cons-ptr ,ptr-sym 0 '#_<LPCWSTR>)))
+	 ,@body))))
+
 #+CCL
 (defun lpcwstr->string (ptr)
   (ccl::%get-native-utf-16-cstring (ptr-effective-sap ptr)))
+
+(defun get-native-utf16-string (ptr)
+  (with-output-to-string (bag)
+    (loop for i from 0 by 2
+          for c = (noffi::peek-u16 ptr i)
+          while (not (eql 0 c))
+          do (write-char (code-char c) bag))))
+
+#+ALLEGRO
+(defun lpcwstr->string (ptr)
+  (get-native-utf16-string ptr))
 
 #+(and SBCL little-endian)
 (defun lpcwstr->string (ptr)
@@ -60,6 +83,11 @@
 #+CCL
 (defun load-win32-libraries ()
   (values))
+
+#+ALLEGRO
+(defun load-win32-libraries ()
+  (load "NtDll.dll")
+  (load "shcore.dll"))
 
 #+SBCL
 (defun load-win32-libraries ()
@@ -84,7 +112,15 @@
   (ccl::%ff-call (ccl::%reference-external-entry-point (ccl:external "RtlVerifyVersionInfo"))
 		 :address (ptr-effective-sap posvi)
 		 :unsigned-fullword mask :unsigned-doubleword condition
-		 :unsigned-fullword))      
+		 :unsigned-fullword))
+
+#+ALLEGRO
+(defun rtl-verify-version-info (posvi mask condition)
+  (noffi::ff-call "RtlVerifyVersionInfo"
+		  :unsigned-nat (ptr-effective-sap posvi)
+		  :unsigned-long mask :unsigned-nat condition
+		  :unsigned-long))
+  
 
 (defun windows-version-or-greater? (major minor sp)
   (clet ((osvi #_<OSVERSIONINFOEXW>))
@@ -179,12 +215,12 @@
 
 (defun helper-window-proc (hWnd uMsg wParam lParam)
 
-  (case uMsg
+  (cond
 
-    (#.#_WM_DISPLAYCHANGE (let ((d (get-win32-display)))
+    ((= uMsg #_WM_DISPLAYCHANGE) (let ((d (get-win32-display)))
 			    (when d (poll-win32-monitors (get-win32-display)))))
 
-    (#.#_WM_DEVICECHANGE ))
+    ((= uMsg #_WM_DEVICECHANGE)))
 
   (#_DefWindowProcW hWnd uMsg wParam lParam))
 
@@ -192,32 +228,39 @@
 	 ((hWnd #_<HWND>) (uMsg #_<UINT>) (wParam #_<WPARAM>) (lParam #_<LPARAM>))
   (helper-window-proc hWnd uMsg wParam lParam))
 
+(defun memset (p v n) (dotimes (i n) (setf (noffi::peek-u8 p i) v)))
+
 (defun create-win32-helper-window (display)
   (clet& ((&msg #_<MSG>)
-	  (&wc #_<WNDCLASSEXW>))
-    (#_memset &wc 0 (c-sizeof-type '#_<WNDCLASSEXW>))
-    (setf (#_.cbSize &wc) (c-sizeof-type '#_<WNDCLASSEXW>))
+	  (&wc #_<WNDCLASSEX>))
+    (setf (#_.cbSize &wc) #_(sizeof(WNDCLASSEX)))
     (setf (#_.style &wc) #_CS_OWNDC)
     (setf (#_.lpfnWndProc &wc) helper-window-proc-callback)
+    (setf (#_.cbClsExtra &wc) 0)
+    (setf (#_.cbWndExtra &wc) 0)
     (setf (#_.hInstance &wc) (win32-instance display))
-    (setf (#_.lpszClassName &wc) (lpcwstr #+CCL "CLUI Helper" #+SBCL "CLUI Helper SBCL"))
+    (setf (#_.hIcon &wc) nil)
+    (setf (#_.hCursor &wc) nil)
+    (setf (#_.hbrBackground &wc) nil)
+    (setf (#_.lpszMenuName &wc) nil)
+    (setf (#_.hIconSm &wc) nil)
+    (setf (#_.lpszClassName &wc) #+(or ALLEGRO CCL) "CLUI Helper" #+SBCL "CLUI Helper SBCL")
 
-    (unless (slot-value display 'helper-window-class)
-      (setf (slot-value display 'helper-window-class) 
-	    (#_RegisterClassExW &wc)))
-
-    (unless (slot-value display 'helper-window-class)
-      (error "win32: Failed to register helper window class."))
+    (let ((c (#_RegisterClassEx &wc)))
+      (if (zerop c)
+	  (error "win32: Failed to register helper window class.")
+	  (setf (slot-value display 'helper-window-class) 
+		c)))    
 
     (let ((handle
-	    (#_CreateWindowExW #_WS_EX_OVERLAPPEDWINDOW
-			       (#_MAKEINTATOM (slot-value display 'helper-window-class))
-			       (lpcwstr "CLUI Helper Window")
-			       (logior #_WS_CLIPSIBLINGS #_WS_CLIPCHILDREN)
-			       0 0 1 1
-			       nil nil
-			       (win32-instance display)
-			       nil)))
+	    (#_CreateWindowEx #_WS_EX_OVERLAPPEDWINDOW
+			      (#_MAKEINTATOM (slot-value display 'helper-window-class))
+			      "CLUI Helper Window"
+			      (logior #_WS_CLIPSIBLINGS #_WS_CLIPCHILDREN)
+			      0 0 1 1
+			      nil nil
+			      (win32-instance display)
+			      nil)))
 
       
 
@@ -247,7 +290,7 @@
 						 &dbi
 						 #_DEVICE_NOTIFY_WINDOW_HANDLE))))
 
-	(loop until (zerop (#_PeekMessageW &msg handle 0 0 #_PM_REMOVE))
+	(loop until (zerop (#_PeekMessage &msg handle 0 0 #_PM_REMOVE))
 	      do (#_TranslateMessage &msg)
 		 (#_DispatchMessage &msg))
 

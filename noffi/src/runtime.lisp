@@ -173,7 +173,7 @@
 (defstruct (ptr (:include cval)
                 (:constructor %cons-ptr (value offset type)))
   offset
-  #+SBCL
+  #+(OR SBCL EXCL)
   (cookie nil))
 
 #+CCL
@@ -288,6 +288,11 @@
 #+SBCL
 (defun peek-ptr (ptr type &optional (offset 0))
   (cons-ptr (sb-sys:sap-ref-sap (ptr-base-sap ptr) (+ (ptr-offset ptr) offset))
+            0 type))
+
+#+EXCL
+(defun peek-ptr (ptr type &optional (offset 0))
+  (cons-ptr (sap-peek-sap (ptr-base-sap ptr) (+ (ptr-offset ptr) offset))
             0 type))
 
 
@@ -419,7 +424,6 @@
 (defun make-gcable (ptr)
   (let ((sap (ptr-base-sap ptr)))
     (setf (ptr-cookie ptr) (list nil))
-    #+(OR)
     (sb-ext:finalize (ptr-cookie ptr) #'(lambda ()
                                           ;; (format *trace-output* "~&freeing ~S~%" sap)
                                           (sap-free sap))))
@@ -659,11 +663,17 @@
         (t
          (error "Cannot do ~S on ~S and ~S" 'c-ptr+ ptr delta))))
 
-(defun c-sizeof-type (type)
+(defun %c-sizeof-type (type)
   (let ((s (type-size type)))
     (unless (eql 0 (mod s 8))
       (error "You cannot take the size of ~S" type))
     (cons-cval (floor s 8) (size_t-type))))
+
+(defun c-sizeof-type (type)
+  (let ((s (type-size type)))
+    (unless (eql 0 (mod s 8))
+      (error "You cannot take the size of ~S" type))
+    s))
 
 (defun c-alignof-type (type)
   (let ((a (type-align type)))
@@ -1246,7 +1256,6 @@ use in an alien funcall."
 
 ;; This is still _way_ too much cut and paste here. 
 
-#+NOMORE
 (defun c-> (object member)
   ;; ### bit fields!
   (setq object (promoted-cval object))
@@ -1271,7 +1280,6 @@ use in an alien funcall."
           (t
            (error "~S is not a pointer to a record, nor some record reference." object)))))
 
-#+NOMORE
 (defun (setf c->) (nv object member)
   ;; ### bit fields!
   (setq object (promoted-cval object))
@@ -1298,7 +1306,6 @@ use in an alien funcall."
           (t
            (error "~S is not a pointer to a record, nor some record reference." object)))))
 
-#+NOMORE
 (defun c->-addr (object member)
   ;; ### code duplication
   (setq object (promoted-cval object))
@@ -1433,7 +1440,11 @@ use in an alien funcall."
               ,(comp-expr (cadddr expr) env)))
         ;;
         ((and (= 2 (length expr)) (eq (car expr) 'sizeof-type))
-         `(c-sizeof-type ',(cadr expr)))
+         (destructuring-bind (type) (cdr expr)
+           (let ((s (type-size type)))
+             (unless (eql 0 (mod s 8))
+               (error "You cannot take the size of ~S" type))
+             `(cons-cval (floor ,s 8) ',(size_t-type)))))
         ;;
         ((and (= 3 (length expr)) (eq (car expr) ':character-constant))
          `(cons-cval ,(evaluate-character-constant (cadr expr)) ':int))
@@ -1454,6 +1465,16 @@ use in an alien funcall."
         ((and (= 3 (length expr)) (eq (car expr) 'setf))
          (destructuring-bind (place new-value) (cdr expr)
            `(SETF ,(comp-expr place env) ,(comp-expr new-value env))))
+        ((and (= 2 (length expr)) (eq (car expr) 'alignof-type))
+         (destructuring-bind (type) (cdr expr)
+           `(c-coerce ,(align-of-type type env)
+                      ',(abi-size_t-type *abi*))))
+        ((and (= 3 (length expr)) (eq (car expr) 'offsetof))
+         (comp-offsetof expr env))
+        ((and (= 3 (length expr)) (eq (car expr) 'and))
+         (comp-and expr env))
+        ((and (= 3 (length expr)) (eq (car expr) 'or))
+         (comp-or expr env))
         (t
          (error "Don't know how to compile ~S" expr))))
 
@@ -1461,10 +1482,28 @@ use in an alien funcall."
   (mapcar (lambda (expr) (comp-expr expr env)) exprs))
 
 (defun comp-sizeof-expr (expr env)
-  (cond ((typep expr '(cons (member :string-literal)))
-         (length (cadr expr)))
-        (t
-         (error "Cannot tell size of expression ~S" expr))))
+  `(c-coerce ,(sizeof-expr expr env) `,(abi-size_t-type *abi*)))
+
+(defun comp-offsetof (expr env)
+  ;; ### offsetof(a, b.c)
+  (destructuring-bind (type member) (cdr expr)
+    (multiple-value-bind (member-type size offset)
+        (record-type-member-layout type member env)
+      (declare (ignore size))
+      (assert (not (bit-field-type-p member-type env)))
+      (/ offset 8))))
+
+(defun comp-and (expr env)
+  (destructuring-bind (a b) (cdr expr)
+    (let ((g (gensym)))
+      `(let ((,g ,(comp-expr a env)))
+         ,(comp-expr `(if (lisp ,g) ,b (lisp ,g)) env)))))
+
+(defun comp-or (expr env)
+  (destructuring-bind (a b) (cdr expr)
+    (let ((g (gensym)))
+      `(let ((,g ,(comp-expr a env)))
+         ,(comp-expr `(if (lisp ,g) (lisp ,g) ,b) env)))))
 
 ;; For CLET I don't know yet what exactly I want.
 
@@ -1813,65 +1852,138 @@ use in an alien funcall."
     (t
      nil)))
 
+'(AREF
+ (:STRING-LITERAL
+  "WMDM/DeviceFirmwareVersion"
+  "L")
+ (:INTEGER-CONSTANT :OCTAL 0 NIL))
 
-(defun c-> (object member)
-  ;; ### bit fields!
-  (setq object (promoted-cval object))
-  (labels ((doit (record-type)
-             (multiple-value-bind (type size offset)
-                 (record-type-member-layout record-type member nil)
-               (declare (ignore size))
-               (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
-                                      (/ offset 8))
-                                  (make-pointer-type type))))))
-    (cond ((and (cvalp object)
-                (pointer-type-p (cval-type object))
-                (record-type-p (pointer-type-base (cval-type object))))
-           (doit (pointer-type-base (cval-type object))))
-          ((and (cvalp object)
-                (record-type-p (cval-type object)))
-           (doit (cval-type object)))
-          (t
-           (error "~S is not a pointer to a record, nor some record reference." object)))))
+(defun expr-type-of (expr &optional env)
+  (select expr
+    ((:string-literal) (text prefix) (declare (ignore text))
+     (cond ((equal prefix "L") (make-pointer-type :short)) ;###
+           ((null prefix) (make-pointer-type :char))
+           (t (error "Unknown prefix"))))
+    ((:integer-constant) (&rest ignore) (declare (ignore ignore))
+     (nth-value 1 (comp-integer-constant expr env)))
+    ((aref) (a b)
+     (let ((a-type (expr-type-of a env))
+           (b-type (expr-type-of b env)))
+       (cond ((pointer-type-p a-type env) (pointer-type-base a-type env))
+             ((pointer-type-p b-type env) (pointer-type-base b-type env))
+             (t
+              (error "Can't tell type of ~S" expr)))))))
 
-(defun (setf c->) (nv object member)
-  ;; ### bit fields!
-  (setq object (promoted-cval object))
-  (labels ((doit (record-type)
-             (multiple-value-bind (type size offset)
-                 (record-type-member-layout record-type member nil)
-               (declare (ignore size))
-               (setf
-                (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
-                                       (/ offset 8))
-                                   (make-pointer-type type)))
-                nv))))
-    (cond ((and (cvalp object)
-                (pointer-type-p (cval-type object))
-                (record-type-p (pointer-type-base (cval-type object))))
-           (doit (pointer-type-base (cval-type object))))
-          ((and (cvalp object)
-                (record-type-p (cval-type object)))
-           (doit (cval-type object)))
-          (t
-           (error "~S is not a pointer to a record, nor some record reference." object)))))
+(defun sizeof-expr (expr env)
+  (cond ((typep expr '(cons (member :string-literal)))
+         (destructuring-bind (text prefix) (cdr expr)
+           (cond ((null prefix)
+                  (1+ (length (de-escaped-c-string text))))
+                 ((equal prefix "L")
+                  (* 2 (1+ (length (de-escaped-c-string text)))))
+                 (t
+                  (error "Unknown string prefix ~S" prefix)))))
+        ((typep expr '(cons (member :string-literal-list)))
+         (1+ (loop for q in (cdr expr)
+                   do (check-type q (cons (member :string-literal)))
+                   sum (1- (sizeof-expr q env)))))
+        (t
+         (size-of-type (expr-type-of expr) env))))
 
-(defun c->-addr (object member)
-  ;; ### code duplication
-  (setq object (promoted-cval object))
-  (labels ((doit (record-type)
-             (multiple-value-bind (type size offset)
-                 (record-type-member-layout record-type member nil)
-               (declare (ignore size))
-               (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
-                             (/ offset 8))
-                         (make-pointer-type type)))))
-    (cond ((and (cvalp object)
-                (pointer-type-p (cval-type object))
-                (record-type-p (pointer-type-base (cval-type object))))
-           (doit (pointer-type-base (cval-type object))))
-          ((and (cvalp object)
-                (record-type-p (cval-type object)))
-           (doit (cval-type object)))
-          (t
-           (error "~S is not a pointer to a record, nor some record reference." object)))))
+
+
+;;;; -- Allegro CL ----------------------------------------------------------------------------
+
+#+EXCL
+(defun terminate-ptr (ptr)
+  (format *trace-output* "freeing 0x~x~%" (car ptr))
+  (ff:free-fobject (car ptr)))
+
+#+EXCL
+(defun c-make (type &optional (count 1) (clear t))
+  "Allocates a GCable foreign object of type _type_ and returns a CVAL
+   pointer to it. If _count_ is given a vector of that length is
+   allocated. When _clear_ is true (the default) the memory is zeroed
+   before being returned."
+  (let* ((el-size (type-size-align type nil))
+         (size (* count (/ el-size 8)))
+         (sap  (ff:allocate-fobject :char :c size))
+         (ptr  (cons-ptr sap 0 (make-pointer-type type)))
+         (cookie (list sap)))
+    (when clear
+      (dotimes (i size)
+        (setf (sap-peek-u8 sap i) 0)))
+    (setf (ptr-cookie ptr) cookie)
+    (excl:schedule-finalization cookie #'terminate-ptr)
+    ptr))
+
+#+EXCL
+(defun make-gcable-c-string (string)
+  ;; xxx
+  (let* ((n (length string))
+         (ptr (c-make ':char (1+ n) t)))
+    (dotimes (i n)
+      (setf (peek-u8 ptr i) (ldb (byte 8 0) (char-code (char string i)))))
+    ptr))
+
+#+EXCL
+(defun make-gcable-c-utf-16-string (string)
+  ;; xxx
+  (let* ((n (length string))
+         (ptr (c-make ':unsigned-short (1+ n) t)))
+    (dotimes (i n)
+      (setf (peek-u16 ptr (* 2 i)) (ldb (byte 16 0) (char-code (char string i)))))
+    ptr))
+
+#+EXCL
+(defun get-c-string (ptr)
+  (with-output-to-string (bag)
+    (do* ((i 0 (+ i 1))
+          (c (peek-u8 ptr i) (peek-u8 ptr i)))
+         ((eql 0 c))
+      (princ (code-char c) bag))))
+
+#+EXCL
+(defun cons-ptr (value offset type)
+  (if (and (sap-null-ptr-p value) (eql offset 0))
+      nil
+      (%cons-ptr value offset type)))
+
+#+EXCL
+(defmacro defcfun ((name res-type) lambda-list &body body)
+  ;; ### Box as a :FUNCTION!
+  (let ()
+    `(progn
+       (ff:defun-foreign-callable ,name
+           (,@(mapcar (lambda (parameter)
+                        (destructuring-bind (var type)
+                            parameter
+                          (list var (foreign-type-for-funcall type))))
+                      lambda-list))
+         (declare (:returning ,(foreign-type-for-funcall res-type)))
+         (unbox-to-native-object
+          (let ,(mapcar (lambda (parameter)
+                          (destructuring-bind (var type)
+                              parameter
+                            `(,var (box-native-object ,var ',type))))
+                        lambda-list)
+
+            ,@body)
+          ',res-type))
+       (defparameter ,name
+         (int-ptr
+          (ff:register-foreign-callable #',name)
+          ',(make-pointer-type
+             (make-function-type
+              res-type
+              (loop for (var type) in lambda-list
+                    collect (make-declaration :name var :type type)))))))))
+
+#+EXCL
+(defun box-native-object (object type)
+  (cond ((pointer-type-p type)
+         (int-ptr object type))
+        ((or (integer-type-p type) (float-type-p type))
+         object)
+        (t
+         (c-coerce object type))))

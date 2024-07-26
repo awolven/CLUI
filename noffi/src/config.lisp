@@ -47,7 +47,8 @@
    ;; See <https://www.msys2.org/docs/environments/>
 
    #+(OR (AND CCL WINDOWS-TARGET X8664-TARGET)
-         (AND SBCL WIN32 X86-64))
+         (AND SBCL WIN32 X86-64)
+         (AND EXCL MSWINDOWS 64BIT))
    (progn
      (setq *abi* +abi-amd64-mingw64+)       ;Not quite right.
      (setf de.bauhh.cpp::*cc* "cc"

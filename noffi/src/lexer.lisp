@@ -38,8 +38,8 @@
 
    Keywords (reserved words) are entered here as well.")
 
-(locally
-    (declaim (optimize (safety 1) (speed 3)))
+(eval-when (:compile-toplevel)
+  (declaim (optimize (safety 1) (speed 3))))
 
 
 ;;;; -- Reserved Words ------------------------------------------------------------------------
@@ -64,6 +64,7 @@
       (:typedef                 "typedef")))
 
   ;; Type Qualifiers
+  ;; This should be part of the ABI proper
   (defparameter *type-qualifier-lexemes*
     '((:const                   "const" "__const" "__const__")
       (:volatile                "volatile" "__volatile" "__volatile__")
@@ -87,21 +88,17 @@
       ;; (:in                      "in")
       (:inout                   "inout")
       (:__kindof                "__kindof")
-      (:null_unspecified        "null_unspecified")
-
-      ;; Microsoft
-      (:__ptr32                 "__ptr32")
-      (:__ptr64                 "__ptr64")
-      (:__unaligned             "__unaligned") ))
+      (:null_unspecified        "null_unspecified") ))
 
   ;; Function Specifiers
   (defparameter *function-specifier-lexemes*
     '((:inline                  "inline" "__inline" "__inline__")
       (:noreturn                "_Noreturn")                            ;ISO C
       ;; Microsoft:
-      (:inline                  "__forceinline")
-      (:cdecl                   "__cdecl")
-      (:stdcall                 "__stdcall")))
+      (:fastcall                "_fastcall" "__fastcall")
+      (:inline                  "_forceinline" "__forceinline")
+      (:cdecl                   "_cdecl" "__cdecl")
+      (:stdcall                 "_stdcall" "__stdcall")))
 
   ;; "Basic" Type Specifiers
 
@@ -186,6 +183,14 @@
    (= lwsp (or #\space #\tab))
    (= int-suffix "[uUlL]*")
    (= string-prefix (or "[lL]"))
+   (= pp-number
+      (and "[.]?[0-9]" (* (or "[.$_0-9a-zA-Z]"
+                           universal-character-name
+                           "[-eEpP+]"))))
+   (= universal-character-name
+      (or (and #\\ #\u hex-quad)
+          (and #\\ #\U hex-quad hex-quad)))
+   (= hex-quad "[0-9A-Fa-f]{4}")
    ;;
    (:simple-tokens
     ">>=" "<<=" "+=" "-=" "*=" "/=" "%=" "&=" "^=" "|=" ">>" "<<" "++" "--" "->"
@@ -214,7 +219,10 @@
                            ,(cond (dec (parse-integer dec))
                                   (oct (parse-integer oct :radix 8))
                                   (hex (parse-integer hex :radix 16)))
-                           ,(cond (none nil) (l :L) (ll :LL) (u :u) (ul :ul) (ull :ull) (ui8 :ui8))))
+                           ,(cond (none nil) (l :L) (ll :LL) (u :u) (ul :ul) (ull :ull)
+                                  (ui8
+                                   ;; ###
+                                   nil))))
    ;; Floats
    (:floating-constant -> (and (= it (or (and "[0-9]+" exp)
                                          (and "[0-9]+[.][0-9]*" (? exp))
@@ -249,6 +257,12 @@
                                     (e (if exp (parse-integer exp :radix 16) 0)))
                               (* (expt 2d0 (- e (* 4 n))) m))
                             :float))    ;###
+
+   ;; We accept anything matching a "preprocessor number" (pp-number) as a
+   ;; literal. Also in the parser. It appears that new creative syntax for
+   ;; number literals pop up each day. We report the actual text and let
+   ;; the compiler deal with that.
+   (:pp-number -> pp-number => $$)
 
    ;; Catch all
    ("[_$a-zA-Z0-9][_$a-zA-Z0-9]*"
@@ -304,6 +318,7 @@
    (-> #\newline)
    ;; Hmm
    (-> (<= #x80 #xFF))
+   #-EXCL
    (-> #\U+FEFF) ))
 
 (defun de-escaped-c-string (string &key (start 0) end)
@@ -366,6 +381,16 @@
                         (exactly-n #\U 8 16))))
                     (t
                      (write-char c bag))))))))
+
+(defun escape-c-string (string)
+  (with-output-to-string (bag)
+    (clex2:lexing (string)
+      ((or #\\ #\? #\") (write-string "\\" bag) (write-string $$ bag))
+      (#\newline (write-string "\\n" bag))
+      (#\tab (write-string "\\t" bag))
+      ((* (- (<= 32 126) #\\ #\? #\")) (write-string $$ bag))
+      ((<= 0 #xFFFF) (format bag "\\u~4,'0X" (char-code (char $$ 0))))
+      (t (format bag "\\U~8,'0X" (char-code (char $$ 0)))))))
 
 
 ;;;; Transducer
@@ -435,7 +460,7 @@
                      (let ((tokens (cdr (butlast (fetch-parenthesized-tokens)))))
                        (assert (and (= 1 (length tokens))
                                     (eq :string-literal (token-cat (car tokens)))))
-                       (yield-pragma (parse-pragma (token-val (car tokens))))))
+                       (yield-pragma (parse-pragma (string-literal-decoded-text (token-val (car tokens)))))))
                     ;;
                     ;; GCC
                     ;;
@@ -467,6 +492,12 @@
                                       :start-line line :start-col col
                                       :end-line end-line :end-col end-col
                                       :source input))))))))))))))
+
+;;
+
+(defun string-literal-decoded-text (string-literal-token)
+  (ensure-type string-literal-token (cons (member :string-literal)))
+  (de-escaped-c-string (cadr string-literal-token)))
 
 
 ;;;; ------------------------------------------------------------------------------------------
@@ -528,8 +559,9 @@
                         (enter (concatenate 'string "__" s) (list :basic-type-specifier k))
                         (enter (concatenate 'string "__" s "__") (list :basic-type-specifier k))))
       (loop for (k . strings) in *type-qualifier-lexemes*
-            do (loop for s in strings
-                     do (enter s (list :type-qualifier k))))
+            do (loop for s in strings do (enter s (list :type-qualifier k))))
+      (loop for (k . strings) in (abi-type-qualifier-lexemes abi)
+            do (loop for s in strings do (enter s (list :type-qualifier k))))
       (loop for (k . strings) in *function-specifier-lexemes*
             do (loop for s in strings
                      do (enter s  (list :function-specifier k))))
@@ -583,6 +615,4 @@
     (setq *ht* ht)))
 
 ;; (boot-ht)
-
-)                                       ;fin
 

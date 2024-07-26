@@ -22,6 +22,7 @@
      #+SBCL
      (:file "patch-sbcl")
      (:file "forward")
+     #+EXCL (:file "lispdep-excl")
      (:file "lispdep")
      (:file "util")
      (:file "string-table")
@@ -35,6 +36,7 @@
      (:file "grammar")
      (:file "adt")
      (:file "comp")
+     #+EXCL (:file "backend-excl")
      (:file "runtime")
      (:file "syntax")
      ;;

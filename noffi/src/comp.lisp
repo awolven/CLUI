@@ -13,63 +13,77 @@
 ;;;;
 
 (defun decl-1 (storage-classes declarators)
-  (dolist (declarator declarators)
-    (destructuring-bind (name type &rest init) declarator
-      (when name
-        (global-enter name `(decl ,storage-classes ,declarator)))
-      (labels ((walk (type)
-                 (cond ((atom type) type)
-                       ((and (member (car type) '(:struct :union))
-                             (cadr type)
-                             (caddr type))
-                        (global-enter `(,(car type) ,(cadr type)) type)
-                        type)
-                       ((and (member (car type) '(:enum)))
-                        (when (cadr type)
-                          (global-enter `(:enum ,(cadr type)) type))
-                        (when (caddr type)
-                          (let ((last-val -1))
-                            (dolist (key (caddr type))
-                              (let ((key (if (consp key) (car key) key))
-                                    (val (if (consp key) (c-eval (cadr key)) (1+ last-val))))
-                                (global-enter key `(decl ((:storage-class :enum-key))
-                                                         (,key (:enum ,(cadr type)) ,val)))
-                                (setq last-val val)))))
-                        type)
-                       ((and (member (car type) '(:struct :union))
-                             (cddr type)
-                             (cadr type))
-                        ;; ### Expand array sizes and such.
-                        (setq type (mapcar #'walk type))
-                        (global-enter `(,(car type) ,(cadr type)) type)
-                        type)
-                       ((and (eql (car type) :array)
-                             (caddr type))
-                        `(:array ,(walk (cadr type))
-                                 (c-eval ,(caddr type) nil)))
-                       (t
-                        ;; ###
-                        (mapcar #'walk type)))))
-        (walk type))))
-  (remove nil (mapcar #'car declarators)))
+  (multiple-value-bind (storage-classes declarators)
+      (decl-kludge-1 storage-classes declarators nil)
+    (dolist (declarator declarators)
+      (destructuring-bind (name type &rest init) declarator
+        (when name
+          (global-enter name `(decl ,storage-classes ,declarator)))
+        (labels ((walk (type)
+                   (cond ((atom type) type)
+                         ((and (member (car type) '(:struct :union))
+                               (caddr type))
+                          (when (cadr type)
+                            (global-enter `(,(car type) ,(cadr type)) type))
+                          (dolist (d (caddr type))
+                            (walk-decl d))
+                          type)
+                         ((and (member (car type) '(:enum)))
+                          (when (cadr type)
+                            (global-enter `(:enum ,(cadr type)) type))
+                          (when (caddr type)
+                            (let ((last-val -1))
+                              (dolist (key (caddr type))
+                                (let ((key (if (consp key) (car key) key))
+                                      (val (if (consp key) (c-eval (cadr key)) (1+ last-val))))
+                                  (global-enter key `(decl ((:storage-class :enum-key))
+                                                           (,key (:enum ,(cadr type)) ,val)))
+                                  (setq last-val val)))))
+                          type)
+                         ((and (member (car type) '(:struct :union))
+                               (cddr type)
+                               (cadr type))
+                          ;; ### Expand array sizes and such.
+                          (setq type (mapcar #'walk type))
+                          (global-enter `(,(car type) ,(cadr type)) type)
+                          type)
+                         ((and (eql (car type) :array)
+                               (caddr type))
+                          `(:array ,(walk (cadr type))
+                                   (c-eval ,(caddr type) nil)))
+                         (t
+                          ;; ###
+                          (mapcar #'walk type))))
+                 (walk-decl (decl)
+                   (dolist (q (cddr decl))
+                     (walk (cadr q))))
+                 )
+          (walk type))))
+    (remove nil (mapcar #'car declarators))))
 
 (defun global-enter (key def)
   (let ((old (gethash key *global-env*)))
-    (when old
-      (cond ((identifierp key)
-             ;; storage class?
-             (unless (types-compatible-p (declaration-type old) (declaration-type def))
-               (warn "Incompatible redefinition of ~S~%old = ~/NOFFI:~DECL/~%new = ~/NOFFI:~DECL/"
-                     key old def)))
-            ((and (consp key) (member (car key) '(:enum :struct :union)))
-             (unless (types-compatible-p old def)
-               (warn "Incompatible redefinition of ~S~%old = ~S~%new = ~S"
-                     key old def)))
-            (t
-             (when (and old (not (equal old def)))
-               (warn "Incompatible redefinition of ~S~%old = ~S~%new = ~S"
-                     key old def)))))
-    (setf (gethash key *global-env*) def))
+    (cond ((null old)
+           (setf (gethash key *global-env*) def))
+          (t
+           (let ((doit nil))
+             (cond ((identifierp key)
+                    ;; storage class?
+                    (unless (types-compatible-p (declaration-type old) (declaration-type def))
+                      (setq doit t)
+                      (warn "Incompatible redefinition of ~S~%old = ~/NOFFI:~DECL/~%new = ~/NOFFI:~DECL/"
+                            key old def)))
+                   ((and (consp key) (member (car key) '(:enum :struct :union)))
+                    (unless (types-compatible-p old def)
+                      (setq doit t)
+                      (warn "Incompatible redefinition of ~S~%old = ~S~%new = ~S"
+                            key old def)))
+                   (t
+                    (when (and old (not (equal old def)))
+                      (setq doit t)
+                      (warn "Incompatible redefinition of ~S~%old = ~S~%new = ~S"
+                            key old def))))
+             (when doit (setf (gethash key *global-env*) def))))))
   key)
 
 
@@ -105,21 +119,29 @@
     (let ((putative-types
            (ecase base
              (:decimal
-              (ecase suffix
-                ((nil)    '(:int :long :long-long))
-                ((:u)     '(:unsigned-int :unsigned-long :unsigned-long-long))
-                ((:l)     '(:long :long-long))
-                ((:ul)    '(:unsigned-long :unsigned-long-long))
-                ((:ll)    '(:long-long))
-                ((:ull)   '(:unsigned-long-long))))
+              (cond ((string-equal "i32" suffix)
+                     ;; hmm
+                     '(:int :long :long-long))
+                    (t
+                     (ecase suffix
+                       ((nil)    '(:int :long :long-long))
+                       ((:u)     '(:unsigned-int :unsigned-long :unsigned-long-long))
+                       ((:l)     '(:long :long-long))
+                       ((:ul)    '(:unsigned-long :unsigned-long-long))
+                       ((:ll)    '(:long-long))
+                       ((:ull)   '(:unsigned-long-long))))))
              ((:octal :hex)
-              (ecase suffix
-                ((nil)    '(:int :unsigned-int :long :unsigned-long :long-long :unsigned-long-long))
-                ((:u)     '(:unsigned-int :unsigned-long :unsigned-long-long))
-                ((:l)     '(:long :unsigned-long :long-long :unsigned-long-long))
-                ((:ul)    '(:unsigned-long :unsigned-long-long))
-                ((:ll)    '(:long-long :unsigned-long-long))
-                ((:ull)   '(:unsigned-long-long)))))))
+              (cond ((string-equal "i32" suffix)
+                     ;; hmm
+                     '(:int :long :long-long))
+                    (t
+                     (ecase suffix
+                       ((nil)    '(:int :unsigned-int :long :unsigned-long :long-long :unsigned-long-long))
+                       ((:u)     '(:unsigned-int :unsigned-long :unsigned-long-long))
+                       ((:l)     '(:long :unsigned-long :long-long :unsigned-long-long))
+                       ((:ul)    '(:unsigned-long :unsigned-long-long))
+                       ((:ll)    '(:long-long :unsigned-long-long))
+                       ((:ull)   '(:unsigned-long-long)))))))))
       (dolist (putative-type putative-types
                (blame form
                       "Integer constant too large to fit any integer type"))
@@ -439,9 +461,6 @@
 
 (defun make-compiled-expr (form type)
   `(--form-- ,form ,type))
-
-(defun identifier-name (identifier)
-  (symbol-name identifier))
 
 (defun comp-cast (expr env)
   (destructuring-bind (out-type expr) (cdr expr)

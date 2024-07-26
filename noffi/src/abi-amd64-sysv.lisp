@@ -30,6 +30,7 @@
 
 (defclass abi-amd64-sysv (iso-c17-mixin
                           gcc-abi-mixin ;###
+                          sysv-struct-layout-mixin
                           abi)
   ())
 
@@ -73,7 +74,19 @@
   '((:float                      32     32      single-float    -1      "float")
     (:double                     64     64      double-float    0       "double")
     ;;### Here we are bust!
-    (:long-double               128    128      double-float    1       "long double") ))
+    (:long-double               128    128      double-float    1       "long double")
+    ;;
+    (:float-16                   16     16      float-16        -2      "_Float16") ;### rank guessed
+    (:float-32                   32     32      float-32        -2      "_Float32") ;### rank guessed
+    (:float-64                   64     64      float-64        -2      "_Float64") ;### rank guessed
+    (:float-128                 128    128      float-128       -2      "_Float128" "__float128") ;### rank guessed
+    #||
+    (:decimal-16                 16     16      decimal-16      -2      "_Decimal16") ;### rank guessed
+    (:decimal-32                 32     32      decimal-32      -2      "_Decimal32") ;### rank guessed
+    (:decimal-64                 64     64      decimal-64      -2      "_Decimal64") ;### rank guessed
+    (:decimal-128               128    128      decimal-128     -2      "_Decimal128") ;### rank guessed
+    ||#
+    ))
 
 (defmethod abi-pointer-type-size-align-1 ((abi abi-amd64-sysv) type)
   (declare (ignore type))

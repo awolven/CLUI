@@ -73,10 +73,21 @@
 (deftype identifier ()
   '(satisfies identifierp))
 
+(defun identifier-name (identifier)
+  (symbol-name identifier))
+
 (defun arithmetic-type-p (type &optional env)
   ;; What about _Complex?
   (or (integer-type-p type env)
       (float-type-p type env)))
+
+(defun arithmetic-type-lisp-type (type &optional env)
+  (cond ((integer-type-p type env)
+         (integer-type-lisp-type type env))
+        ((float-type-p type env)
+         (float-type-lisp-type type env))
+        (t
+         (error "Not an arithmetic type: ~S" type))))
 
 ;;; Integer Types
 
@@ -93,9 +104,21 @@
     (first q)))
 
 (defun integer-type-size (type &optional env)
+  "Returns the size of the integer type in bits. This includes padding
+  bits. E.g. the size of _Bool is 8. See INTEGER-TYPE-WIDTH."
   (let ((q (integer-type-p type env)))
     (unless q (error "Not an integer type: ~S" type))
     (second q)))
+
+(defun integer-type-width (type &optional env)
+  "Returns the width (precision) of the integer type in bits. This
+  excludes padding bits, but includes a possible sign bit. E.g. the
+  width of _Bool is 1. See INTEGER-TYPE-SIZE."
+  (if (bool-type-p type env)
+      1
+      (let ((q (integer-type-p type env)))
+        (unless q (error "Not an integer type: ~S" type))
+        (second q))))
 
 (defun integer-type-align (type &optional env)
   (let ((q (integer-type-p type env)))
@@ -129,6 +152,10 @@
 
 (defun bool-type-p (type &optional env)
   (eq :bool (car (integer-type-p type env))))
+
+(defun integer-type-lisp-type (type env)
+  `(integer ,(integer-type-min-value type env)
+            ,(integer-type-max-value type env)))
 
 ;;; Floating Point Types
 
@@ -191,7 +218,11 @@
 
 (defun named-type-expansion (type &optional env)
   (cond ((and (consp type) (eq (car type) :type-qualifier))
-         `(,(car type) ,(cadr type) ,(named-type-expansion (caddr type) env)))
+         (let* ((base (caddr type))
+                (new (named-type-expansion base env)))
+           (if (eq base new)
+               type
+               `(,(car type) ,(cadr type) ,new))))
         ((and (consp type) (eq (car type) ':type-name))
          (let ((def (find-identifier-declaration (named-type-name type env) env)))
            (unless (typedef-declaration-p def)
@@ -205,7 +236,8 @@
     (and (and (consp type) (eq (car type) :pointer))
          type)))
 
-(defun make-pointer-type (base)
+(defun make-pointer-type (base &optional env)
+  (declare (ignore env))
   `(:pointer ,base))
 
 (defun pointer-type-base (type &optional env)
@@ -233,6 +265,47 @@
     (and (and (consp type) (eq (car type) :block-pointer))
          type)))
 
+(defun block-pointer-type-base (type &optional env)
+  (let ((it (block-pointer-type-p type env)))
+    (unless it
+      (error "~S is not a block pointer type." type))
+    (cadr it)))
+
+(defun block-pointer-type-size (type &optional env)
+  (let ((it (block-pointer-type-p type env)))
+    (unless it
+      (error "~S is not a pointer type." type))
+    (nth-value 0 (abi-pointer-type-size-align type))))
+
+(defun block-pointer-type-align (type &optional env)
+  (let ((it (block-pointer-type-p type env)))
+    (unless it
+      (error "~S is not a pointer type." type)))
+  (nth-value 1 (abi-pointer-type-size-align type)))
+
+(defun amp-pointer-type-p (type &optional env)
+  (let ((type (bare-expanded-type type env)))
+    (and (and (consp type) (eq (car type) :amp-pointer))
+         type)))
+
+(defun amp-pointer-type-base (type &optional env)
+  (let ((it (amp-pointer-type-p type env)))
+    (unless it
+      (error "~S is not a amp pointer type." type))
+    (cadr it)))
+
+(defun amp-pointer-type-size (type &optional env)
+  (let ((it (amp-pointer-type-p type env)))
+    (unless it
+      (error "~S is not a pointer type." type))
+    (nth-value 0 (abi-pointer-type-size-align type))))
+
+(defun amp-pointer-type-align (type &optional env)
+  (let ((it (amp-pointer-type-p type env)))
+    (unless it
+      (error "~S is not a pointer type." type)))
+  (nth-value 1 (abi-pointer-type-size-align type)))
+
 ;;;
 
 (defun array-type-p (type &optional env)
@@ -254,6 +327,15 @@
     (unless it
       (error "~S is not an array type." type))
     (caddr it)))
+
+(defun array-type-count-value (type &optional env)
+  (labels ((aux (count)
+             (typecase count
+               ((member :unspecified) nil)
+               ((cons (member :type-qualifier) (cons t (cons t null)))
+                (aux (caddr count)))
+               (t (set'/x count)(c-eval count env)))))
+    (aux (array-type-count type env))))
 
 (defun incomplete-array-type-p (type &optional env)
   (and (array-type-p type env)
@@ -352,6 +434,7 @@ a flag indicating whether the function is variadic."
     (car q)))
 
 (defun record-type-complete-p (type &optional env)
+  ;; ### Not quite.
   (let ((q (record-type-p type env)))
     (unless q (error "Not a struct or union type: ~S" type))
     (not (null (cddr q)))))
@@ -367,6 +450,15 @@ itself, not necessarily the type as such."
                    (list (cadr x))))
             (cadddr q))))
 
+(defun record-type-pack (type &optional env)
+  (let ((q (record-type-p type env)))
+    (unless q (error "Not a struct or union type: ~S" type))
+    (setq q (or (find-record-type q env) q))
+    (dolist (x (cadddr q))
+      (when (typep x '(cons (member :declaration-specifier :type-qualifier)
+                       (cons (cons (member :pack)))))
+        (return (cadr (cadr x)))))))
+
 (defun record-type-members (type &optional env &key (errorp t) (resolve t))
   (let ((q (record-type-p type env)))
     (unless q (error "Not a struct or union type: ~S" type))
@@ -381,7 +473,7 @@ itself, not necessarily the type as such."
   "Given a 'struct' or 'union' type _type_ find the record definition and
 returns it as a complete record type, if there is any."
   (let ((q (record-type-p type env)))
-    (unless q (error "Huh?"))
+    (unless q (error "This isn't a record type: ~S" type))
     ;; ### actually this is wrong, as there cannot be both a "union foo" and a "struct foo".
     (let ((it (gethash (list (record-type-kind type) (record-type-name q env))
                        *global-env*)))
@@ -415,8 +507,8 @@ members are given my _members_ as a list of declarations."
 ;;(defun record-member-offset (member))   ;in bits
 ;; (defun record-member-size (member))     ;in bits
 
-#+NOMORE
 (defun record-type-member-layout (record-type member env &key (errorp t))
+  ;; -> type; size; offset
   (let ((layout (record-type-layout (find-record-type record-type env) env)))
     (labels ((aux (member layout delta)
                (cond ((null layout) nil)
@@ -431,7 +523,7 @@ members are given my _members_ as a list of declarations."
                                (aux member (cdr layout) delta))))))))
       (values-list
        (or (cdr (aux member layout 0))
-           (and errorp (error "Record type ~S has no member ~S" record-type member)))))))
+           (and errorp (error "~@<Record type ~S has no member ~S~:@>" record-type member)))))))
 
 (defun record-type-member-offset (record-type member env &key (errorp t))
   "Offset of member /member/ within record type /record-type/ in bits.
@@ -545,20 +637,10 @@ could be found, when in doubt the incomplete type is returned."
   )
 
 (defun size-of-type (type &optional env)
-  (let ((bits-per-byte 8))              ;Hmm
-    (values
-     (ceiling
-      (cond ((record-type-p type env)
-             (nth-value 1 (record-type-layout type env)))
-            ((integer-type-p type env)
-             (integer-type-size type))
-            ((float-type-p type env)
-             (float-type-size type))
-            ((pointer-type-p type env)
-             (pointer-type-size type env))
-            (t
-             (error "Oops, cannot tell size of type ~S" type)))
-      bits-per-byte))))
+  (/ (nth-value 0 (type-size-align type env)) 8))
+
+(defun align-of-type (type &optional env)
+  (/ (nth-value 1 (type-size-align type env)) 8))
 
 
 
@@ -573,6 +655,18 @@ could be found, when in doubt the incomplete type is returned."
         ((named-type-p type)
          (type-qualifiers (named-type-expansion type) env))
         (t nil)))
+
+(defun type-qualifiers-1 (type &optional env)
+  "Return all the type qualifiers that apply to _type_. Does follow type names as well."
+  (cond ((and (consp type) (eq (car type) :type-qualifier))
+         (cons (cadr type)
+               (type-qualifiers (caddr type) env)))
+        ((named-type-p type)
+         (type-qualifiers-1 (named-type-expansion type) env))
+        ((record-type-p type)
+         (record-type-qualifiers type env))
+        (t
+         nil)))
 
 (defun qualified-type-p (type &optional env)
   (declare (ignore env))
@@ -593,13 +687,19 @@ could be found, when in doubt the incomplete type is returned."
 (defun make-qualified-type (qualifier base)
   `(:type-qualifier ,qualifier ,base))
 
-(defun expand-type (type &optional env)
-  (cond ((atom type) type)
+(defun expand-type (type &optional env yet)
+  (cond ((member type yet)
+         (error "Recursive type found: ~S" type))
+        ((atom type) type)
         ((and (consp type) (eq (car type) :type-qualifier))
-         `(:type-qualifier ,(cadr type)
-                           ,(expand-type (caddr type) env)))
+         (let ((yet (cons type yet)))
+           (declare (dynamic-extent yet))
+           `(:type-qualifier ,(cadr type)
+                             ,(expand-type (caddr type) env yet))))
         ((named-type-p type)
-         (expand-type (named-type-expansion type env) env))
+         (let ((yet (cons type yet)))
+           (declare (dynamic-extent yet))
+           (expand-type (named-type-expansion type env) env yet)))
         (t type)))
 
 (defun bare-type (type)
@@ -611,7 +711,7 @@ could be found, when in doubt the incomplete type is returned."
 (defun bare-expanded-type (type &optional env)
   (let ((type (bare-type type)))
     (if (named-type-p type env)
-        (bare-expanded-type (named-type-expansion type env) env)
+        (bare-expanded-type (named-type-expansion (bare-type type) env) env)
         type)))
 
 (defun find-identifier-declaration (identifier &optional env &key (errorp t))
@@ -661,6 +761,13 @@ could be found, when in doubt the incomplete type is returned."
   (assert (declaration-p decl))
   (cadr decl))
 
+(defun declaration-align-value (decl env)
+  (dolist (d (declaration-specifiers decl))
+    (when (and (eq (car d) ':declaration-specifier)
+               (align-qualifier-p (cadr d)))
+      ;; ### Multiple?
+      (return (align-qualifier-align (cadr d) env)))))
+
 ;;;
 
 ;; We might want to actually change this as each declaration has exactly
@@ -668,14 +775,14 @@ could be found, when in doubt the incomplete type is returned."
 
 (defun declaration-storage-class (decl &optional (default :extern))
   (dolist (decl-spec (declaration-specifiers decl) default)
-    (when (storage-class-decl-spec-p decl-spec)
-      (return (storage-class-decl-spec-storage-class decl-spec)))))
+    (when (storage-class-specifier-p decl-spec)
+      (return (storage-class-specifier-storage-class decl-spec)))))
 
-(defun storage-class-decl-spec-p (decl-spec)
+(defun storage-class-specifier-p (decl-spec)
   (and (eq :storage-class (car decl-spec)) decl-spec))
 
-(defun storage-class-decl-spec-storage-class (decl-spec)
-  (cadr (or (storage-class-decl-spec-p decl-spec)
+(defun storage-class-specifier-storage-class (decl-spec)
+  (cadr (or (storage-class-specifier-p decl-spec)
             (error "~@<Huh? Not a storage class decl-sepc - ~S~@:>" decl-spec))))
 
 (defun extern-declaration-p (decl)
@@ -685,114 +792,26 @@ could be found, when in doubt the incomplete type is returned."
   (and (eql :static (declaration-storage-class decl))
        (member :const (type-qualifiers (declaration-type decl) env))))
 
-
-;;;; Record Layout
+(defun storage-class-spelling (storage-class)
+  (or (cadr (assoc storage-class *storage-class-lexemes*))
+      ;; ### Hmm
+      (string-downcase storage-class)))
 
-;;; Bit-fields
+(defun declaration-specifier-p (thing)
+  (typep thing '(cons (member :declaration-specifier))))
 
-;; First, I cannot find any documentation about gcc's layout for AMD64. It
-;; refers to the ABI, but doesn't followit, at least not like I read it.
+;; There is:
+;;     (:ALIGNAS-TYPE <type>)
+;;     (:ALIGNAS-EXPR <expr>)
+;;     (:ALIGN <expr>)
+;;     (:PACK ?)
 
-;; Anyhow, we make the bold assumption that the exactly placement of a
-;; bit-fields only depends on what precedes it in the list of members. We also
-;; assume that a bit-field never is placed at lower bit-addresses than a
-;; previous bit-field.
-
-;; Here is what gcc appears to do: We have a current allocation pointer and a
-;; current overall alignment for the struct. The bit-field itself has a
-;; certain alignment requirement. This alignment requirement makes it to the
-;; overall alignment requirement. Then room is searched for the given
-;; bit-field. Say the bit-field base type is `w' bits, with alignment `a' and
-;; the bit-field itself has `n' bits, then that chunk of (BYTE n (* k a)) is
-;; used with the smallest k. The allocation pointer is bumped and we're done.
-
-(defun record-type-layout (record-type &optional (env nil))
-  "Returns a list of (<name> <type> <size> <pos>) size and position
-are measured in bits. Second and third return value are the size and alignment in bits."
-  (assert (record-type-p record-type))
-  (let* ((members        (record-type-members record-type env :errorp t))
-         (qualifiers     (record-type-qualifiers record-type))
-         (kind           (record-type-kind record-type))
-         ;;overall structure alignment in bits
-         (max-align      8)
-         (allo 0)        ;allocation pointer in bits
-         (max-allo 0)    ;overall maximum allocation
-                                        ; (may differ from `allo' in case of unions).
-         (res nil)                   ;assembled list of member layouts
-         )
-    (dolist (member members)
-      (multiple-value-bind (member-name member-type)
-          (values (record-member-name member) (record-member-type member))
-        (cond ((bit-field-type-p member-type)
-               ;; See above for what we do.
-               (let ((width (c-eval (bit-field-type-width member-type) env)) ;eval?
-                     (base-type (bit-field-type-base-type member-type env)))
-                 (multiple-value-bind (base-size base-align)
-                     (type-size-align base-type env)
-                   ;;
-                   ;; Heh, what about bit-fields with unions? Is that even allowed?
-                   ;;
-                   ;; Try fitting it directly at `allo' first.
-                   ;;
-                   ;; I believe this still is not entirely correct. The question rather is:
-                   ;; Would given the alignment constraints some memory access using the
-                   ;; base-type work? Need more tests and more reading here.
-                   (unless (and (not (zerop width))
-                                (= (floor allo base-align)
-                                   (floor (1- (+ allo width)) base-align)))
-                     ;; Around here under pack(1) we see a difference to MSVC
-                     ;; with IMAGE_IMPORT_CONTROL_TRANSFER_DYNAMIC_RELOCATION
-                     ;; Doesn't fit. Align 'allo' first.
-                     (setq allo (* base-align (ceiling allo base-align))))
-                   ;; Place it at `allo'
-                   (push (list member-name member-type width allo) res)
-                   ;; Adjust overall align and size.
-                   (when (record-member-pack member)
-                     (setq base-align (min base-align (* 8 (record-member-pack member)))))
-                   (setf max-align (max max-align base-align))
-                   ;; (setq max-allo (max max-allo (+ allo base-size)))
-                   (setq max-allo (max max-allo (+ allo width)))
-                   (incf allo width))))
-              (t
-               (multiple-value-bind (member-size member-align)
-                   ;; Unspecified array size in records.
-                   ;;
-                   ;; For structs all of gcc, clang and msvc assume zero.
-                   ;; For unions gcc and clnag complain, while msvc assumes one.
-                   ;;
-                   (if (and (array-type-p member-type) (incomplete-array-type-p member-type))
-                       (values (ecase kind
-                                 (:struct 0)
-                                 (:union (type-size-align (array-type-base member-type) env)))
-                               (nth-value 1 (type-size-align (array-type-base member-type) env)))
-                       (type-size-align member-type env))
-                 ;; Update the overall alignment, if needed
-                 (when (record-member-pack member)
-                   (setq member-align (min member-align (* 8 (record-member-pack member)))))
-                 (setq max-align (max max-align member-align))
-                 ;; Bump the allocation pointer according to alignment.
-                 (setq allo      (if (eq :union kind)
-                                     0
-                                     (* member-align (ceiling allo member-align))))
-                 ;; Place it
-                 (push (list member-name member-type member-size allo) res)
-                 (incf allo member-size)
-                 (setq max-allo (max max-allo allo)))))))
-    ;;
-    (setq max-align
-          ;; Some __attribute__((aligned(n))) may override this
-          (dolist (q qualifiers max-align)
-            (when (align-qualifier-p q)
-              (return (* 8 (align-qualifier-align q env))))))
-    (values
-     (reverse res)
-     (* max-align (ceiling max-allo max-align))
-     max-align)))
 
 (defun align-qualifier-p (qualifier)
   (typep qualifier '(cons (member :align) (cons t null))))
 
 (defun align-qualifier-align (qualifier env)
+  ;; ### :align-as ...
   (assert (align-qualifier-p qualifier))
   (c-eval (cadr qualifier) env))
 
@@ -804,22 +823,43 @@ are measured in bits. Second and third return value are the size and alignment i
   "Returns alignment of type `type' measured in bits."
   (nth-value 1 (type-size-align type env)))
 
-(defun type-size-align (type env &aux it)
+(defun type-size-align (type &optional env &aux it)
   "Returns size and alignment of type `type' measured in bits."
   (declare (ignorable it))
-  (cond ((setq it (integer-type-p type env))
+  (cond ((qualified-type-p type env)
+         (multiple-value-bind (qual base)
+             (values (qualified-type-qualifier type env)
+                     (qualified-type-base type env))
+           (cond ((typep qual '(cons (member :align)))
+                  (multiple-value-bind (size align)
+                      (type-size-align base env)
+                    (declare (ignore align)) ;sic!
+                    (values size (* 8 (c-eval (cadr qual) env))))) ;### 8
+                 ((eq qual ':__ptr32)
+                  (values 32 32))
+                 (t
+                  (type-size-align base env)))))
+        ((named-type-p type env)
+         (type-size-align (named-type-expansion type env) env))
+        ((setq it (integer-type-p type env))
          (values (integer-type-size type)
                  (integer-type-align type)))
         ((setq it (float-type-p type env))
          (values (float-type-size type)
                  (float-type-align type)))
-        ((or (setq it (pointer-type-p type env))
-             (setq it (block-pointer-type-p type env)))
+        ((setq it (pointer-type-p type env))
          (values (pointer-type-size type)
                  (pointer-type-align type)))
+        ((setq it (block-pointer-type-p type env))
+         (values (block-pointer-type-size type)
+                 (block-pointer-type-align type)))
         ((setq it (record-type-p type))
          (multiple-value-bind (layout size align) (record-type-layout type env)
            (declare (ignore layout))
+           (dolist (qual (record-type-qualifiers type env))
+             (when (align-qualifier-p qual)
+               (setq align (* 8 (align-qualifier-align qual env))
+                     size (max size (* align (ceiling size align))))))
            (values size align)))
         ((array-type-p type env)
          ;; What about "int[]" ?
@@ -832,6 +872,9 @@ are measured in bits. Second and third return value are the size and alignment i
                                                :unsigned-long-long))
                          element-size))
                    element-align)))
+        ((eq type ':__builtin_va_list)
+         ;; ### This is ABI dependent!
+         (values (* 64 3) 64))
         (t
          (error "Cannot tell size and alignment of ~S" type))))
 
@@ -878,10 +921,14 @@ are measured in bits. Second and third return value are the size and alignment i
                       (unless (cond ((eq (car p1) '&rest)
                                      (eq (car p2) '&rest))
                                     ((declaration-p (car p1))
-                                     (and (declaration-p (car p2))
-                                          (types-compatible-p (declaration-type (car p1))
-                                                              (declaration-type (car p2))
-                                                              env)))
+                                     (labels ((mock (type)
+                                                (if (array-type-p type)
+                                                    `(:pointer ,(array-type-base type))
+                                                    type)))
+                                       (and (declaration-p (car p2))
+                                            (types-compatible-p (mock (declaration-type (car p1)))
+                                                                (mock (declaration-type (car p2)))
+                                                                env))))
                                     (t
                                      (error "Huh? What kind of parameters are ~S and ~S?" (car p1) (car p2))))
                         (return nil)))))
@@ -936,82 +983,413 @@ are measured in bits. Second and third return value are the size and alignment i
                (warn "~@<What kind of types are ~S and ~S?~@:>" type-1 type-2)
                nil)))))
 
-                    
-(defun record-type-member-layout (record-type member env &key (errorp t))
-  (let ((layout (record-type-layout (find-record-type record-type env) env)))
-    (labels ((aux (member layout delta)
-               (cond ((null layout) nil)
-                     (t
-                      (destructuring-bind (name type size offset) (car layout) ;ADT
-                        (cond ((eq name member)
-                               (list name type size (+ offset delta)))
-                              ((and (null name)
-                                    (record-type-p type)
-                                    (aux member (record-type-layout (find-record-type type env) env) (+ delta offset))))
-                              (t
-                               (aux member (cdr layout) delta))))))))
-      (values-list
-       (or (cdr (aux member layout 0))
-           (and errorp (error "Record type ~S has no member ~S" record-type member)))))))
 
-(defun c-> (object member)
-  ;; ### bit fields!
-  (setq object (promoted-cval object))
-  (labels ((doit (record-type)
-             (multiple-value-bind (type size offset)
-                 (record-type-member-layout record-type member nil)
-               (declare (ignore size))
-               (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
-                                      (/ offset 8))
-                                  (make-pointer-type type))))))
-    (cond ((and (cvalp object)
-                (pointer-type-p (cval-type object))
-                (record-type-p (pointer-type-base (cval-type object))))
-           (doit (pointer-type-base (cval-type object))))
-          ((and (cvalp object)
-                (record-type-p (cval-type object)))
-           (doit (cval-type object)))
-          (t
-           (error "~S is not a pointer to a record, nor some record reference." object)))))
+;; MAKE-NAMED-TYPE name
+;; MAKE-POINTER-TYPE base
+;; MAKE-FUNCTION-TYPE result-type parameter-declarations
 
-(defun (setf c->) (nv object member)
-  ;; ### bit fields!
-  (setq object (promoted-cval object))
-  (labels ((doit (record-type)
-             (multiple-value-bind (type size offset)
-                 (record-type-member-layout record-type member nil)
-               (declare (ignore size))
-               (setf
-                (%c-aref (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
-                                       (/ offset 8))
-                                   (make-pointer-type type)))
-                nv))))
-    (cond ((and (cvalp object)
-                (pointer-type-p (cval-type object))
-                (record-type-p (pointer-type-base (cval-type object))))
-           (doit (pointer-type-base (cval-type object))))
-          ((and (cvalp object)
-                (record-type-p (cval-type object)))
-           (doit (cval-type object)))
-          (t
-           (error "~S is not a pointer to a record, nor some record reference." object)))))
+;; to be changed
 
-(defun c->-addr (object member)
-  ;; ### code duplication
-  (setq object (promoted-cval object))
-  (labels ((doit (record-type)
-             (multiple-value-bind (type size offset)
-                 (record-type-member-layout record-type member nil)
-               (declare (ignore size))
-               (c-coerce (c+ (cons-ptr (ptr-base-sap object) (ptr-offset object) (make-pointer-type :char))
-                             (/ offset 8))
-                         (make-pointer-type type)))))
-    (cond ((and (cvalp object)
-                (pointer-type-p (cval-type object))
-                (record-type-p (pointer-type-base (cval-type object))))
-           (doit (pointer-type-base (cval-type object))))
-          ((and (cvalp object)
-                (record-type-p (cval-type object)))
-           (doit (cval-type object)))
-          (t
-           (error "~S is not a pointer to a record, nor some record reference." object)))))
+;; MAKE-STRUCT-TYPE &key tag members &allow-other-keys
+
+;;   Makes a new `struct' type.
+
+;;    (make-struct-type :tag '#_point 
+;;                      :members (list
+;;                                (make-declaration :name '#_x :type :int)
+;;                                (make-declaration :name '#_y :type :int)))
+
+;; MAKE-UNION-TYPE
+;; MAKE-RECORD-TYPE kind 
+
+;; make-record-member
+;; make-qualified-type
+
+;; make-declaration
+
+(defun find-integer-type (&key min-width max-width width (signed t) env (errorp t))
+  "Finds the integer datatype of lowest absolute rank meeting the
+criteria given by _min-width_, _max-width_, _width_ and matching the
+given signess. Note that :INT has rank 0 and so is of lowest absolute
+rank."
+  (let ((best-rank nil) (best nil))
+    (dolist (k (abi-integer-types)      ;###
+             (or best (and errorp (error "No suitable integer type available"))))
+      (let ((k (car k)))                ;hmm
+        (when (and (not (bool-type-p k))
+                   (boolean= signed (integer-type-signed-p k env))
+                   (or (not width) (= (integer-type-width k env) width))
+                   (or (not min-width) (>= (integer-type-width k env) min-width))
+                   (or (not max-width) (<= (integer-type-width k env) max-width))
+                   (or (null best-rank) (< (abs (integer-type-rank k env)) best-rank)))
+          (setq best-rank (abs (integer-type-rank k env))
+                best k))))))
+
+(defgeneric abi-record-type-layout (abi record-type env offset))
+
+(defun record-type-layout (record-type &optional (env nil) &key (offset 0))
+  "Returns a list of (<name> <type> <size> <pos>) size and position
+are measured in bits. Second and third return value are the size and alignment in bits."
+  (abi-record-type-layout *abi* record-type env offset))
+
+
+;;;; -- Record Layout -------------------------------------------------------------------------
+
+
+;;; SYSV/gcc
+
+;; Bit-fields
+
+;; First, I cannot find any documentation about gcc's layout for AMD64. It
+;; refers to the ABI, but doesn't followit, at least not like I read it.
+
+;; Anyhow, we make the bold assumption that the exactly placement of a
+;; bit-fields only depends on what precedes it in the list of members. We also
+;; assume that a bit-field never is placed at lower bit-addresses than a
+;; previous bit-field.
+
+;; Here is what gcc appears to do: We have a current allocation pointer and a
+;; current overall alignment for the struct. The bit-field itself has a
+;; certain alignment requirement. This alignment requirement makes it to the
+;; overall alignment requirement. Then room is searched for the given
+;; bit-field. Say the bit-field base type is `w' bits, with alignment `a' and
+;; the bit-field itself has `n' bits, then that chunk of (BYTE n (* k a)) is
+;; used with the smallest k. The allocation pointer is bumped and we're done.
+
+(defclass sysv-struct-layout-mixin () ())
+(defmethod abi-record-type-layout ((abi sysv-struct-layout-mixin) record-type env offset)
+  "Returns a list of (<name> <type> <size> <pos>) size and position
+are measured in bits. Second and third return value are the size and alignment in bits."
+  (assert (record-type-p record-type))
+  (let* ((members        (record-type-members record-type env :errorp t))
+         (qualifiers     (record-type-qualifiers record-type env))
+         (pack           (record-type-pack record-type env))
+         (kind           (record-type-kind record-type))
+         ;;overall structure alignment in bits
+         (max-align      8)
+         (allo offset)        ;allocation pointer in bits
+         (max-allo offset)    ;overall maximum allocation
+                                        ; (may differ from `allo' in case of unions).
+         (res nil)                   ;assembled list of member layouts
+         )
+    (labels ((allo-bitfield (member-name member-type width base-align)
+               (if (zerop width)
+                   (setq allo (* base-align (ceiling allo base-align))
+                         max-allo (max max-allo allo)
+                         ;; max-align (max max-align base-align)
+                         )
+                   (progn
+                     (unless (and '(not (zerop width))
+                                  (= (floor allo base-align)
+                                     (floor (1- (+ allo width)) base-align)))
+                       (unless pack
+                         (setq allo (* base-align (ceiling allo base-align)))))
+                     ;; Place it at `allo'
+                     (when member-name
+                       (push (list member-name member-type width allo) res))
+                     ;; Adjust overall align and size.
+                     (setf max-align (max max-align base-align))
+                     (setq max-allo (max max-allo (+ allo width)))
+                     (incf allo width) ))))
+      (dolist (member members)
+        (multiple-value-bind (member-name member-type)
+            (values (record-member-name member) (record-member-type member))
+          (let ((decl-align (declaration-align-value member env)))
+            (cond ((bit-field-type-p member-type)
+                   ;; See above for what we do.
+                   (let ((width (c-eval (bit-field-type-width member-type) env)) ;eval?
+                         (base-type (bit-field-type-base-type member-type env)))
+                     (multiple-value-bind (base-size base-align)
+                         (type-size-align base-type env)
+                       (when decl-align
+                         ;; ### 8
+                         (setq base-align (max base-align (* 8 decl-align))))
+                       (let ((pack (or (record-member-pack member) pack)))
+                         (when pack
+                           (setq base-align (min base-align (* 8 pack))
+                                 ;; I find the following a very questionable thing
+                                 base-size (min base-size (* 8 pack)))))
+                       (when (eq :union kind)
+                         (setq allo offset))
+                       (allo-bitfield member-name member-type width base-align))))
+                  (t
+                   (multiple-value-bind (member-size member-align)
+                       ;; Unspecified array size in records.
+                       ;;
+                       ;; For structs all of gcc, clang and msvc assume zero.
+                       ;; For unions gcc and clnag complain, while msvc assumes one.
+                       ;;
+                       (if (and (array-type-p member-type) (incomplete-array-type-p member-type))
+                           (values (ecase kind
+                                     (:struct 0)
+                                     (:union (type-size-align (array-type-base member-type) env)))
+                                   (nth-value 1 (type-size-align (array-type-base member-type) env)))
+                           (type-size-align member-type env))
+                     ;;
+                     (when decl-align
+                       ;; ### 8
+                       (setq member-align (max member-align (* 8 decl-align))))
+                     ;; Update the overall alignment, if needed
+                     (let ((pack (or (record-member-pack member) pack)))
+                       (when pack
+                         (setq member-align (min member-align (* 8 pack)))))
+                     ;;
+                     (setq max-align (max max-align member-align))
+                     ;; Bump the allocation pointer according to alignment.
+                     (setq allo      (if (eq :union kind)
+                                         offset
+                                         (* member-align (ceiling allo member-align))))
+                     ;; Place it, if we can.
+                     (push (list member-name member-type member-size allo) res)
+                     (incf allo member-size)
+                     (setq max-allo (max max-allo allo)))))))))
+    ;;
+    (setq max-align
+          ;; Some __attribute__((aligned(n))) may override this
+          (dolist (q qualifiers max-align)
+            (when (align-qualifier-p q)
+              (return (* 8 (align-qualifier-align q env))))))
+    (values
+     (reverse res)
+     (* max-align (ceiling max-allo max-align))
+     max-align)))
+
+
+;;; MS Windows
+
+;; Again with Microsoft the situation is simpler and better documented than
+;; with gcc. Bit fields are allocated in "allocation units" of 8, 16, 32, or
+;; 64 bits. The base type of the bitfield type governs its size and alignment.
+;; When the next bitfield names a likewise size allocation unit and fits that
+;; unit reused otherwise a new unit is opened. Straight forward.
+
+;; Alignment in combination with packing is handled differently with MSVC from
+;; gcc. MSVC actually agrees with its own documentation. It is said that
+;; packing can makes the alignment requirements of a structure member smaller,
+;; unless an explicit alignment has been stated with __declspec(align(n)).
+
+;; The consequence is that we now need to keep track of declared alignment
+;; additional to natural alignment because the contribute differently here.
+
+;; A simple test is:
+
+;;     typedef __declspec((align(16))) char foo;
+;;     #pragma pack(push,1)
+;;     struct bar { char a; foo b; };
+;;     #pragma pack(pop)
+
+;; Now sizeof(struct bar) == 32
+
+;; gcc still packs 'b'.
+
+;; Further the explicit alignment can spill from structure members to the
+;; overall structure. That is a structure member with explicit alignment can
+;; make the structure itself be considered explicitly aligned. fpieee.h
+;; exposes this.
+
+;; Overall I believe it makes sense that explicit alignment cannot be
+;; overwritten by packing.
+
+;; We keep implementing Microsoft's conventions here for they are the
+;; authority to set the ABI for Windows.
+
+;; Another discrepancy between gcc/clang and MSVC with typedef. Consider
+
+;;    __declspec(align(32)) typedef struct foo { .. } foo;
+
+;; Here when using "foo" gcc/clang just forgets about the alignment, while
+;; MSVC applies this alignment.
+
+(defvar *debug-record-type-layout* nil)
+
+(defclass ms-struct-layout-mixin () ())
+
+(defun type-declared-align/char (type env)
+  (max*
+   (dolist (qual (type-qualifiers-1 type env))
+     (when (align-qualifier-p qual)
+       (return (align-qualifier-align qual env))))
+   (and (record-type-p type env)
+        (let ((n (nth-value 3 (record-type-layout type env))))
+          (and n (/ n 8))))))
+
+(defmethod abi-record-type-layout
+    ((abi ms-struct-layout-mixin) record-type env offset &aux (*note-nest* (+ *note-nest* 1)))
+  (assert (record-type-p record-type))
+  (let* ((members        (record-type-members record-type env :errorp t))
+         (qualifiers     (record-type-qualifiers record-type env))
+         (pack           (record-type-pack record-type env))
+         (kind           (record-type-kind record-type))
+         (max-align      8)       ;overall structure alignment in bits
+         (max-decl-align nil) ;overall maximum declared align in bits if any
+         (allo offset)        ;allocation pointer in bits
+         ;; overall maximum allocation, may differ from `allo' in case of unions.
+         (max-allo offset)
+         ;; allocation unit
+         (allo-unit nil)                ;size of allocation unit
+         (allo-unit-allo 0) ;current allocation within current allocation unit
+         (allo-unit-pos 0) ;position of the allocation unit within overall structure
+         (res nil)         ;assembled list of member layouts
+         (last-was-zero t))
+    (labels ((allo-one (name size align)
+               "Allocates one member of size _size_ and with alignment
+               _align_. ALLO and MAX-ALIGN are updated accordingly.
+               Returns the starting offset."
+               (when *debug-record-type-layout*
+                 (note "allo-one ~4D ~4D ~S" size align name))
+               (let ((pos (* align (ceiling allo align))))
+                 (setf max-align (max max-align align))
+                 (setf max-allo (max max-allo (+ pos size)))
+                 (unless (eq kind ':union)
+                   (setq allo (+ pos size)))
+                 pos)))
+      ;;
+      (do ((q members (cdr q)))
+          ((endp q))
+        (let ((member (car q)))
+          (multiple-value-bind (member-name member-type)
+              (values (record-member-name member)
+                      (record-member-type member))
+            (let ((decl-align (declaration-align-value member env)))
+              (cond ((bit-field-type-p member-type)
+                     (let ((width (c-eval (bit-field-type-width member-type) env)) ;eval?
+                           (base-type (bit-field-type-base-type member-type env)))
+                       (multiple-value-bind (base-size base-align)
+                           (progn
+                             (multiple-value-bind (base-size base-align)
+                                 (type-size-align base-type env)
+                               (when decl-align
+                                 ;; ### 8, min or max? Multiple?
+                                 (setq base-align (max base-align (* 8 decl-align))))
+                               (let ((pack (or (record-member-pack member) pack)))
+                                 (let ((base-align (if pack (min (* 8 pack) base-align) base-align)))
+                                   (values base-size base-align)))))
+                         (check-type base-size (integer 1 *))
+                         (check-type base-align (integer 1 *))
+                         (unless (<= 0 width base-size)
+                           (blame record-type "~@<Bit-field '~A' ~
+                                                    of width ~D does not fit its unit ~
+                                                    of type '~/NOFFI:~TYPE/'.~:@>"
+                                  member-name width base-type))
+                         (cond ((zerop width)
+                                (when allo-unit
+                                  (when '(and (cdr q))
+                                    ;; | N2176 6.7.2.1 (12) "As a special case, a bit-field structure member
+                                    ;; | with a width of 0 indicates that no further bit-field is to be
+                                    ;; | packed into the unit in which the previous bit-field, if any, was
+                                    ;; | placed."
+                                    ;;
+                                    ;; With MS this still has influence on the overall struct alignment. We
+                                    ;; achieve that with ALLO-ONE.
+                                    (setq allo-unit nil
+                                          allo-unit-allo 0)
+                                    (unless last-was-zero
+                                      (setq allo-unit-pos (allo-one member-name 0 base-align)))))
+                                (setq last-was-zero t))
+                               (t
+                                (setq last-was-zero nil)
+                                ;;
+                                ;; Decide whether we need a new allocation unit for bit-fields
+                                ;;
+                                (when (or (null allo-unit)
+                                          (/= base-size allo-unit)
+                                          (> (+ allo-unit-allo width) allo-unit))
+                                  (setq allo-unit base-size
+                                        allo-unit-allo 0
+                                        allo-unit-pos (allo-one member-name base-size base-align)))
+                                (assert (<= (+ allo-unit-allo width) allo-unit) ()
+                                        "Bitfield member does not fit")
+                                ;;
+                                (when member-name
+                                  (push (list member-name
+                                              member-type
+                                              width
+                                              (+ allo-unit-pos allo-unit-allo))
+                                        res))
+                                (unless (eq kind ':union)
+                                  (incf allo-unit-allo width)))))))
+                    (t
+                     ;; Alignment
+                     ;;
+                     ;; MS says that a __declspec(align(n)) wins over packing, to tell we need to
+                     ;; tell the natural alignment from the declared alignment. To do this, we need
+                     ;; to tell the natural alignment.
+                     ;;
+                     (setq allo-unit nil)
+                     (setq last-was-zero nil)
+                     (multiple-value-bind (member-size member-align)
+                         (let ((pack (or (record-member-pack member) pack)))
+                           ;; Unspecified array size in records.
+                           ;;
+                           ;; Actually these are only allowed as the last member. However, somehow
+                           ;; the size is still assumed to be 4 (no matter what the type) for the
+                           ;; purpose of the the size of the containing struct. The member itself
+                           ;; still reports as zero.
+                           ;;
+                           ;; We see a discrepancy with sizeof(struct _CLUSTER_VALIDATE_PATH). We
+                           ;; say 0, MS says 4.
+                           ;;
+                           (multiple-value-bind (member-size member-align)
+                               (if (and (array-type-p member-type) (incomplete-array-type-p member-type))
+                                   ;; ### Here we need tests for the array align
+                                   (values (ecase kind
+                                             (:struct 0)
+                                             (:union (type-size-align (array-type-base member-type) env)))
+                                           (nth-value 1 (type-size-align (array-type-base member-type) env)))
+                                   (type-size-align member-type env))
+                             ;; Now care for any declared alignment, which takes precedence over packing
+                             ;; with MS.
+                             (let ((decl-align (or decl-align (type-declared-align/char member-type env))))
+                               (when t ;; '(eq member-name '#_Context)
+                                 (when *debug-record-type-layout*
+                                   (note "~S size ~D align ~D pack ~S decl-align ~S"
+                                         member-name
+                                         member-size
+                                         member-align
+                                         pack decl-align)))
+                               (when pack
+                                 (setq member-align (min member-align (* 8 pack))))
+                               ;; Now, with MS a declared alignment takes precedence
+                               (when decl-align
+                                 (when (and pack (> decl-align pack))
+                                   (warn "~S:~S has larger declared alignment ~D than packing ~D."
+                                         (record-type-name record-type)
+                                         member-name
+                                         decl-align pack))
+                                 (setq max-decl-align (max* max-decl-align (* 8 decl-align)))
+                                 (setq member-align (* 8 decl-align))))
+                             ;;
+                             (values member-size member-align)))
+                       ;;
+                       (push (list member-name
+                                   member-type
+                                   member-size
+                                   (allo-one member-name member-size member-align))
+                             res)
+                       ;; ### What if there is no name and this isn't a transperent struct or
+                       ;; ### union?
+                       ))))))))
+    #+NIL
+    (setq max-align
+          ;; Some __attribute__((aligned(n))) may override this
+          (dolist (q qualifiers max-align)
+            (when (align-qualifier-p q)
+              (return (* 8 (align-qualifier-align q env))))))
+    (setq max-allo (* max-align (ceiling max-allo max-align)))
+    (when *debug-record-type-layout*
+      (note "=> size = ~D, align = ~D, explicit align = ~D" 
+            (* max-align (ceiling max-allo max-align))
+            max-align
+            max-decl-align))
+    ;; MS Kludge. Somehow struct foo { char :0; } or struct 
+    (when (= max-allo 0)
+      (setf max-allo (* 4 8)))
+    ;;
+    (values
+     (reverse res)
+     max-allo
+     max-align
+     max-decl-align)))
+
+
+

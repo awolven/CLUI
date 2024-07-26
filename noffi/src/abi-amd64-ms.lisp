@@ -35,6 +35,7 @@
 
 (defclass abi-amd64-ms (iso-c17-mixin
                         msvc-abi-mixin
+                        ms-struct-layout-mixin
                         abi)
   ())
 
@@ -95,6 +96,12 @@
 (defmethod abi-basic-type-specifier-lexemes append ((abi abi-amd64-ms))
   (declare (ignorable abi))
   '())
+
+(defmethod abi-type-qualifier-lexemes append ((abi abi-amd64-ms))
+  '((:__uptr                  "__uptr" "_uptr")
+    (:__ptr32                 "__ptr32" "_ptr32")
+    (:__ptr64                 "__ptr64" "_ptr64")
+    (:__unaligned             "_unaligned" "__unaligned") )) ;This is a declspec rather!
 
 (defmethod abi-maybe-translate-base-type or ((abi msvc-abi-mixin) type-specifiers)
   (cadr (assoc type-specifiers

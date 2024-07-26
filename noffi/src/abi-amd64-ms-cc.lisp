@@ -28,8 +28,6 @@
 
 (in-package :noffi)
 
-#+NOFFI-AMD64-MS-ABI (progn
-
 ;;;; -- Overview ------------------------------------------------------------------------------
 
 ;;; Summary
@@ -51,8 +49,14 @@
 ;; Other record types are returned by passing a pointer to the result as
 ;; first argument.
 
+;; We need to be careful though: With declared arguments `float'
+;; arguments are passed as single floats, while with undeclared
+;; arguments they are passed promoted as `double'.
+
 
 ;;;; -- Common --------------------------------------------------------------------------------
+
+#+NOFFI-AMD64-MS-ABI (progn
 
 (defmacro $amd64-ms-funcall-template ()
   ` (let ((to-free nil))
@@ -72,6 +76,7 @@
 ;; cons-ptr
 
 ;; add-int-arg type value
+;; add-float-arg type value
 ;; add-double-arg type value
 ;; add-ptr-arg type value
 ;; do-call type
@@ -83,11 +88,15 @@
   ` (labels ((process-arg (arg parameter-type)
                (when (array-type-p parameter-type)
                  (setq parameter-type (make-pointer-type (array-type-base parameter-type))))
-               (setq arg (promoted-cval arg))
+               ;; (setq arg (promoted-cval arg)) <--- don't
                (cond ((integer-type-p parameter-type)
                       (add-int-arg parameter-type (cval-value (c-coerce arg :unsigned-long-long))))
                      ((float-type-p parameter-type)
-                      (add-double-arg parameter-type (cval-value (c-coerce arg :double))))
+                      (ecase (car (float-type-p parameter-type))
+                        (:float
+                         (add-float-arg parameter-type (cval-value (c-coerce arg :float))))
+                        (:double
+                         (add-double-arg parameter-type (cval-value (c-coerce arg :double))))))
                      ((pointer-type-p parameter-type)
                       (add-ptr-arg parameter-type
                                (ptr-effective-sap (c-coerce arg parameter-type))))
@@ -116,7 +125,11 @@
              (error "Too few arguments"))
            (when (and (null p) a (not restp))
              (error "Too many arguments"))
-           ;; Rest args
+           ;;
+           ;; Rest args.
+           ;;
+           ;; While in &rest args, do we need to promote float? btw what about long long?
+           ;;
            (dolist (arg a)
              (cond ((cvalp arg)       (process-arg arg (cval-type arg)))
                    ((integerp arg)    (process-arg arg ':int))
@@ -157,6 +170,10 @@
     (labels ((add-int-arg (type val)
                (declare (ignore type))
                (push :unsigned-doubleword ff-call-args)
+               (push val ff-call-args))
+             (add-float-arg (type val)
+               (declare (ignore type))
+               (push :single-float ff-call-args)
                (push val ff-call-args))
              (add-double-arg (type val)
                (declare (ignore type))
@@ -205,6 +222,10 @@
                    (declare (ignore type))
                    (push :unsigned-doubleword ff-call-args)
                    (push val ff-call-args))
+                 (add-float-arg (type val)
+                   (declare (ignore type))
+                   (push :single-float ff-call-args)
+                   (push val ff-call-args))
                  (add-double-arg (type val)
                    (declare (ignore type))
                    (push :double-float ff-call-args)
@@ -237,7 +258,9 @@
 
 ;;;; -- SBCL ----------------------------------------------------------------------------------
 
-#+(AND SBCL NOFFI-AMD64-MS-ABI)
+;; SBCL needs a little help. ACL as well.
+
+#+(AND (OR SBCL EXCL) NOFFI-AMD64-MS-ABI)
 (defparameter +amd64-ms-trampoline+
   (coerce 
    '(
@@ -278,7 +301,7 @@
                                      sb-sys:system-area-pointer))
        fun count io-sap))))
 
-#+(AND SBCL NOFFI-AMD64-MS-ABI)
+#+(AND NOFFI-AMD64-MS-ABI (OR SBCL EXCL))
 (defun c-funcall (fun &rest args)
   (let ((nargs (length args)) (io-off 0)
         the-res)
@@ -287,6 +310,10 @@
                  (declare (ignore type))
                  (setf (sap-peek-u64 io io-off) (ldb (byte 64 0) val))
                  (incf io-off 8))
+               (add-float-arg (type val)
+                 (declare (ignore type))
+                 (setf (sap-peek-float io io-off) val)
+                 (incf io-off 8))       ;xxx Now? sic!
                (add-double-arg (type val)
                  (declare (ignore type))
                  (setf (sap-peek-double io io-off) val)
@@ -295,9 +322,23 @@
                  (declare (ignore type))
                  (setf (sap-peek-sap io io-off) val)
                  (incf io-off 8))
-               (do-call (rtype)
-                 (declare (ignore rtype))
-                 (amd-64-ms-ff-call (ptr-effective-sap fun) (* 2 (ceiling (1+ nargs))) io))
+                 (do-call (rtype)
+                   (declare (ignore rtype))
+                   (if (float-type-p rtype)
+                       (ecase (car (float-type-p rtype))
+                         (:float 
+                          (amd-64-ms-ff-call-float
+                           (ptr-effective-sap fun)
+                           (* 2 (ceiling (1+ nargs))) ;wut?
+                           io))
+                         (:double 
+                          (amd-64-ms-ff-call-double
+                           (ptr-effective-sap fun)
+                           (* 2 (ceiling (1+ nargs))) ;wut?
+                           io)))
+                       (amd-64-ms-ff-call (ptr-effective-sap fun)
+                                          (* 2 (ceiling (1+ nargs))) ;wut?
+                                          io)))
                (make-res (type)
                  (setq the-res (c-make type 1 nil)))
                (get-res ()
@@ -310,6 +351,8 @@
 
 #+(AND SBCL NOFFI-AMD64-MS-ABI)
 (defmacro static-c-funcall-2 (fun-type identifier &rest args)
+  ;; We come along here only if higher up we already determined that the
+  ;; host Lisp can do that.
   (let ((alien-args nil) (alien-parameter-types nil) to-free
         (res (gensym "RES."))
         res-init)
@@ -327,6 +370,10 @@
                  (declare (ignore type))
                  (push '(sb-alien:unsigned 64) alien-parameter-types)
                  (push arg alien-args))
+               (add-float-arg (type arg)
+                 (declare (ignore type))
+                 (push 'single-float alien-parameter-types)
+                 (push arg alien-args))
                (add-double-arg (type arg)
                  (declare (ignore type))
                  (push 'double-float alien-parameter-types)
@@ -342,6 +389,61 @@
                    `(sb-alien:alien-funcall 
                      (sb-alien:extern-alien ,(identifier-name identifier) ,alien-type)
                      ,@(reverse alien-args))))
+               (make-res (type)
+                 (setq res-init `(c-make ',type 1 nil)))
+               (get-res ()
+                 res)
+               (deposit-res-1 (accessor value)
+                 `(setf (,accessor ,res 0) ,value))
+               ($progn (&rest body)
+                 `(progn ,@body)))
+        (macrolet ((deposit-res (accessor value)
+                     `(deposit-res-1 ',accessor ,value)))
+          (multiple-value-bind (rtype ptypes restp)
+              (function-type-signature fun-type)
+            (let ((body ($amd64-ms-funcall-template-2)))
+              (when res-init
+                (setq body `(let ((,res ,res-init)) ,body)))
+              body)))))))
+
+#+(AND EXCL NOFFI-AMD64-MS-ABI)
+(defmacro static-c-funcall-2 (fun-type identifier &rest args)
+  ;; We come along here only if higher up we already determined that the
+  ;; host Lisp can do that.
+  (let ((alien-args nil)  to-free
+        (res (gensym "RES."))
+        res-init)
+    (labels ((cval-value (x) `(cval-value ,x))
+             (c-coerce (x y) `(c-coerce ,x ',y))
+             (ptr-effective-sap (x) `(ptr-effective-sap ,x))
+             (peek-u8 (&rest xs) `(peek-u8 ,@xs))
+             (peek-u16 (&rest xs) `(peek-u16 ,@xs))
+             (peek-u32 (&rest xs) `(peek-u32 ,@xs))
+             (peek-u64 (&rest xs) `(peek-u64 ,@xs))
+             (promoted-cval (x) `(promoted-cval ,x))
+             (cons-ptr (x y z) `(cons-ptr ,x ,y ',z))
+             ($ldb (x y) `(ldb ',x ,y)))
+      (labels ((add-int-arg (type arg)
+                 (declare (ignore type))
+                 (push :unsigned-nat alien-args)
+                 (push arg alien-args))
+               (add-double-arg (type arg)
+                 (declare (ignore type))
+                 (push :double alien-args)
+                 (push arg alien-args))
+               (add-float-arg (type arg)
+                 (declare (ignore type))
+                 (push :float alien-args)
+                 (push arg alien-args))
+               (add-ptr-arg (type arg)
+                 (declare (ignore type))
+                 (push :unsigned-nat alien-args)
+                 (push arg alien-args))
+               (do-call (rtype)
+                 (push (foreign-type-for-funcall rtype) alien-args)
+                 `(ff-call
+                   ,(identifier-name identifier)
+                   ,@(reverse alien-args)))
                (make-res (type)
                  (setq res-init `(c-make ',type 1 nil)))
                (get-res ()

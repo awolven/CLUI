@@ -29,29 +29,38 @@
    #:start-column
    #:end-column
    ||#
-
    #:with-input-from-lexer
-   #:test-lexer
-   #:with-scan
-   #:with-match
+   ;;
    #:scan
-   #:match
    #:scanner
-   #:matcher
-   #:tranducer
-   #:transduce-string
-   #:show-dfa
+   #:with-scan
    #:scan-case
+   #:scan-to-strings
+   ;;
+   #:match
+   #:matcher
+   #:with-match
    #:match-case
+   #:match-to-strings
+   ;;
+   #:transducer                         ;reserved
+   #:transduce-string                   ;reserved
+   ;;
+   #:test-lexer
+   #:show-dfa
    )
   (:shadow #:step))
 
 (in-package :clex2)
 
-(locally
-(declaim (optimize (speed 3) (safety 1)))
+(eval-when (:compile-toplevel)
+  (declaim (optimize (speed 3) (safety 1))))
 
 ;;;; -- Changes -------------------------------------------------------------------------------
+
+;; 2024-05-12   GB      - Support for :READ-SEQUENCE and :UNREAD-SEQUENCE scanner options.
+;;                      - SCAN, SCANNER, WITH-SCAN, SCAN-CASE, SCAN-TO-STRINGS
+;;                      - MATCH, MATCHNER, WITH-MATCH, MATCH-CASE, MATCH-TO-STRINGS
 
 ;; 2022-10-12   GB      - We did away with RE-* and use RE-** always further
 ;;                        min=-1 is the not yet expanded iteration for the POSIX
@@ -269,6 +278,10 @@
 ;; by "CLEX::" no harm is done. Common Lisp is not about establishing fences
 ;; and walls, but more about to give the progammer a lot of rope to play
 ;; with. Or put otherwise: Just don't mess with my package. End of story.
+
+
+;;; Fixes
+#+SBCL (declaim (notinline parsed-lexer-p)) ;Dammit, I didn't ask for that!
 
 
 ;;;; -- Implementation ------------------------------------------------------------------------
@@ -935,9 +948,23 @@ resulting set iff
 (defun re-char (c)
   (re-set (isum-singleton (if (characterp c) (char-code c) c))))
 
+(declaim (inline re-stripped))
+(defun re-stripped (re)
+  "The regular expression /re/ without any SETQ nodes."
+  (or (re-%stripped re)
+      (if (null (re-%vars re))
+          re
+          (setf (re-%stripped re)
+                (re-stripped-1 re)))))
+
 ;;; RE-OR
 
 ;; Note: RE-AND is no function and short circuits.
+
+(define-compiler-macro re-or (&rest terms)
+  (cond ((null terms) nil)
+        ((null (cdr terms)) (car terms))
+        (t (reduce #'(lambda (x y) `(re-or/2 ,x ,y)) terms))))
 
 (declaim (inline re-or/2))
 (defun re-or/2 (x y)
@@ -968,11 +995,6 @@ resulting set iff
   (cond ((null terms) +null+)
         ((null (cdr terms)) (car terms))
         (t (reduce #'re-or/2 terms))))
-
-(define-compiler-macro re-or (&rest terms)
-  (cond ((null terms) nil)
-        ((null (cdr terms)) (car terms))
-        (t (reduce #'(lambda (x y) `(re-or/2 ,x ,y)) terms))))
 
 ;;; RE-AND
 
@@ -1061,15 +1083,6 @@ resulting set iff
   (let ((res +epsilon+))
     (loop for v in vars do (setf res (re-and res (re-setq v))))
     res))
-
-(declaim (inline re-stripped))
-(defun re-stripped (re)
-  "The regular expression /re/ without any SETQ nodes."
-  (or (re-%stripped re)
-      (if (null (re-%vars re))
-          re
-          (setf (re-%stripped re)
-                (re-stripped-1 re)))))
 
 (defun re-setq-free-p (re)
   "Is the regular expression /re/ free of SETQ nodes?"
@@ -3019,7 +3032,9 @@ resulting set iff
   (syntax :flex)
   interactive-p
   (sloc-mode nil)
-  %has-ctx)
+  %has-ctx
+  (read-sequence-fun nil)
+  (unread-sequence-fun nil))
 
 (defstruct lexer-rule
   prefix                                ;### never used
@@ -3280,6 +3295,7 @@ lexer must have."
            (let* ((exit            (dfa-state-exit-transition dfa q))
                   (exit-subst      (and exit (transition-subst exit)))
                   (cat             (and exit (subst-cat (transition-subst exit))))
+                  #+(or)
                   (backup-less-p   (and exit cat ;we cannot do this, if category is unknown
                                         (not (dfa-state-needs-backup-p dfa q))))
                   ;;
@@ -3354,6 +3370,7 @@ lexer must have."
                             `(isum-case ch
                                ,@(append clauses (list (list t jam-goto)))))))))
                   )
+             (declare (ignorable backup-less-p))
              ;;
              (cond
                ;; special case for no effective contextes
@@ -3606,7 +3623,7 @@ lexer must have."
                           (and ,test
                                (or ,cache-var
                                    (setq ,cache-var
-                                         (subseq ,string-var ,start-reg ,end-reg)))))))
+                                         (subseq-string ,string-var ,start-reg ,end-reg)))))))
              (macrolet (,(buffer-macro ':start
                                        (mapcar (lambda (b) (list (car b) (cadr b) (caddr b)))
                                                bindings))
@@ -4213,7 +4230,9 @@ context. Usually a dispatch on the condition follows."
         (dot-includes-newline nil)
         (interactive-p nil)
         (binaryp nil)
-        (sloc-mode :unspecified))
+        (sloc-mode :unspecified)
+        (read-sequence-fun nil)
+        (unread-sequence-fun nil))
     ;;
     (macrolet
         ((destructuring-case ((var) &rest clauses)
@@ -4314,7 +4333,7 @@ context. Usually a dispatch on the condition follows."
                                 (setf binaryp nil))
                                (t
                                 (error "Unrecognized ~S option: ~S" :element-type element-type))))
-                        ((:interactive-p) (boolean)
+                        ((:interactive-p :interactive) (boolean)
                          (setq interactive-p boolean))
                         ((:track-file-position-p) (boolean)
                          (setq track-file-position-p boolean))
@@ -4322,6 +4341,13 @@ context. Usually a dispatch on the condition follows."
                          (setq count-columns-p boolean))
                         ((:count-lines-p) (boolean)
                          (setq count-lines-p boolean))
+                        ((:read-sequence) (fun)
+                         (setq read-sequence-fun fun))
+                        ((:unread-sequence) (fun)
+                         (when *template-closure-p*
+                           (error "The ~S option is only supported with ~S."
+                                  ':unread-sequence 'lexing))
+                         (setq unread-sequence-fun fun))
                         ;;
                         (t
                          (cond ((keywordp (car clause))
@@ -4401,6 +4427,8 @@ context. Usually a dispatch on the condition follows."
          :count-columns-p (if (eq sloc-mode :unspecified)
                               count-columns-p
                               (member sloc-mode '(:line-column)))
+         :read-sequence-fun read-sequence-fun
+         :unread-sequence-fun unread-sequence-fun
          :conditions conditions
          :rules (append (reverse rules)
                         ;; Add default :EOF rules
@@ -4630,11 +4658,11 @@ context. Usually a dispatch on the condition follows."
                        (let ((ch 0))
                          (declare (type fixnum ch))
                          (tagbody
-                          start
-                            (setf bptr     fin-ptr
-                                  rptr     (1- fin-ptr))
+                           start
+                                 (setf bptr     fin-ptr
+                                       rptr     (1- fin-ptr))
 
-                            ,@dispatch)))))))))
+                                 ,@dispatch)))))))))
       (let (bindings declarations)
         (when (parsed-lexer-has-condition lexer)
           ;;current condition we are in
@@ -4670,6 +4698,7 @@ context. Usually a dispatch on the condition follows."
                  (if stringp (or ,start-form 0) 0))
                 ,@bindings)
            (declare (type fixnum saved-fptr saved-fin-ptr)
+                    (ignorable virgin-p)
                     ,@declarations
                     (type fixnum saved-buffer-length))
            ,(if *template-closure-p*
@@ -4684,7 +4713,14 @@ context. Usually a dispatch on the condition follows."
                           (make-concatenated-stream
                            (make-string-input-stream (subseq saved-buffer saved-fin-ptr saved-fptr))
                            input)) ))
-                main))))))
+                (if (parsed-lexer-unread-sequence-fun lexer)
+                    `(unwind-protect
+                          ,main
+                       (,(parsed-lexer-unread-sequence-fun lexer)
+                         saved-buffer input
+                         :start saved-fin-ptr
+                         :end saved-fptr))
+                    main)))))))
 
 ;;; Traking FILE-POSITION
 
@@ -4696,8 +4732,8 @@ context. Usually a dispatch on the condition follows."
 
 (defun template-underflow-fun (lexer &key dec binaryp track-charactor-position-p)
   (let ((interactive-read
-         (if binaryp
-             `(read-sequence buffer input :start fptr :end (+ fptr 1))
+         (if (or binaryp (parsed-lexer-read-sequence-fun lexer))
+             `(,(or (parsed-lexer-read-sequence-fun lexer) 'read-sequence) buffer input :start fptr :end (+ fptr 1))
              `(progn
                 (unless virgin-p
                   ;; Consume the peeked char. EOF?
@@ -4730,7 +4766,7 @@ context. Usually a dispatch on the condition follows."
                      (1+ fptr))))))
         (buffered-read
          ;; BTW, where is READ-SEQUENCE-NO-BLOCK or sth. similar
-         `(read-sequence buffer input :start fptr :end buffer-length) ))
+         `(,(or (parsed-lexer-read-sequence-fun lexer) 'read-sequence) buffer input :start fptr :end buffer-length) ))
     `(underflow
       ()
       ,*track-file-position-p*
@@ -5059,7 +5095,7 @@ integer? Returns that `n' or NIL."
   ((string   :initarg :string   :reader bad-pattern-string)
    (position :initarg :position :reader bad-pattern-position))
   (:report (lambda (condition stream)
-             (format stream "Bad regulare expression; ~?~%~A~@[~%~v<~>^~]"
+             (format stream "Bad regular expression; ~?~%~A~@[~%~v<~>^~]"
                      (simple-condition-format-control condition)
                      (simple-condition-format-arguments condition)
                      (bad-pattern-string condition)
@@ -6000,121 +6036,123 @@ integer? Returns that `n' or NIL."
                   (apply #'cg-cond clauses)))))))
 
 (defvar *code*)
-
-;;(defparameter *string-type* '(simple-array character (*)))
-
 (defvar *translate-dfa*)                ;debugging aid
 
-(defun translate-dfa (dfa output-registers)
-  (setq *gensym-counter* 0)
-  (setq *code*
-        (let* (*won-needed*
-               ;;
-               (p       #+(or) (gensym "P.") #-(or) 'p)
-               (start   #+(or) (gensym "START.") #-(or) 'start)
-               (end     #+(or) (gensym "END.") #-(or) 'end)
-               (won (gensym "WON."))
-               (buffer (gensym "BUFFER."))
-               (len (gensym "LENGTH."))
-               (c (gensym "C."))
-               (out output-registers)
-               (regs (loop for r in (union out (dfa-all-registers dfa)) collect
-                           (etypecase r
-                             ((or symbol integer)
-                              (cons r (register-var r))))))
-               (env (list* (cons 'p p)
-                           (cons 'end end)
-                           (cons 'buffer buffer)
-                           (cons 'won won)
-                           (cons 'curchar c)
-                           regs)))
-          ;;
-          `(lambda (,buffer &key ((:start ,start) 0) ((:end ,end) nil))
-             #+SBCL (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
-             (check-type ,buffer ,*string-type*)
-             (let ((,len (length ,buffer)))
-               (declare (type (integer 0 ,array-total-size-limit) ,len))
-               (setq ,end (or ,end ,len))
-               (check-type ,start (integer 0 ,array-total-size-limit))
-               (check-type ,end (integer 0 ,array-total-size-limit))
-               (assert (<= 0 ,start ,end ,len)))
-             (let ((,buffer ,buffer)
-                   (,p ,start)
-                   (,end ,end)
-                   (,c 0))
-               (declare (type ,*string-type* ,buffer)
-                        (type (integer 0 ,array-total-size-limit) ,p ,end ,start)
-                        (type (integer -2 (,char-code-limit)) ,c)
-                        (ignorable ,c)
-                        (ignorable ,buffer ,p ,end)
-                        (optimize (speed 3) (safety 0)))
-               ,(simp-prog
-                 `(prog ((,won nil) ,@(mapcar (lambda (r)
-                                                `(,(cdr r) -1))
-                                              regs))
-                     (declare (ignorable ,won ,@(mapcar #'cdr regs))
-                              (type (integer -1 ,array-total-size-limit)
-                                    ,@(mapcar #'cdr regs)))
-                     ;; When scanning, we need an overall loop incrementing the position we look at.
-                     ,@(when *scanning-mode-p*
-                             (let ((bof-transition
-                                    (find-if (lambda (tr)
-                                               (and (consp (transition-sigma tr))
-                                                    (isum-member +beginning-of-file-sentinel+
-                                                                 (transition-sigma tr))))
-                                             (dfa-state-transitions (dfa-state dfa 3))))
-                                   (eof-tr
-                                    (find-if (lambda (tr)
-                                               (and (consp (transition-sigma tr))
-                                                    (isum-member +end-of-file-sentinel+
-                                                                 (transition-sigma tr))))
-                                             (dfa-state-transitions (dfa-state dfa 3))))
-                                   (char-trs
-                                    (dfa-state-char-transitions (dfa-state dfa 3))))
-                               `(
-                                 start
-                                 ;; The initial dispatch on :BOF
-                                 ,@(and bof-transition
-                                        (cg-progn*
-                                         (list (translate-goto (transition-to bof-transition)
-                                                               (shift-subst (transition-subst bof-transition) -1)
-                                                               nil
-                                                               env))))
-                                 ;; Any further dispatch
-                                 scan-loop
-                                 ,@(cond #+NIL
-                                         ((null char-trs)
-                                          `((return (values))))
-                                         (t
-                                          `(
-                                            (when (= ,start ,end)
-                                              (return (values))) ;hmm
-                                            (setq ,p ,start)
-                                            (setq ,start (the (integer 0 ,array-total-size-limit) (+ ,start 1)))
-                                            ;; 3         ;???
-                                            ,@(translate-state dfa (dfa-state dfa 3) out env)
-                                            (go scan-loop)
-                                            )) ))))
-                     ;;
-                     ,@(loop for i from 3 below (length (dfa-states dfa)) append
-                             `(,(intern-Qn i)
-                                (progn ,@(translate-state dfa (dfa-state dfa i) out env))
-                                (go ,(intern-Qn 1))))
+(defun translate-dfa (dfa output-registers &key (use-key-args nil))
+  (let ((*gensym-counter* 0))
+    (setq *code*
+          (let* (*won-needed*
+                 ;;
+                 (p       #+(or) (gensym "P.") #-(or) 'p)
+                 (start   #+(or) (gensym "START.") #-(or) 'start)
+                 (end     #+(or) (gensym "END.") #-(or) 'end)
+                 (won (gensym "WON."))
+                 (buffer (gensym "BUFFER."))
+                 (len (gensym "LENGTH."))
+                 (c (gensym "C."))
+                 (out output-registers)
+                 (regs (loop for r in (union out (dfa-all-registers dfa)) collect
+                             (etypecase r
+                               ((or symbol integer)
+                                (cons r (register-var r))))))
+                 (env (list* (cons 'p p)
+                             (cons 'end end)
+                             (cons 'buffer buffer)
+                             (cons 'won won)
+                             (cons 'curchar c)
+                             regs)))
+            ;;
+            `(lambda ,(if use-key-args
+                          `(,buffer &key ((:start ,start) 0) ((:end ,end) nil))
+                          `(,buffer &optional (,start 0) (,end nil)))
+               #+SBCL (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
+               (check-type ,buffer ,*string-type*)
+               (locally
+                   (declare (type ,*string-type* ,buffer))
+                 (let ((,len (length ,buffer)))
+                   (declare (type (integer 0 ,array-total-size-limit) ,len))
+                   (setq ,end (or ,end ,len))
+                   (check-type ,start (integer 0 ,array-total-size-limit))
+                   (check-type ,end (integer 0 ,array-total-size-limit))
+                   (assert (<= 0 ,start ,end ,len)))
+                 (let ((,buffer ,buffer)
+                       (,p ,start)
+                       (,end ,end)
+                       (,c 0))
+                   (declare (type ,*string-type* ,buffer)
+                            (type (integer 0 ,array-total-size-limit) ,p ,end ,start)
+                            (type (integer -2 (,char-code-limit)) ,c)
+                            (ignorable ,c)
+                            (ignorable ,buffer ,p ,end)
+                            (optimize (speed 3) (safety 0)))
+                   ,(simp-prog
+                     `(prog ((,won nil) ,@(mapcar (lambda (r)
+                                                    `(,(cdr r) -1))
+                                                  regs))
+                              (declare (ignorable ,won ,@(mapcar #'cdr regs))
+                                       (type (integer -1 ,array-total-size-limit)
+                                             ,@(mapcar #'cdr regs)))
+                              ;; When scanning, we need an overall loop incrementing the position we look at.
+                              ,@(when *scanning-mode-p*
+                                      (let ((bof-transition
+                                             (find-if (lambda (tr)
+                                                        (and (consp (transition-sigma tr))
+                                                             (isum-member +beginning-of-file-sentinel+
+                                                                          (transition-sigma tr))))
+                                                      (dfa-state-transitions (dfa-state dfa 3))))
+                                            #+(or)
+                                            (eof-tr
+                                             (find-if (lambda (tr)
+                                                        (and (consp (transition-sigma tr))
+                                                             (isum-member +end-of-file-sentinel+
+                                                                          (transition-sigma tr))))
+                                                      (dfa-state-transitions (dfa-state dfa 3))))
+                                            (non-bof-dispatch
+                                             (translate-state dfa (dfa-state dfa 3) out env)))
+                                        `(start
+                                          ;; The initial dispatch on :BOF
+                                          ,@(and bof-transition
+                                                 (cg-progn*
+                                                  (list (translate-goto (transition-to bof-transition)
+                                                                        (shift-subst (transition-subst bof-transition) -1)
+                                                                        nil
+                                                                        env))))
+                                          ;; Any further dispatch
+                                          scan-loop
+                                          ,@(cond ((null non-bof-dispatch)
+                                                   ;; This catches anchored searches in scanning mode. There cannot be
+                                                   ;; anything matched when not in BOF.
+                                                   `((return (values))))
+                                                  (t
+                                                   `(
+                                                     (when (= ,start ,end)
+                                                       (return (values))) ;hmm
+                                                     (setq ,p ,start)
+                                                     (setq ,start (the (integer 0 ,array-total-size-limit) (+ ,start 1)))
+                                                     ;; 3         ;???
+                                                     ,@non-bof-dispatch
+                                                     (go scan-loop)
+                                                     )) ))))
+                              ;;
+                              ,@(loop for i from 3 below (length (dfa-states dfa)) append
+                                      `(,(intern-Qn i)
+                                         (progn ,@(translate-state dfa (dfa-state dfa i) out env))
+                                         (go ,(intern-Qn 1))))
                   
-                     ,(intern-Qn 1)
-                     ,@(if *won-needed*
-                          (list `(if ,won (go ,(intern-Qn 2)))))
-                     ,(if *scanning-mode-p*
-                          '(go scan-loop)
-                          '(return (values)))
-                     ,(intern-Qn 2)
-                     (return (values ,@ (let ((g (gensym)))
-                                          (labels ((foo (r)
-                                                     (setq r (register-var r))
-                                                     (if (member r regs :key #'cdr)
-                                                         `(let ((,g ,r)) (if (eql ,g -1) nil ,g))
-                                                         nil)))
-                                            (mapcar #'foo output-registers))))))))))))
+                              ,(intern-Qn 1)
+                              ,@(if *won-needed*
+                                    (list `(if ,won (go ,(intern-Qn 2)))))
+                              ,(if *scanning-mode-p*
+                                   '(go scan-loop)
+                                   '(return (values)))
+                              ,(intern-Qn 2)
+                              (return (values ,@ (let ((g (gensym)))
+                                                   (labels ((foo (r)
+                                                              (setq r (register-var r))
+                                                              (if (member r regs :key #'cdr)
+                                                                  `(let ((,g ,r)) (if (eql ,g -1) nil ,g))
+                                                                  nil)))
+                                                     (mapcar #'foo output-registers))))))))))))))
 
 (defun simp-prog (prog-form)
   (destructuring-bind (bindings &body body) (cdr prog-form)
@@ -6165,6 +6203,12 @@ integer? Returns that `n' or NIL."
                           (list tr))))))
           (dfa-state-transitions state)))
 
+
+;;;; -- Use as RE matcher API -----------------------------------------------------------------
+
+;; We have SCAN, SCANNER, SCAN-TO-STRINGS, WITH-SCAN, and SCAN-CASE.
+;; And the same saying 'MATCH' instead of 'SCAN'.
+
 (defun scan (pattern string
              &key (start 0) (end nil)
                   (dot-includes-newline t)
@@ -6178,10 +6222,138 @@ integer? Returns that `n' or NIL."
                     :anchored anchored)
            string :start start :end end))
 
+(defun scanner (pattern &rest args
+                &key (dot-includes-newline t)
+                     (case-sensitive t)
+                     (syntax :extended)
+                     (anchored nil))
+  (declare (ignore dot-includes-newline case-sensitive syntax anchored))
+  (compile nil (apply #'scanner-lambda pattern args)))
+
 (defun scan-to-strings (pattern string &rest options &key &allow-other-keys)
   (values-list
    (loop for (s e) on (multiple-value-list (apply #'scan pattern string options)) by #'cddr
          collect (and s (subseq string s e)))))
+
+(defmacro with-scan ((pattern input &key (start 0) (end nil)
+                              (syntax :extended) (dot-includes-newline t)
+                              (case-sensitive t) (anchored nil))
+                     &body body)
+  (multiple-value-bind (lambda-form varmap)
+      (scanner-lambda pattern 
+                      :syntax syntax
+                      :dot-includes-newline dot-includes-newline
+                      :case-sensitive case-sensitive
+                      :anchored anchored)
+    (let ((start-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "S.")) varmap))
+          (end-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "E.")) varmap))
+          (g.string (gensym "STRING.")))
+      `(let ((,g.string ,input))
+         (multiple-value-bind ,(mapcan #'list start-gensyms end-gensyms)
+             (,lambda-form ,g.string :start ,start :end ,end)
+           (declare (ignorable ,@(mapcan #'list start-gensyms end-gensyms)))
+           (when ,(car start-gensyms)
+             (with-submatch-macros-2
+                 (,g.string)
+                 ,(loop for var in varmap
+                        for s in start-gensyms
+                        for e in end-gensyms
+                        for test in (cons 't (cdr start-gensyms))
+                        collect (list var test s e))
+               ,@body)))))))
+
+(defmacro scan-case (&whole w
+                     (input &key (start 0) (end nil)
+                            (syntax :extended) (dot-includes-newline t)
+                            (case-sensitive t) (anchored nil))
+                     &body clauses)
+  (let ((binaryp nil))
+    (let ((default-tail (member-if (lambda (c) (member (car c) '(t otherwise))) clauses)))
+      (when (cdr default-tail)
+        (error "~@<Default clause is not the last in ~S~@:>" w))
+      (setq clauses (ldiff clauses default-tail))
+      (multiple-value-bind (macros clauses)
+          (labels ((f (x) (typep x '(cons (member =) t))))
+            (values (remove-if-not #'f clauses)
+                    (remove-if #'f clauses)))
+        (multiple-value-bind (lambda-form varmap)
+            (scanner-lambda (mapcar #'car clauses)
+                            :syntax syntax
+                            :dot-includes-newline dot-includes-newline
+                            :case-sensitive case-sensitive
+                            :anchored anchored
+                            :%vector-p t
+                            :macros (mapcar (lambda (m) (destructuring-bind (n e) (cdr m)
+                                                          (cons n e)))
+                                            macros))
+          (let ((start-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "S.")) varmap))
+                (end-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "E.")) varmap))
+                (g.string (gensym "STRING.")))
+            `(let ((,g.string ,input))
+               (multiple-value-bind (cat ,@(mapcan #'list start-gensyms end-gensyms))
+                   (,lambda-form ,g.string :start ,start :end ,end)
+                 (declare (ignorable ,@(mapcan #'list start-gensyms end-gensyms)))
+                 (labels ((subseq-string (v s e)
+                            ,(if binaryp
+                                 `(map 'string #'code-char (subseq v s e)) ;### slow
+                                 `(subseq v s e))))
+                   (declare (inline subseq-string))
+                   (with-submatch-macros-2
+                       (,g.string)
+                       ,(loop for var in varmap
+                              for s in start-gensyms
+                              for e in end-gensyms
+                              for test in (cons 't (cdr start-gensyms))
+                              collect (list var test s e))
+                     (case cat
+                       ,@ (let ((k 0))
+                            (mapcar (lambda (c)
+                                      `((,(1- (incf k))) ,@(cdr c)))
+                                    clauses))
+                          ,@ default-tail)))))))))))
+
+;;; "matching" is just an anchored scan.
+
+(defun match (pattern string
+              &rest args
+              &key (start 0) (end nil)
+                   (dot-includes-newline t)
+                   (case-sensitive t)
+                   (syntax :extended)
+                   (anchored t))
+  (declare (ignore start end dot-includes-newline case-sensitive syntax))
+  (apply #'scan pattern string :anchored anchored args))
+
+(defun matcher (pattern &rest args
+                &key (dot-includes-newline t)
+                     (case-sensitive t)
+                     (syntax :extended))
+  (declare (ignore dot-includes-newline case-sensitive syntax))
+  (compile nil (apply #'scanner-lambda pattern :anchored t args)))
+
+(defun match-to-strings (pattern string &rest options &key &allow-other-keys)
+  (values-list
+   (loop for (s e) on (multiple-value-list (apply #'scan pattern string :anchored t options)) by #'cddr
+         collect (and s (subseq string s e)))))
+
+(defmacro with-match ((pattern input &key (start 0) (end nil)
+                               (syntax :extended) (dot-includes-newline t)
+                               (case-sensitive t)
+                               (anchored t))
+                      &body body)
+  `(with-scan (,pattern ,input :start ,start :end ,end
+                        :syntax ,syntax
+                        :dot-includes-newline ,dot-includes-newline
+                        :case-sensitive ,case-sensitive
+                        :anchored ,anchored)
+     ,@body))
+
+(defmacro match-case ((input &rest options) &rest clauses)
+  `(scan-case (,input :anchored t ,@options)
+              ,@clauses))
+
+
+;;; compiler macros
 
 (define-compiler-macro scan (&whole whole
                              pattern string
@@ -6200,25 +6372,111 @@ integer? Returns that `n' or NIL."
                             :dot-includes-newline (eval dot-includes-newline)
                             :case-sensitive (eval case-sensitive)
                             :syntax (eval syntax)
-                            :anchored (eval anchored))
-            ,string :start ,start :end ,end))
+                            :anchored (eval anchored)
+                            :%use-key-args nil)
+            ,string ,start ,end))
         (t
          whole)))
 
-(defun scanner (pattern &rest args
-                &key (dot-includes-newline t)
-                     (case-sensitive t)
-                     (syntax :extended)
-                     (anchored nil))
-  (declare (ignore dot-includes-newline case-sensitive syntax anchored))
-    (compile nil (apply #'scanner-lambda pattern args)))
+(define-compiler-macro scanner (&whole whole
+                                pattern
+                                &key (dot-includes-newline t)
+                                     (case-sensitive t)
+                                     (syntax :extended)
+                                     (anchored nil))
+  (cond ((and (constantp pattern)
+              (constantp dot-includes-newline)
+              (constantp case-sensitive)
+              (constantp syntax)
+              (constantp anchored))
+         `#',(scanner-lambda (eval pattern)
+                             :dot-includes-newline (eval dot-includes-newline)
+                             :case-sensitive (eval case-sensitive)
+                             :syntax (eval syntax)
+                             :anchored (eval anchored)))
+        (t
+         whole)))
+
+(define-compiler-macro scan-to-strings (&whole whole
+                                               pattern string
+                                               &rest options
+                                               &key (start '0) (end 'nil)
+                                               &allow-other-keys)
+  (setq options (copy-list options))
+  (remf options :start)
+  (remf options :end)
+  (cond ((and (constantp pattern)
+              (every #'constantp options))
+         (multiple-value-bind (lambda-form varmap)
+             (apply #'scanner-lambda
+                    (eval pattern)
+                    :%use-key-args nil
+                    (mapcar #'eval options))
+           (let ((gs (mapcan (lambda (x) (declare (ignore x)) (list (gensym) (gensym))) varmap))
+                 (g.string (gensym "INPUT.")))
+             `(LET ((,g.string ,string))
+                (MULTIPLE-VALUE-BIND ,gs
+                    (,lambda-form ,g.string ,start ,end)
+                  (VALUES
+                   ,@(loop for (s e) on gs by #'cddr
+                           collect `(AND ,s (SUBSEQ ,g.string ,s ,e)))))))))
+        (t
+         whole)))
+
+(define-compiler-macro match (pattern string
+                              &rest args
+                              &key (start 0)
+                                   (end nil)
+                                   (dot-includes-newline t)
+                                   (case-sensitive t)
+                                   (syntax :extended)
+                                   (anchored 't))
+  (declare (ignore start end dot-includes-newline case-sensitive syntax))
+  `(scan ,pattern ,string :anchored ,anchored ,@args))
+
+(define-compiler-macro matcher (pattern &rest args)
+  `(scanner ,pattern :anchored t ,@args))
+
+(define-compiler-macro match-to-strings (&whole whole
+                                                pattern string
+                                                &rest options
+                                                &key (start '0) (end 'nil)
+                                                &allow-other-keys)
+  (setq options (copy-list options))
+  (remf options :start)
+  (remf options :end)
+  (cond ((and (constantp pattern)
+              (every #'constantp options))
+         (multiple-value-bind (lambda-form varmap)
+             (apply #'scanner-lambda
+                    (eval pattern)
+                    :%use-key-args nil
+                    :anchored t
+                    (mapcar #'eval options))
+           (let ((gs (mapcan (lambda (x) (declare (ignore x)) (list (gensym) (gensym))) varmap))
+                 (g.string (gensym "INPUT.")))
+             `(LET ((,g.string ,string))
+                (MULTIPLE-VALUE-BIND ,gs
+                    (,lambda-form ,g.string ,start ,end)
+                  (DECLARE (IGNORABLE ,@gs))
+                  (IF ,(car gs)
+                      (VALUES 
+                       T
+                       ,@(loop for (s e) on (cddr gs) by #'cddr
+                               collect `(AND ,s (SUBSEQ ,g.string ,s ,e))))
+                      (VALUES NIL)))))))
+        (t
+         whole)))
+
+
 
 (defun scanner-lambda (pattern &key (dot-includes-newline t)
                                     (case-sensitive t)
                                     (syntax :extended)
                                     (anchored nil)
                                     (%vector-p nil)
-                                    (macros nil))
+                                    (macros nil)
+                                    (%use-key-args t))
   "Returns a lambda expression for matching /pattern/ and a map of
   group capture names as a sequence."
   (multiple-value-bind (sre varmap)
@@ -6254,95 +6512,8 @@ integer? Returns that `n' or NIL."
                         :has-condition-dispatch nil
                         :has-lookahead *scanning-mode-p*))
            (dfa (setq *dfa* (dfa-simp dfa))))
-      (values (translate-dfa dfa output-registers)
+      (values (translate-dfa dfa output-registers :use-key-args %use-key-args)
               varmap))))
-
-(defmacro with-scan ((pattern input &key (start 0) (end nil)
-                              (syntax :extended) (dot-includes-newline t)
-                              (case-sensitive t) (anchored nil))
-                     &body body)
-  (multiple-value-bind (lambda-form varmap)
-      (scanner-lambda pattern 
-                      :syntax syntax
-                      :dot-includes-newline dot-includes-newline
-                      :case-sensitive case-sensitive
-                      :anchored anchored)
-    (let ((start-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "S.")) varmap))
-          (end-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "E.")) varmap))
-          (g.string (gensym "STRING.")))
-      `(let ((,g.string ,input))
-         (multiple-value-bind ,(mapcan #'list start-gensyms end-gensyms)
-             (,lambda-form ,g.string :start ,start :end ,end)
-           (declare (ignorable ,@(mapcan #'list start-gensyms end-gensyms)))
-           (when ,(car start-gensyms)
-             (with-submatch-macros-2
-                 (,g.string)
-                 ,(loop for var in varmap
-                        for s in start-gensyms
-                        for e in end-gensyms
-                        for test in (cons 't (cdr start-gensyms))
-                        collect (list var test s e))
-               ,@body)))))))
-
-(defmacro with-match ((pattern input &key (start 0) (end nil)
-                               (syntax :extended) (dot-includes-newline t)
-                               (case-sensitive t)
-                               (anchored t))
-                      &body body)
-  `(with-scan (,pattern ,input :start ,start :end ,end
-                        :syntax ,syntax
-                        :dot-includes-newline ,dot-includes-newline
-                        :case-sensitive ,case-sensitive
-                        :anchored ,anchored)
-     ,@body))
-
-(defmacro match-case ((input &rest options) &rest clauses)
-  `(scan-case (,input :anchored t ,@options)
-              ,@clauses))
-
-(defmacro scan-case (&whole w
-                            (input &key (start 0) (end nil)
-                                   (syntax :extended) (dot-includes-newline t)
-                                   (case-sensitive t) (anchored nil))
-                     &body clauses)
-  (let ((default-tail (member-if (lambda (c) (member (car c) '(t otherwise))) clauses)))
-    (when (cdr default-tail)
-      (error "~@<Default clause is not the last in ~S~@:>" w))
-    (setq clauses (ldiff clauses default-tail))
-    (multiple-value-bind (macros clauses)
-        (labels ((f (x) (typep x '(cons (member =) t))))
-          (values (remove-if-not #'f clauses)
-                  (remove-if #'f clauses)))
-      (multiple-value-bind (lambda-form varmap)
-          (scanner-lambda (mapcar #'car clauses)
-                          :syntax syntax
-                          :dot-includes-newline dot-includes-newline
-                          :case-sensitive case-sensitive
-                          :anchored anchored
-                          :%vector-p t
-                          :macros (mapcar (lambda (m) (destructuring-bind (n e) (cdr m)
-                                                        (cons n e)))
-                                          macros))
-        (let ((start-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "S.")) varmap))
-              (end-gensyms (mapcar (lambda (x) (declare (ignore x)) (gensym "E.")) varmap))
-              (g.string (gensym "STRING.")))
-          `(let ((,g.string ,input))
-             (multiple-value-bind (cat ,@(mapcan #'list start-gensyms end-gensyms))
-                 (,lambda-form ,g.string :start ,start :end ,end)
-               (declare (ignorable ,@(mapcan #'list start-gensyms end-gensyms)))
-               (with-submatch-macros-2
-                   (,g.string)
-                   ,(loop for var in varmap
-                          for s in start-gensyms
-                          for e in end-gensyms
-                          for test in (cons 't (cdr start-gensyms))
-                          collect (list var test s e))
-                 (case cat
-                   ,@ (let ((k 0))
-                        (mapcar (lambda (c)
-                                  `((,(1- (incf k))) ,@(cdr c)))
-                                clauses))
-                      ,@ default-tail)))))))))
 
 ;;;; ------------------------------------------------------------------------------------------
 
@@ -6395,4 +6566,3 @@ integer? Returns that `n' or NIL."
              (and (dfa-has-condition-dispatch dfa)
                   (dfa-state-successors dfa 0))))
 
-) ;locally

@@ -13,12 +13,11 @@
    #+SBCL :sb-gray
    ;;#+CMU :clim-lisp
    #+CMU :ext
-   #+COMMON-LISP-WORKS :stream
-   ;;
-   ;; :named-readtables
-   )
-  (:local-nicknames ("!" "NOFFI-CI"))
-  (:shadow #:declaration)
+   #+COMMON-LISP-WORKS :stream)
+  ;; (:local-nicknames ("!" "NOFFI-CI"))
+  (:shadow
+   #:declaration
+   #:make-hash-table)
   #+CCL (:import-from :CCL #:QUIT)
   #+SBCL (:import-from :SB-EXT #:QUIT)
   ;;
@@ -30,8 +29,6 @@
            #:c-coerce
            #:c-aref
            #:c-addr-of
-	   #:c->-addr
-	   #:c-sizeof-type
            #:get-c-string
            #:get-native-utf16-string
            #:int-ptr
@@ -42,8 +39,7 @@
            #:use-include
            #:c-compile-file
            #:c-compile-file-pathname
-           #:pkg-use
-	   #:cval-value)
+           #:pkg-use)
   #+(OR CCL ECL CLISP)
   (:import-from #+CCL :ccl #+ECL :gray #+CLISP :gray
                 #:fundamental-binary-input-stream

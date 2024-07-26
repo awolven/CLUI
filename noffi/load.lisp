@@ -12,6 +12,7 @@
               (make-pathname
                :directory `(:relative "fasl"
                                       ,(sanify (lisp-implementation-type))
+                                      ,(sanify (lisp-implementation-version))
                                       ,(sanify (software-type))
                                       ,(sanify (machine-type))
                                       :wild-inferiors)
@@ -52,9 +53,11 @@
                 "noffi:src;compiler-warn.lisp"
                 "noffi:src;package.lisp"
                 "noffi:src;features.lisp"
-                #+SBCL  "noffi:src;patch-sbcl.lisp"
+         #+SBCL "noffi:src;patch-sbcl.lisp"
                 "noffi:src;forward.lisp"
+                #+(OR CCL SBCL ECL ABCL CLISP)
                 "noffi:src;lispdep.lisp"
+         #+EXCL "noffi:src;lispdep-excl.lisp"
                 "noffi:src;util.lisp"
                 "noffi:src;string-table.lisp"
                 ;;
@@ -67,11 +70,13 @@
                 "noffi:src;grammar.lisp"
                 "noffi:src;adt.lisp"
                 "noffi:src;comp.lisp"
+         #+EXCL "noffi:src;backend-excl.lisp"
                 "noffi:src;runtime.lisp"
                 "noffi:src;syntax.lisp"
                 ;;
                 "noffi:src;abi-amd64-sysv.lisp"
                 "noffi:src;abi-amd64-mingw64.lisp"
+                "noffi:src;abi-amd64-ms.lisp"
                 ;;
                 "noffi:src;abi-amd64-sysv-cc.lisp"
                 "noffi:src;abi-amd64-ms-cc.lisp"

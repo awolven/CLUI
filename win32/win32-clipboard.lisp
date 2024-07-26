@@ -6,7 +6,7 @@
       (return-from win32-copy-string-to-clipboard nil))
 
     (with-lpcwstr (lpcwstr string)
-      (let ((size (* (1+ (* (length string))) (cval-value (c-sizeof-type '#_<WCHAR>)))))
+      (let ((size (* (1+ (* (length string))) (c-sizeof-type '#_<WCHAR>))))
 
 	(when (zerop (#_EmptyClipboard))
 	  (error "EmptyClipboard returned error code: ~S" (#_GetLastError)))

@@ -90,9 +90,6 @@
 (defparameter *auto-typedef-p*
   nil)
 
-(defun note (fmt &rest args)
-  (format t "~&~<;; ~@;~?~:>" (list fmt args)))
-
 (defun current-packing ()
   (caar (machine-pack-stack *current-machine*)))
 
@@ -114,14 +111,24 @@
 
 ;; 
 
+;;; struct
+
+;; We made it so that struct and union may contain any external-declaration.
+;; The grammar doesn't mind and this will also parse [some] C++ class
+;; definitions. However, to accommodate bit fields however we made any
+;; init-declarator allowing for that bitfield :n suffix.
+
 (define-grammar c99-parser
     ;; These tokens are for entering some specific subparts of the parser.
     (:tokens @expression @statement @type /gcc-attribute @ms-decl-spec
              /pragma)
 
   (:precedence (:nonassoc :else) ;This silences the complain about that shift/reduce conflict with "else"
-               (:nonassoc ":")
-               )
+               (:left "==" "!=")
+               (:left "<" ">" "<=" ">=")
+               (:left "<<" ">>")
+               (:left "+" "-")
+               (:left "*" "/" "%") )
 
   (start 
    -> (? translation-unit)              => (cons-progn $1)
@@ -139,6 +146,7 @@
   ;; A.2.1 Expressions
   (primary-expression
    -> :bad                              ;xxx
+   -> :pp-number                        => `(:pp-number ,$1)
    -> :identifier
    -> :integer-constant
    -> :character-constant
@@ -147,18 +155,6 @@
    -> "(" expression ")"                => $2
    -> "(" :error ")"                    => `(error)
    -> "(" "{" (? block-item-list) "}" ")" => `(c-block-expr ,@$3) )
-  #+NOFFI-OBJC
-  (primary-expression
-   -> "[" expression :identifier objc-arguments "]"                => `(objc-invoke ,$2 ,$3 ,@$4))
-  #+NOFFI-OBJC
-  (objc-arguments
-   ->                   => nil
-   -> ":" expression    => (list $2)
-   -> ":" expression objc-more-arguments => (cons $2 $3))
-  #+NOFFI-OBJC
-  (objc-more-arguments
-   -> :identifier ":" expression (? objc-more-arguments) => (list* $1 $3 $4))
-
   (string-literal-list -> (+ :string-literal) => (concat-string-literals $1))
   
   (postfix-expression
@@ -188,39 +184,34 @@
    -> "~" cast-expression               => (unop 'lognot $2)
    -> "!" cast-expression               => (unop 'not $2)
    -> "_Alignof" unary-expression       => (unop 'alignof-expr $2)
-   -> "_Alignof" "(" type-name ")"      => (unop 'alignof-type $2)
+   -> "_Alignof" "(" type-name ")"      => (unop 'alignof-type $3)
    -> "sizeof" unary-expression         => (unop 'sizeof-expr $2)
    -> "sizeof" "(" type-name ")"        => (unop 'sizeof-type $3)
    -> "__noffi_type" "(" type-name ")"  => (unop 'noffi-type $3))
+
+  (binary-expression
+   -> binary-expression "==" binary-expression     => (binop '= $1 $3)
+   -> binary-expression "!=" binary-expression     => (binop '/= $1 $3)
+   -> binary-expression "<"  binary-expression     => (left-assoc '< $1 $3)
+   -> binary-expression ">"  binary-expression     => (left-assoc '> $1 $3)
+   -> binary-expression "<=" binary-expression     => (left-assoc '<= $1 $3)
+   -> binary-expression ">=" binary-expression     => (left-assoc '>= $1 $3)
+   -> binary-expression "<<" binary-expression     => (left-assoc '<< $1 $3)
+   -> binary-expression ">>" binary-expression     => (left-assoc '>> $1 $3)
+   -> binary-expression "+"  binary-expression     => (left-assoc '+ $1 $3)
+   -> binary-expression "-"  binary-expression     => (left-assoc '- $1 $3)
+   -> binary-expression "*"  binary-expression     => (left-assoc '* $1 $3)
+   -> binary-expression "/"  binary-expression     => (left-assoc '/ $1 $3)
+   -> binary-expression "%"  binary-expression     => (left-assoc '% $1 $3)
+   -> cast-expression)
+
   (cast-expression
    -> unary-expression
    -> "(" type-name ")" cast-expression                 => `(the ,$2 ,$4))
-  (multiplicative-expression
-   -> cast-expression
-   -> multiplicative-expression "*" cast-expression     => (left-assoc '* $1 $3)
-   -> multiplicative-expression "/" cast-expression     => (left-assoc '/ $1 $3)
-   -> multiplicative-expression "%" cast-expression     => (left-assoc '% $1 $3))
-  (additive-expression
-   -> multiplicative-expression
-   -> additive-expression "+" multiplicative-expression     => (left-assoc '+ $1 $3)
-   -> additive-expression "-" multiplicative-expression     => (left-assoc '- $1 $3))
-  (shift-expression
-   -> additive-expression
-   -> shift-expression "<<" additive-expression         => (left-assoc '<< $1 $3)
-   -> shift-expression ">>" additive-expression         => (left-assoc '>> $1 $3))
-  (relational-expression
-   -> shift-expression
-   -> relational-expression   "<"    shift-expression     => (left-assoc '< $1 $3)
-   -> relational-expression   ">"    shift-expression     => (left-assoc '> $1 $3)
-   -> relational-expression   "<="   shift-expression     => (left-assoc '<= $1 $3)
-   -> relational-expression   ">="   shift-expression     => (left-assoc '>= $1 $3))
-  (equality-expression
-   -> relational-expression
-   -> equality-expression "==" relational-expression      => (binop '= $1 $3)
-   -> equality-expression "!=" relational-expression      => (binop '/= $1 $3))
+
   (AND-expression
-   -> equality-expression
-   -> AND-expression "&" equality-expression                    => (left-assoc 'logand $1 $3))
+   -> binary-expression
+   -> AND-expression "&" binary-expression                    => (left-assoc 'logand $1 $3))
   (exclusive-OR-expression
    -> AND-expression
    -> exclusive-OR-expression "^" AND-expression                => (left-assoc 'logxor $1 $3))
@@ -278,33 +269,19 @@
   ;; "int foo", when we would not prun at the grammar level.
   ;;
 
-  #||
   (declaration-specifiers
-  -> declaration-specifiers-2
-  => $1)
-  (declaration-specifiers-2
-  -> one-declaration-specifier                                 => $1
-  -> declaration-specifiers-2 one-declaration-specifier        => (append $2 $1))
-  (one-declaration-specifier
-  -> storage-class-specifier                   => (list $1)
-  -> type-specifier                            => (list $1)
-  -> type-qualifier                            => (list $1)
-  -> function-specifier                        => (list $1)
-  -> declaration-specifier                     => $1)
-  ||#
-  
-  (declaration-specifiers
-   -> storage-class-specifier (? declaration-specifiers)        => (cons $1 $2)
-   -> alignment-specifier (? declaration-specifiers)            => (cons $1 $2)
-   -> type-qualifier (? declaration-specifiers)                 => (cons $1 $2)
-   -> function-specifier (? declaration-specifiers)             => (cons $1 $2)
-   -> declaration-specifier (? declaration-specifiers)          => (append $1 $2)
+   -> storage-class-specifier (? declaration-specifiers)                        => (cons $1 $2)
+   -> type-qualifier (? declaration-specifiers)                                 => (cons $1 $2)
+   -> alignment-specifier (? declaration-specifiers)                            => (cons $1 $2)
+   -> function-specifier (? declaration-specifiers)                             => (cons $1 $2)
+   -> declaration-specifier (? declaration-specifiers)                          => (append $1 $2)
    -> definitive-type-specifier (? declaration-specifiers-definitive-type)      => (append $1 $2)
-   -> :basic-type-specifier (? declaration-specifiers-base-type)                => (cons `(:base-type ,$1) $2))
+   -> basic-type-specifier (? declaration-specifiers-base-type)                 => (cons $1 $2)
+   -> struct-or-union-specifier                                                 => $1)
 
   (declaration-specifiers-definitive-type
    -> storage-class-specifier (? declaration-specifiers-definitive-type)        => (cons $1 $2)
-   -> alignment-specifier (? declaration-specifiers)            => (cons $1 $2)
+   -> alignment-specifier (? declaration-specifiers)                            => (cons $1 $2)
    -> type-qualifier (? declaration-specifiers-definitive-type)                 => (cons $1 $2)
    -> function-specifier (? declaration-specifiers-definitive-type)             => (cons $1 $2)
    -> declaration-specifier (? declaration-specifiers-definitive-type)          => (append $1 $2) )
@@ -315,37 +292,54 @@
    -> type-qualifier (? declaration-specifiers-base-type)                 => (cons $1 $2)
    -> function-specifier (? declaration-specifiers-base-type)             => (cons $1 $2)
    -> declaration-specifier (? declaration-specifiers-base-type)          => (append $1 $2)
-   -> :basic-type-specifier (? declaration-specifiers-base-type)          => (cons `(:base-type ,$1) $2) )
+   -> basic-type-specifier (? declaration-specifiers-base-type)           => (cons $1 $2) )
 
   (definitive-type-specifier
-      -> struct-or-union-specifier                    => (list $1)
       -> enum-specifier                               => (list $1)
       -> :typedef-name                                => (list (list :type-name $1))
-      -> :typedef-name ":" type-name :--tie--         => (list (list :type-name $1))
       -> :typeof "(" expression ")"                   => (list `(:typeof ,$3))
       -> :typeof "(" :error ")"                       => (list `(:typeof (error)))
-      ;; ### That's not entirely correct:
-      ;; |     If the _Atomic keyword is immediately followed by a left parenthesis, it is interpreted as a type
-      ;; |     specifier (with a type name), not as a type qualifier.
-      ;; Thus we need an extra token for that.
-      ->  :_atomic :--tie3-- "(" type-name ")"        => (list `(:_atomic ,$4))
+      ;; |     If the _Atomic keyword is immediately followed by a left
+      ;; |     parenthesis, it is interpreted as a type specifier (with a type
+      ;; |     name), not as a type qualifier.
+      ;; Our transducer takes care of this.
+      -> :_atomic\( type-name ")"        => (list `(:_atomic ,$2))
       )
-  #+NOFFI-OBJC
-  (definitive-type-specifier
-      -> :typedef-name "<" (++ "," type-name) ">"
-      => (list `(:objc-angled ,$1 ,$3)))
 
   (declaration-specifier -> :declaration-specifier      => (list `(:declaration-specifier ,$1))
+                         -> :gcc-attribute              => (list `(:gcc-attribute ,$1))
                          -> "__declspec" ms-decl-spec   => $2)
 
   (init-declarator-list
    -> init-declarator                                   => (list $1)
    -> init-declarator-list "," init-declarator          => (cons $3 $1))
+  #-NIL
+  (init-declarator
+   -> declarator (? decl-spec-list) (? ":" constant-expression => $2)
+   => (let ((x $1))
+        (when $3 (setq x `(:bit-field ,x ,$3)))
+        (dolist (d $2 x)
+          (setq x `(,(car d) ,(cadr d) ,x))))
+   -> declarator (? decl-spec-list) (? ":" constant-expression => $2) "=" initializer
+   => `(= , (let ((x $1))
+              (when $3 (setq x `(:bit-field ,x ,$3)))
+              (dolist (d $2 x) (setq x `(,(car d) ,(cadr d) ,x))))
+            ,$5)
+   -> ":" constant-expression
+   => `(:bit-field nil ,$2))
+
+  #+NIL
   (init-declarator
    -> declarator (? decl-spec-list)
-   => (let ((x $1)) (dolist (d $2 x) (setq x `(,(car d) ,(cadr d) ,x))))
+   => (let ((x $1))
+        (when $3 (setq x `(:bit-field ,x ,$3)))
+        (dolist (d $2 x)
+          (setq x `(,(car d) ,(cadr d) ,x))))
    -> declarator (? decl-spec-list) "=" initializer
-   => `(= ,(let ((x $1)) (dolist (d $2 x) (setq x `(,(car d) ,(cadr d) ,x)))) ,$4))
+   => `(= , (let ((x $1))
+              (when $3 (setq x `(:bit-field ,x ,$3)))
+              (dolist (d $2 x) (setq x `(,(car d) ,(cadr d) ,x))))
+            ,$5))
 
   (decl-spec-list -> declaration-specifier
                   -> function-specifier => (list $1)
@@ -354,7 +348,7 @@
                   )
 
   (alignment-specifier -> "_Alignas" "(" type-name ")" => `(:declaration-specifier (:alignas-type ,$3))
-                       -> "_Alignas" "(" constant-expression ")" => `(:declaration-specifier (:alignas-expr ,$3)))
+                       -> "_Alignas" "(" constant-expression ")" => `(:declaration-specifier (:align ,$3)))
 
   (storage-class-specifier -> :storage-class            => `(:storage-class ,$1))
   (type-qualifier -> :type-qualifier                    => `(:type-qualifier ,$1))
@@ -379,7 +373,7 @@
    -> "^" pointer-declarator                            => `(:block-pointer ,$2)
    -> :type-qualifier pointer-declarator                => `(:type-qualifier ,$1 ,$2) 
    -> :function-specifier pointer-declarator            => `(:function-specifier ,$1 ,$2)
-   -> declaration-specifier pointer-declarator          => `(:declaration-specifier ,$1 ,$2) )
+   -> declaration-specifier pointer-declarator          => (wrap-specifier-list $1 $2) )
   (pointer-abstract-declarator
    ->
    -> direct-abstract-declarator
@@ -399,12 +393,12 @@
 
   (nested-declarator
    -> :function-specifier nested-declarator             => `(:function-specifier ,$1 ,$2)
-   -> declaration-specifier nested-declarator           => `(:declaration-specifier ,$1 ,$2)
+   -> declaration-specifier nested-declarator           => (wrap-specifier-list $1 $2)
    -> declarator                                        => $1)
                      
   (nested-abstract-declarator
    -> :function-specifier nested-abstract-declarator    => `(:function-specifier ,$1 ,$2)
-   -> declaration-specifier nested-abstract-declarator  => `(:declaration-specifier ,$1 ,$2)
+   -> declaration-specifier nested-abstract-declarator  => (wrap-specifier-list $1 $2)
    -> abstract-declarator => $1)
   
   ;; Abstract Declarator
@@ -422,16 +416,22 @@
    ;; -> (? direct-abstract-declarator) "(" :error ")"    => `(:function ,$1 (error)) 
    )
 
+  #-NIL
   (parameter-declaration
    -> parameter-specifiers declarator                 => (cons-and-note-declaration $1 (and $2 (list $2)))
    -> parameter-specifiers (? abstract-declarator)    => (cons-and-note-declaration $1 (and $2 (list $2))))
+  #+NIL
+  (parameter-declaration
+   -> declaration-specifiers declarator                 => (cons-and-note-declaration $1 (and $2 (list $2)))
+   -> declaration-specifiers (? abstract-declarator)    => (cons-and-note-declaration $1 (and $2 (list $2))))
 
   ;; Same dance again
   (parameter-specifiers
    -> storage-class-specifier (? parameter-specifiers)                  => (cons $1 $2)
    -> type-qualifier (? parameter-specifiers)                           => (cons $1 $2)
    -> definitive-type-specifier (? parameter-specifiers/type-seen)      => (append $1 $2)
-   -> basic-type-specifier (? parameter-specifiers/basic-type-seen)     => (cons $1 $2))
+   -> basic-type-specifier (? parameter-specifiers/basic-type-seen)     => (cons $1 $2)
+   -> struct-or-union-specifier                                         => $1)
   (parameter-specifiers/type-seen
    -> storage-class-specifier (? parameter-specifiers/type-seen)        => (cons $1 $2)
    -> type-qualifier (? parameter-specifiers/type-seen)                 => (cons $1 $2))
@@ -440,17 +440,6 @@
    -> type-qualifier (? parameter-specifiers/basic-type-seen)           => (cons $1 $2)
    -> basic-type-specifier (? parameter-specifiers/basic-type-seen)     => (cons $1 $2))
 
-  #|| 
-
-  (parameter-specifiers
-  -> one-parameter-specifier                           => (list $1)
-  -> parameter-specifiers one-parameter-specifier      => (cons $2 $1))
-  (one-parameter-specifier
-  -> storage-class-specifier
-   ;; yyy -> type-specifier             ;
-  -> type-qualifier)
-  ||#
-  
   ;;
   (array-dimension
    -> :type-qualifier array-dimension           => `(:type-qualifier ,$1 ,$2)
@@ -467,66 +456,54 @@
   ;; Types
 
   (struct-or-union-specifier
-   ;; ### Accepting empty lists is an extension
-   -> struct-or-union struct-decl-specs (? :identifier) "{" (? struct-declaration-list) "}"
-   => `(,$1 ,$3 ,$5 ,(mapcar (lambda (x)
-                               ;; Hmm
-                               (if (and (consp x) (member (car x) '(:declaration-specifier)))
-                                   `(:type-qualifier ,(cadr x))
-                                   x))
-                             $2))
-   -> struct-or-union struct-decl-specs :identifier
-   =>
-   ;; First, why cannot I name the source location. Second: Where to put
-   ;; these delcaration?
-   (when $2 (warn "Attribute pile ~S ignored" $2))
-   ;; (when $2 (blame-for-token *last-good-token* "Pile ignored: ~S" $2))
-   `(,$1 ,$3))
+   -> struct-or-union                              ;1
+   (? struct-decl-specs)                           ;2
+   :identifier                                     ;3
+   (? struct-decl-specs)                           ;4
+   "{" (? struct-declaration-list) "}"             ;5 6 7
+   (? struct-decl-specs)                           ;8
+   => (cons-struct-or-union $1 $3 $6 (append $2 $4 $8)))
+  (struct-or-union-specifier
+   -> struct-or-union                              ;1
+   (? struct-decl-specs)                           ;2
+   "{" (? struct-declaration-list) "}"             ;3 4 5
+   (? struct-decl-specs)                           ;6
+   => (cons-struct-or-union $1 nil $4 (append $2 $6)))
+  (struct-or-union-specifier
+   -> struct-or-union                              ;1
+   (? struct-decl-specs)                           ;2
+   :identifier                                     ;3
+   (? struct-decl-specs)                           ;4
+   => (cons-struct-or-union $1 $3 :unspecified (append $2 $4)))
 
-  (struct-decl-specs -> (? struct-decl-specs-1) => $1)
-  (struct-decl-specs-1 -> declaration-specifier                         => $1
-                       -> struct-decl-specs-1 declaration-specifier     => (append $1 $1))
+  (struct-decl-specs
+   ;; These are in reverse. Do we care? Perhaps not.
+   -> declaration-specifier                     => $1
+   -> type-qualifier                            => (list $1)
+   -> struct-decl-specs declaration-specifier   => (append $2 $1)
+   -> struct-decl-specs type-qualifier          => (cons $2 $1))
 
   (struct-or-union
    -> "struct"          => :struct
    -> "union"           => :union)
+
   (struct-declaration-list
    -> struct-declaration                                => $1
    -> struct-declaration-list struct-declaration        => (append $1 $2))
+
   (struct-declaration
-   -> (? specifier-qualifier-list) struct-declarator-list ";"
+   -> (? declaration-specifiers) struct-declarator-list ";"
    => (cons-member-declaration $1 $2 (current-packing))
-   -> (? specifier-qualifier-list) ";"
-   => (cons-member-declaration $1 nil (current-packing)))
-  #+NOFFI-OBJC
+   -> declaration-specifiers ";"
+   => (cons-member-declaration $1 nil (current-packing))
+   -> ";" => nil)
+
   (struct-declaration
-   -> "@private" => nil
-   -> "@protected" => nil
-   -> "@public"  => nil
-   -> "@required" => nil
-   -> "@optional" => nil
-   -> "@package" => nil)
+   -> function-definition)
 
-  ;; Same dance, make sure that there is only at most one definitive type (some
-  ;; typedef-name, some enum, struct or union, or a sequence of basic types) in
-  ;; this list. This is need to disambiguate beautiful things like "typedef enum
-  ;; foo : bar baz;".
-
-  (specifier-qualifier-list
-   -> type-qualifier (? specifier-qualifier-list)                           => (cons $1 $2)
-   -> alignment-specifier (? declaration-specifiers)                        => (cons $1 $2)   
-   -> definitive-type-specifier (? specifier-qualifier-list/type-seen)      => (append $1 $2)
-   -> basic-type-specifier (? specifier-qualifier-list/basic-type-seen)     => (cons $1 $2))
-  (specifier-qualifier-list/type-seen
-   -> alignment-specifier (? declaration-specifiers)                        => (cons $1 $2)   
-   -> type-qualifier (? specifier-qualifier-list/type-seen)                 => (cons $1 $2))
-  (specifier-qualifier-list/basic-type-seen
-   -> alignment-specifier (? declaration-specifiers)                        => (cons $1 $2)   
-   -> type-qualifier (? specifier-qualifier-list/basic-type-seen)           => (cons $1 $2)
-   -> basic-type-specifier (? specifier-qualifier-list/basic-type-seen)     => (cons $1 $2))
-
-  (basic-type-specifier -> :basic-type-specifier => `(:base-type ,$1))
-  
+  (basic-type-specifier
+   -> :basic-type-specifier                             => `(:base-type ,$1)
+   -> "_BitInt" "(" constant-expression ")"             => `(:bit-int ,$3))
 
   (struct-declarator-list
    -> struct-declarator                                         => (list $1)
@@ -534,29 +511,15 @@
   (struct-declarator
    -> declarator (? decl-spec-list)
    => (let ((x $1)) (dolist (d $2 x) (setq x `(,(car d) ,(cadr d) ,x))))
-   -> (? declarator) ":" constant-expression                    => `(:bit-field ,$1 ,$3)
-   )
-
-  #-NOFFI-OBJC
-  (enum-specifier
-   -> "enum" (? :identifier) "{" enumerator-list "}"            => `(:enum ,$2 ,(reverse $4))
-   -> "enum" (? :identifier) "{" enumerator-list "," "}"        => `(:enum ,$2 ,(reverse $4))
-   -> "enum" :identifier                                        => `(:enum ,$2))
-
-  (enumerator-list
-   -> enumerator                                                => (list $1)
-   -> enumerator-list "," enumerator                            => (cons $3 $1))
-  (enumerator
-   -> enumeration-constant                                      => $1
-   -> enumeration-constant "=" constant-expression              => `(,$1 ,$3) )
-
-  ;;
+   -> (? declarator) ":" constant-expression
+   => `(:bit-field ,$1 ,$3))
 
   (parameter-type-list
    -> parameter-list                            => $1
    -> parameter-list "," "..."                  => (cons '&rest $1)
    -> "..."                                     => (list '&rest) ;### for clang's tg_promote
    )
+
   (parameter-list
    -> parameter-declaration                     => (list $1)
    -> parameter-list "," parameter-declaration  => (cons $3 $1))
@@ -566,10 +529,11 @@
    -> identifier-list "," :identifier           => (cons $3 $1))
 
   (type-name
-   -> specifier-qualifier-list (? abstract-declarator)
+   ;; We allow for declspecs here as well although they make no sense. This
+   ;; simplifies our grammar.
+   -> declaration-specifiers (? abstract-declarator)
    => (fold-type-name $1 $2))
 
-  ;; (typedef-name -> :identifier)
   (initializer
    -> assignment-expression             => $1
    -> "{" initializer-list "}"          => `(:list ,@(reverse $2))
@@ -641,15 +605,29 @@
    -> parameter-specifiers (** "," declarator) ";"
    => (cons-and-note-declaration $1 $2))
 
-  
-  ;;
-  (enumeration-constant -> :identifier)
+  (enum-specifier
+   -> "enum" enum-tag                                   => `(:enum ,$2)
+   -> "enum" enum-tag enum-def                          => `(:enum ,$2 ,$3)
+   -> "enum" enum-def                                   => `(:enum nil ,$2))
+  (enum-tag
+   -> :identifier)
+  (enum-def
+   -> "{" (** "," enumerator) (? ",") "}"               => $2)
+  (enumerator
+   -> :identifier                                       => $1
+   -> :identifier "=" constant-expression               => `(,$1 ,$3) )
 
+  ;; ---- GCC attributes ---
+  ;;
+  ;; These are actually parsed off-line with a transducer.
   ;;
   (gcc-attribute       -> (or "aligned" "__aligned" "__aligned__")
-                       => `(multi-token (:declaration-specifier :align) (:type-specifier :align))
+                       ;; ####
+                       => `(multi-token (:type-qualifier (:align (:INTEGER-CONSTANT :DECIMAL 16 NIL)))
+                                        (:declaration-specifier (:align (:INTEGER-CONSTANT :DECIMAL 16 NIL))))
                        -> (or "aligned" "__aligned" "__aligned__") "(" expression ")"
-                       => `(multi-token (:declaration-specifier (:align ,$3)) (:type-specifier (:align ,$3)))
+                       => `(multi-token (:type-qualifier (:align ,$3))
+                                        (:declaration-specifier (:align ,$3)))
                        -> (or "cdecl" "__cdecl" "__cdecl__")
                        => `(:function-specifier :cdecl)
                        -> (or "stdcall" "__stdcall" "__stdcall__")
@@ -662,7 +640,12 @@
                        => `(:function-specifier :inline)
                        -> (or "sentinel" "__sentinel" "__sentinel__") "(" expression ")"
                        => `(:function-specifier (:sentinel ,$3))
-                       )
+                       -> (or "__packed__" "__packged" "packed")
+                       => `(:declaration-specifier (:pack 1))
+                       -> (or "__mode__" "__mode" "mode") "(" :identifier ")"
+                       => `(:declaration-specifier (:gcc-mode ,$3)))
+
+  ;; ---- MicroSoft attributes ---
   ;;
   (ms-decl-spec
    -> "(" (? ms-decl-modifier-seq) ")"          => $2)
@@ -682,26 +665,6 @@
    -> :identifier
    -> :any-identifier)
 
-
-  #||
-  (ms-decl-spec                 -> "(" (? ms-decl-modifier-seq) ")" => $2
-  -> "(" :error ")" => nil)
-  (ms-decl-modifier-seq         -> ms-decl-modifier                      => (list $1)
-  -> ms-decl-modifier-seq ms-decl-modifier => (append $1 (list $2)))
-  (ms-decl-modifier             -> "align" "(" expression ")"
-  => `(:type-qualifier (:align ,$3))
-  -> :identifier
-  => (warn "Cannot make sense of __declspec -- ~S" $1)
-  nil
-  -> :identifier "(" expression ")"
-  => (warn "Cannot make sense of __declspec -- ~S" (list $1 $3))
-  nil
-  -> :identifier "(" :error ")"
-  => (warn "Cannot make sense of __declspec -- ~S" (list $1 $3))
-  nil
-  )
-  ||#
-
   ;; MS #pragma pack
   (pragma       -> "pack" "(" pragma-pack ")" => `(:pack ,$3))
   (pragma-pack  ->
@@ -715,53 +678,75 @@
                 -> "pop" pragma-pack-comma-integer
                 => `(:pop ,$2 nil)
                 -> "pop"
-                => `(:pop nil nil))
+                => `(:pop nil nil)
+                -> "show"
+                => (list :show))
   (pragma-pack-comma-ident -> "," :identifier => $2)
   (pragma-pack-comma-integer -> "," :integer-constant => (c-eval $2 nil))
 
+  ;; --- Objective C ---
+  ;; This is wip. We cannot fully handle Objective C yet. But Apple doesn't feel
+  ;; like documenting it. So all we can do is looking at some headers and wonder.
 
-  ;; Objective C
   #+NOFFI-OBJC
-  (enum-specifier
-   -> "enum" :identifier                         => `(:enum ,$2)
-   -> "enum" :identifier enum-def                => `(:enum ,$2 ,$3)
-   -> "enum" enum-def                            => `(:enum nil ,$2)
-   #||
-   -> "enum" derived                             => `(:derived (:enum nil) ,$2)
-   -> "enum" derived enum-def                    => `(:derived (:enum nil ,$3) ,$2)
-   -> "enum" :identifier derived                 => `(:derived (:enum ,$2) ,$3)
-   -> "enum" :identifier derived enum-def        => `(:derived (:enum ,$2 ,$4) ,$3)
-   ||#
-   -> "enum" derived                             => `(:enum nil)
-   -> "enum" derived enum-def                    => `(:enum nil ,$3)
-   -> "enum" :identifier derived                 => `(:enum ,$2)
-   -> "enum" :identifier derived enum-def        => `(:enum ,$2 ,$4)
-   )
+  (objc-method-signature
+   -> (? "(" type-name ")" => $2) :identifier
+   => `(:objc-method ,$2 ,$1 ())
+   ->   (? "(" type-name ")" => $2)
+   (+ (? :identifier) ":" "(" (? "out") type-name ")" :identifier => (list $1 $4 $6))
+   (? "," "..." => t)
+   (? (+ :function-specifier))
+   => `(:objc-method ,(intern (format nil "~{~A:~}" (mapcar #'verbatim (mapcar 'car $2))) *c-package*)
+                     ,$1
+                     (,@(mapcar (lambda (param)
+                                  `(decl nil (,(caddr param) ,(cadr param))))
+                                $2)
+                        ,@(and $3 '(&rest)))))
+  #+NOFFI-OBJC
+  (objc-property-property
+   -> :type-qualifier => $1
+   -> :identifier     => $1
+   -> :any-identifier "=" :any-identifier => `(= ,$1 ,$3)
+   -> :identifier "=" :any-identifier => `(= ,$1 ,$3)
+   -> :any-identifier "=" :identifier => `(= ,$1 ,$3)
+   -> :identifier "=" :identifier => `(= ,$1 ,$3) )
+  #+NOFFI-OBJC
+  (objc-interface-or-protocol
+   -> "@interface" => 'objc-interface
+   -> "@protocol"  => 'objc-protocol)
 
-  (enum-def -> "{" (++ "," enumerator) (? ",") "}" => $2)
-  (derived  -> ":" type-name :--tie--              => $2)
+  ;;
+  #+NOFFI-OBJC
+  (primary-expression
+   -> "[" expression :identifier objc-arguments "]"                => `(objc-invoke ,$2 ,$3 ,@$4))
+  #+NOFFI-OBJC
+  (objc-arguments
+   ->                   => nil
+   -> ":" expression    => (list $2)
+   -> ":" expression objc-more-arguments => (cons $2 $3))
+  #+NOFFI-OBJC
+  (objc-more-arguments
+   -> :identifier ":" expression (? objc-more-arguments) => (list* $1 $3 $4))
 
-  #-NOFFI-OBJC
-  (enum-specifier
-   -> "enum" (? :identifier)  "{" enumerator-list "}"            => `(:enum ,$2 ,(reverse $4))
-   -> "enum" (? :identifier)  "{" enumerator-list "," "}"        => `(:enum ,$2 ,(reverse $4))
-   -> "enum" :identifier                                      => `(:enum ,$2)
-   )
-  ;; (foo -> (+ :basic-type-specifier) -> :typedef-name)
-  ;; (foo -> type-name)
-
+  #+NOFFI-OBJC
+  (definitive-type-specifier
+      -> :typedef-name "<" (++ "," type-name) ">"
+      => (list `(:objc-angled ,$1 ,$3)))
+  #+NOFFI-OBJC
+  (struct-declaration
+   -> "@private" => nil
+   -> "@protected" => nil
+   -> "@public"  => nil
+   -> "@required" => nil
+   -> "@optional" => nil
+   -> "@package" => nil)
   #+NOFFI-OBJC
   (external-declaration -> "@class" (++ "," objc-class) ";"
-                        =>
-                        (mapc (lambda (x) (announce-typedef x)) $2)
-                        (list `(objc-class ,@$2)))
-  ;;
-
+                        => (mapc (lambda (x) (announce-typedef x)) $2)
+                           (list `(objc-class ,@$2)))
   #+NOFFI-OBJC
-  (external-declaration
-   ->
-   (? declaration-specifiers)
-   objc-interface-or-protocol (++ "," objc-class) (? objc-super-class) (? objc-class-struct)
+  (external-declaration -> (? declaration-specifiers)
+                        objc-interface-or-protocol (++ "," objc-class) (? objc-super-class) (? objc-class-struct)
    :--tie--
    => 
    (mapc (lambda (x) (announce-typedef x)) $3)
@@ -772,44 +757,18 @@
                ;; Hmm
                (list `(decl ((:storage-class :typedef))
                             (,name (:struct ,name ,$5))))))))
-
+  #+NOFFI-OBJC
   (objc-class -> :identifier (? objc-class-item-list)
               => $1)
+  #+NOFFI-OBJC
   (objc-class-item-list
    -> "<" (++ "," type-name) ">" (? objc-class-item-list)
    -> "(" (** "," :identifier) ")" (? objc-class-item-list))
-
-  #+(or)
-  (external-declaration ->
-                        objc-interface-or-protocol
-                        (++ "," objc-class)
-                        (? objc-super-class)
-                        interface-tail
-                        =>
-                        (mapc (lambda (x) (announce-typedef x)) $2)
-                        (list `(,$1 ,$2 ,$3 ,@$4)))
-  #+(or)
-  (external-declaration ->
-                        :--tie-- (+ :storage-class) 
-                        objc-interface-or-protocol
-                        (++ "," objc-class)
-                        (? objc-super-class)
-                        interface-tail
-                        =>
-                        (mapc (lambda (x) (announce-typedef x)) $4)
-                        (list `(,$3 ,$5 ,$3 ,@$6)))
-  #+(or)
-  (interface-tail ->
-                  (? objc-class-struct)
-                  (* objc-member-declaration)
-                  "@end"
-                  => (append $1 $2)
-                  -> ";" => nil)
+  #+NOFFI-OBJC
   (objc-super-class -> ":" objc-class)
-  #-(or)
+  #+NOFFI-OBJC
   (objc-class-struct -> "{" (? struct-declaration-list) "}" => $2)
-
-  
+  #+NOFFI-OBJC
   (external-declaration
    -> "+" objc-method-signature ";" => (list `(objc-class-method ,$2))
    -> "-" objc-method-signature ";" => (list `(objc-instance-method ,$2))
@@ -823,33 +782,29 @@
    -> "@package" => (list :package)
    -> "@end"     => (list :end)
    )
-
-  (objc-method-signature
-   -> (? "(" type-name ")" => $2) :identifier
-   => `(:objc-method ,$2 ,$1 ())
-
-   ->   (? "(" type-name ")" => $2)
-        (+ (? :identifier) ":" "(" (? "out") type-name ")" :identifier => (list $1 $4 $6))
-        (? "," "..." => t)
-        (? (+ :function-specifier))
-   => `(:objc-method ,(intern (format nil "~{~A:~}" (mapcar #'verbatim (mapcar 'car $2))) *c-package*)
-                     ,$1
-                     (,@(mapcar (lambda (param)
-                                  `(decl nil (,(caddr param) ,(cadr param))))
-                                $2)
-                        ,@(and $3 '(&rest)))))
-  (objc-property-property
-   -> :type-qualifier => $1
-   -> :identifier     => $1
-   -> :any-identifier "=" :any-identifier => `(= ,$1 ,$3)
-   -> :identifier "=" :any-identifier => `(= ,$1 ,$3)
-   -> :any-identifier "=" :identifier => `(= ,$1 ,$3)
-   -> :identifier "=" :identifier => `(= ,$1 ,$3) )
-
-  (objc-interface-or-protocol
-   -> "@interface" => 'objc-interface
-   -> "@protocol"  => 'objc-protocol)
   )
+
+(defun wrap-specifier-list (specifier-list inner)
+  (dolist (specifier specifier-list inner)
+    (ensure-type specifier (or (cons (member :declaration-specifier))
+                               (cons (member :type-qualifier))))
+    (setq inner (borrow-sloc specifier (list (car specifier) (cadr specifier) inner)))))
+
+(defun cons-struct-or-union (kind tag members declspecs)
+  ;; We must keep type-qualifiers like "align" in the struct as a 'struct
+  ;; __align(n) foo' when referred to 'struct foo' must carry this around.
+  ;;
+  ;; Actually we need to change this because the following works as well:
+  ;;
+  ;; struct __declspec(align(32)) foo;
+  ;; struct foo { ... };
+  ;;
+  ;; The alignment is remembered.
+  (cons
+   (if (eq members ':unspecified)
+       `(,kind ,tag)
+       `(,kind ,tag ,members ,(subst :type-qualifier :declaration-specifier declspecs)))
+   nil #|declspecs|# ))
 
 (defun cons-progn (forms)
   (let ((res nil))
@@ -911,6 +866,7 @@
         ((:declaration-specifier) (push d more-declaration-specifiers))
         ((:base-type)             (push d base-types))
         ((:_atomic)               (push d base-types))
+        ;; ((:type-specifier)        (push d base-types)) ;__mode__
         ((:type-name :struct :union :enum :typeof
                      :objc-angled :derived)
          (push d types))))
@@ -1008,7 +964,7 @@
                 type))))
 
 (defun fold-type-name (specifier-qualifier-list declarator)
-  ;; Lazy
+  ;; Lazy ### We should at least say so when we ignore declspecs.
   (let ((de (cons-and-note-declaration specifier-qualifier-list (list declarator))))
     (cadr (caddr de))))
 
@@ -1319,6 +1275,17 @@ inside-out. Returns a list of DECL forms."
                    ((token-cat-p (car q) :\)) (decf nest))))))
         (t (values nil token-list nil))))
 
+(defun chop-parenthesized-keep-parens (token-list)
+  (cond ((and token-list (token-cat-p (car token-list) :\())
+         (let ((nest 0))
+           (do ((q token-list (cdr q))) (nil)
+             (cond ((null q) (return (values nil token-list nil)))
+                   ((and (= nest 1) (token-cat-p (car q) :\)))
+                    (return (values (ldiff token-list (cdr q)) (cdr q) t)))
+                   ((token-cat-p (car q) :\() (incf nest))
+                   ((token-cat-p (car q) :\)) (decf nest))))))
+        (t (values nil token-list nil))))
+
 (defun chop-by (sep token-list)
   (let ((p token-list) (nest 0) (bag nil))
     (do ((q token-list (cdr q))) (nil)
@@ -1371,22 +1338,37 @@ inside-out. Returns a list of DECL forms."
         (last-was-paren-expr nil))
     (macrolet ((spill () `(when cur (push (reverse cur) res) (setq cur nil))))
       ;;
-      (do ((q token-list (cdr q)))
+      (do ((q token-list))
           ((endp q))
-        (let ((token (car q)))
+        (let ((token (pop q)))
           (push token cur)
           (case (token-main-cat token)
+            ((:__declspec)
+             ;; When followed by a paren, we must consume this as a whole and _not_ report
+             ;; last-was-paren-expr. This is to not be fooled by struct __declspec() { }
+             ;; Hence move this out of the way entirely.
+             (when (and q (token-cat-p (car q) :\())
+               (multiple-value-bind (eaten kept)
+                   (chop-parenthesized-keep-parens q)
+                 (dolist (k eaten) (push k cur))
+                 (setq q kept))))
             ((:\( :\[ :\{) (push (token-cat token) stack))
-            (:\) (assert (eq :\( (car stack))) (pop stack))
+            (:\) (assert (eq :\( (car stack)) nil "~S seen yet stack says ~S" token stack) (pop stack))
             (:\] (assert (eq :\[ (car stack))) (pop stack))
             (:\} (assert (eq :\{ (car stack)) nil "~S" stack) (pop stack)
                  (when (and (null stack) last-was-paren-expr)
                    (spill)))
             (:\; (when (and (null stack)
                             ;; This is here to catch K&R functions.
-                            (or (null (cdr q))
-                                (not (eql :\{ (token-cat (cadr q))))))
+                            (or (null q)
+                                (not (eql :\{ (token-cat (car q))))))
                    (spill)))
+            (:_atomic
+             (when (eq :\( (token-cat (car q)))
+               (pop q)
+               (setf (token-cat token) ':_atomic\()
+               (push :\( stack)))
+            #+NOFFI-OBJC
             ((:\+ :\-)
              (when (and (null stack)
                         (or (member :@interface cur :key #'token-main-cat)
@@ -1394,31 +1376,114 @@ inside-out. Returns a list of DECL forms."
                (pop cur)
                (spill)
                (push token cur)))
-            #+NIL
-            ((:@interface :@protocol)
-             ;; 
-             (do ((p (cdr q) (cdr p)))
-                 ((or (null p)
-                      (eql (token-main-cat (car p)) :@end))
-                  (unless p (error "No @end?"))
-                  (when p (push (car p) cur))
-                  (spill)
-                  (setq q p))
-               (push (car p) cur))
-             '(let ((p (member :@end q :key #'token-main-cat)))
-               (pop cur) (spill)
-               (unless p (error "No @end?"))
-               (push (ldiff q (cdr p)) res)
-               (setq q p)))
+            #+NOFFI-OBJC
             ((:@end)
              (pop cur) (spill)
              (push token cur) (spill))
-            #+(or)
-            ((:@end)
-             (blame-for-token (car q) "Stray @end?"))
             (:eof (pop cur)))
           (when (null stack)
             (setq last-was-paren-expr (eq :\) (token-cat token)))) ))
       ;;
       (spill)
       (reverse res))))
+
+
+;;;; ------------------------------------------------------------------------------------------
+
+(defun bipartition (predicate list)
+  (cond ((endp list) list)
+        ((funcall predicate (car list))
+         (multiple-value-bind (more-yes more-no)
+             (bipartition predicate (cdr list))
+           (values
+            (if (eq (cdr list) more-yes)
+                list
+                (cons (car list) more-yes))
+            more-no)))
+        (t
+         (multiple-value-bind (more-yes more-no)
+             (bipartition predicate (cdr list))
+           (values
+            more-yes
+            (if (eq (cdr list) more-no)
+                list
+                (cons (car list) more-no)))))))
+
+(defun decl-kludge-1 (specs decls &optional env)
+  ;; Now this is due to the brain-dead __attribute__(...) syntax. Some
+  ;; things that apply to types rather than to declarations may end up as
+  ;; :DECLARATION-SPECIFIER. AND: To me alignment only makes sense when
+  ;; applied to an object, but not a type. With gcc however those spill
+  ;; into the type rather.
+  (multiple-value-bind (quals specs)
+      (bipartition #'(lambda (x)
+                       (typep x '(cons (member :declaration-specifier)
+                                  (cons (cons (member :align :gcc-mode))))))
+                   specs)
+    (dolist (qual quals)
+      (let ((qual (cadr qual)))
+        (case (car qual)
+          (:gcc-mode
+           (let ((mode (cadr qual)))
+             (setf decls (mapcar (lambda (d)
+                                   (list* (car d) (apply-gcc-mode mode (cadr d) env) (cddr d)))
+                                 decls))))
+          (:align
+           (setf decls (mapcar (lambda (d)
+                                 (list* (car d)
+                                        (list :type-qualifier qual (cadr d))
+                                        (cddr d)))
+                               decls))))) )
+    ;;
+    (multiple-value-bind (packs specs)
+        (bipartition #'(lambda (x)
+                         (typep x '(cons (member :declaration-specifier)
+                                    (cons (cons (member :pack))))))
+                     specs)
+      (assert (<= 0 (length packs) 1))
+      (when packs
+        (setf decls (mapcar (lambda (d)
+                              (destructuring-bind (name type &rest more) d
+                                (cond ((not
+                                        (and (not (named-type-p type env))
+                                             (record-type-p type env)
+                                             ;; This is not correct. The following works:
+                                             ;; struct __attribute__((packed)) foo;
+                                             ;; struct foo { .. };
+                                             (record-type-complete-p type env)))
+                                       (warn "Packing applied to ~/NOFFI:~TYPE/" type)
+                                       (list* name type more))
+                                      (t
+                                       (list* name
+                                              (append type (list packs))
+                                              more)))))
+                            decls)))
+      ;;
+      (values specs decls))))
+
+(defun gcc-mode-width (mode)
+  (cadr (or (assoc mode '(("BI" 1)
+                          ("QI" 8)
+                          ("HI" 16)
+                          ("SI" 32)
+                          ("DI" 64)
+                          ("TI" 128)
+                          ("OI" 256)
+                          ("XI" 512)
+                          ("__word__" 64)) ;undocumented
+                   :test (lambda (a b)
+                           (or (string-equal a b)
+                               (string-equal a (concatenate 'string "__" b "__")))))
+            (error "Unknown GCC mode: ~S" mode))))
+
+(defun apply-gcc-mode (mode type env)
+  (cond ((integer-type-p type env)
+         (let* ((width (gcc-mode-width mode))
+                (new-type (find-integer-type :min-width width :max-width width
+                                             :signed (integer-type-signed-p type env)
+                                             :env env)))
+           (dolist (q (type-qualifiers type env))
+             (setq new-type (make-qualified-type q new-type)))
+           new-type))
+        (t
+         (error "Cannot apply mode to type ~S" type))))

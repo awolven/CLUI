@@ -1,5 +1,8 @@
 (in-package :clui)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (noffi::noffi-syntax))
+
 #+(or windows os-windows)
 (defun get-error-message (error-code)
   (clet& ((buffer-pointer #_<unsigned short[65536]>))
@@ -143,16 +146,16 @@ the call signals an error via the return value.")
             ((logtest #_FILE_ATTRIBUTE_DIRECTORY attributes)
              :directory)
             (t
-             (ecase (get-file-type handle)
-               (#.#_FILE_TYPE_DISK
+             (cond ;;(get-file-type handle)
+               ((= (get-file-type handle) #_FILE_TYPE_DISK)
 		:regular-file)
-               (#.#_FILE_TYPE_PIPE
+               ((= (get-file-type handle) #_FILE_TYPE_PIPE)
 		:pipe)
-               (#.#_FILE_TYPE_CHAR
+               ((= (get-file-type handle) #_FILE_TYPE_CHAR)
 		:character-device)
-	       (#.#_FILE_TYPE_REMOTE
+	       ((= (get-file-type handle) #_FILE_TYPE_REMOTE)
 		:remote)
-	       (#.#_FILE_TYPE_UNKNOWN
+	       ((= (get-file-type handle) #_FILE_TYPE_UNKNOWN)
 		:unknown)))))))))
 
 #-(or windows os-windows)
@@ -192,8 +195,9 @@ the call signals an error via the return value.")
         ;; lstat() returned ENOENT: FILE does not exist
         (t nil)))))
 
+
 (defun native-namestring (pathname)
-  (cffi-sys:native-namestring pathname))
+  (uiop/filesystem:native-namestring pathname))
 
 (defun get-file-kind (file follow-p)
   (%get-file-kind (native-namestring file) follow-p))

@@ -43,30 +43,121 @@
    #+NOFFI-WINDOWS "dll"
    "so"))
 
+(defparameter +c-object-pathname-type+
+  (or
+   #+NOFFI-DARWIN "o"
+   #+NOFFI-LINUX "o"
+   #+NOFFI-WINDOWS "obj"
+   "o"))
+
+(defparameter +c-executable-pathname-type+
+  #+NOFFI-WINDOWS "exe" #-NOFFI-WINDOWS "bin")
+
 
 ;;;; Using the host C compiler
 
-(defun c-compile-file-pathname (pathname)
-  (make-pathname :type +c-shared-object-pathname-type+
+(defvar *cc* "cc"
+  "C compiler to use with C-COMPILE-FILE. Either a string or a list of
+the command name followed by command line arguments.")
+
+(defun c-compile-file-pathname (pathname &key (output-type :shared-object))
+  (make-pathname :type (ecase output-type
+                         (:preprocessed "i")
+                         (:preprocessed-and-verify "i")
+                         (:preprocessed-with-definitions "j")
+                         (:shared-object +c-shared-object-pathname-type+)
+                         (:object +c-object-pathname-type+)
+                         ((:executable :run) +c-executable-pathname-type+))
                  :defaults pathname))
 
-(defun c-compile-file (pathname &key (output-file (c-compile-file-pathname pathname)))
-  (let ((cmd
-         #+NOFFI-DARWIN (list "cc" "-shared" "-o" (native-namestring output-file) (native-namestring pathname))
-         ;; Hmm
-         #+NOFFI-WINDOWS (list "cc" "-shared" "-o" (native-namestring output-file) (native-namestring pathname)) 
-         ))
-    (when *compile-verbose*
-      (format t "~&; Compiling C file ~S ..." pathname)
-      (force-output))
-    (let ((exit (exit-status
-                 (run-program (car cmd) (cdr cmd) :error *error-output*))))
-      (unless (zerop exit)
-        (error "Shell command ~S failed." cmd))
-      (when *compile-verbose*
-        (format t " done~%")
+;; CL.EXE
+;; /Fe:
+;; /Fo:
+;; /std:clatest
+;; /c
+;; /LD
+
+(defun c-compile-file (pathname &key ((:cc *cc*) *cc*)
+                                     (output-type :shared-object)
+                                     (output-file (c-compile-file-pathname pathname :output-type output-type))
+                                     (verbose *compile-verbose*))
+  (check-type output-type (member :object :shared-object :executable :run :preprocessed :preprocessed-with-definitions :preprocessed-and-verify))
+  (let ((native-output (native-namestring output-file))
+        (cc (if (stringp *cc*) (list *cc*) *cc*))
+        (stdout-is-output nil)
+        (temp-files nil)
+        (t0 (get-internal-real-time)))
+    (let ((cmd
+           (if (string-equal "cl" (pathname-name (car cc)))
+               (append cc
+                       (list "/nologo"
+                             ;; "/std:c11"
+                             )
+                       (ecase output-type
+                         (:preprocessed-and-verify
+                          (let ((obj-file (native-namestring
+                                           (c-compile-file-pathname pathname :output-type :object))))
+                            (push obj-file temp-files)
+                            (list "/c" "/P" "/Fo:" obj-file "/Fi:" native-output)))
+                         (:preprocessed
+                          (list "/E" "/P" "/Fi:" native-output))
+                         (:preprocessed-with-definitions
+                          (list
+                           "/Zc:preprocessor" "/E" "/P" "/PD"
+                           "/Fi:" native-output))
+                         (:object
+                          (list "/c" "/Fo:" native-output))
+                         ((:executable :run)
+                          (let ((obj-file (native-namestring
+                                           (c-compile-file-pathname pathname :output-type :object))))
+                            (push obj-file temp-files)
+                            (list "/Fe:" native-output
+                                  "/Fo:" (native-namestring obj-file))))
+                         (:shared-object
+                          (list "/LD" "/Fe:" native-output)))
+                       (list (native-namestring pathname)))
+               (append cc
+                       (ecase output-type
+                         (:preprocessed
+                          (setq stdout-is-output t)
+                          (list "-E"))
+                         (:preprocessed-with-definitions
+                          (setq stdout-is-output t)
+                          (list "-dD" "-E"))
+                         (:object (list "-c"))
+                         ((:executable :run) nil)
+                         (:shared-object (list "-shared")))
+                       (list "-o" native-output)
+                       (list (native-namestring pathname)) ))))
+      (assert (every #'stringp cmd))
+      (ensure-directories-exist output-file :verbose verbose)
+      (when verbose
+        ;;(format t "~&; Compiling C file ~S~%" pathname)
+        (format t "~&# ~{~A~^ ~}~%" (mapcar #'verbatim cmd))
         (force-output))
-      output-file)))
+      (ignore-errors (delete-file output-file))
+      (dolist (k temp-files) (ignore-errors (delete-file k)) (ensure-directories-exist k))
+      (let ((won nil))
+        (unwind-protect
+             (let ((exit (exit-status
+                          (run-program (car cmd) (cdr cmd)
+                                       :output (if stdout-is-output
+                                                   output-file
+                                                   *standard-output*)
+                                       :if-output-exists :supersede
+                                       :error *error-output*
+                                       :external-format +utf-8/crnl+))))
+               (unless (zerop exit)
+                 (error "Shell command ~S failed. Exit code: ~D" cmd exit))
+               (setq won t))
+          (unless won
+            (ignore-errors (delete-file output-file))
+            (dolist (k temp-files) (ignore-errors (delete-file k)))))
+        (when verbose
+          (format t "~&# done, took ~:Dms.~%" (round (- (get-internal-real-time) t0)
+                                                     (/ internal-time-units-per-second 1000)))
+          (force-output))
+        output-file))))
 
 #+(OR CCL SBCL)
 (defun use-library (name &key search-path)

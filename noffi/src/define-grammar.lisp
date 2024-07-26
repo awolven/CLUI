@@ -12,15 +12,26 @@
 (defun expand-define-grammar (grammar-name rules)
   (multiple-value-bind (rules tokens options)
       (edit-grammar rules)
+    ;; rules now are raw rules (<nt> ( { <cat> }* ) <action>)
+    (let ((used nil))
+      (labels ((aux (cat)
+                 (unless (member cat used)
+                   (push cat used)
+                   (dolist (r (remove cat rules :test-not #'eql :key #'car))
+                     (mapc #'aux (second r))))))
+        (aux (caar rules))              ;start with top category
+        (let ((defined (remove-duplicates (mapcar #'car rules))))
+          (let ((unused (set-difference defined used)))
+            (when unused
+              (warn "Unused non-terminals: ~<~@{~S~^, ~:_~}~:>" unused))))))
+    ;;
     (let* ((defined     (remove-duplicates (mapcar #'car rules)))
            (used        (remove-duplicates (cons (caar rules) (mapcan #'copy-list (mapcar #'cadr rules)))))
            (undef       (remove-if (lambda (x) (or (assoc x tokens) (member x defined))) used))
            (unused      (set-difference defined used))
            (terminals   (set-difference used defined)))
-      (when undef
-        (warn "Undefined: ~S" undef))
-      (when unused
-        (warn "Unused non-terminals: ~S" unused))
+      (when undef (warn "Undefined: ~S" undef))
+      ;; (when unused (warn "Unused non-terminals: ~S" unused))
       (let ((aux-defuns nil))
         (setq rules (mapcar (lambda (rule)
                               (destructuring-bind (lhs rhs lambda-form) rule

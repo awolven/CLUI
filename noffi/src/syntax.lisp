@@ -7,7 +7,17 @@
                             (lambda (stream char)
                               (read-hash-underscore stream char nil))
                             t))
-     (set-dispatch-macro-character #\# #\_ 'read-hash-underscore)))
+     (set-dispatch-macro-character #\# #\_ 'read-hash-underscore)
+     (set-pprint-dispatch '(satisfies valid-c-identifier-symbol-p)
+                          (lambda (stream object)
+                            (if *print-escape*
+                                (progn
+                                  (write-string "#_" stream)
+                                  (write-string (symbol-name object) stream))
+                                (write-string (string object) stream))
+                            object))
+
+     ))
 
 (defun read-hash-underscore (stream subchar arg)
   (declare (ignore subchar))
@@ -247,6 +257,15 @@
 
 ;;;; -- Printer -------------------------------------------------------------------------------
 
+(defmacro with-stream-arg ((stream-var) &body body)
+  `(invoke-with-stream-arg (lambda (,stream-var) ,@body) ,stream-var))
+
+(defun invoke-with-stream-arg (cont stream)
+  (etypecase stream
+    (null (with-output-to-string (stream) (funcall cont stream)))
+    ((member t) (funcall cont *standard-output*))
+    (stream (funcall cont stream))))
+
 (defun valid-c-identifier-symbol-p (object)
   (and (symbolp object)
        (eq (symbol-package object) (find-package *c-package*))
@@ -259,14 +278,25 @@
        (> (length (symbol-name object)) 0)
        (not (char<= #\0 (char (symbol-name object) 0) #\9))))
 
-(set-pprint-dispatch '(satisfies valid-c-identifier-symbol-p)
-                     (lambda (stream object)
-                       (if *print-escape*
-                           (progn
-                             (write-string "#_" stream)
-                             (write-string (symbol-name object) stream))
-                           (write-string (string object) stream))
-                       object))
+(defun render-identifier (identifier &optional env)
+  "Returns a string suitable for a C parser to be read as the identifier _identifier_."
+  ;; For funny characters or for reserved words we might chose to use \uhhhh and \UHHHHHHHH escapes.
+  (if (valid-c-identifier-symbol-p identifier)
+      (identifier-name identifier)
+      (with-output-to-string (bag)
+        (loop for c across (identifier-name identifier)
+              for first = t then nil
+              do (cond ((or (char<= #\a c #\z)
+                            (char<= #\A c #\Z)
+                            (char= c #\_)
+                            (and (not first) (char<= #\0 c #\9)))
+                        (write-char c bag))
+                       ((<= (char-code c) #xFFFF)
+                        (format bag "\\u~4,'0X" (char-code c)))
+                       ((<= (char-code c) #xFFFFFFFF)
+                        (format bag "\\U~8,'0X" (char-code c)))
+                       (t
+                        (error "Impressive!")))))))
 
 ;;;; ------------------------------------------------------------------------------------------
 
@@ -438,6 +468,8 @@
                        (let ((addr (ccl::eep.address eep)))
                          (write-string (ccl::eep.name eep) stream)
                          (when addr (format stream " /* 0x~X */" addr)))))
+                    ((eql ':char (bare-expanded-type (pointer-type-base type)))
+                     (print-putative-c-string object stream))
                     (t
                      (format stream "0x~X" (ptr-int object)))))))
               ((record-type-p type)
@@ -446,6 +478,58 @@
               (t
                (print-unreadable-object (object stream :type t :identity nil)
                  (format stream "~S ~S" type (cval-value object)))))))))
+
+;; This is a heuristic for printing strings. This works on Lisps that
+;; have proper support for catching segmentation faults. An alternative
+;; would be to attempt to write(2) and then read(2) from a pipe and
+;; looking for EFAULT.
+
+(defun maybe-peek-u8 (ptr &optional (offset 0))
+  "Try to peek an unsigned 8-bit integer from the given pointer and
+  returns it. and returns NIL. If that doesn't happen for us because
+  it is outside the address space.
+
+  If it is not possible to catch invalid addresses always return NIL."
+  (or
+   #+CCL
+   (handler-case
+       (peek-u8 ptr offset)
+     (ccl::invalid-memory-access ()
+       nil))
+   #+SBCL
+   (handler-case
+       (peek-u8 ptr offset)
+     (sb-sys:memory-fault-error ()
+       nil))))
+
+(defun print-putative-c-string (ptr stream &aux (max 80))
+  "Tries to print the pointer /ptr/ as a C string. If that fails, we
+print a hexadecimal for the address in C syntax instead."
+  (let ((bag (make-array 80 :element-type 'character :fill-pointer 0 :adjustable t)))
+    (vector-push-extend #\" bag)
+    (do* ((i 0 (+ i 1))
+          (c (maybe-peek-u8 ptr i) (maybe-peek-u8 ptr i)))
+        (nil)
+      (cond ((null c)
+             ;; no luck
+             (format stream "0x~X" (ptr-int ptr))
+             (return))
+            ((zerop c)
+             ;; we won
+             (vector-push-extend #\" bag)
+             (write-string bag stream)
+             (return))
+            ((> i max)
+             (dotimes (k 3)
+               (vector-push-extend #\\ bag)
+               (vector-push-extend #\. bag))
+             (vector-push-extend #\" bag)
+             (write-string bag stream)
+             (return))
+            ((<= 32 c 126)
+             (when (or (eql c #.(char-code #\")) (eql c #.(char-code #\\)))
+               (vector-push-extend #\\ bag))
+             (vector-push-extend (code-char c) bag))))))
 
 (defun print-record (cval stream)
   (pprint-logical-block (stream nil :prefix "(" :suffix ")")
@@ -457,7 +541,7 @@
           (let ((member (pprint-pop)))
             (format stream ".~A = " (verbatim (record-member-name member)))
             (handler-case
-                (let ((val (c-> cval (record-member-name member))))
+                (let ((val (ignore-errors (c-> cval (record-member-name member)))))
                   (if val
                       (prin1 (c-> cval (record-member-name member)) stream)
                       (write-string "0" stream)))
@@ -475,26 +559,23 @@
 
 (defun print-type (type &optional (stream *standard-output*) (inner nil))
   (let ((*print-circle* nil))
-    (cond ((null stream)
-           (with-output-to-string (stream)
-             (print-type type stream inner)))
-          (t
-           (let ((qualifiers (type-qualifiers type)))
-             (print-type-1 type stream
-                           (if (and (null qualifiers) (null inner))
-                               nil
-                               (lambda (stream)
-                                 (do ((q qualifiers (cdr qualifiers)))
-                                     ((endp q))
-                                   (let ((it (cadr (assoc (car q) *type-qualifier-lexemes*))))
-                                     (format stream "~A" (verbatim (or it q))))
-                                   (when (or (cdr q) inner)
-                                     (princ " " stream)))
-                                 (etypecase inner
-                                   (null)
-                                   (function (funcall inner stream))
-                                   (string   (write-string inner stream))
-                                   (symbol   (princ inner stream)))))))))))
+    (with-stream-arg (stream)
+      (let ((qualifiers (type-qualifiers type)))
+        (print-type-1 type stream
+                      (if (and (null qualifiers) (null inner))
+                          nil
+                          (lambda (stream)
+                            (do ((q qualifiers (cdr qualifiers)))
+                                ((endp q))
+                              (let ((it (cadr (assoc (car q) *type-qualifier-lexemes*))))
+                                (format stream "~A" (verbatim (or it q))))
+                              (when (or (cdr q) inner)
+                                (princ " " stream)))
+                            (etypecase inner
+                              (null)
+                              (function (funcall inner stream))
+                              (string   (write-string inner stream))
+                              (symbol   (princ inner stream))))))))))
 
 (defun print-type-1 (type stream inner)
   (labels ((frob (name)
@@ -547,6 +628,16 @@
                            (and inner (funcall inner stream))
                            (when (> (type-precedence base) (type-precedence type))
                              (princ ")" stream))))))
+          ((amp-pointer-type-p type)
+           (let ((base (amp-pointer-type-base type)))
+             (print-type base stream
+                         (lambda (stream)
+                           (when (> (type-precedence base) (type-precedence type))
+                             (princ "(" stream))
+                           (princ "&" stream)
+                           (and inner (funcall inner stream))
+                           (when (> (type-precedence base) (type-precedence type))
+                             (princ ")" stream))))))
           ((array-type-p type)
            (let ((base (array-type-base type)))
              (print-type base stream
@@ -554,7 +645,11 @@
                            (when (> (type-precedence base) (type-precedence type))
                              (princ "(" stream))
                            (and inner (funcall inner stream))
-                           (princ "[]" stream) ;###
+                           (princ "[" stream)
+                           (let ((count (array-type-count type)))
+                             (unless (eq count ':UNSPECIFIED)
+                               (print-expression count stream)))
+                           (princ "]" stream)
                            (when (> (type-precedence base) (type-precedence type))
                              (princ ")" stream))))))
           ((function-type-p type)
@@ -585,36 +680,41 @@
                                                                    stream)))))))))
                              (when parenp (princ ")" stream)))))))
           ((record-type-p type)
-           (write-string (cond ((struct-type-p type) "struct")
-                               ((union-type-p type) "union")
-                               (t (assert nil)))
-                         stream)
-           (let ((name (record-type-name type)))
+           (let* ((name (record-type-name type))
+                  (completep (record-type-complete-p type))
+                  (members (and completep (record-type-members type))))
+             (pprint-logical-block (stream members)
+               (write-string (cond ((struct-type-p type) "struct")
+                                   ((union-type-p type) "union")
+                                   (t (assert nil)))
+                             stream)
                (when name
                  (format stream " ~A" (verbatim (identifier-name name))))
-               (when (record-type-complete-p type)
-                 (let ((members (record-type-members type)))
-                   (princ " {" stream)
-                   ;; (pprint-newline :mandatory stream)
-                   (terpri stream)
-                   (pprint-logical-block (stream members :per-line-prefix "  ")
-                     (dolist (member members)
-                       (let ((name (record-member-name member))
-                             (type (record-member-type member)))
-                         (print-type type stream (lambda (s)
-                                                   (when name
-                                                     (write-string
-                                                      (identifier-name name)
-                                                      s))))
-                         (princ ";" stream)
-                         (unless (eq member (car (last members)))
-                           (pprint-newline :mandatory stream)))))
-                   (terpri stream)
-                   (princ "}" stream)))
-             (when inner
-               (princ " " stream)
-               (funcall inner stream)) ))
-          (t (error "Huh? What kind of type is ~S" type)))))
+               (when completep
+                 (pprint-indent :block 4 stream)
+                 (write-string " {" stream)
+                 (unwind-protect
+                      (loop
+                        (pprint-exit-if-list-exhausted)
+                        (pprint-newline :mandatory stream)
+                        (print-declaration (pprint-pop) stream))
+                   (pprint-indent :block 0 stream)
+                   (pprint-newline :mandatory stream)
+                   (princ "}" stream)))))
+           (when inner
+             (princ " " stream)
+             (funcall inner stream)) )
+          ((keywordp type)              ;###
+           (frob (concatenate 'string "__noffi_unknown " (string-downcase type))))
+          ((bit-field-type-p type)
+           (let ((base (bit-field-type-base-type type)))
+             (print-type base stream
+                         (lambda (stream)
+                           (and inner (funcall inner stream))
+                           (princ " :" stream)
+                           (print-expression (bit-field-type-width type) stream)))))
+          (t
+           (error "Huh? What kind of type is ~S" type)))))
 
 (defun type-precedence (type)
   (cond ((named-type-p type)    100)
@@ -625,6 +725,9 @@
         ((function-type-p type) 400)
         ((array-type-p type)    400)
         ((pointer-type-p type)  200)
+        ((amp-pointer-type-p type)  200)
+        (t 100)
+        #+(or)
         (t (error "Huh? What kind of type is ~S" type))))
 
 
@@ -816,6 +919,7 @@
                   (destructuring-bind (literal prefix) (cdr expr)
                     (when prefix (write-string prefix stream))
                     (write-char #\" stream)
+                    ;; Note that the literal is already escaped.
                     (write-string literal stream)
                     (write-char #\" stream))))
                (:string-literal-list
@@ -828,6 +932,11 @@
                         (pprint-exit-if-list-exhausted)
                         (write-string " " stream)
                         (pprint-newline :fill stream))))))
+               (:pp-number
+                (note-token :constant stream)
+                (with-block (nil 0)
+                  (destructuring-bind (text) (cdr expr)
+                    (write-string text stream))))
                ((LISP)
                 (note-token :lisp stream)
                 (with-block (nil 0)
@@ -1090,15 +1199,42 @@
                  (print-declaration-2 specifiers name type init stream))))))
 
 (defun print-declaration-2 (specifiers name type init stream)
-  (print-type type stream name)
-  (typecase init
-    (null)
-    ((member BEGIN)
-     )
-    (T
-     (write-string " = " stream)
-     (print-expression init stream)))
-  (write-string ";" stream))
+  (pprint-logical-block (stream nil)
+    (dolist (k specifiers)
+      (print-specifier k stream)
+      (write-string " " stream))
+    (print-type type stream name)
+    (typecase init
+      (null
+       (write-string ";" stream))
+      ((cons (member BEGIN))
+       (pprint-newline :mandatory stream)
+       (print-statement init stream))
+      (T
+       (write-string " = " stream)
+       (print-expression init stream)
+       (write-string ";" stream)))))
+
+(defun print-specifier (specifier stream)
+  (with-stream-arg (stream)
+    (select specifier
+      ((:storage-class) (storage-class)
+       (write-string (storage-class-spelling storage-class) stream))
+      ((:declaration-specifier) (spec)
+       (print-declaration-specifier spec stream))
+      (otherwise
+       (format stream "/* ~S */" specifier)))))
+
+(defun print-declaration-specifier (specifier stream)
+  (with-stream-arg (stream)
+    (select specifier
+      ((:align) (n)
+       (pprint-logical-block (stream nil :prefix "__noffi_align(" :suffix ")")
+         (print-expression n stream)))
+      ((:pack) (n)
+       (format stream "__noffi_pack(~D)" n))
+      (otherwise
+       (format stream "/* ~S */" specifier)))))
 
 
 ;;;;
@@ -1106,3 +1242,20 @@
 (defun ~decl (stream declaration colon at)
   (declare (ignore colon at))
   (print-declaration declaration stream))
+
+(defun ~type (stream declaration colon at)
+  (declare (ignore colon at))
+  (print-type declaration stream))
+
+(defun ~green (stream arg colon at)
+  (declare (ignore colon at arg))
+  (write-string #.(format nil "~A[32m" (code-char 27)) stream))
+
+(defun ~red (stream arg colon at)
+  (declare (ignore colon at arg))
+  (write-string #.(format nil "~A[31m" (code-char 27)) stream))
+
+(defun ~plain (stream arg colon at)
+  (declare (ignore colon at arg))
+  (write-string #.(format nil "~A[0m" (code-char 27)) stream))
+

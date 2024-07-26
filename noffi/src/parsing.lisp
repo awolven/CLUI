@@ -2,8 +2,8 @@
 
 ;;; This is the driver for the grammar implementing backtracking.
 
-(locally
-    (declaim (optimize (safety 1) (speed 3)))
+(eval-when (:compile-toplevel)
+  (declaim (optimize (safety 1) (speed 3))))
 
 (defparameter *global-env-sloc*
   (make-hash-table :test #'eq))
@@ -12,8 +12,14 @@
 (defvar *current-machine* nil)
 (defparameter *sloc-table* nil)
 (defparameter *observe-line-directives-p* nil)
-(defparameter *max-backtrack*
-  (or #+WINDOWS 50 10))
+
+(defparameter *max-backtrack* 5
+  ;; This used to be some high number, but our parser is good enough
+  ;; already that valid input can do with just one token backtracking.
+  "The maximum distance in number of tokens that backtracking can reach.")
+
+(defparameter *max-queue* 0
+  "For statistics only; maximum backtracking queue length.")
 
 (defvar *typedefs* (make-hash-table :test #'eq)
   ;; Maybe we make this part of a machine?
@@ -51,7 +57,8 @@
                 (not (keywordp (car arguments)))))
       (push (pop arguments) kws)
       (push (pop arguments) kws))
-    (apply #'error 'noffi-parsing-error
+    (apply #'error
+           'noffi-parsing-error
            :format-control (car arguments)
            :format-arguments (cdr arguments)
            (reverse kws)) ))
@@ -275,7 +282,6 @@
                                 (funcall-lexer scanner))
                             (setq last-sloc sloc)
                             (cond ((eq cat :line-directive)
-                                   ;; (print (list cat val))
                                    (when *observe-line-directives-p*
                                      (destructuring-bind (no file) val
                                        ;; (note "file ~S line ~D. We're at line ~D atm" file no (line-col-sloc-start-line sloc))
@@ -327,6 +333,7 @@
 (defvar +uparrow-char+
   (or (code-char 8593) #\^))
 
+#+(or)
 (defun show-context-line-col-from-start (source sloc-kind sloc-args format-control format-args)
   (declare (ignore sloc-kind))
   (destructuring-bind (line-no col-no) sloc-args
@@ -343,8 +350,25 @@
                      (format t "~&;; ~6D:[1;31m ~A[0m~%" cur-line-no (verbatim line))
                      (format t "~&;; ~6D: ~A~%" cur-line-no (verbatim line)))
                  (when (= cur-line-no line-no)
-                   (format t "~&;;         ~v<~A~>~%" (1+ col-no) (verbatim +uparrow-char+))
-                   '(format t "~&;; **** ~?~%" format-control format-args)))))))
+                   (format t "~&;;         ~v<~A~>~%" (1+ col-no) (verbatim +uparrow-char+))))))))
+
+(defun show-context-line-col-from-start (source sloc-kind sloc-args format-control format-args)
+  (declare (ignore sloc-kind))
+  (destructuring-bind (line-no col-no) sloc-args
+    (format t "~&;; **** ~?~%" format-control format-args)
+    (let ((pn (ignore-errors (pathname source))))
+      (when pn (format t "~&// * ~S~%" pn)))
+    (let ((start-line (- line-no 3))
+          (end-line (+ line-no 3)))
+      (loop for line = (read-line source nil nil)
+            for cur-line-no from 1
+            while (and line (< line-no end-line))
+            do (when (<= start-line cur-line-no end-line)
+                 (if (= cur-line-no line-no)
+                     (format t "~&/* ~6D: */ [1;31m~A[0m~%" cur-line-no (verbatim line))
+                     (format t "~&/* ~6D: */ ~A~%" cur-line-no (verbatim line)))
+                 (when (= cur-line-no line-no)
+                   (format t "~&//            ~v<~A~>~%" (1+ col-no) (verbatim +uparrow-char+))))))))
 
 
 ;;;; ------------------------------------------------------------------------------------------
@@ -388,8 +412,9 @@
                  (t          (balanced-member item (cdr list) :key key :nest nest)))))))
 
 (defun machine-accpets-category (m cat)
-  (and (integerp (machine-state m))
-       (table-next (machine-table m) (machine-state m) cat)))
+  (let ((state (machine-state m)))
+    (and (integerp state)
+         (table-next (machine-table m) state cat))))
 
 ;;;
 
@@ -417,6 +442,9 @@
 
 ;; The idea is that every ";" or "("...")" "{"..."}" ends one declaration.
 
+(defparameter *parse-error-report*
+  #'princ)
+
 (defun bf-parse (input &key inject (grammar 'c99-parser))
   (cond ((not (null inject))
          (parse-token-list (butlast (tokenize input)) :inject inject :grammar grammar))
@@ -436,9 +464,8 @@
                                 (multiple-value-bind (form out-machine)
                                     (handler-case
                                         (parse-token-list k :inject inject :grammar grammar :proto-machine machine)
-                                      #-NIL
                                       (error (c)
-                                        (princ c)
+                                        (funcall *parse-error-report* c)
                                         (values nil nil)))
                                   (when out-machine
                                     (setf machine out-machine)
@@ -448,59 +475,6 @@
             *typedefs*)))))
 
 ;; Another approach:
-
-#+(or)
-(defun token-list-declaration-subseqs (token-list)
-  (let ((stack nil)                     ;stack of parens
-        (cur nil)                       ;current subseq
-        (res nil)                       ;all subseqs
-        (last-was-paren-expr nil))
-    (macrolet ((spill () `(when cur (push (reverse cur) res) (setq cur nil))))
-      ;;
-      (do ((q token-list (cdr q)))
-          ((endp q))
-        (let ((token (car q)))
-          (push token cur)
-          (case (token-main-cat token)
-            ((:\( :\[ :\{) (push (token-cat token) stack))
-            (:\) (assert (eq :\( (car stack))) (pop stack))
-            (:\] (assert (eq :\[ (car stack))) (pop stack))
-            (:\} (assert (eq :\{ (car stack)) nil "~S" stack) (pop stack)
-                 (when (and (null stack) last-was-paren-expr)
-                   (spill)))
-            (:\; (when (and (null stack)
-                            ;; This is here to catch K&R functions.
-                            (or (null (cdr q))
-                                (not (eql :\{ (token-cat (cadr q))))))
-                   (spill)))
-            ((:\+ :\-)
-             (when (and (null stack))
-               (pop cur)
-               (spill)
-               (push token cur)))
-            ((:@interface :@protocol)
-             ;; 
-             (do ((p (cdr q) (cdr p)))
-                 ((or (null p)
-                      (eql (token-main-cat (car p)) :@end))
-                  (unless p (error "No @end?"))
-                  (when p (push (car p) cur))
-                  (spill)
-                  (setq q p))
-               (push (car p) cur))
-             '(let ((p (member :@end q :key #'token-main-cat)))
-               (pop cur) (spill)
-               (unless p (error "No @end?"))
-               (push (ldiff q (cdr p)) res)
-               (setq q p)))
-            ((:@end)
-             (blame-for-token (car q) "Stray @end?"))
-            (:eof (pop cur)))
-          (when (null stack)
-            (setq last-was-paren-expr (eq :\) (token-cat token)))) ))
-      ;;
-      (spill)
-      (reverse res))))
 
 #+(or)
 (defun blame-for-token (tok format-control &rest format-args)
@@ -619,56 +593,47 @@
         (values (and m (cadar (machine-stack m)))
                 m)))))
 
+(defvar *global-lock*
+  (make-lock "*global-lock*"))
+
 (defun bt-parse-1 (q0 input)
-  (let* ((qs (list q0))
+  (let* ((qs (list q0))                 ;Queue of machines.
          (max-serial 0)
          (best-state nil)
          (best-machine nil)
          (best-tok nil)
          (err-qs nil))
-    (setf(machine-tokens q0) input)
+    (declare (ignorable best-machine best-state))
+    (setf (machine-tokens q0) input)
     (prog ()
      :loop
      (unless qs
        (when best-tok
-         (let ((q (aref (machine-table q0) best-state)))
-           (let ((putative-tokens nil))
-             (maphash (lambda (k v) (declare (ignore v)) (push k putative-tokens)) q)
-             (let ((expected
-                    nil
-                     #+(or)
-                    (loop for tok in putative-tokens
-                          when (bf-step (copy-machine best-machine)
-                                        (make-token :cat tok)) ;###
-                          collect tok)))
-               ;; ### This must be a dry run w/o invoking actions?!
-               (setq expected (mapcar (lambda (x)
-                                        (or (cdr (assoc x (fancy-lalr-table-terminals (get 'c99-parser 'lalr-table))))
-                                            x))
-                                      expected))
-               (blame-for-token best-tok "~@<Parse error in state ~D: Saw ~S.~_~@<Expected one of ~{~S~^, ~:_~}~:>~:>"
-                                best-state
-                                best-tok
-                                expected))))))
+         (blame-for-token best-tok "~@<Parse Error.~:@>")))
      (let ((q (find :fin qs :key #'machine-state)))
        (when q (return q)))
-     (let ((head (or (pop qs)
-                     (pop err-qs))))
-       (unless head (return nil))
-       ;; (print `(head = ,head la = ,(machine-tokens head)))
-       (when (<= (- max-serial (machine-serial head)) *max-backtrack*)
+     (let ((head (or (pop qs) (pop err-qs))))
+       (unless head
+         ;; We shouldn't really get here.
+         (blame-for-token best-tok "~@<No luck. We ran out of options.~:@>")
+         (return nil))
+       (progn
          (when (> (1+ (machine-serial head)) max-serial)
            (setq best-machine head)
            (setq best-state (machine-state head))
-           (setq best-tok (car (machine-tokens head))))
-         (setq max-serial (max (1+ (machine-serial head)) max-serial))
+           (setq best-tok (car (machine-tokens head)))
+           (setq max-serial (1+ (machine-serial head))))
+         ;;
          (multiple-value-bind (nqs err-q)
              (bt-step head)
+           (let ((p (nthcdr *max-backtrack* qs)))
+             (and p (rplacd p nil)))
            (setq qs (nconc nqs qs))
            (when err-q (push err-q err-qs)))))
      (go :loop))))
 
 (defun bt-step (m)
+  (declare (type machine m))
   (setq m (last-minute-transducer m))
   (cond ((null (machine-tokens m))
          (if (eq :fin (machine-state m)) (list m) nil))
@@ -693,6 +658,7 @@
                                              m)
                                            (car q))
                          when m* collect m*)
+                   #+(or)
                    (loop for tie in '(:--tie-- :--tie2-- :--tie3--)
                          nconc
                          (when (machine-accpets-category m tie)
@@ -706,6 +672,7 @@
             (bf-step (copy-machine m) err-tok))))))
 
 (defun bf-step (m token)
+  (declare (type machine m))
   (handler-bind
       ((error (lambda (cond)
                 (blame-for-token token "~&ERROR: ~A~%" cond)
@@ -740,6 +707,7 @@
           (state (machine-state m))
           (table (machine-table m))
           next)
+
       (prog ()
        :loop
        (when (null la) (return))
@@ -802,8 +770,14 @@
       (setf (machine-la m) la)))
   m)
 
+(defun borrow-sloc (from to)
+  (let ((sloc (and *sloc-table* (gethash from *sloc-table*))))
+    (when sloc (setf (gethash to *sloc-table*) sloc))
+    to))
+
 (defun last-minute-transducer (m)
   "Destructive!"
+  (declare (type machine m))
   ;; This is a last minute transducer to be run right in front of STEP-MACHINE.
   (let ((tok (car (machine-tokens m))))
     (cond ((eq (token-cat tok) :line-directive)
@@ -822,6 +796,8 @@
                                        (cdr (machine-pack-stack m))))))
                   (let ((op (cadr val)))
                     (ecase (car op)
+                      (:show
+                       (note "Packing stack: ~S" (machine-pack-stack m)))
                       (:push
                        (destructuring-bind (id? value) (cdr op)
                          (push (list (caar (machine-pack-stack m)) id?)
@@ -887,5 +863,3 @@
              (error "~S: ~?" form format-control format-arguments))
           (t
            (apply #'error format-control format-arguments)))))
-
-) ;fin

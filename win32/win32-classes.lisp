@@ -40,12 +40,9 @@
 
 (defmethod initialize-instance ((instance win32:display-mixin) &rest initargs &key &allow-other-keys)
   (declare (ignorable initargs))
-
   (call-next-method)
   (win32-init instance)
   instance)
-
-
 
 (defclass win32:monitor-mixin (clui:monitor-mixin handle-mixin)
   ((adapter-name :initarg :adapter-name :accessor adapter-name)
@@ -179,7 +176,6 @@
    (%high-surrogate
     :initform nil
     :accessor high-surrogate)))
-		      
 
 (defmethod initialize-instance :after ((instance win32:window-mixin) &rest initargs &key &allow-other-keys)
   (apply #'create-native-win32-window instance initargs))

@@ -652,7 +652,7 @@
         (warn "Undefined categories: ~@<~{~S~^ ~:_~}~:>" missing)))
     (let ((unused  (set-difference def use)))
       (when unused
-        (warn "Unused categories: ~@<~{~S~^ ~:_~}~:>" unused))))
+        '(warn "Unused categories: ~@<~{~S~^ ~:_~}~:>" unused))))
   ;;  cache some data that will be useful later
   (setq *lex-vector* (coerce (cons *end-marker* *lex*) 'vector))
   (setq *lex-index* (make-hash-table :test 'eq))
@@ -731,9 +731,9 @@
                     (FIRST CAT-LA))
                   (SHIFT-FROM (NEW-STATE)
                     (PUSH CUR-STATE STATE-STACK)
+                    (SETF CUR-STATE NEW-STATE)
                     (POP CAT-LA)
-                    (PUSH (POP VAL-LA) VAL-STACK)
-                    (SETF CUR-STATE NEW-STATE))
+                    (PUSH (POP VAL-LA) VAL-STACK))
                   (REDUCE-CAT (NAME CAT NDAUGHTERS ACTION)
                     (IF (EQ CAT ',*topcat*)
                         (RETURN-FROM ,name (POP VAL-STACK))

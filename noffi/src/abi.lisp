@@ -44,6 +44,9 @@
 (defgeneric abi-basic-type-specifier-lexemes (abi)
   (:method-combination append))
 
+(defgeneric abi-type-qualifier-lexemes (abi)
+  (:method-combination append))
+
 (defgeneric abi-maybe-translate-base-type (abi type-specifiers)
   (:method-combination or))
 
@@ -92,7 +95,7 @@
     (:double                  "double")
     (:signed                  "signed")
     (:unsigned                "unsigned")
-    (:Bool                    "_Bool")
+    (:bool                    "_Bool")
     (:Complex                 "_Complex")))
 
 (defclass gcc-abi-mixin () ())
@@ -111,6 +114,10 @@
     (:decimal-128             "_Decimal128")
     ;;
     (:__builtin_va_list       "__builtin_va_list")))
+
+(defmethod abi-type-qualifier-lexemes append ((abi iso-c17-mixin))
+  (declare (ignorable abi))
+  '())
 
 (defmethod abi-maybe-translate-base-type or ((abi gcc-abi-mixin) type-specifiers)
   (cadr (assoc type-specifiers
@@ -139,8 +146,8 @@
 (defclass msvc-abi-mixin () ())
 
 (defmethod abi-basic-type-specifier-lexemes append ((abi msvc-abi-mixin))
-  '((:__int8                  "int8"  "__int8")
-    (:__int16                 "int16" "__int16")
-    (:__int32                 "int32" "__int32")
-    (:__int64                 "int64" "__int64")))
+  '((:__int8            "__int8")
+    (:__int16           "__int16")
+    (:__int32           "__int32")
+    (:__int64           "__int64")))
 

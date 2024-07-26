@@ -17,7 +17,7 @@
   :author "Gilbert Baummann"
   :serial t
   :components
-  (#+ccl(:file "../noffi/src/patch-ccl")
+  (
    (:file "noffi/other/clex/src/clex")
    (:file "noffi/other/lalr/lalr")
    (:file "noffi/src/file")
@@ -27,6 +27,7 @@
    #+sbcl(:file "noffi/src/patch-sbcl")
    (:file "noffi/src/forward")
    (:file "noffi/src/lispdep")
+   #+ALLEGRO(:file "noffi/src/lispdep-excl")
    (:file "noffi/src/util")
    (:file "noffi/src/string-table")
    (:file "noffi/src/abi")
@@ -37,6 +38,7 @@
    (:file "noffi/src/grammar")
    (:file "noffi/src/adt")
    (:file "noffi/src/comp")
+   #+ALLEGRO(:file "noffi/src/backend-excl")
    (:file "noffi/src/runtime")
    (:file "noffi/src/syntax")
    (:file "noffi/src/abi-amd64-sysv")

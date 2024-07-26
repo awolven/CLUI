@@ -14,18 +14,18 @@
   (maybe-get-monitor-handle handle data))
 
 (defun maybe-get-monitor-handle (handle data)
-  (clet ((mi #_<MONITORINFOEXW>))
+  (clet ((mi #_<MONITORINFOEX>))
     (let* ((&mi (c-addr-of mi))
-	   (p-szDevice (c->-addr &mi '#_szDevice))
-	   (size (c-sizeof-type '#_<MONITORINFOEXW>))
+	   (szDevice (#_.szDevice &mi))
+	   (size #_(sizeof(MONITORINFOEX)))
 	   (&mc (noffi::cons-ptr (int-sap data) 0 '#_<monitor_cons>)))
-      (#_memset &mi size 0)
+      ;;(#_memset &mi size 0)
       (setf (#_.cbSize (c-cast '#_<MONITORINFO*> &mi)) size)
       (setf (#_.handle &mc) (noffi::%cons-ptr (int-sap 0) 0 '#_<HMONITOR>))
 
-      (unless (zerop (#_GetMonitorInfoW handle &mi))
+      (unless (zerop (#_GetMonitorInfo handle &mi))
 
-	(when (zerop (#_wcscmp p-szDevice (#_.adapterName &mc)))
+	(when (string= (lpcwstr->string szDevice) (lpcwstr->string (#_.adapterName &mc)))
 	  (setf (#_.handle &mc) handle)))
 
       #_TRUE)))
@@ -34,29 +34,28 @@
   (cons-ptr (int-sap (+ (sap-int (ptr-effective-sap ptr)) offset)) 0 type))
 
 (defun create-monitor (&adapter &display display)
-  (let ((p-adapter-name (c->-addr &adapter '#_DeviceName))
-	(p-display-name (c->-addr &display '#_DeviceName))
-	(p-adapter-string (c->-addr &adapter '#_DeviceString))
-	(p-display-string (c->-addr &display '#_DeviceString))
+  (let ((adapter-name (lpcwstr->string (#_.DeviceName &adapter)))
+	(display-name (lpcwstr->string (#_.DeviceName &display)))
+	(adapter-string (lpcwstr->string (#_.DeviceString &adapter)))
+	(display-string (lpcwstr->string (#_.DeviceString &display)))
 	(width-mm)
 	(height-mm)
 	(name)
 	(monitor))
 
     (if &display
-	(setq name (lpcwstr->string p-display-string))
-	(setq name (lpcwstr->string p-adapter-string)))
+	(setq name display-string)
+	(setq name adapter-string))
 
-    (clet ((dm #_<DEVMODEW>))
+    (clet ((dm #_<DEVMODE>))
       (let ((&dm (c-addr-of dm))
-	    (dm-size (c-sizeof-type '#_<DEVMODEW>)))
-	(#_memset &dm dm-size 0)
+	    (dm-size #_(sizeof(DEVMODE))))
+	;;(#_memset &dm dm-size 0)
 	(setf (#_.dmSize &dm) dm-size)
 
-	(#_EnumDisplaySettingsW p-adapter-name #_ENUM_CURRENT_SETTINGS &dm)
+	(#_EnumDisplaySettings adapter-name #_ENUM_CURRENT_SETTINGS &dm)
 
-	(with-lpcwstr (dstring "DISPLAY")
-	  (let ((hdc (#_CreateDCW dstring p-adapter-name nil nil)))
+	(let ((hdc (#_CreateDC "DISPLAY" adapter-name nil nil)))
 
 	    (if (windows-8.1-or-greater?)
 		(progn
@@ -67,7 +66,7 @@
 		  (setq width-mm (/ (* (#_.dmPelsWidth &dm) 25.4) (#_GetDeviceCaps hdc #_LOGPIXELSX)))
 		  (setq height-mm (/ (* (#_.dmPelsHeight &dm) 25.4) (#_GetDeviceCaps hdc #_LOGPIXELSY)))))
 
-	    (#_DeleteDC hdc)))
+	    (#_DeleteDC hdc))
 
 	(setq monitor (make-instance 'monitor
 				     :display display
@@ -75,13 +74,13 @@
 				     :width-mm width-mm
 				     :height-mm height-mm
 				     :modes-pruned? (logtest (#_.StateFlags &adapter) #_DISPLAY_DEVICE_MODESPRUNED)
-				     :adapter-name (lpcwstr->string p-adapter-name)
+				     :adapter-name adapter-name
 				     :display-name (when &display
-						     (lpcwstr->string p-display-name))))
+						     display-name)))
 
 	(let ((dmPosition (ptr-inc &dm (+ (* 2 32) (* 2 4) 4) '#_<POINTL*>)))
 	  
-	  (setf (h monitor) (find-monitor-handle (lpcwstr->string p-adapter-name)
+	  (setf (h monitor) (find-monitor-handle adapter-name
 						 (#_.x dmPosition)
 						 (#_.y dmPosition)
 						 (+ (#_.x dmPosition) (#_.dmPelsWidth &dm))
@@ -92,81 +91,84 @@
   (clet ((mc #_<monitor_cons>))
     (let* ((&mc (c-addr-of mc))
 	   (lparam (cons-cval (sap-int (ptr-effective-sap &mc)) '#_<LPARAM>)))
-      (with-lpcwstr (padaptername adapter-name)
-	(setf (#_.adapterName &mc) padaptername)
-	(setf (#_.handle &mc) (noffi::%cons-ptr (int-sap 0) 0 '#_<HMONITOR>))
-	(if bottom
-	    (clet ((rect #_<RECT>))
-	      (let ((&rect (c-addr-of rect)))
-		(setf (#_.left &rect) left
-		      (#_.top &rect) top
-		      (#_.right &rect) right
-		      (#_.bottom &rect) bottom)
-		(#_EnumDisplayMonitors nil &rect monitor-callback lparam)))
-	    (#_EnumDisplayMonitors nil nil monitor-callback lparam))
-	(#_.handle &mc)))))
+      (setf (#_.adapterName &mc) adapter-name)
+      (setf (#_.handle &mc) (noffi::%cons-ptr (int-sap 0) 0 '#_<HMONITOR>))
+      (if bottom
+	  (clet ((rect #_<RECT>))
+	    (let ((&rect (c-addr-of rect)))
+	      (setf (#_.left &rect) left
+		    (#_.top &rect) top
+		    (#_.right &rect) right
+		    (#_.bottom &rect) bottom)
+	      (#_EnumDisplayMonitors nil &rect monitor-callback lparam)))
+	  (#_EnumDisplayMonitors nil nil monitor-callback lparam))
+      (#_.handle &mc))))
+
+(defun memset (p v n) (dotimes (i n) (setf (noffi::peek-u8 p i) v)))
 
 (defun poll-win32-monitors (dpy)
-  (clet ((adapter #_<DISPLAY_DEVICEW>)
-	 (display #_<DISPLAY_DEVICEW>))
+
+  (clet ((adapter #_<DISPLAY_DEVICE>)
+	 (display #_<DISPLAY_DEVICE>))
     (let* ((&adapter (c-addr-of adapter))
-	   (p-adapter-name (c->-addr &adapter '#_DeviceName))
 	   (&display (c-addr-of display))
-	   (p-display-name (c->-addr &display '#_DeviceName))
-	   (size (c-sizeof-type '#_<DISPLAY_DEVICEW>))
+	   (size #_(sizeof(DISPLAY_DEVICE)))
 	   (disconnected (copy-list (display-monitors dpy))))
+
 
       (loop for adapter-index from 0
 	    do (let ((placement :insert-last))
-		 (#_memset &adapter size 0)
+		 (memset &adapter size 0)
 		 (setf (#_.cb &adapter) size)
-
-		 (when (zerop (#_EnumDisplayDevicesW nil adapter-index &adapter 0))
+		 
+		 (when (zerop (#_EnumDisplayDevices nil adapter-index &adapter 0))
 		   (return))
 
-		 (when (logtest (#_.StateFlags &adapter) #_DISPLAY_DEVICE_ACTIVE)
-
-		   (when (logtest (#_.StateFlags &adapter) #_DISPLAY_DEVICE_PRIMARY_DEVICE)
-		     (setq placement :insert-first))
-
-		   (loop for display-index from 0
-			 with monitor
-			 with found? = nil
-			 with display-name
-			 do (#_memset &display size 0)
-			    (setf (#_.cb &display) size)
-			    
-			    (when (zerop (#_EnumDisplayDevicesW p-adapter-name display-index &display 0))
-			      (return))
-
-			    (unless (logtest (#_.StateFlags &display) #_DISPLAY_DEVICE_ACTIVE)
+		 (let ((adapter-name (lpcwstr->string (#_.DeviceName &adapter))))
+		 
+		   (when (logtest (#_.StateFlags &adapter) #_DISPLAY_DEVICE_ACTIVE)
+		   
+		     (when (logtest (#_.StateFlags &adapter) #_DISPLAY_DEVICE_PRIMARY_DEVICE)
+		       (setq placement :insert-first))
+		     
+		     (loop for display-index from 0
+			   with monitor
+			   with found? = nil
+			   do (memset &display size 0)
+			      (setf (#_.cb &display) #_(sizeof(DISPLAY_DEVICE)))
 			      
-			      (setq display-name (lpcwstr->string p-display-name))
-			      
-			      (let ((m (find display-name disconnected :key #'display-name :test #'string=)))
-				(when m
-				  (setq disconnected (remove m disconnected))
-				  (setf (h m) (find-monitor-handle (lpcwstr->string p-adapter-name)))
-				  (setq found? t)
-				  (return))))
-
-			    (unless found?
-			      (setq monitor (create-monitor &adapter &display dpy))
-			      (unless monitor
+			      (when (zerop (#_EnumDisplayDevices
+					    adapter-name
+					    display-index &display 0))
 				(return))
 
-			      (input-monitor dpy monitor :action :connected :placement placement))
+			      (let ((display-name (lpcwstr->string (#_.DeviceName &display))))
 
-			    (setq placement :insert-last)))))
+				(unless (logtest (#_.StateFlags &display) #_DISPLAY_DEVICE_ACTIVE)
+			      
+				  (let ((m (find display-name disconnected :key #'display-name :test #'string=)))
+				    (when m
+				      (setq disconnected (remove m disconnected))
+				      (setf (h m) (find-monitor-handle display-name))
+				      (setq found? t)
+				      (return))))
 
+				(unless found?
+				  (setq monitor (create-monitor &adapter &display dpy))
+				  (unless monitor
+				    (return))
+				  
+				  (input-monitor dpy monitor :action :connected :placement placement))
+				
+				(setq placement :insert-last)))))))
+      
       (loop for discon in disconnected
 	    do (input-monitor dpy discon :action :disconnected)))))
 
 (defun restore-win32-monitor-video-mode (monitor)
   (when (mode-changed? monitor)
-    (with-lpcwstr (p-adapter-name (adapter-name monitor))
-      (#_ChangeDisplaySettingsExW p-adapter-name nil nil #_CDS_FULLSCREEN nil)
-      (setf (mode-changed? monitor) nil)))
+    (#_ChangeDisplaySettingsEx (adapter-name monitor) nil nil #_CDS_FULLSCREEN nil)
+    (setf (mode-changed? monitor) nil))
   (values))
 
 (defun set-win32-monitor-video-mode (monitor desired)
@@ -178,10 +180,10 @@
       (when (zerop (compare-video-modes current best))
 	(return (values)))
 
-      (clet ((dm #_<DEVMODEW>))
+      (clet ((dm #_<DEVMODE>))
 	(let ((&dm (c-addr-of dm))
-	      (dm-size (c-sizeof-type '#_<DEVMODEW>)))
-	  (#_memset &dm dm-size 0)
+	      (dm-size #_(sizeof(DEVMODE))))
+	  ;;(#_memset &dm dm-size 0)
 	  (setf (#_.dmSize &dm) dm-size)
 
 	  (setf (#_.dmFields &dm) (logior #_DM_PELSWIDTH #_DM_PELSHEIGHT #_DM_BITSPERPEL)
@@ -196,37 +198,35 @@
 		    (>= (#_.dmBitsPerPel &dm) 24))
 	    (setf (#_.dmBitsPerPel &dm) 32))
 
-	  (with-lpcwstr (p-adapter-name (adapter-name monitor))
-	    (setq result (#_ChangeDisplaySettingsExW p-adapter-name &dm nil #_CDS_FULLSCREEN nil))
+	  (setq result (#_ChangeDisplaySettingsEx (adapter-name monitor) &dm nil #_CDS_FULLSCREEN nil))
 
-	    (if (= result #_DISP_CHANGE_SUCCESSFUL)
-		(return
-		  (progn
-		    (setf (mode-changed? monitor) t)
-		    (values)))
+	  (if (= result #_DISP_CHANGE_SUCCESSFUL)
+	      (return
+		(progn
+		  (setf (mode-changed? monitor) t)
+		  (values)))
 
-		(error "Failed to set video mode, reason: ~A"
-		       (case result
-			 (#.#_DISP_CHANGE_BADDUALVIEW "The system uses DualView")
-			 (#.#_DISP_CHANGE_BADFLAGS "Invalid flags")
-			 (#.#_DISP_CHANGE_BADMODE "Graphics mode not supported")
-			 (#.#_DISP_CHANGE_BADPARAM "Invalid parameter")
-			 (#.#_DISP_CHANGE_FAILED "Graphics mode failed")
-			 (#.#_DISP_CHANGE_NOTUPDATED "Failed to write to registry")
-			 (#.#_DISP_CHANGE_RESTART "Computer restart required"))))))))))
+	      (error "Failed to set video mode, reason: ~A"
+		     (cond
+		       ((= result #_DISP_CHANGE_BADDUALVIEW) "The system uses DualView")
+		       ((= result #_DISP_CHANGE_BADFLAGS) "Invalid flags")
+		       ((= result #_DISP_CHANGE_BADMODE) "Graphics mode not supported")
+		       ((= result #_DISP_CHANGE_BADPARAM) "Invalid parameter")
+		       ((= result #_DISP_CHANGE_FAILED) "Graphics mode failed")
+		       ((= result #_DISP_CHANGE_NOTUPDATED) "Failed to write to registry")
+		       ((= result #_DISP_CHANGE_RESTART) "Computer restart required")))))))))
 
 (defun get-win32-monitor-pos (monitor)
   (clet ((dm #_<DEVMODEW>))
     (let* ((&dm (c-addr-of dm))
-	   (dm-size (c-sizeof-type '#_<DEVMODEW>))
+	   (dm-size #_(sizeof(DEVMODE)))
 	   (dmPosition (ptr-inc &dm (+ (* 2 32) (* 2 4) 4) '#_<POINTL*>)))
       (setf (#_.dmSize &dm) dm-size)
 
-      (with-lpcwstr (p-adapter-name (adapter-name monitor))
-	(#_EnumDisplaySettingsExW p-adapter-name #_ENUM_CURRENT_SETTINGS &dm #_EDS_ROTATEDMODE)
+      (#_EnumDisplaySettingsEx (adapter-name monitor) #_ENUM_CURRENT_SETTINGS &dm #_EDS_ROTATEDMODE)
 
-	(values (#_.x dmPosition)
-		(#_.y dmPosition))))))
+      (values (#_.x dmPosition)
+	      (#_.y dmPosition)))))
 	      
   
 (defun get-win32-monitor-content-scale (monitor)
@@ -237,7 +237,7 @@
     (let ((&mi (c-addr-of mi)))
       (setf (#_.cbSize &mi) (c-sizeof-type '#_<MONITORINFO>))
 
-      (#_GetMonitorInfoW (h monitor) &mi)
+      (#_GetMonitorInfo (h monitor) &mi)
 
       (values (#_.left #_(&(@mi).rcWork))
 	      (#_.top #_(&(@mi).rcWork))
@@ -245,53 +245,51 @@
 	      (- (#_.bottom #_(&(@mi).rcWork)) (#_.top #_(&(@mi).rcWork)))))))
 
 (defun get-win32-monitor-video-mode (monitor)
-  (clet ((dm #_<DEVMODEW>))
+  (clet ((dm #_<DEVMODE>))
     (let ((&dm (c-addr-of dm))
-	  (dm-size (c-sizeof-type '#_<DEVMODEW>)))
-      (#_memset &dm dm-size 0)
+	  (dm-size #_(sizeof(DEVMODE))))
+      ;;(#_memset &dm dm-size 0)
       (setf (#_.dmSize &dm) dm-size)
 
-      (with-lpcwstr (p-adapter-name (adapter-name monitor))
-	(#_EnumDisplaySettingsW p-adapter-name #_ENUM_CURRENT_SETTINGS &dm)
+      (#_EnumDisplaySettings (adapter-name monitor) #_ENUM_CURRENT_SETTINGS &dm)
 
-	(multiple-value-bind (red green blue) (split-bpp (#_.dmBitsPerPel &dm))
-	  (make-video-mode
-	   :width (#_.dmPelsWidth &dm)
-	   :height (#_.dmPelsHeight &dm)
-	   :refresh-rate (#_.dmDisplayFrequency &dm)
-	   :red-bits red
-	   :green-bits green
-	   :blue-bits blue))))))
+      (multiple-value-bind (red green blue) (split-bpp (#_.dmBitsPerPel &dm))
+	(make-video-mode
+	 :width (#_.dmPelsWidth &dm)
+	 :height (#_.dmPelsHeight &dm)
+	 :refresh-rate (#_.dmDisplayFrequency &dm)
+	 :red-bits red
+	 :green-bits green
+	 :blue-bits blue)))))
 
 (defun get-win32-monitor-video-modes (monitor)
   ;;(when (modes-pruned? monitor)
-    (clet ((dm #_<DEVMODEW>))
-      (let ((&dm (c-addr-of dm))
-	    (dm-size (c-sizeof-type '#_<DEVMODEW>)))
-	(with-lpcwstr (p-adapter-name (adapter-name monitor))
-	  (loop for mode-index from 0
-		with results = ()
-		do 
-		   (#_memset &dm dm-size 0)
-		   (setf (#_.dmSize &dm) dm-size)
+  (clet ((dm #_<DEVMODE>))
+    (let ((&dm (c-addr-of dm))
+	  (dm-size #_(sizeof(DEVMODE))))
+      (loop for mode-index from 0
+	    with results = ()
+	    do 
+	       ;;(#_memset &dm dm-size 0)
+	       (setf (#_.dmSize &dm) dm-size)
 		 
-		when (zerop (#_EnumDisplaySettings p-adapter-name mode-index &dm))
-		  do (return (nreverse results))
+	    when (zerop (#_EnumDisplaySettings (adapter-name monitor) mode-index &dm))
+	      do (return (nreverse results))
 
-		when (>= (#_.dmBitsPerPel &dm) 15)
-		  do (multiple-value-bind (red green blue) (split-bpp (#_.dmBitsPerPel &dm))
-		       (let ((mode (make-video-mode
-				    :width (#_.dmPelsWidth &dm)
-				    :height (#_.dmPelsHeight &dm)
-				    :refresh-rate (#_.dmDisplayFrequency &dm)
-				    :red-bits red
-				    :green-bits green
-				    :blue-bits blue)))
+	    when (>= (#_.dmBitsPerPel &dm) 15)
+	      do (multiple-value-bind (red green blue) (split-bpp (#_.dmBitsPerPel &dm))
+		   (let ((mode (make-video-mode
+				:width (#_.dmPelsWidth &dm)
+				:height (#_.dmPelsHeight &dm)
+				:refresh-rate (#_.dmDisplayFrequency &dm)
+				:red-bits red
+				:green-bits green
+				:blue-bits blue)))
 		       
-			 (unless (find mode results :test (lambda (a b) (zerop (compare-video-modes a b))))
-			   (when (= (#_ChangeDisplaySettingsExW p-adapter-name &dm nil #_CDS_TEST nil)
-				    #_DISP_CHANGE_SUCCESSFUL)
-			     (push mode results))))))))));;)
+		     (unless (find mode results :test (lambda (a b) (zerop (compare-video-modes a b))))
+		       (when (= (#_ChangeDisplaySettingsEx (adapter-name monitor) &dm nil #_CDS_TEST nil)
+				#_DISP_CHANGE_SUCCESSFUL)
+			 (push mode results))))))))) ;;)
 			  
 			  
     

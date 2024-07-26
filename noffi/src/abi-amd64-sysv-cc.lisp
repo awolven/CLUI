@@ -312,6 +312,7 @@ type. Returns a vector of the classes. May also just return :MEMORY."
               ($poke-double (nv sap off) `(setf (peek-double ,sap ,off) ,nv))
               ($peek-u64 (&rest xs) `(peek-u64 ,@xs))
               (cval-value (x) `(cval-value ,x))
+              (cval-type (x) `(cval-type ,x))
               (c-coerce (x y) `(c-coerce ,x ',y))
               (ptr-effective-sap (x) `(ptr-effective-sap ,x))
               ($double-u64 (x) `(double-u64 ,x))

@@ -161,7 +161,8 @@ string argument, we copy that string to defeat that."
         (prin1 it)
         (set'/sloc (cadr it))
         (terpri))
-      (print-declaration decl *standard-output*)))
+      (print-declaration decl *standard-output*)
+      (return-from c-inspect nil)))
   (let ((decl (or (find-identifier-declaration `(:union ,what) nil :errorp nil)
                   (find-identifier-declaration `(:struct ,what) nil :errorp nil)
                   (find-identifier-declaration `(:enum ,what) nil :errorp nil))))
@@ -169,3 +170,21 @@ string argument, we copy that string to defeat that."
       (print-type decl *standard-output*)
       (princ ";")))
   (values))
+
+(defun boolean= (a b)
+  (if a b (not b)))
+
+(defmacro ensure-type (value type)
+  (let ((g (gensym)))
+    `(LET ((,g ,value))
+       (ETYPECASE ,g (,type ,g)))))
+
+(defun max* (a b)
+  (if a (if b (max a b) a) b))
+
+(defvar *note-nest* -1)
+
+(defun note (fmt &rest args)
+  (format t
+          (format nil "~~&~~<;; ~v<~>~~@;~~?~~:>" (* 2 (max 0 *note-nest*)))
+          (list fmt args)))

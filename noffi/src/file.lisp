@@ -11,6 +11,10 @@
 
 (in-package :de.bauhh.file)
 
+#+CCL
+(eval-when (:compile-toplevel)
+  (setq *readtable* (copy-readtable ccl::%initial-readtable%)))
+
 ;;;; -- Temponary Files -----------------------------------------------------------------------
 
 (defmacro with-temponary-file ((filename) &body body)
@@ -44,9 +48,9 @@
   (let ((errno
          (ccl::with-filename-cstrs ((oldpath oldpath)
                                     (newpath newpath))
-           (ccl::int-errno-call (#_link oldpath newpath)))))
+           (ccl::int-errno-call (#.(read-from-string "#_link") oldpath newpath)))))
     (unless (zerop errno)
-      (error "~A" (verbatim (ccl::%strerror errno))))))
+      (error "~A" (copy-seq (ccl::%strerror errno))))))
 
 ;;;; ------------------------------------------------------------------------------------------
 

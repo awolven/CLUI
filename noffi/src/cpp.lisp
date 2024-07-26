@@ -2193,7 +2193,7 @@ second return value is the remaining tokens. Initial white space is skipped."
         do (when (probe-file probe)
              (return probe))))
 
-#-windows
+#-WINDOWS
 (defun handle-system-include (filename)
   (multiple-value-bind (proc output)
       (run-program *cc* (append *cc-args* (list "-dD" "-E" "-"))
@@ -2212,6 +2212,7 @@ second return value is the remaining tokens. Initial white space is skipped."
     ;; and then check the process status.
     (push-input-stream output (format nil "<~A>" (verbatim filename)))))
 
+#+(or)
 (defun run-program (program arguments
                     &rest rest
                     &key wait
@@ -2221,6 +2222,8 @@ second return value is the remaining tokens. Initial white space is skipped."
                          (external-format :utf-8)
                     &allow-other-keys)
   (declare (ignorable wait input output error external-format))
+  (format t "~&# ~{~A~^ ~}~%" (cons program arguments))
+  (force-output)
   #+CCL
   (let ((proc
          (apply #'ccl:run-program program arguments
@@ -2246,6 +2249,9 @@ second return value is the remaining tokens. Initial white space is skipped."
      (sb-ext:process-output proc)
      (sb-ext:process-error proc)
      (sb-ext:process-input proc))))
+
+(defun run-program (&rest args)
+  (apply #'noffi::run-program args))
 
 
 ;;;; -- Macro Expansion -----------------------------------------------------------------------
@@ -3344,7 +3350,6 @@ When sth else is seen whine and return NIL."
                               :error *error-output*
                               :input nil
                               :wait t
-			      :if-output-exists :supersede
                               :output output
                               :external-format *cpp-default-file-encoding*)
                (declare (ignore proc))

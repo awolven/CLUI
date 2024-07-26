@@ -28,10 +28,10 @@
 
 (in-package :noffi)
 
-(locally
-    (declaim (optimize (safety 1) (speed 3)))
-
 (declaim (inline string-table-count string-table-size string-table-table string-table-get))
+
+(eval-when (:compile-toplevel)
+  (declaim (optimize (safety 1) (speed 3))))
 
 (defstruct (string-table (:print-function print-string-table)
                          (:constructor cons-string-table (size table)))
@@ -127,5 +127,3 @@
     (setf (string-table-size table) new-size
           (string-table-table table) new-storage)
     table))
-
-)                                       ;locally

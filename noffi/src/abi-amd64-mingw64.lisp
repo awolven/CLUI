@@ -30,6 +30,7 @@
 
 (defclass abi-amd64-mingw64 (iso-c17-mixin
                              gcc-abi-mixin
+                             ms-struct-layout-mixin
                              abi)
   ())
 
