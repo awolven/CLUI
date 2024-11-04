@@ -2,33 +2,35 @@
 
 (defun win32-copy-string-to-clipboard (string)
   (when (stringp string)
-    (unless (#_OpenClipboard nil)
-      (return-from win32-copy-string-to-clipboard nil))
-
-    (with-lpcwstr (lpcwstr string)
-      (let ((size (* (1+ (* (length string))) (c-sizeof-type '#_<WCHAR>))))
-
-	(when (zerop (#_EmptyClipboard))
-	  (error "EmptyClipboard returned error code: ~S" (#_GetLastError)))
-	
+    (when (> (length string) 0)
       
-	(let ((hglb (#_GlobalAlloc #_GMEM_MOVEABLE size)))
-
-	  (unless hglb
-	    (#_CloseClipboard)
-	    (return-from win32-copy-string-to-clipboard nil))
-
-	  (let ((lpcwstrCopy (#_GlobalLock hglb)))
-
-	    (#_memcpy lpcwstrCopy lpcwstr size)
-
-	    (#_GlobalUnlock hglb)
+      (unless (#_OpenClipboard nil)
+	(return-from win32-copy-string-to-clipboard nil))
+      
+      (with-lpcwstr (lpcwstr string)
+	(let ((size (* (1+ (* (length string))) (c-sizeof-type '#_<WCHAR>))))
 	  
-	    (unwind-protect (progn
-			      (#_SetClipboardData #_CF_UNICODETEXT hglb)
-			      t)
+	  (when (zerop (#_EmptyClipboard))
+	    (error "EmptyClipboard returned error code: ~S" (#_GetLastError)))
+	  
+	  
+	  (let ((hglb (#_GlobalAlloc #_GMEM_MOVEABLE size)))
 	    
-	      (#_CloseClipboard))))))))
+	    (unless hglb
+	      (#_CloseClipboard)
+	      (return-from win32-copy-string-to-clipboard nil))
+	    
+	    (let ((lpcwstrCopy (#_GlobalLock hglb)))
+	      
+	      (#_memcpy lpcwstrCopy lpcwstr size)
+	      
+	      (#_GlobalUnlock hglb)
+	      
+	      (unwind-protect (progn
+				(#_SetClipboardData #_CF_UNICODETEXT hglb)
+				t)
+		
+		(#_CloseClipboard)))))))))
 
 (defun win32-copy-string-from-clipboard ()
   (unless (#_OpenClipboard nil)
