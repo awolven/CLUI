@@ -135,35 +135,36 @@
   (values))
 
 (defun input-key (window key action x y mods lock-mods timestamp)
-  (let ((keys (window-keys window)))
+  (when key
+    (let ((keys (window-keys window)))
 
-    (when (and (eq action :release) (eq (aref keys key) :release))
-      (return-from input-key (values)))
+      (when (and (eq action :release) (eq (aref keys key) :release))
+	(return-from input-key (values)))
 
 
-    (when (and (eq action :press) (eq (aref keys key) :press))
-      (setq action :repeat))
+      (when (and (eq action :press) (eq (aref keys key) :press))
+	(setq action :repeat))
 
-    (if (and (eq action :release) (sticky-keys? window))
-	(setf (aref keys key) :stick)
-	(setf (aref keys key) action))
+      (if (and (eq action :release) (sticky-keys? window))
+	  (setf (aref keys key) :stick)
+	  (setf (aref keys key) action))
 
-    (restart-bind ((ignore (lambda (&optional c)
-			     (declare (ignorable c))
-			     (throw :ignore nil))))
-      (catch :ignore
-	(clim:handle-event window (make-instance (ecase action
-					      (:repeat 'key-repeat-event)
-					      (:press 'key-press-event)
-					      (:release 'key-release-event))
-					    :window window
-					    :input-code key
-					    :x x
-					    :y y
-					    :modifier-state mods
-					    :lock-modifier-state lock-mods
-					    :timestamp timestamp))))
-    (values)))
+      (restart-bind ((ignore (lambda (&optional c)
+			       (declare (ignorable c))
+			       (throw :ignore nil))))
+	(catch :ignore
+	  (clim:handle-event window (make-instance (ecase action
+						     (:repeat 'key-repeat-event)
+						     (:press 'key-press-event)
+						     (:release 'key-release-event))
+						   :window window
+						   :input-code key
+						   :x x
+						   :y y
+						   :modifier-state mods
+						   :lock-modifier-state lock-mods
+						   :timestamp timestamp))))))
+  (values))
     
 (defun input-mouse-click (window button action x y mods lock-mods timestamp)
   (if (and (eq action :release)

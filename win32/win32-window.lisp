@@ -818,12 +818,12 @@ int decorated;
 
 		 ((= uMsg #_WM_DISPLAYCHANGE)
 
-		  (if (clim:handle-event window (make-instance 'window-monitor-switched-event
-							       :window window
-							       :timestamp time))
+		  ;;(if (clim:handle-event window (make-instance 'window-monitor-switched-event
+		;;					       :window window
+		;;					       :timestamp time))
 
-		      (return 0)
-		      (go break)))
+		  ;;    (return 0)
+		      (go break));;)
 
 		 ((= uMsg #_WM_SETFOCUS) ;; 7
 
