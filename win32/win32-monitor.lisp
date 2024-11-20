@@ -5,6 +5,14 @@
   )
 
 
+(defun get-win32-monitor-gamma-ramp (monitor)
+  (declare (ignore monitor))
+  (values))
+
+(defun set-win32-monitor-gamma-ramp (monitor ramp)
+  (declare (ignore monitor ramp))
+  (values))
+
 (defcfun (monitor-callback #_<BOOL>)
 	 ((handle #_<HMONITOR>)
 	  (dc #_<HDC>)
@@ -33,17 +41,17 @@
 (defun ptr-inc (ptr offset type)
   (cons-ptr (int-sap (+ (sap-int (ptr-effective-sap ptr)) offset)) 0 type))
 
-(defun create-monitor (&adapter &display display)
-  (let ((adapter-name (lpcwstr->string (#_.DeviceName &adapter)))
-	(display-name (lpcwstr->string (#_.DeviceName &display)))
-	(adapter-string (lpcwstr->string (#_.DeviceString &adapter)))
-	(display-string (lpcwstr->string (#_.DeviceString &display)))
+(defun create-monitor (adapter* display* display)
+  (let ((adapter-name (lpcwstr->string (#_.DeviceName adapter*)))
+	(display-name (lpcwstr->string (#_.DeviceName display*)))
+	(adapter-string (lpcwstr->string (#_.DeviceString adapter*)))
+	(display-string (lpcwstr->string (#_.DeviceString display*)))
 	(width-mm)
 	(height-mm)
 	(name)
 	(monitor))
 
-    (if &display
+    (if display*
 	(setq name display-string)
 	(setq name adapter-string))
 
@@ -73,9 +81,9 @@
 				     :name name
 				     :width-mm width-mm
 				     :height-mm height-mm
-				     :modes-pruned? (logtest (#_.StateFlags &adapter) #_DISPLAY_DEVICE_MODESPRUNED)
+				     :modes-pruned? (logtest (#_.StateFlags adapter*) #_DISPLAY_DEVICE_MODESPRUNED)
 				     :adapter-name adapter-name
-				     :display-name (when &display
+				     :display-name (when display*
 						     display-name)))
 
 	(let ((dmPosition (ptr-inc &dm (+ (* 2 32) (* 2 4) 4) '#_<POINTL*>)))

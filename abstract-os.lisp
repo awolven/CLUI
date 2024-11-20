@@ -179,6 +179,7 @@
     (values)))
 
 (defun disable-cursor (window)
+  #+NOTYET
   (when (last-raw-mouse-motion? window)
     (enable-raw-mouse-motion window))
 

@@ -65,6 +65,7 @@
 (defun lpcwstr->string (ptr)
   (ccl::%get-native-utf-16-cstring (ptr-effective-sap ptr)))
 
+#+NIL
 (defun get-native-utf16-string (ptr)
   (with-output-to-string (bag)
     (loop for i from 0 by 2

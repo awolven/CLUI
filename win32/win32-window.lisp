@@ -155,8 +155,8 @@
   (declare (ignorable window))
   (values))
 
-(defun set-win32-window-fullscreen (window)
-  (declare (ignorable window))
+(defun set-win32-window-fullscreen (window value)
+  (declare (ignorable value window))
   (values))
 
 (defun get-win32-window-closable (window)
@@ -343,6 +343,14 @@
   (declare (ignorable window value))
   (values))
 
+(defun get-win32-window-iconifiable (window)
+  (declare (ignorable window))
+  (values))
+
+(defun set-win32-window-iconifiable (window value)
+  (declare (ignorable window value))
+  (values))
+
 (defun iconify-win32-window (window)
   (declare (ignorable window))
   (values))
@@ -368,7 +376,7 @@
   (declare (ignorable window))
   (values))
 
-#+NIL
+
 (defun get-win32-window-hovered (window)
   (block nil
     (clet ((area #_<RECT>)
@@ -1890,7 +1898,7 @@ int decorated;
   (values))
 	
 (defun set-win32-window-mouse-passthrough (window enabled?)
-  (declare (type win32-window-mixin window))
+  (declare (type win32:window-mixin window))
   (clet ((key #_<COLORREF> 0)
 	 (alpha #_<BYTE> 0)
 	 (flags #_<DWORD> 0))

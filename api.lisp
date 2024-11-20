@@ -137,7 +137,7 @@
   (warn "Cocoa: Raw mouse motion not yet implemented. No-op.")
   nil)
 
-#+win32
+#+(and win32 NOTYET)
 (defmethod enable-raw-mouse-motion ((window win32:window-mixin))
   (enable-win32-raw-mouse-motion window))
 
@@ -150,7 +150,7 @@
   (warn "Cocoa: Raw mouse motion not yet implemented. No-op.")
   nil)
 
-#+win32
+#+(and win32 NOTYET)
 (defmethod disable-raw-mouse-motion ((window win32:window-mixin))
   (disable-win32-raw-mouse-motion window))
 
@@ -238,7 +238,7 @@
 
 #+win32
 (defmethod get-default-screen-workarea ((display win32:display-mixin))
-  (get-win32-display-workarea))
+  (get-win32-desktop-workarea))
 
 #+cocoa
 (defmethod get-default-screen-workarea ((display cocoa:display-mixin)))
@@ -279,7 +279,7 @@
   (set-wayland-window-fullscreen window value))
 
 (defmethod (setf window-fullscreen-monitor) ((monitor monitor-mixin) (window window-mixin))
-  (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea (monitor-display monitor))
+  (multiple-value-bind (xpos ypos width height) (get-default-screen-workarea (window-display monitor))
     (let ((refresh-rate :dont-care))
       (set-window-fullscreen-monitor window monitor :xpos xpos :ypos ypos :width width :height height :refresh-rate refresh-rate)
       monitor)))
@@ -690,7 +690,7 @@
 (defmethod focus-window ((window wayland:window-mixin))
   (focus-wayland-window window))
 
-#+win32
+#+(and win32 NOTYET)
 (defmethod defocus-window ((window win32:window-mixin))
   (defocus-win32-window window))
 
@@ -1188,6 +1188,7 @@
 
 #+win32
 (defmethod wait-events ((display win32:display-mixin) &optional (timeout nil))
+  (declare (ignorable timeout))
   (wait-win32-events display))
 
 #+cocoa

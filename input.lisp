@@ -126,7 +126,7 @@
 			   (throw :ignore nil))))
     (catch :ignore
       (clim:handle-event window (make-instance 'pointer-motion-event
-					  :window
+					  :window window
 					  :input-code +pointer-move+
 					  :x xpos
 					  :y ypos

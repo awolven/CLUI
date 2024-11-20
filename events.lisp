@@ -233,6 +233,8 @@
 (defclass button-release-event-mixin ()
   ())
 
+(defvar *keysyms* (make-array 256 :initial-element nil))
+
 (defmethod print-object ((event input-event-mixin) stream)
   (print-unreadable-object (event stream :type t :identity t)
     (when (input-event-code event)
@@ -664,12 +666,12 @@
 (define-input-code +ms-ext-key-kanji+ #x10003 "Kanji")
       )
 
-(defparameter *keysyms*
-  (let ((keysyms (make-array 256 :initial-element nil)))
-    (loop for (input-code . keysym) in *input-code/keysym-alist*
-	  when (< input-code 256)
-	    do (setf (aref keysyms input-code) keysym)
-	  finally (return keysyms))))
+(defun initialize-keysyms ()
+  (loop for (input-code . keysym) in *input-code/keysym-alist*
+	when (< input-code 256)
+	  do (setf (aref *keysyms* input-code) keysym)))
+
+(initialize-keysyms)
 
 ;; modifier codes and names
 
