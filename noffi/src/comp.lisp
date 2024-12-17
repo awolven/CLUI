@@ -17,6 +17,7 @@
       (decl-kludge-1 storage-classes declarators nil)
     (dolist (declarator declarators)
       (destructuring-bind (name type &rest init) declarator
+	(declare (ignorable init))
         (when name
           (global-enter name `(decl ,storage-classes ,declarator)))
         (labels ((walk (type)
@@ -97,12 +98,12 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (decl-1 ',storage-classes '(,@ declarators))))
 
-(defmacro objc-interface (&rest xs) nil)
-(defmacro objc-protocol (&rest xs) nil)
-(defmacro objc-class (&rest xs) nil)
-(defmacro objc-class-method (&rest xs) nil)
-(defmacro objc-instance-method (&rest xs) nil)
-(defmacro objc-property (&rest xs) nil)
+(defmacro objc-interface (&rest xs) (declare (ignorable xs)) nil)
+(defmacro objc-protocol (&rest xs) (declare (ignorable xs)) nil)
+(defmacro objc-class (&rest xs) (declare (ignorable xs)) nil)
+(defmacro objc-class-method (&rest xs) (declare (ignorable xs)) nil)
+(defmacro objc-instance-method (&rest xs) (declare (ignorable xs)) nil)
+(defmacro objc-property (&rest xs) (declare (ignorable xs)) nil)
 
 
 ;;;; Constant Expression Evaluator
@@ -290,6 +291,7 @@
                          nil)))))) )))))
 
 (defun find-integer-type-with-rank-and-signedess (rank sigedness &optional env)
+  (declare (ignorable env))
   (car (or (find-if (lambda (type-desc)
                       (and (eql (if (fourth type-desc) t nil)
                                 (if sigedness t nil))
@@ -754,6 +756,7 @@ point arguments."
       (let ((arg-forms-types (mapcar (lambda (x)
                                        (multiple-value-list (comp-expr x env)))
                                      args)))
+	(declare (ignorable arg-forms-types))
         nil))))
         
 (defmacro c-form (form &environment env)

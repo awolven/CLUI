@@ -5,6 +5,9 @@
 (eval-when (:compile-toplevel)
   (declaim (optimize (safety 1) (speed 3))))
 
+#+sbcl
+(declaim (sb-ext:muffle-conditions sb-ext:compiler-note))
+
 (defparameter *global-env-sloc*
   (make-hash-table :test #'eq))
 
@@ -569,6 +572,7 @@
     m))
 
 (defun parse-token-list (tokens &key (proto-machine nil) (inject nil) (grammar 'c99-parser) source)
+  (declare (ignorable source))
   (let ()
     (setq tokens (append
                   (mapcar (lambda (x)
@@ -805,6 +809,7 @@
                          (when value (set-pack value)))) ;??
                       (:pop
                        (destructuring-bind (id? value) (cdr op)
+			 (declare (ignorable id? value))
                          (cond ((<= (length (machine-pack-stack m)) 1)
                                 (warn "#pragma pack stack underflow with ~S" (machine-pack-stack m))
                                 (setf (machine-pack-stack m) (list (list nil nil))))

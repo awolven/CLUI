@@ -1429,6 +1429,7 @@ use in an alien funcall."
          (destructuring-bind (fun &rest args) (cdr expr)
            (cond ((identifierp fun)
                   (let ((type (declaration-type (find-identifier-declaration fun env))))
+		    (declare (ignorable type))
                     `(static-c-funcall ,fun ,@(comp-list args env))))
                  (t
                   `(c-funcall ,@(mapcar (lambda (x) (comp-expr x env)) (cdr expr)))))))

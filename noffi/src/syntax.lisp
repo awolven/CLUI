@@ -1,5 +1,8 @@
 (in-package :noffi)
 
+#+SBCL
+(declaim (sb-ext:muffle-conditions SB-KERNEL:&OPTIONAL-AND-&KEY-IN-LAMBDA-LIST))
+
 (defmacro noffi-syntax (&optional (aggressivep nil))
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (when ,aggressivep
@@ -72,6 +75,7 @@
         (let* ((expr (parse-expression (cpp str )))
                (whole (list 'c-form (sublis map expr)))
                (subforms nil))
+	  (declare (ignorable subforms))
           ;; I believe somehow we have to mess with subnotes
           #+CCL
           (maphash (lambda (form sloc)
@@ -280,6 +284,7 @@
 
 (defun render-identifier (identifier &optional env)
   "Returns a string suitable for a C parser to be read as the identifier _identifier_."
+  (declare (ignorable env))
   ;; For funny characters or for reserved words we might chose to use \uhhhh and \UHHHHHHHH escapes.
   (if (valid-c-identifier-symbol-p identifier)
       (identifier-name identifier)
@@ -1137,7 +1142,7 @@ print a hexadecimal for the address in C syntax instead."
         (print-statement-1 body stream)))
 
     (FOR-DECL ((decl test step) body)
-      )
+      (declare (ignorable decl test step body)))
 
     (GOTO (tag)
       (pprint-logical-block (stream nil)

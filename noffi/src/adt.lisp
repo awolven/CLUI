@@ -28,6 +28,9 @@
 
 (in-package :noffi)
 
+#+SBCL
+(declaim (sb-ext:muffle-conditions SB-KERNEL:&OPTIONAL-AND-&KEY-IN-LAMBDA-LIST))
+
 (defvar *global-env*
   (make-hash-table :test 'equal))
 
@@ -494,6 +497,7 @@ returns it as a complete record type, if there is any."
 either :STRUCT or :UNION. _name_ is the struct type tag name and must
 either be NIL for an anonymous struct or a C identifier. The structure
 members are given my _members_ as a list of declarations."
+  (declare (ignorable pack))
   (check-type kind (member :struct :union))
   (check-type name (or null identifier))
   (when (and members-p (null members))
@@ -715,6 +719,7 @@ could be found, when in doubt the incomplete type is returned."
         type)))
 
 (defun find-identifier-declaration (identifier &optional env &key (errorp t))
+  (declare (ignorable env))
   (multiple-value-bind (res win) (gethash identifier *global-env*)
     (when (and errorp (not win))
       (blame identifier "~@<Undeclared identifier ~S~@:>" identifier))
@@ -1231,6 +1236,7 @@ are measured in bits. Second and third return value are the size and alignment i
          (allo-unit-pos 0) ;position of the allocation unit within overall structure
          (res nil)         ;assembled list of member layouts
          (last-was-zero t))
+    (declare (ignorable qualifiers))
     (labels ((allo-one (name size align)
                "Allocates one member of size _size_ and with alignment
                _align_. ALLO and MAX-ALIGN are updated accordingly.

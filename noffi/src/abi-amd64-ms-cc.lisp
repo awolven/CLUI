@@ -60,6 +60,7 @@
 
 (defmacro $amd64-ms-funcall-template ()
   ` (let ((to-free nil))
+      (declare (ignorable to-free))
       (when (and (pointer-type-p (cval-type fun)) (function-type-p (pointer-type-base (cval-type fun))))
         (setq fun (%c-aref fun)))
       (unless (function-type-p (cval-type fun))
@@ -322,23 +323,28 @@
                  (declare (ignore type))
                  (setf (sap-peek-sap io io-off) val)
                  (incf io-off 8))
-                 (do-call (rtype)
-                   (declare (ignore rtype))
-                   (if (float-type-p rtype)
-                       (ecase (car (float-type-p rtype))
-                         (:float 
-                          (amd-64-ms-ff-call-float
-                           (ptr-effective-sap fun)
-                           (* 2 (ceiling (1+ nargs))) ;wut?
-                           io))
-                         (:double 
-                          (amd-64-ms-ff-call-double
-                           (ptr-effective-sap fun)
-                           (* 2 (ceiling (1+ nargs))) ;wut?
-                           io)))
-                       (amd-64-ms-ff-call (ptr-effective-sap fun)
-                                          (* 2 (ceiling (1+ nargs))) ;wut?
-                                          io)))
+	       (do-call (rtype)
+		 (declare (ignorable rtype))
+		 (amd-64-ms-ff-call (ptr-effective-sap fun)
+				    (* 2 (ceiling (1+ nargs))) ;wut?
+				    io)
+		 #+NIL
+                 (if (float-type-p rtype)
+		       
+                     (ecase (car (float-type-p rtype))
+                       (:float 
+                        (amd-64-ms-ff-call-float
+                         (ptr-effective-sap fun)
+                         (* 2 (ceiling (1+ nargs))) ;wut?
+                         io))
+                       (:double 
+                        (amd-64-ms-ff-call-double
+                         (ptr-effective-sap fun)
+                         (* 2 (ceiling (1+ nargs))) ;wut?
+                         io)))
+                     (amd-64-ms-ff-call (ptr-effective-sap fun)
+                                        (* 2 (ceiling (1+ nargs))) ;wut?
+                                        io)))
                (make-res (type)
                  (setq the-res (c-make type 1 nil)))
                (get-res ()
@@ -356,6 +362,7 @@
   (let ((alien-args nil) (alien-parameter-types nil) to-free
         (res (gensym "RES."))
         res-init)
+    (declare (ignorable to-free))
     (labels ((cval-value (x) `(cval-value ,x))
              (c-coerce (x y) `(c-coerce ,x ',y))
              (ptr-effective-sap (x) `(ptr-effective-sap ,x))
@@ -363,7 +370,7 @@
              (peek-u16 (&rest xs) `(peek-u16 ,@xs))
              (peek-u32 (&rest xs) `(peek-u32 ,@xs))
              (peek-u64 (&rest xs) `(peek-u64 ,@xs))
-             (promoted-cval (x) `(promoted-cval ,x))
+             ;;(promoted-cval (x) `(promoted-cval ,x))
              (cons-ptr (x y z) `(cons-ptr ,x ,y ',z))
              ($ldb (x y) `(ldb ',x ,y)))
       (labels ((add-int-arg (type arg)

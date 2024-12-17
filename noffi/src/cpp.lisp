@@ -33,6 +33,11 @@
 
 (in-package :de.bauhh.cpp)
 
+#+sbcl
+(declaim (sb-ext:muffle-conditions sb-ext:compiler-note))
+#+SBCL
+(declaim (sb-ext:muffle-conditions SB-KERNEL:&OPTIONAL-AND-&KEY-IN-LAMBDA-LIST))
+
 ;; "cpp is inherently imperfect (in fact, it's downright awful), so the
 ;; preprocessor design should reflect that" --moon-child
 
@@ -79,7 +84,7 @@
 
 ;;;; -- Overview ------------------------------------------------------------------------------
 
-(eval-when (compile)
+(eval-when (:compile-toplevel)
   (defparameter +optimize-fast+
     '(optimize (speed 3) (safety 2) (debug 3)))
 
@@ -586,7 +591,7 @@ string to defeat that."
 
 ;;;; -- Tokens --------------------------------------------------------------------------------
 
-(eval-when (eval compile load)
+(eval-when (:execute :compile-toplevel :load-toplevel)
   (defstruct pp-token kind text)
 
   (defmethod print-object ((object pp-token) stream)
@@ -601,7 +606,7 @@ string to defeat that."
 ;; EQ in case the string is constant. We also define an appropriate load
 ;; form for tokens, so that they are interned, when loaded.
 
-(eval-when (eval compile load)
+(eval-when (:execute :compile-toplevel :load-toplevel)
   (defvar *punct-token-hash*
     (make-hash-table :test #'equal))
 
@@ -623,7 +628,7 @@ string to defeat that."
 
 ;; Dito for identifiers
 
-(eval-when (eval compile load)
+(eval-when (:execute :compile-toplevel :load-toplevel)
   (defparameter *ident-token-hash*
     (make-hash-table :test #'equal))
 
@@ -645,8 +650,7 @@ string to defeat that."
 
 ;; load form for tokens
 
-(eval-when (eval compile load)
-  
+(eval-when (:execute :compile-toplevel :load-toplevel)  
   (defmethod make-load-form ((object pp-token) &optional env)
     (declare (ignore env))
     (cond ((eql :punctuation (pp-token-kind object))
@@ -891,7 +895,7 @@ second return value is the remaining tokens. Initial white space is skipped."
 
 (defvar *expect-header-name-p* nil)
 
-(eval-when (eval compile load)
+(eval-when (:execute :compile-toplevel :load-toplevel)
   (defparameter *c-punctuations* 
     '(">>=" "<<=" "+=" "-=" "*=" "/=" "%=" "&=" "^=" "|=" ">>" "<<" "++"
       "--" "->" "&&" "||" "<=" ">=" "==" "!=" ";" "{" "}" "," ":" "=" "("
@@ -918,7 +922,7 @@ second return value is the remaining tokens. Initial white space is skipped."
 ;; :blue-painted        A blue painted identifier
 ;;
 
-(eval-when (eval compile load)
+(eval-when (:execute :compile-toplevel :load-toplevel)
   (defun make-punctuation-tree-form (strings &optional (prefix ""))
     (cond ((null strings)
            `',(make-punct-token prefix))
