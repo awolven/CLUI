@@ -156,7 +156,7 @@
                       (32 (deposit-res peek-u32 ($ldb (byte 32 0) (do-call :unsigned-long-long))))
                       (64 (deposit-res peek-u64 ($ldb (byte 64 0) (do-call :unsigned-long-long))))
                       (t  (do-call :void))))
-                  (get-res)))
+		  `(c-aref ,(get-res))))
                 (t
                  (error "No idea what to do with function return type ~S" rtype)))
         '(dolist (sap to-free)

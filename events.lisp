@@ -407,7 +407,7 @@
 
 (defmacro define-input-code (symbol input-code keysym)
   `(progn
-     (defconstant ,symbol ,input-code)
+     (eval '(defconstant ,symbol ,input-code))
      (pushnew (cons ,input-code ,keysym) *input-code/keysym-alist* :key #'car)
      (setf (gethash (keysym-matcher ,keysym) *keysym-matcher->keysym*)
 	   ,keysym)

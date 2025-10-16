@@ -33,11 +33,11 @@
 	 (loop for i from 0 below 256
 	      with keys = (window-keys window)
 	    when (and (eq (aref keys i) :stick)
-		      (not (find i '(+pointer-button-left+
-				     +pointer-button-right+
-				     +pointer-button-middle+
-				     +pointer-button-4+
-				     +pointer-button-5+))))
+		      (not (find i (list +pointer-left-button+
+					 +pointer-right-button+
+					 +pointer-middle-button+
+					 +pointer-button-4+
+					 +pointer-button-5+))))
 	    do (setf (aref keys i) :release)))
 
        (setf (sticky-keys? window) value)
@@ -51,11 +51,11 @@
 	 (return (values)))
        
        (unless value
-	 (loop for i in '(+pointer-button-left+
-			  +pointer-button-right+
-			  +pointer-button-middle+
-			  +pointer-button-4+
-			  +pointer-button-5+)
+	 (loop for i in (list +pointer-left-button+
+			      +pointer-right-button+
+			      +pointer-middle-button+
+			      +pointer-button-4+
+			      +pointer-button-5+)
 	    with keys = (window-keys window)
 	    when (eq (aref keys i) :stick)
 	    do (setf (aref keys i) :release)))

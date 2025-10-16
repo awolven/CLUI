@@ -576,7 +576,7 @@ resulting set iff
 (defun isum-union (a b)         (isum-op boole-ior a b))
 (defun isum-intersection (a b)  (isum-op boole-and a b))
 (defun isum-difference (a b)    (isum-op boole-andc2 a b))
-(defun isum-complement (a)      (isum-op boole-c1 a nil))
+;;(defun isum-complement (a)      (isum-op boole-c1 a nil))
 
 ;;; Misc
 

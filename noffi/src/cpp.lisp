@@ -2197,7 +2197,7 @@ second return value is the remaining tokens. Initial white space is skipped."
         do (when (probe-file probe)
              (return probe))))
 
-#-WINDOWS
+#-(or WINDOWS win32)
 (defun handle-system-include (filename)
   (multiple-value-bind (proc output)
       (run-program *cc* (append *cc-args* (list "-dD" "-E" "-"))
@@ -3319,12 +3319,12 @@ When sth else is seen whine and return NIL."
         (ccl:native-to-pathname (concatenate 'string (string-right-trim "/" (ccl:getenv "TMPDIR")) "/")))
    #p"/tmp/"))
 
-(defun make-temponary-file (&key (type (or #+WINDOWS "$$$" "tmp")))
+(defun make-temponary-file (&key (type (or #+(or WINDOWS win32) "$$$" "tmp")))
   (let ((stream (make-temponary-file-stream :type type)))
     (when stream (close stream))
     (pathname stream)))
 
-(defun make-temponary-file-stream (&key (type (or #+WINDOWS "$$$" "tmp")))
+(defun make-temponary-file-stream (&key (type (or #+(or WINDOWS win32) "$$$" #-(or WINDOWS win32) "tmp")))
   (let (pn)
     (loop
       (setf pn (make-pathname
@@ -3333,11 +3333,11 @@ When sth else is seen whine and return NIL."
                           (princ-to-string (random (expt 36 20)))))
                 :type type
                 :defaults (temponary-directory)))
-      (let ((stream (open pn :if-exists nil :if-does-not-exist :create :direction :io)))
+      (let ((stream (open pn :if-exists :supersede :if-does-not-exist :create :direction :io)))
         (when stream
           (return stream))))))
 
-#+WINDOWS
+#+(or WINDOWS win32)
 ;; pipes are unbearable slow with Windows for some reason.
 (defun handle-system-include (filename)
   (with-open-stream (fodder (make-temponary-file-stream :type "c"))
@@ -3355,9 +3355,10 @@ When sth else is seen whine and return NIL."
                               :input nil
                               :wait t
                               :output output
+			      :if-output-exists :supersede
                               :external-format *cpp-default-file-encoding*)
                (declare (ignore proc))
-               (push-input-stream (open output :direction :input :external-format *cpp-default-file-encoding*)
+               (push-input-stream (open output :direction :input :external-format *cpp-default-file-encoding* :if-exists :supersede)
                                   (format nil "<~A>" (verbatim filename))))))
       (delete-file fodder))))
 

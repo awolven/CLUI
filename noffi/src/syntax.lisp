@@ -280,6 +280,7 @@
                     (find c "_$:")))    ;### Not quite yet
               (symbol-name object))
        (> (length (symbol-name object)) 0)
+       (not (find #\: (symbol-name object)))
        (not (char<= #\0 (char (symbol-name object) 0) #\9))))
 
 (defun render-identifier (identifier &optional env)

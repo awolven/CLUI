@@ -2,6 +2,11 @@
 
 (defvar w)
 
+(defvar *view-table* (make-hash-table :weakness :value))
+
+(defconstant ID_FILE_EXIT 1)
+(defconstant ID_HELP_ABOUT 2)
+
 (defcfun (my-exception-handler-callback #_<LONG>)
 	 ((ExceptionInfo #_<EXCEPTION_POINTERS*>))
   (my-exception-handler ExceptionInfo))
@@ -1469,6 +1474,34 @@ int decorated;
 			(#_DragFinish drop)
 			(return 0)))))
 
+		 ((= uMsg #_WM_COMMAND)
+		  (cond ((= ID_HELP_ABOUT (#_LOWORD wparam))
+			 (with-lpcwstr (message "This is a CLUI application.")
+			   (with-lpcwstr (title "About")
+			     (#_MessageBox hwnd message title
+					   (logior #_MB_OK #_MB_ICONINFORMATION)))))
+			((= ID_FILE_EXIT (#_LOWORD wparam))
+			 (#_PostQuitMessage 0))
+			(t
+			 (let ((view (gethash (#_LOWORD wparam) *view-table*)))
+			   (when view
+			     (cond ((= #_BN_CLICKED (#_HIWORD wparam))
+				    (multiple-value-bind (x y) (window-cursor-position window)
+				      (clim:handle-event view (make-instance 'pointer-button-press-event
+									     :window window
+									     :clicked-items (list view)
+									     :modifier-state mods
+									     :lock-modifier-state lock-mods
+									     :x x :y y
+									     :native-x x :native-y y
+									     :timestamp time
+									     :input-code +pointer-left-button+))))
+				   ))))))
+								 
+							       
+							       
+		 
+
 		    
 		 )))
 	   
@@ -1495,11 +1528,13 @@ int decorated;
 					  (transparent? nil)
 					  (scale-to-monitor? t)
 					  (key-menu nil)
+					  (vscroll? nil)
 					&allow-other-keys)
 
   (declare (ignorable args transparent? resizable? floating? key-menu))
-  
-  (let* ((style (get-window-style window))
+
+  (let* ((style (logior (get-window-style window)
+			(if vscroll? (logior #_WS_OVERLAPPEDWINDOW #_WS_VSCROLL) 0)))
 	 (ex-style (get-window-ex-style window))
 	 (frame-x)
 	 (frame-y)
@@ -1617,16 +1652,16 @@ int decorated;
 			   (setf (gethash id *id->window-table*) window)
 		       
 			   (let ((result (#_CreateWindowEx ex-style
-							    (#_MAKEINTATOM main-window-class)
-							    wide-title
-							    style
-							    frame-x frame-y
-							    frame-width frame-height
-							    nil ;; no parent window
-							    nil ;; no window menu
-							    (#_GetModuleHandle nil)
-							    (c-cast '#_<LPVOID> &wc)
-							    )))
+							   (#_MAKEINTATOM main-window-class)
+							   wide-title
+							   style
+							   frame-x frame-y
+							   frame-width frame-height
+							   nil ;; no parent window
+							   nil ;; no window menu
+							   (#_GetModuleHandle nil)
+							   (c-cast '#_<LPVOID> &wc)
+							   )))
 
 			     (if result
 				 (progn

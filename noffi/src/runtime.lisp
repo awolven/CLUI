@@ -1602,16 +1602,21 @@ use in an alien funcall."
                                            (mapcar #'cadr lambda-list)))))
     `(progn
        (defparameter ,pascal-name
-         (sb-alien::alien-callback
-          ,(foreign-type-for-funcall ftype)
-          #'(lambda ,temps
-              (unbox-to-native-object
-               (let ,(mapcar (lambda (parameter temp)
-                               (destructuring-bind (var type) parameter
-                                 `(,var (box-native-object ,temp ',type))))
-                             lambda-list temps)
-                 ,@body)
-               ',res-type))))
+	 (sb-alien::alien-lambda
+	     (:cdecl ,(foreign-type-for-funcall res-type))
+	     ,(mapcar (lambda (temp parameter)
+			(destructuring-bind (var type) parameter
+			  (declare (ignore var))
+			  (list temp (foreign-type-for-funcall type))))
+		      temps lambda-list)
+	     (unbox-to-native-object
+	      (let ,(mapcar (lambda (parameter temp)
+			      (destructuring-bind (var type) parameter
+				`(,var (box-native-object ,temp ',type))))
+		     lambda-list temps)
+		,@body)
+	      ',res-type)
+	   ))
        (define-symbol-macro ,name
            (cons-ptr (sb-alien:alien-sap ,pascal-name)
                      0
