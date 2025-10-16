@@ -11,6 +11,10 @@
 (defmethod sb-mop:validate-superclass ((class protocol-class) (super standard-class))
   t)
 
+#+ECL
+(defmethod mop:validate-superclass ((class protocol-class) (super standard-class))
+  t)
+
 (defgeneric compute-concrete-class (protocol &rest args))
 
 (defmethod make-instance ((class protocol-class) &rest initargs)
