@@ -118,7 +118,7 @@
 					 value))
 	  (warn "XGetWindowProperty failed."))
 
-	(cval-value item-count)))))
+	item-count))))
 
 (defun window-from-window-handle (window-handle-integer)
   (gethash window-handle-integer *window-handle->window-table*))
@@ -162,7 +162,7 @@
 	    (clet ((filter #_<unsigned long>))
 	      (when (null (noffi::c-funcall #_XGetICValues ic #_XNFilterEvents (c-addr-of filter) 0))
 		(#_XSelectInput xdisplay window-handle
-				(logior (#_.your_event_mask &attribs) (cval-value filter))))))))
+				(logior (#_.your_event_mask &attribs) filter)))))))
       (values))))
 
 (defun set-x11-window-cursor (window cursor)
@@ -193,6 +193,11 @@
   (when visible? (show-x11-window window))
   window)
 
+(defun logme (object)
+  (declare (ignorable object))
+  (print object)
+  (finish-output))
+
 (defun %create-native-x11-window (window
 				  &rest initargs
 				  &key
@@ -217,12 +222,16 @@
 
   (declare (ignore initargs))
 
+  (logme 0)
+
   (let ((xdisplay (h display))
 	(root (h root)))
 
     (when scale-to-monitor?
       (setq width (* width (display-content-scale display))
 	    height (* height (display-content-scale display))))
+
+    (logme 1)
 
     (setf (window-colormap window) (#_XCreateColormap xdisplay
 						      root
@@ -231,18 +240,28 @@
 
     (setf (last-transparent? window) (%x11-visual-transparent? xdisplay visual))
 
+    (logme 2)
+
     (clet ((wa #_<XSetWindowAttributes>))
+      (logme 2.4)
       (let ((&wa (c-addr-of wa)))
-	(#_memset &wa 0 (c-sizeof-type '#_<XSetWindowAttributes>))
+	(logme 2.8)
+	;;(#_memset &wa 0 (c-sizeof-type '#_<XSetWindowAttributes>))
+	(logme 2.6)
 	(setf (#_.colormap &wa) (window-colormap window))
+	(logme 2.7)
 	(setf (#_.event_mask &wa) (logior #_StructureNotifyMask #_KeyPressMask #_KeyReleaseMask
 					  #_PointerMotionMask #_ButtonPressMask #_ButtonReleaseMask
 					  #_ExposureMask #_FocusChangeMask #_VisibilityChangeMask
 					  #_EnterWindowMask #_LeaveWindowMask #_PropertyChangeMask))
+	(logme 2.5)
 
 	(setf (window-parent window) parent)
-	
+
+	(logme 2.1)
 	(%grab-x11-error-handler display)
+
+	(logme 2.2)
 
 	(let ((w (or (and width (round width)) 640))
 	      (h (or (and height (round height)) 480)))
@@ -259,12 +278,18 @@
 						 (logior #_CWBorderPixel #_CWColormap #_CWEventMask)
 						 &wa))
 
-	    (%release-x11-error-handler display))
+	    (logme 2.3)
+	    (%release-x11-error-handler display)
+	    (logme 2.4))
 
 	  (when (null (h window))
 	    (error "X11: Failed to create window."))
 
-	  (initialize-window-devices window :width w :height h))
+	  (logme 3)
+
+	  (initialize-window-devices window :width w :height h)
+
+	  (logme 4))
 
 	(setf (gethash (h window) *window-handle->window-table*) window)
 
@@ -272,6 +297,8 @@
 	  (#_XSaveContext xdisplay (h window)
 			  (unique-context display)
 			  xwindow))
+
+	(logme 5)
 
 	(unless decorated?
 	  (set-x11-window-decorated window nil))
@@ -309,11 +336,15 @@
 				     NET_WM_STATE #_XA_ATOM 32
 				     #_PropModeReplace states (incf count))))))
 
+	  (logme 6)
+
 	  (clet ((protocols #_<Atom[2]>))
 	    (setf (c-aref protocols 0) WM_DELETE_WINDOW
 		  (c-aref protocols 1) NET_WM_PING)
 	    
 	    (#_XSetWMProtocols xdisplay (h window) protocols 2))
+
+	  (logme 7)
 
 	  (clet ((pid #_<long> #+CCL (ccl::getpid) #+SBCL (sb-unix:unix-getpid)))
 	    (#_XChangeProperty xdisplay (h window)
@@ -321,11 +352,15 @@
 			       #_PropModeReplace
 			       (c-addr-of pid) 1))
 
+	  (logme 8)
+
 	  (when (and NET_WM_WINDOW_TYPE NET_WM_WINDOW_TYPE_NORMAL)
 	    (clet ((type #_<Atom> NET_WM_WINDOW_TYPE_NORMAL))
 	      (#_XChangeProperty xdisplay (h window)
 				 NET_WM_WINDOW_TYPE #_XA_ATOM 32
 				 #_PropModeReplace (c-addr-of type) 1)))
+
+	  (logme 9)
 
 	  (let ((hints (#_XAllocWMHints)))
 
@@ -337,6 +372,8 @@
 
 	    (#_XSetWMHints xdisplay (h window) hints)
 	    (#_XFree hints))
+
+	  (logme 10)
 
 	  (let ((hints (#_XAllocSizeHints)))
 
@@ -361,6 +398,8 @@
 
 	    (#_XFree hints))
 
+	  (logme 11)
+
 	  (let ((hint (#_XAllocClassHint)))
 
 	    (if (and instance-name (not (string= instance-name ""))
@@ -383,6 +422,8 @@
 	    (#_XSetClassHint xdisplay (h window) hint)
 	    (#_XFree hint))
 
+	  (logme 12)
+
 	  (with-slots (XdndAware
 		       version)
 	      (display-drag-and-drop display)
@@ -391,8 +432,12 @@
 				 XdndAware #_XA_ATOM 32
 				 #_PropModeReplace (c-addr-of version) 1)))
 
+	  (logme 13)
+
 	  (when (display-input-method display)
 	    (create-x11-input-context window))
+
+	  (logme 14)
 
 	  (set-x11-window-title window title)
 
@@ -407,6 +452,8 @@
 	  (multiple-value-bind (x y) (get-x11-window-cursor-pos window)
 	    (setf (cursor-warp-pos-x window) x
 		  (cursor-warp-pos-y window) y))
+
+	  (logme 15)
 	  
 	  t)))))
 
@@ -429,7 +476,7 @@
 		     (c-addr-of child-x) (c-addr-of child-y)
 		     (c-addr-of mask))
 
-    (values (cval-value child-x) (cval-value child-y))))
+    (values child-x child-y)))
 
 (defun set-x11-window-cursor-pos (window x y)
   (setf (cursor-warp-pos-x window) x
@@ -510,7 +557,7 @@
     (#_XTranslateCoordinates (h (window-display window)) (h window) (h (window-parent window))
 			     0 0 (c-addr-of x) (c-addr-of y) (c-addr-of dummy))
 
-    (values (cval-value x) (cval-value y))))
+    (values x y)))
 
 (defun set-x11-window-pos (window x y)
 
@@ -604,6 +651,7 @@
 	       nil))))
 
 (defun enable-x11-raw-mouse-motion (window)
+  (declare (ignorable window))
       #+NIL
 
   (clet ((em #_<XIEventMask>))
@@ -670,7 +718,7 @@
 			 (xinerama-screen-index))
 		     (progn
 		       (unwind-protect
-			    (loop for i from 0 below (cval-value screen-count)
+			    (loop for i from 0 below screen-count
 				  do (let ((xorg (#_.x_org (c-aref xinerama-screens i)))
 					   (yorg (#_.y_org (c-aref xinerama-screens i))))
 				       (when (and (<= xorg

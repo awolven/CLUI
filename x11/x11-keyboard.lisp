@@ -179,15 +179,15 @@
 	(let ((keysyms
 		(#_XGetKeyboardMapping (h display)
 				       scancode-min
-				       (1+ (- (cval-value scancode-max) (cval-value scancode-min)))
+				       (1+ (- scancode-max scancode-min))
 				       (c-addr-of width))))
 	  
-	  (loop for scancode from (cval-value scancode-min) to (cval-value scancode-max)
+	  (loop for scancode from scancode-min to scancode-max
 		for i from 0
 		unless (aref (display-keycodes display) scancode)
-		do (let ((base (* i (cval-value width))))
+		do (let ((base (* i width)))
 		     (setf (aref (display-keycodes display) scancode)
-			   (translate-x11-keysyms (noffi::c+ keysyms base) (cval-value width))))
+			   (translate-x11-keysyms (noffi::c+ keysyms base) width)))
 	      when (aref (display-keycodes display) scancode)
 		do (setf (aref (display-scancodes display) (aref (display-keycodes display) scancode)) scancode))
 	  
@@ -203,7 +203,7 @@
       (when (> width 1)
 
 	(setq result
-	      (case (cval-value (c-aref keysyms 1))
+	      (case (c-aref keysyms 1)
 		(#.#_XK_KP_0 +key-pad-0+)
 		(#.#_XK_KP_1 +key-pad-1+)
 		(#.#_XK_KP_2 +key-pad-2+)
@@ -220,7 +220,7 @@
 
       (when result (return result))
 
-      (case (cval-value (c-aref keysyms 0))
+      (case (c-aref keysyms 0)
 	(#.#_XK_Escape +key-escape+)
 	(#.#_XK_Tab +key-tab+)
 	(#.#_XK_Shift_L +key-left-shift+)

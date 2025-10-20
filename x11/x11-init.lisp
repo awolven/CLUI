@@ -30,7 +30,7 @@
     (setf (hidden-cursor display) (create-x11-cursor display image 0 0))))
 
 (defun create-empty-event-pipes (display)
-  (let ((pipes (#_malloc (* 2 (cval-value (c-sizeof-type '#_<int>))))))
+  (let ((pipes (#_malloc (* 2 (c-sizeof-type '#_<int>)))))
 
     (#_pipe pipes)
 
@@ -39,8 +39,8 @@
     (loop for i from 0 below 2
 	  with sf
 	  with df
-	  do (setq sf (#_fcntl (cval-value (c-aref pipes i)) #_F_GETFL 0))
-	     (setq df (#_fcntl (cval-value (c-aref pipes i)) #_F_GETFD 0))
+	  do (setq sf (#_fcntl (c-aref pipes i) #_F_GETFL 0))
+	     (setq df (#_fcntl (c-aref pipes i) #_F_GETFD 0))
 
 	     (when (or (= -1 sf)
 		       (= -1 df)
@@ -93,8 +93,8 @@
 
 	    (%release-x11-error-handler display))
 
-	  (unwind-protect (unless (= (cval-value (c-aref window-from-root 0))
-				     (cval-value (c-aref window-from-child 0)))
+	  (unwind-protect (unless (= (c-aref window-from-root 0)
+				     (c-aref window-from-child 0))
 			    (return-from %detect-EWMH nil))
 	    
 	    (#_XFree window-from-root)
@@ -107,7 +107,7 @@
 	  (flet ((get-if-supported (atom-name)
 		   (let ((atom (#_XInternAtom xdisplay atom-name #_False)))
 		     (loop for i from 0 below atom-count
-			   when (= atom (cval-value (c-aref supported-atoms i)))
+			   when (= atom (c-aref supported-atoms i))
 			     do (return atom)
 			   finally (return nil)))))
 
@@ -216,11 +216,11 @@
 	      (let* ((&major (c-addr-of major))
 		     (&minor (c-addr-of minor)))
 		(#_XRRQueryVersion xdisplay &major &minor)
-		(setf (randr-major x11-state) (cval-value major)
-		      (randr-minor x11-state) (cval-value minor))
+		(setf (randr-major x11-state) major
+		      (randr-minor x11-state) minor)
 
-		(when (or (> (cval-value major) 1)
-			  (>= (cval-value minor) 3))
+		(when (or (> major 1)
+			  (>= minor 3))
 		  (setf (randr-available? x11-state) t)))))))
 
       (when (randr-available? x11-state)
@@ -247,8 +247,8 @@
 	(let* ((&major (c-addr-of major))
 	       (&minor (c-addr-of minor)))
 	  (unless (zerop (#_XineramaQueryExtension xdisplay &major &minor))
-	    (setf (xinerama-major x11-state) (cval-value major)
-		  (xinerama-minor x11-state) (cval-value minor))
+	    (setf (xinerama-major x11-state) major
+		  (xinerama-minor x11-state) minor)
 	    (unless (zerop (#_XineramaIsActive xdisplay))
 	      (setf (xinerama-available? x11-state) t)))))
     
@@ -270,16 +270,16 @@
 					    (c-addr-of major)
 					    (c-addr-of minor)))
 	  (setf (xkb-available? x11-state) t
-		(xkb-major-opcode x11-state) (cval-value major-opcode)
-		(xkb-event-base x11-state) (cval-value event-base)
-		(xkb-error-base x11-state) (cval-value error-base)
-		(xkb-major x11-state) (cval-value major)
-		(xkb-minor x11-state) (cval-value minor))
+		(xkb-major-opcode x11-state) major-opcode
+		(xkb-event-base x11-state) event-base
+		(xkb-error-base x11-state) error-base
+		(xkb-major x11-state) major
+		(xkb-minor x11-state) minor)
 
 	  (clet ((supported #_<Bool>))
 
 	    (unless (zerop (#_XkbSetDetectableAutoRepeat xdisplay #_True (c-addr-of supported)))
-	      (unless (zerop (cval-value supported))
+	      (unless (zerop supported)
 		(setf (xkb-detectable? x11-state) t))))
 
 	  (clet ((state #_<XkbStateRec>))

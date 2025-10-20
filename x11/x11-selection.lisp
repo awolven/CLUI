@@ -91,7 +91,7 @@
 		  (loop for i from 0 below count by 2
 			with found? = nil
 			do (loop for j from 0 below format-count
-				 when (= (cval-value (c-aref targetz i)) (cval-value (c-aref formats j)))
+				 when (= (c-aref targetz i) (c-aref formats j))
 				   do (setq found? t)
 				      (return))
 			   
@@ -134,7 +134,7 @@
 
 	    ;; conversion to a data target was requested
 	    (loop for i from 0 below format-count
-		  when (= (#_.target request) (cval-value (c-aref formats i)))
+		  when (= (#_.target request) (c-aref formats i))
 		    ;; the requested target is one we support
 		    do (#_XChangeProperty  (h display)
 					   (#_.requestor request)
@@ -235,7 +235,7 @@
 						   (c-addr-of bytes-after)
 						   (c-addr-of data))
 
-			     (when (= (cval-value actual-type) INCR)
+			     (when (= actual-type INCR)
 			       (let ((string ""))
 
 				 (loop
@@ -247,7 +247,7 @@
 					    do (wait-for-x11-event display))
 
 				      (when data
-					(let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
+					(let ((data-ptr (cons-ptr data 0 '#_<char*>)))
 					  (#_XFree data-ptr)))
 
 				      (unless (= (#_.requestor &xselection) 0)
@@ -264,12 +264,12 @@
 							      (c-addr-of bytes-after)
 							      (c-addr-of data))
 
-					(unless (zerop (cval-value item-count))
+					(unless (zerop item-count)
 					  (when data
-					    (let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
+					    (let ((data-ptr (cons-ptr data 0 '#_<char*>)))
 					      (setq string (concatenate 'string string (get-c-string data-ptr))))))
 
-					(when (zerop (cval-value item-count))
+					(when (zerop item-count)
 					  (unless (string= "" string)
 					    (if (= (c-aref targets i) #_XA_STRING)
 						(setq selection-string (convert-latin1-to-utf8 string))
@@ -277,11 +277,11 @@
 					  (return))))))
 
 			     (when data
-			       (let ((data-ptr (cons-ptr (cval-value data) 0 '#_<char*>)))
+			       (let ((data-ptr (cons-ptr data 0 '#_<char*>)))
 
-				 (when (= (cval-value actual-type) (cval-value (c-aref targets i)))
+				 (when (= actual-type (c-aref targets i))
 
-				   (if (= (cval-value (c-aref targets i)) #_XA_STRING)
+				   (if (= (c-aref targets i) #_XA_STRING)
 				       (setq selection-string (convert-latin1-to-utf8 (get-c-string data-ptr)))
 				       (setq selection-string (get-c-string data-ptr))))
 			     

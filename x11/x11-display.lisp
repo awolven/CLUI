@@ -241,7 +241,7 @@
 	    (return nil))
 
 	  (loop for i from 0 below (#_.count_styles styles)
-		when (= (cval-value (c-aref (#_.supported_styles styles) i))
+		when (= (c-aref (#_.supported_styles styles) i)
 			(logior #_XIMPreeditNothing
 				#_XIMStatusNothing))
 		  do (setq found? t)
@@ -317,6 +317,8 @@
     (code-char (- codepoint (aref *utf8-offsets* (1- count))))))
 	 
 (defun process-event (display event)
+  (logme 'a)
+  
   (block nil
 
     (let ((x11-state (display-x11-state display))
@@ -329,12 +331,15 @@
 	(setq x11-keycode (#_.keycode (c->-addr event '#_xkey))))
 
       (setq filtered (#_XFilterEvent event #_None))
-      
+
+      (logme 'b)
       (when (randr-available? x11-state)
-	(when (= event-type (+ (cval-value (randr-event-base x11-state)) #_RRNotify))
+	(when (= event-type (+ (randr-event-base x11-state) #_RRNotify))
 	  (#_XRRUpdateConfiguration event)
 	  (poll-x11-monitors display)
 	  (return)))
+
+      (logme 'c)
       
       (when (xkb-available? x11-state)
 	(when (= event-type (+ (xkb-event-base x11-state) #_XkbEventCode))
@@ -343,6 +348,8 @@
 		     (logtest (#_.changed (c->-addr event '#_state)) #_XkbGroupStateMask))
 	    (setf (xkb-group x11-state) (#_.group (c->-addr event '#_state))))
 	  (return)))
+
+      (logme 'd)
 
       (when (= event-type #_GenericEvent)
 
@@ -377,10 +384,14 @@
 							  :y ypos)))))))))
 	(return))
 
+      (logme 'e)
+
       (when (= event-type #_SelectionRequest)
 
 	(%handle-selection-request display event)
 	(return))
+
+      (logme 'f)
 
       (clet ((xw #_<Window>))
 	(unless (zerop (#_XFindContext (h display)
@@ -389,17 +400,19 @@
 				       (c-addr-of xw)))
 	  (return))
 
-	(let ((window (window-from-window-handle (cval-value xw))))
+	(let ((window (window-from-window-handle xw)))
 
 	  (case event-type
 	    
 	    (#.#_ReparentNotify
+	     (logme 'g)
 	     (let ((new-parent (window-from-window-handle (#_.parent (c->-addr event '#_xreparent)))))
 	       (when new-parent
 		 (setf (window-parent window) new-parent)))
 	     (return))
 
 	    (#.#_KeyPress
+	     (logme 'h)
 	     (let* ((key (translate-key display x11-keycode))
 		    (&xkey (c->-addr event '#_xkey)))
 	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state &xkey))
@@ -458,13 +471,14 @@
 
 			   (input-key window key :press x y mods lock-mods timestamp)
 
-			   (let ((char (xkb-keysym-to-unicode (cval-value keysym))))
+			   (let ((char (xkb-keysym-to-unicode keysym)))
 			     (when char
 			       (input-char window (char-code char) mods lock-mods plain?)))))
 
 		     (return))))))
 
 	    (#.#_KeyRelease
+	     (logme 'i)
 	     (let ((key (translate-key display x11-keycode)))
 	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state (c->-addr event '#_xkey)))
 		 (multiple-value-bind (x y) (window-cursor-position window)
@@ -493,7 +507,7 @@
 		   (return)))))
 
 	    (#.#_ButtonPress
-
+	     (logme 'j)
 	     (let ((button (#_.button (c->-addr event '#_xbutton))))
 	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state (c->-addr event '#_xbutton)))
 		 (multiple-value-bind (x y) (window-cursor-position window)
@@ -554,7 +568,7 @@
 	       (return)))
 
 	    (#.#_ButtonRelease
-
+	     (logme 'k)
 	     (let ((button (#_.button (c->-addr event '#_xbutton))))
 	       (multiple-value-bind (mods lock-mods) (translate-x11-state (#_.state (c->-addr event '#_xbutton)))
 		 (multiple-value-bind (x y) (window-cursor-position window)
@@ -574,6 +588,7 @@
 	       (return)))
 
 	    (#.#_EnterNotify
+	     (logme 'l)
 	     (let ((x (#_.x (c->-addr event '#_xcrossing)))
 		   (y (#_.y (c->-addr event '#_xcrossing))))
 
@@ -597,6 +612,7 @@
 	       (return)))
 
 	    (#.#_LeaveNotify
+	     (logme 'm)
 	     (let ((x (#_.x (c->-addr event '#_xcrossing)))
 		   (y (#_.y (c->-addr event '#_xcrossing))))
 
@@ -609,6 +625,7 @@
 
 
 	    (#.#_MotionNotify
+	     (logme 'n)
 	     (let ((x (#_.x (c->-addr event '#_xmotion)))
 		   (y (#_.y (c->-addr event '#_xmotion))))
 
@@ -642,9 +659,21 @@
 	       (return)))
 
 	    (#.#_ConfigureNotify
-
+	     (logme 'o)
 	     (let ((&xconfigure (c->-addr event '#_xconfigure)))
-	       
+
+	       ;;(break "~S ~S ~S ~S" (#_.width &xconfigure) (last-width window)
+	       ;; (#_.height &xconfigure) (last-height window))
+	       (progn
+		 (clim:handle-event window (make-instance 'window-resize-event
+						     :window window
+						     :new-width (#_.width &xconfigure)
+						     :new-height (#_.height &xconfigure)))
+
+		 (setf (last-width window) (#_.width &xconfigure)
+		       (last-height window) (#_.height &xconfigure)))
+
+	       #+NIL
 	       (when (or (/= (#_.width &xconfigure) (last-width window))
 			 (/= (#_.height &xconfigure) (last-height window)))
 
@@ -676,21 +705,21 @@
 		   (when (= (display-error-code display) #_BadWindow)
 		     (return))
 
-		   (when (or (/= (last-pos-x window) (cval-value xpos))
-			     (/= (last-pos-y window) (cval-value ypos)))
+		   (when (or (/= (last-pos-x window) xpos)
+			     (/= (last-pos-y window) ypos))
 		     
 		     (clim:handle-event window (make-instance 'window-move-event
 							 :window window
-							 :new-x (cval-value xpos)
-							 :new-y (cval-value ypos)))
+							 :new-x xpos
+							 :new-y ypos))
 
-		     (setf (last-pos-x window) (cval-value xpos)
-			   (last-pos-y window) (cval-value ypos)))
+		     (setf (last-pos-x window) xpos
+			   (last-pos-y window) ypos))
 
 		   (return)))))
 
 	    (#.#_ClientMessage
-
+	     (logme 'p)
 	     (unless (zerop filtered)
 	       (return))
 
@@ -712,7 +741,7 @@
 		     (display-drag-and-drop display)
 	     
 		   (cond ((= (#_.message_type &xclient) WM_PROTOCOLS)
-			  (let ((protocol (cval-value (c-aref (#_.l (c->-addr &xclient '#_data)) 0))))
+			  (let ((protocol (c-aref (#_.l (c->-addr &xclient '#_data)) 0)))
 
 			    (cond ((= protocol #_None) (return))
 			      
@@ -737,7 +766,7 @@
 			 ((= (#_.message_type &xclient) XdndPosition)))))))
 
 	    (#.#_SelectionNotify
-
+	     (logme 'q)
 	     (with-slots (XdndSelection)
 		 (display-drag-and-drop display)
 	       (if (= (#_.property (c->-addr event '#_xselection)) XdndSelection)
@@ -746,6 +775,7 @@
 	       (return)))
 
 	    (#.#_FocusIn
+	     (logme 'r)
 	     (when (or (= (#_.mode (c->-addr event '#_xfocus)) #_NotifyGrab)
 		       (= (#_.mode (c->-addr event '#_xfocus)) #_NotifyUngrab))
 	       ;; Ignore focus events from popup indicator windows, window menu, key chords and window dragging
@@ -762,6 +792,7 @@
 	     (return))
 
 	    (#.#_FocusOut
+	     (logme 's)
 	     (when (or (= (#_.mode (c->-addr event '#_xfocus)) #_NotifyGrab)
 		       (= (#_.mode (c->-addr event '#_xfocus)) #_NotifyUngrab))
 	       ;; Ignore focus events from popup indicator windows, window menu, key chords and window dragging
@@ -781,11 +812,12 @@
 	     (return))	     
 
 	    (#.#_Expose
+	     (logme 't)
 	     (clim:handle-event window (make-instance 'window-repaint-event
 						 :window window)))
 
 	    (#.#_PropertyNotify
-	     
+	     (logme 'u)	     
 	     (when (= (#_.state (c->-addr event '#_xproperty)) #_PropertyNewValue)
 	       (return))
 
@@ -831,9 +863,11 @@
 	     (return))
 
 	    (#.#_DestroyNotify
+	     (logme 'v)
 	     (return))))))))
 
 (defun poll-x11-events (display)
+  (logme 'w)
 
   (let ((xdisplay (h display)))
 
@@ -841,12 +875,14 @@
 
     (#_XPending xdisplay)
 
+    (logme 'x)
     (loop until (zerop (#_QLength xdisplay))
 	  do (clet ((event #_<XEvent>))
 
 	       (#_XNextEvent xdisplay (c-addr-of event))
 	       (process-event display (c-addr-of event))))
 
+    (logme 'y)
     (let ((window (disabled-cursor-window display)))
 
       (when window
@@ -858,13 +894,18 @@
 		    (/= (last-cursor-pos-y window) (/ height 2)))
 
 	    (set-x11-cursor-pos window (/ width 2) (/ height 2))))))
+    (logme 'z)
 
     (#_XFlush xdisplay)
+
+    (logme 'a0)
     (values)))
 
 
 
 (defun wait-x11-events (display &optional (timeout nil))
+  (logme 'a1)
   (wait-for-any-event display timeout)
+  (logme 'a2)
   (poll-x11-events display))
 

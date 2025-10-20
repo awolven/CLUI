@@ -88,7 +88,7 @@
 							     :x11-output output
 							     :x11-crtc crtc)))
 		     
-				 (loop for j from 0 below (cval-value screen-count) ;; ugly.
+				 (loop for j from 0 below screen-count ;; ugly.
 				       when (and (= (#_.x_org (c-aref screens j)) (#_.x ci))
 						 (= (#_.y_org (c-aref screens j)) (#_.y ci))
 						 (= (#_.width (c-aref screens j)) (#_.width ci))
@@ -145,7 +145,7 @@
 	  (loop for i from 0 below (#_.nmode oi)
 		with mi
 		with mode
-		do (setq mi (get-x11-mode-info sr (cval-value (c-aref (#_.modes oi) i))))
+		do (setq mi (get-x11-mode-info sr (c-aref (#_.modes oi) i)))
 		when (x11-display-mode-is-good? mi)
 		  do (setq mode (vidmode-from-x11-mode-info display mi ci))
 		     (when (zerop (compare-video-modes best mode))
@@ -266,13 +266,13 @@
 	  (let ((extent-count (%get-x11-window-property xdisplay root NET_WORKAREA #_XA_CARDINAL &extents)))
 	    (when (> (%get-x11-window-property xdisplay root NET_CURRENT_DESKTOP #_XA_CARDINAL &desktop) 0)
 
-	      (when (and (>= extent-count 4) (< (cval-value (c-aref desktop 0)) (/ extent-count 4)))
+	      (when (and (>= extent-count 4) (< (c-aref desktop 0) (/ extent-count 4)))
 
-		(let* ((base-idx (* (cval-value (c-aref desktop 0)) 4))
-		       (global-x (cval-value (c-aref extents (+ base-idx 0))))
-		       (global-y (cval-value (c-aref extents (+ base-idx 1))))
-		       (global-width (cval-value (c-aref extents (+ base-idx 2))))
-		       (global-height (cval-value (c-aref extents (+ base-idx 3)))))
+		(let* ((base-idx (* (c-aref desktop 0) 4))
+		       (global-x (c-aref extents (+ base-idx 0)))
+		       (global-y (c-aref extents (+ base-idx 1)))
+		       (global-width (c-aref extents (+ base-idx 2)))
+		       (global-height (c-aref extents (+ base-idx 3))))
 
 		  (when (< x global-x)
 		    (setq width (- width (- global-x x)))
@@ -311,7 +311,7 @@
 
 	  (loop for i from 0 below (#_.nmode oi)
 		with mi
-		do (setq mi (get-x11-mode-info sr (cval-value (c-aref (#_.modes oi) i))))
+		do (setq mi (get-x11-mode-info sr (c-aref (#_.modes oi) i)))
 		when (x11-display-mode-is-good? mi)
 		  do (let ((mode (vidmode-from-x11-mode-info display mi ci)))
 
