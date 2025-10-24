@@ -131,7 +131,7 @@
 	      (when (#_XrmGetResource db "Xft.dpi" "Xft.Dpi" &type &value)
 
 		(when (and type (zerop (#_strcmp type "String")))
-		  (setq dpi (#+ccl ccl::%ptr-to-int #+sbcl sb-sys::sap-int (#_.addr &value)))))))
+		  (setq dpi (read-from-string (get-c-string (#_.addr &value))))))))
 
 	  (#_XrmDestroyDatabase db))))
 

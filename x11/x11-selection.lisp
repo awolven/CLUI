@@ -247,8 +247,7 @@
 					    do (wait-for-x11-event display))
 
 				      (when data
-					(let ((data-ptr (cons-ptr data 0 '#_<char*>)))
-					  (#_XFree data-ptr)))
+					(#_XFree data))
 
 				      (unless (= (#_.requestor &xselection) 0)
 					(#_XGetWindowProperty (h display)
@@ -266,8 +265,7 @@
 
 					(unless (zerop item-count)
 					  (when data
-					    (let ((data-ptr (cons-ptr data 0 '#_<char*>)))
-					      (setq string (concatenate 'string string (get-c-string data-ptr))))))
+					    (setq string (concatenate 'string string (get-c-string data)))))
 
 					(when (zerop item-count)
 					  (unless (string= "" string)
@@ -277,15 +275,13 @@
 					  (return))))))
 
 			     (when data
-			       (let ((data-ptr (cons-ptr data 0 '#_<char*>)))
-
-				 (when (= actual-type (c-aref targets i))
+			       (when (= actual-type (c-aref targets i))
 
 				   (if (= (c-aref targets i) #_XA_STRING)
-				       (setq selection-string (convert-latin1-to-utf8 (get-c-string data-ptr)))
-				       (setq selection-string (get-c-string data-ptr))))
+				       (setq selection-string (convert-latin1-to-utf8 (get-c-string data)))
+				       (setq selection-string (get-c-string data))))
 			     
-				 (#_XFree data-ptr)))
+				 (#_XFree data))
 
 			     (unless (string= selection-string "")
 			       (return))))))))

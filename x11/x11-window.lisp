@@ -195,8 +195,9 @@
 
 (defun logme (object)
   (declare (ignorable object))
-  (print object)
-  (finish-output))
+  ;;(print object)
+  ;;(finish-output)
+  )
 
 (defun %create-native-x11-window (window
 				  &rest initargs
